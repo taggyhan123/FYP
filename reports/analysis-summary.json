@@ -1,0 +1,5402 @@
+{
+  "format_version": 1,
+  "inventory": {
+    "longest_tools": [
+      {
+        "domain": "toolbench",
+        "name": "Crypto_Arbitrage_crypto_arb",
+        "schema_tokens": 8652,
+        "source": "toolret:web",
+        "tool_id": "toolbench_tool_9208"
+      },
+      {
+        "domain": "toolbench",
+        "name": "Realtor_API_for_Real_Estate_Data_RealtorAgentList",
+        "schema_tokens": 3053,
+        "source": "toolret:web",
+        "tool_id": "toolbench_tool_130"
+      },
+      {
+        "domain": "toolbench",
+        "name": "Realtor_Data_API_for_Real_Estate_RealtorAgentList",
+        "schema_tokens": 3053,
+        "source": "toolret:web",
+        "tool_id": "toolbench_tool_5220"
+      },
+      {
+        "domain": "tooleyes",
+        "name": "search_resource",
+        "schema_tokens": 1830,
+        "source": "toolret:web",
+        "tool_id": "tooleyes_tool_13"
+      },
+      {
+        "domain": "webtools_tmdb",
+        "name": "GET_discover_movie",
+        "schema_tokens": 1758,
+        "source": "toolret:web",
+        "tool_id": "webtools_tmdb_tool_12"
+      },
+      {
+        "domain": "toolbench",
+        "name": "ChangeNOW_crypto_exchange_API_V2_Transaction_status",
+        "schema_tokens": 1651,
+        "source": "toolret:web",
+        "tool_id": "toolbench_tool_2061"
+      },
+      {
+        "domain": "webtools_tmdb",
+        "name": "GET_discover_tv",
+        "schema_tokens": 1416,
+        "source": "toolret:web",
+        "tool_id": "webtools_tmdb_tool_36"
+      },
+      {
+        "domain": "webtools_spotify",
+        "name": "GET_search",
+        "schema_tokens": 1349,
+        "source": "toolret:web",
+        "tool_id": "webtools_spotify_tool_37"
+      },
+      {
+        "domain": "webtools_spotify",
+        "name": "GET_playlists_playlist_id_tracks",
+        "schema_tokens": 1287,
+        "source": "toolret:web",
+        "tool_id": "webtools_spotify_tool_34"
+      },
+      {
+        "domain": "toolbench",
+        "name": "ChangeNOW_crypto_exchange_API_V2_Estimated_exchange_network_fee",
+        "schema_tokens": 1218,
+        "source": "toolret:web",
+        "tool_id": "toolbench_tool_13292"
+      },
+      {
+        "domain": "toolbench",
+        "name": "Realtor_API_for_Real_Estate_Data_RealtorPropertyList",
+        "schema_tokens": 1217,
+        "source": "toolret:web",
+        "tool_id": "toolbench_tool_131"
+      },
+      {
+        "domain": "toolbench",
+        "name": "Realtor_Data_API_for_Real_Estate_RealtorPropertyList",
+        "schema_tokens": 1217,
+        "source": "toolret:web",
+        "tool_id": "toolbench_tool_5218"
+      },
+      {
+        "domain": "rotbench",
+        "name": "list_properties",
+        "schema_tokens": 1090,
+        "source": "toolret:web",
+        "tool_id": "rotbench_tool_413"
+      },
+      {
+        "domain": "toolbench",
+        "name": "get_0MMO_0MMO",
+        "schema_tokens": 1090,
+        "source": "toolret:web",
+        "tool_id": "toolbench_tool_10261"
+      },
+      {
+        "domain": "tooleyes",
+        "name": "yelp_search",
+        "schema_tokens": 1089,
+        "source": "toolret:web",
+        "tool_id": "tooleyes_tool_59"
+      },
+      {
+        "domain": "webtools_spotify",
+        "name": "GET_playlists_playlist_id",
+        "schema_tokens": 1071,
+        "source": "toolret:web",
+        "tool_id": "webtools_spotify_tool_31"
+      },
+      {
+        "domain": "webtools_spotify",
+        "name": "GET_recommendations",
+        "schema_tokens": 1070,
+        "source": "toolret:web",
+        "tool_id": "webtools_spotify_tool_36"
+      },
+      {
+        "domain": "rotbench",
+        "name": "seitreporp_tsil",
+        "schema_tokens": 1068,
+        "source": "toolret:web",
+        "tool_id": "rotbench_tool_139"
+      },
+      {
+        "domain": "rotbench",
+        "name": "xhCwNAgc",
+        "schema_tokens": 1068,
+        "source": "toolret:web",
+        "tool_id": "rotbench_tool_145"
+      },
+      {
+        "domain": "toolbench",
+        "name": "ChangeNOW_crypto_exchange_API_V2_Estimated_exchange_amount",
+        "schema_tokens": 1067,
+        "source": "toolret:web",
+        "tool_id": "toolbench_tool_2060"
+      },
+      {
+        "domain": "rotbench",
+        "name": "lit_proerties",
+        "schema_tokens": 1065,
+        "source": "toolret:web",
+        "tool_id": "rotbench_tool_771"
+      },
+      {
+        "domain": "rotbench",
+        "name": "lst_properties",
+        "schema_tokens": 1064,
+        "source": "toolret:web",
+        "tool_id": "rotbench_tool_767"
+      },
+      {
+        "domain": "toolbench",
+        "name": "SpatialScale_Route_Engine_Get_Route",
+        "schema_tokens": 1043,
+        "source": "toolret:web",
+        "tool_id": "toolbench_tool_8471"
+      },
+      {
+        "domain": "toolbench",
+        "name": "ChangeNOW_crypto_exchange_Currency_info",
+        "schema_tokens": 1005,
+        "source": "toolret:web",
+        "tool_id": "toolbench_tool_2063"
+      },
+      {
+        "domain": "toolbench",
+        "name": "StarLoveMatch_Brad_Pitt",
+        "schema_tokens": 1001,
+        "source": "toolret:web",
+        "tool_id": "toolbench_tool_7149"
+      }
+    ],
+    "schema_issue_counts": {
+      "empty_parameters": 19887,
+      "malformed_parameters": 150,
+      "missing_description": 994,
+      "missing_name": 2,
+      "missing_parameters": 155,
+      "required_field_not_in_properties": 1
+    },
+    "schema_token_distribution": {
+      "count": 45815,
+      "max": 8652,
+      "mean": 92.084,
+      "median": 70.0,
+      "min": 28,
+      "p25": 49.0,
+      "p75": 109.0,
+      "p90": 169.0,
+      "p95": 220.0,
+      "p99": 357.0
+    },
+    "source_schema_token_distribution": {
+      "bfcl:irrelevance": {
+        "count": 239,
+        "max": 206,
+        "mean": 109.075,
+        "median": 108.0,
+        "min": 52,
+        "p25": 96.0,
+        "p75": 120.5,
+        "p90": 132.4,
+        "p95": 144.0,
+        "p99": 172.68
+      },
+      "bfcl:multiple": {
+        "count": 480,
+        "max": 212,
+        "mean": 105.031,
+        "median": 106.0,
+        "min": 51,
+        "p25": 87.0,
+        "p75": 118.0,
+        "p90": 134.2,
+        "p95": 149.0,
+        "p99": 175.21
+      },
+      "bfcl:parallel": {
+        "count": 153,
+        "max": 173,
+        "mean": 106.268,
+        "median": 106.0,
+        "min": 51,
+        "p25": 92.0,
+        "p75": 117.0,
+        "p90": 131.8,
+        "p95": 145.6,
+        "p99": 160.36
+      },
+      "bfcl:parallel_multiple": {
+        "count": 270,
+        "max": 188,
+        "mean": 100.222,
+        "median": 97.5,
+        "min": 52,
+        "p25": 82.0,
+        "p75": 117.0,
+        "p90": 137.0,
+        "p95": 152.2,
+        "p99": 180.48
+      },
+      "bfcl:simple_python": {
+        "count": 220,
+        "max": 206,
+        "mean": 114.991,
+        "median": 110.0,
+        "min": 56,
+        "p25": 98.0,
+        "p75": 129.0,
+        "p90": 149.0,
+        "p95": 157.15,
+        "p99": 190.24
+      },
+      "toolret:code": {
+        "count": 3794,
+        "max": 560,
+        "mean": 120.701,
+        "median": 74.0,
+        "min": 33,
+        "p25": 53.0,
+        "p75": 164.0,
+        "p90": 276.0,
+        "p95": 321.0,
+        "p99": 402.0
+      },
+      "toolret:customized": {
+        "count": 3367,
+        "max": 846,
+        "mean": 67.863,
+        "median": 57.0,
+        "min": 30,
+        "p25": 41.0,
+        "p75": 79.0,
+        "p90": 109.4,
+        "p95": 137.7,
+        "p99": 238.7
+      },
+      "toolret:web": {
+        "count": 37292,
+        "max": 8652,
+        "mean": 90.832,
+        "median": 69.0,
+        "min": 28,
+        "p25": 48.0,
+        "p75": 107.0,
+        "p90": 166.0,
+        "p95": 211.0,
+        "p99": 346.09
+      }
+    },
+    "tasks": 9201,
+    "tool_sources": {
+      "bfcl:irrelevance": 239,
+      "bfcl:multiple": 480,
+      "bfcl:parallel": 153,
+      "bfcl:parallel_multiple": 270,
+      "bfcl:simple_python": 220,
+      "toolret:code": 3794,
+      "toolret:customized": 3367,
+      "toolret:web": 37292
+    },
+    "tools": 45815,
+    "tools_with_any_issue": 19921,
+    "top_tool_domains": {
+      "apibank": 101,
+      "apigen": 3605,
+      "appbench": 32,
+      "craft_Math_algebra": 280,
+      "craft_Tabmwp": 180,
+      "craft_Vqa": 525,
+      "gorilla_huggingface": 907,
+      "gorilla_pytorch": 43,
+      "gorilla_tensor": 55,
+      "gpt4tools": 32,
+      "gta": 14,
+      "irrelevance": 239,
+      "metatool_which": 200,
+      "mnms": 33,
+      "multiple": 480,
+      "parallel": 153,
+      "parallel_multiple": 270,
+      "reversechain": 783,
+      "rotbench": 919,
+      "simple_python": 220,
+      "t_eval_dialog": 50,
+      "t_eval_step": 50,
+      "taskbench_daily": 40,
+      "taskbench_huggingface": 23,
+      "taskbench_multimedia": 40,
+      "toolACE": 16072,
+      "toolLens": 314,
+      "tool_be_honest": 892,
+      "toolalpaca": 1937,
+      "toolbench": 13862,
+      "toolbench_sam": 197,
+      "toolemu": 38,
+      "tooleyes": 95,
+      "toolink": 1804,
+      "ultraTool": 1171,
+      "webtools_food": 22,
+      "webtools_music": 32,
+      "webtools_spotify": 40,
+      "webtools_tmdb": 54,
+      "webtools_weather": 11
+    }
+  },
+  "methodology": {
+    "bfcl_evidence": "exposed function menus, not gold calls",
+    "cache_estimate": "tool-unit trie with 16-token block rounding; it excludes constant system/user prefixes and must be validated against vLLM",
+    "replays": {
+      "empirical": "dataset file/config order",
+      "session_bursty": "same-domain tasks grouped into contiguous sessions",
+      "skewed": "controlled sampling weighted by aggregate benchmark tool support",
+      "uniform": "uniform task sampling with replacement"
+    },
+    "token_measure": "canonical JSON serialization without chat-template wrapper",
+    "toolret_evidence": "gold relevance labels"
+  },
+  "partitions": {
+    "bfcl_exposed": {
+      "cooccurrence_tasks_skipped_over_25_tools": {
+        "pairs": 0,
+        "triples": 0
+      },
+      "evidence_types": {
+        "exposed_menu": 1240
+      },
+      "locality": [
+        {
+          "adjacent_pairs": 1239,
+          "mean_tool_jaccard": 0.002033,
+          "partition": "bfcl_exposed",
+          "replay": "empirical",
+          "same_domain_ratio": 0.996772,
+          "shared_tool_ratio": 0.006457
+        },
+        {
+          "adjacent_pairs": 1239,
+          "mean_tool_jaccard": 0.000807,
+          "partition": "bfcl_exposed",
+          "replay": "uniform",
+          "same_domain_ratio": 0.226796,
+          "shared_tool_ratio": 0.000807
+        },
+        {
+          "adjacent_pairs": 1239,
+          "mean_tool_jaccard": 0.002321,
+          "partition": "bfcl_exposed",
+          "replay": "skewed",
+          "same_domain_ratio": 0.232446,
+          "shared_tool_ratio": 0.004843
+        },
+        {
+          "adjacent_pairs": 1239,
+          "mean_tool_jaccard": 0.0,
+          "partition": "bfcl_exposed",
+          "replay": "session_bursty",
+          "same_domain_ratio": 0.996772,
+          "shared_tool_ratio": 0.0
+        }
+      ],
+      "ordering_results": [
+        {
+          "block_size": 16,
+          "cacheable_block_tokens": 22144,
+          "estimated_block_reuse_ratio": 0.10985,
+          "naive_nodes": 1917,
+          "node_compression_ratio": 0.118936,
+          "ordering": "original",
+          "partition": "bfcl_exposed",
+          "replay": "empirical",
+          "requests": 1240,
+          "reusable_tool_tokens": 23625,
+          "total_tool_tokens": 201584,
+          "trie_nodes": 1689
+        },
+        {
+          "block_size": 16,
+          "cacheable_block_tokens": 31008,
+          "estimated_block_reuse_ratio": 0.153822,
+          "naive_nodes": 1917,
+          "node_compression_ratio": 0.166406,
+          "ordering": "alphabetical",
+          "partition": "bfcl_exposed",
+          "replay": "empirical",
+          "requests": 1240,
+          "reusable_tool_tokens": 32782,
+          "total_tool_tokens": 201584,
+          "trie_nodes": 1598
+        },
+        {
+          "block_size": 16,
+          "cacheable_block_tokens": 29440,
+          "estimated_block_reuse_ratio": 0.146043,
+          "naive_nodes": 1917,
+          "node_compression_ratio": 0.165363,
+          "ordering": "random_seed_7",
+          "partition": "bfcl_exposed",
+          "replay": "empirical",
+          "requests": 1240,
+          "reusable_tool_tokens": 31364,
+          "total_tool_tokens": 201584,
+          "trie_nodes": 1600
+        },
+        {
+          "block_size": 16,
+          "cacheable_block_tokens": 28720,
+          "estimated_block_reuse_ratio": 0.142472,
+          "naive_nodes": 1917,
+          "node_compression_ratio": 0.162233,
+          "ordering": "random_seed_42",
+          "partition": "bfcl_exposed",
+          "replay": "empirical",
+          "requests": 1240,
+          "reusable_tool_tokens": 30575,
+          "total_tool_tokens": 201584,
+          "trie_nodes": 1606
+        },
+        {
+          "block_size": 16,
+          "cacheable_block_tokens": 29408,
+          "estimated_block_reuse_ratio": 0.145885,
+          "naive_nodes": 1917,
+          "node_compression_ratio": 0.161711,
+          "ordering": "random_seed_101",
+          "partition": "bfcl_exposed",
+          "replay": "empirical",
+          "requests": 1240,
+          "reusable_tool_tokens": 31194,
+          "total_tool_tokens": 201584,
+          "trie_nodes": 1607
+        },
+        {
+          "block_size": 16,
+          "cacheable_block_tokens": 38064,
+          "estimated_block_reuse_ratio": 0.188825,
+          "naive_nodes": 1917,
+          "node_compression_ratio": 0.210746,
+          "ordering": "frequency",
+          "partition": "bfcl_exposed",
+          "replay": "empirical",
+          "requests": 1240,
+          "reusable_tool_tokens": 40335,
+          "total_tool_tokens": 201584,
+          "trie_nodes": 1513
+        },
+        {
+          "block_size": 16,
+          "cacheable_block_tokens": 37824,
+          "estimated_block_reuse_ratio": 0.187634,
+          "naive_nodes": 1917,
+          "node_compression_ratio": 0.205529,
+          "ordering": "schema_cost_weighted",
+          "partition": "bfcl_exposed",
+          "replay": "empirical",
+          "requests": 1240,
+          "reusable_tool_tokens": 40057,
+          "total_tool_tokens": 201584,
+          "trie_nodes": 1523
+        },
+        {
+          "block_size": 16,
+          "cacheable_block_tokens": 38064,
+          "estimated_block_reuse_ratio": 0.188825,
+          "naive_nodes": 1917,
+          "node_compression_ratio": 0.210746,
+          "ordering": "fp_tree_global",
+          "partition": "bfcl_exposed",
+          "replay": "empirical",
+          "requests": 1240,
+          "reusable_tool_tokens": 40335,
+          "total_tool_tokens": 201584,
+          "trie_nodes": 1513
+        },
+        {
+          "block_size": 16,
+          "cacheable_block_tokens": 73104,
+          "estimated_block_reuse_ratio": 0.371171,
+          "naive_nodes": 1887,
+          "node_compression_ratio": 0.393747,
+          "ordering": "original",
+          "partition": "bfcl_exposed",
+          "replay": "uniform",
+          "requests": 1240,
+          "reusable_tool_tokens": 77140,
+          "total_tool_tokens": 196955,
+          "trie_nodes": 1144
+        },
+        {
+          "block_size": 16,
+          "cacheable_block_tokens": 77472,
+          "estimated_block_reuse_ratio": 0.393349,
+          "naive_nodes": 1887,
+          "node_compression_ratio": 0.419714,
+          "ordering": "alphabetical",
+          "partition": "bfcl_exposed",
+          "replay": "uniform",
+          "requests": 1240,
+          "reusable_tool_tokens": 81703,
+          "total_tool_tokens": 196955,
+          "trie_nodes": 1095
+        },
+        {
+          "block_size": 16,
+          "cacheable_block_tokens": 76640,
+          "estimated_block_reuse_ratio": 0.389124,
+          "naive_nodes": 1887,
+          "node_compression_ratio": 0.418654,
+          "ordering": "random_seed_7",
+          "partition": "bfcl_exposed",
+          "replay": "uniform",
+          "requests": 1240,
+          "reusable_tool_tokens": 80969,
+          "total_tool_tokens": 196955,
+          "trie_nodes": 1097
+        },
+        {
+          "block_size": 16,
+          "cacheable_block_tokens": 76800,
+          "estimated_block_reuse_ratio": 0.389937,
+          "naive_nodes": 1887,
+          "node_compression_ratio": 0.418124,
+          "ordering": "random_seed_42",
+          "partition": "bfcl_exposed",
+          "replay": "uniform",
+          "requests": 1240,
+          "reusable_tool_tokens": 81070,
+          "total_tool_tokens": 196955,
+          "trie_nodes": 1098
+        },
+        {
+          "block_size": 16,
+          "cacheable_block_tokens": 76992,
+          "estimated_block_reuse_ratio": 0.390912,
+          "naive_nodes": 1887,
+          "node_compression_ratio": 0.417594,
+          "ordering": "random_seed_101",
+          "partition": "bfcl_exposed",
+          "replay": "uniform",
+          "requests": 1240,
+          "reusable_tool_tokens": 81223,
+          "total_tool_tokens": 196955,
+          "trie_nodes": 1099
+        },
+        {
+          "block_size": 16,
+          "cacheable_block_tokens": 80976,
+          "estimated_block_reuse_ratio": 0.41114,
+          "naive_nodes": 1887,
+          "node_compression_ratio": 0.441441,
+          "ordering": "frequency",
+          "partition": "bfcl_exposed",
+          "replay": "uniform",
+          "requests": 1240,
+          "reusable_tool_tokens": 85483,
+          "total_tool_tokens": 196955,
+          "trie_nodes": 1054
+        },
+        {
+          "block_size": 16,
+          "cacheable_block_tokens": 80896,
+          "estimated_block_reuse_ratio": 0.410733,
+          "naive_nodes": 1887,
+          "node_compression_ratio": 0.438262,
+          "ordering": "schema_cost_weighted",
+          "partition": "bfcl_exposed",
+          "replay": "uniform",
+          "requests": 1240,
+          "reusable_tool_tokens": 85365,
+          "total_tool_tokens": 196955,
+          "trie_nodes": 1060
+        },
+        {
+          "block_size": 16,
+          "cacheable_block_tokens": 80976,
+          "estimated_block_reuse_ratio": 0.41114,
+          "naive_nodes": 1887,
+          "node_compression_ratio": 0.441441,
+          "ordering": "fp_tree_global",
+          "partition": "bfcl_exposed",
+          "replay": "uniform",
+          "requests": 1240,
+          "reusable_tool_tokens": 85483,
+          "total_tool_tokens": 196955,
+          "trie_nodes": 1054
+        },
+        {
+          "block_size": 16,
+          "cacheable_block_tokens": 156112,
+          "estimated_block_reuse_ratio": 0.568211,
+          "naive_nodes": 2633,
+          "node_compression_ratio": 0.587923,
+          "ordering": "original",
+          "partition": "bfcl_exposed",
+          "replay": "skewed",
+          "requests": 1240,
+          "reusable_tool_tokens": 161025,
+          "total_tool_tokens": 274743,
+          "trie_nodes": 1085
+        },
+        {
+          "block_size": 16,
+          "cacheable_block_tokens": 162688,
+          "estimated_block_reuse_ratio": 0.592146,
+          "naive_nodes": 2633,
+          "node_compression_ratio": 0.613369,
+          "ordering": "alphabetical",
+          "partition": "bfcl_exposed",
+          "replay": "skewed",
+          "requests": 1240,
+          "reusable_tool_tokens": 167805,
+          "total_tool_tokens": 274743,
+          "trie_nodes": 1018
+        },
+        {
+          "block_size": 16,
+          "cacheable_block_tokens": 161760,
+          "estimated_block_reuse_ratio": 0.588768,
+          "naive_nodes": 2633,
+          "node_compression_ratio": 0.613749,
+          "ordering": "random_seed_7",
+          "partition": "bfcl_exposed",
+          "replay": "skewed",
+          "requests": 1240,
+          "reusable_tool_tokens": 167075,
+          "total_tool_tokens": 274743,
+          "trie_nodes": 1017
+        },
+        {
+          "block_size": 16,
+          "cacheable_block_tokens": 161456,
+          "estimated_block_reuse_ratio": 0.587662,
+          "naive_nodes": 2633,
+          "node_compression_ratio": 0.612609,
+          "ordering": "random_seed_42",
+          "partition": "bfcl_exposed",
+          "replay": "skewed",
+          "requests": 1240,
+          "reusable_tool_tokens": 166683,
+          "total_tool_tokens": 274743,
+          "trie_nodes": 1020
+        },
+        {
+          "block_size": 16,
+          "cacheable_block_tokens": 161904,
+          "estimated_block_reuse_ratio": 0.589293,
+          "naive_nodes": 2633,
+          "node_compression_ratio": 0.61147,
+          "ordering": "random_seed_101",
+          "partition": "bfcl_exposed",
+          "replay": "skewed",
+          "requests": 1240,
+          "reusable_tool_tokens": 167013,
+          "total_tool_tokens": 274743,
+          "trie_nodes": 1023
+        },
+        {
+          "block_size": 16,
+          "cacheable_block_tokens": 168656,
+          "estimated_block_reuse_ratio": 0.613868,
+          "naive_nodes": 2633,
+          "node_compression_ratio": 0.639954,
+          "ordering": "frequency",
+          "partition": "bfcl_exposed",
+          "replay": "skewed",
+          "requests": 1240,
+          "reusable_tool_tokens": 174216,
+          "total_tool_tokens": 274743,
+          "trie_nodes": 948
+        },
+        {
+          "block_size": 16,
+          "cacheable_block_tokens": 168288,
+          "estimated_block_reuse_ratio": 0.612529,
+          "naive_nodes": 2633,
+          "node_compression_ratio": 0.636156,
+          "ordering": "schema_cost_weighted",
+          "partition": "bfcl_exposed",
+          "replay": "skewed",
+          "requests": 1240,
+          "reusable_tool_tokens": 173812,
+          "total_tool_tokens": 274743,
+          "trie_nodes": 958
+        },
+        {
+          "block_size": 16,
+          "cacheable_block_tokens": 168656,
+          "estimated_block_reuse_ratio": 0.613868,
+          "naive_nodes": 2633,
+          "node_compression_ratio": 0.639954,
+          "ordering": "fp_tree_global",
+          "partition": "bfcl_exposed",
+          "replay": "skewed",
+          "requests": 1240,
+          "reusable_tool_tokens": 174216,
+          "total_tool_tokens": 274743,
+          "trie_nodes": 948
+        },
+        {
+          "block_size": 16,
+          "cacheable_block_tokens": 22144,
+          "estimated_block_reuse_ratio": 0.10985,
+          "naive_nodes": 1917,
+          "node_compression_ratio": 0.118936,
+          "ordering": "original",
+          "partition": "bfcl_exposed",
+          "replay": "session_bursty",
+          "requests": 1240,
+          "reusable_tool_tokens": 23625,
+          "total_tool_tokens": 201584,
+          "trie_nodes": 1689
+        },
+        {
+          "block_size": 16,
+          "cacheable_block_tokens": 31008,
+          "estimated_block_reuse_ratio": 0.153822,
+          "naive_nodes": 1917,
+          "node_compression_ratio": 0.166406,
+          "ordering": "alphabetical",
+          "partition": "bfcl_exposed",
+          "replay": "session_bursty",
+          "requests": 1240,
+          "reusable_tool_tokens": 32782,
+          "total_tool_tokens": 201584,
+          "trie_nodes": 1598
+        },
+        {
+          "block_size": 16,
+          "cacheable_block_tokens": 29440,
+          "estimated_block_reuse_ratio": 0.146043,
+          "naive_nodes": 1917,
+          "node_compression_ratio": 0.165363,
+          "ordering": "random_seed_7",
+          "partition": "bfcl_exposed",
+          "replay": "session_bursty",
+          "requests": 1240,
+          "reusable_tool_tokens": 31364,
+          "total_tool_tokens": 201584,
+          "trie_nodes": 1600
+        },
+        {
+          "block_size": 16,
+          "cacheable_block_tokens": 28720,
+          "estimated_block_reuse_ratio": 0.142472,
+          "naive_nodes": 1917,
+          "node_compression_ratio": 0.162233,
+          "ordering": "random_seed_42",
+          "partition": "bfcl_exposed",
+          "replay": "session_bursty",
+          "requests": 1240,
+          "reusable_tool_tokens": 30575,
+          "total_tool_tokens": 201584,
+          "trie_nodes": 1606
+        },
+        {
+          "block_size": 16,
+          "cacheable_block_tokens": 29408,
+          "estimated_block_reuse_ratio": 0.145885,
+          "naive_nodes": 1917,
+          "node_compression_ratio": 0.161711,
+          "ordering": "random_seed_101",
+          "partition": "bfcl_exposed",
+          "replay": "session_bursty",
+          "requests": 1240,
+          "reusable_tool_tokens": 31194,
+          "total_tool_tokens": 201584,
+          "trie_nodes": 1607
+        },
+        {
+          "block_size": 16,
+          "cacheable_block_tokens": 38064,
+          "estimated_block_reuse_ratio": 0.188825,
+          "naive_nodes": 1917,
+          "node_compression_ratio": 0.210746,
+          "ordering": "frequency",
+          "partition": "bfcl_exposed",
+          "replay": "session_bursty",
+          "requests": 1240,
+          "reusable_tool_tokens": 40335,
+          "total_tool_tokens": 201584,
+          "trie_nodes": 1513
+        },
+        {
+          "block_size": 16,
+          "cacheable_block_tokens": 37824,
+          "estimated_block_reuse_ratio": 0.187634,
+          "naive_nodes": 1917,
+          "node_compression_ratio": 0.205529,
+          "ordering": "schema_cost_weighted",
+          "partition": "bfcl_exposed",
+          "replay": "session_bursty",
+          "requests": 1240,
+          "reusable_tool_tokens": 40057,
+          "total_tool_tokens": 201584,
+          "trie_nodes": 1523
+        },
+        {
+          "block_size": 16,
+          "cacheable_block_tokens": 38064,
+          "estimated_block_reuse_ratio": 0.188825,
+          "naive_nodes": 1917,
+          "node_compression_ratio": 0.210746,
+          "ordering": "fp_tree_global",
+          "partition": "bfcl_exposed",
+          "replay": "session_bursty",
+          "requests": 1240,
+          "reusable_tool_tokens": 40335,
+          "total_tool_tokens": 201584,
+          "trie_nodes": 1513
+        }
+      ],
+      "partition": "bfcl_exposed",
+      "task_domain_counts": {
+        "irrelevance": 240,
+        "multiple": 200,
+        "parallel": 200,
+        "parallel_multiple": 200,
+        "simple_python": 400
+      },
+      "task_schema_tokens": {
+        "count": 1240,
+        "max": 616,
+        "mean": 162.568,
+        "median": 119.0,
+        "min": 51,
+        "p25": 101.0,
+        "p75": 204.5,
+        "p90": 309.2,
+        "p95": 362.2,
+        "p99": 477.22
+      },
+      "task_tool_count": {
+        "count": 1240,
+        "max": 4,
+        "mean": 1.546,
+        "median": 1.0,
+        "min": 1,
+        "p25": 1.0,
+        "p75": 2.0,
+        "p90": 3.0,
+        "p95": 3.0,
+        "p99": 4.0
+      },
+      "tasks": 1240,
+      "top_ordered_adjacency_proxy": [
+        {
+          "count": 2,
+          "p_next_given_current": 1.0,
+          "tool_ids": [
+            "bfcl:weather.get_forecast_by_coordinates:29ea299fd21c",
+            "bfcl:weather.get_by_coordinates_date:3c90340efc17"
+          ],
+          "tool_names": [
+            "weather.get_forecast_by_coordinates",
+            "weather.get_by_coordinates_date"
+          ]
+        },
+        {
+          "count": 2,
+          "p_next_given_current": 1.0,
+          "tool_ids": [
+            "bfcl:wildlife_population.assess_growth:72ff10415b1b",
+            "bfcl:ecological_impact.analyze:30ff1b8a498c"
+          ],
+          "tool_names": [
+            "wildlife_population.assess_growth",
+            "ecological_impact.analyze"
+          ]
+        },
+        {
+          "count": 2,
+          "p_next_given_current": 1.0,
+          "tool_ids": [
+            "bfcl:property_valuation.get:f808d1a63e16",
+            "bfcl:realestate.find_properties:43c0497afce3"
+          ],
+          "tool_names": [
+            "property_valuation.get",
+            "realestate.find_properties"
+          ]
+        },
+        {
+          "count": 2,
+          "p_next_given_current": 1.0,
+          "tool_ids": [
+            "bfcl:sculptor_info.get:fcfa4cd914e8",
+            "bfcl:sculpture_price.calculate:bca04c71355a"
+          ],
+          "tool_names": [
+            "sculptor_info.get",
+            "sculpture_price.calculate"
+          ]
+        },
+        {
+          "count": 2,
+          "p_next_given_current": 1.0,
+          "tool_ids": [
+            "bfcl:geology.get_era:84a3a17d12fe",
+            "bfcl:history.get_event_date:6ca28cd8ea00"
+          ],
+          "tool_names": [
+            "geology.get_era",
+            "history.get_event_date"
+          ]
+        },
+        {
+          "count": 2,
+          "p_next_given_current": 1.0,
+          "tool_ids": [
+            "bfcl:cosine_similarity.calculate:ea48ac61d586",
+            "bfcl:correlation.calculate:191c51d8713c"
+          ],
+          "tool_names": [
+            "cosine_similarity.calculate",
+            "correlation.calculate"
+          ]
+        },
+        {
+          "count": 2,
+          "p_next_given_current": 1.0,
+          "tool_ids": [
+            "bfcl:volume_traded:5d3f2520091c",
+            "bfcl:total_revenue:bf29c13ae59e"
+          ],
+          "tool_names": [
+            "volume_traded",
+            "total_revenue"
+          ]
+        },
+        {
+          "count": 2,
+          "p_next_given_current": 1.0,
+          "tool_ids": [
+            "bfcl:total_revenue:bf29c13ae59e",
+            "bfcl:avg_closing_price:a88d826f30db"
+          ],
+          "tool_names": [
+            "total_revenue",
+            "avg_closing_price"
+          ]
+        },
+        {
+          "count": 2,
+          "p_next_given_current": 1.0,
+          "tool_ids": [
+            "bfcl:air_quality_forecast:44b4893b74cd",
+            "bfcl:weather_forecast:79de908d7cbd"
+          ],
+          "tool_names": [
+            "air_quality_forecast",
+            "weather_forecast"
+          ]
+        },
+        {
+          "count": 2,
+          "p_next_given_current": 1.0,
+          "tool_ids": [
+            "bfcl:timezones.get_difference:7cc0719e7a62",
+            "bfcl:geodistance.find:c6874050ed33"
+          ],
+          "tool_names": [
+            "timezones.get_difference",
+            "geodistance.find"
+          ]
+        },
+        {
+          "count": 2,
+          "p_next_given_current": 1.0,
+          "tool_ids": [
+            "bfcl:MBTI.analyse:376486534997",
+            "bfcl:five_factor_model.analyse:18d8026ee654"
+          ],
+          "tool_names": [
+            "MBTI.analyse",
+            "five_factor_model.analyse"
+          ]
+        },
+        {
+          "count": 2,
+          "p_next_given_current": 1.0,
+          "tool_ids": [
+            "bfcl:us_history.population_by_state_year:c573e501c936",
+            "bfcl:us_economy.gdp_by_state_year:c30cd8328c1c"
+          ],
+          "tool_names": [
+            "us_history.population_by_state_year",
+            "us_economy.gdp_by_state_year"
+          ]
+        },
+        {
+          "count": 2,
+          "p_next_given_current": 1.0,
+          "tool_ids": [
+            "bfcl:religion.get_core_beliefs:78b52a26eab7",
+            "bfcl:religion.get_origin:469bfd9b2e75"
+          ],
+          "tool_names": [
+            "religion.get_core_beliefs",
+            "religion.get_origin"
+          ]
+        },
+        {
+          "count": 2,
+          "p_next_given_current": 1.0,
+          "tool_ids": [
+            "bfcl:basketball_scores.get_scores:dae789d6a5fe",
+            "bfcl:soccer_scores.get_scores:869fca6d1f5c"
+          ],
+          "tool_names": [
+            "basketball_scores.get_scores",
+            "soccer_scores.get_scores"
+          ]
+        },
+        {
+          "count": 2,
+          "p_next_given_current": 1.0,
+          "tool_ids": [
+            "bfcl:music_generator.generate_scale_progression:e462e28d232f",
+            "bfcl:math.hcf:c92a3a24a1e5"
+          ],
+          "tool_names": [
+            "music_generator.generate_scale_progression",
+            "math.hcf"
+          ]
+        },
+        {
+          "count": 2,
+          "p_next_given_current": 1.0,
+          "tool_ids": [
+            "bfcl:get_shortest_driving_distance:0d477798afd2",
+            "bfcl:cell_biology.function_lookup:be2ec9539d34"
+          ],
+          "tool_names": [
+            "get_shortest_driving_distance",
+            "cell_biology.function_lookup"
+          ]
+        },
+        {
+          "count": 2,
+          "p_next_given_current": 0.4,
+          "tool_ids": [
+            "bfcl:mix_paint_color:e687eb1b0024",
+            "bfcl:cooking_conversion.convert:314bab0d8d2d"
+          ],
+          "tool_names": [
+            "mix_paint_color",
+            "cooking_conversion.convert"
+          ]
+        },
+        {
+          "count": 2,
+          "p_next_given_current": 0.4,
+          "tool_ids": [
+            "bfcl:cooking_conversion.convert:314bab0d8d2d",
+            "bfcl:group_dynamics.pattern:49d94ab3ad1d"
+          ],
+          "tool_names": [
+            "cooking_conversion.convert",
+            "group_dynamics.pattern"
+          ]
+        },
+        {
+          "count": 2,
+          "p_next_given_current": 0.5,
+          "tool_ids": [
+            "bfcl:calculate_genotype_frequency:a4ed6dc2eef5",
+            "bfcl:math.factorial:c843d084d3bd"
+          ],
+          "tool_names": [
+            "calculate_genotype_frequency",
+            "math.factorial"
+          ]
+        },
+        {
+          "count": 2,
+          "p_next_given_current": 0.333333,
+          "tool_ids": [
+            "bfcl:chess.rating:4970845289cb",
+            "bfcl:calculate_fitness:e2e37615667b"
+          ],
+          "tool_names": [
+            "chess.rating",
+            "calculate_fitness"
+          ]
+        },
+        {
+          "count": 2,
+          "p_next_given_current": 1.0,
+          "tool_ids": [
+            "bfcl:prediction.evolution:0f27a3207f0c",
+            "bfcl:calculate_probability:bc87293c2bff"
+          ],
+          "tool_names": [
+            "prediction.evolution",
+            "calculate_probability"
+          ]
+        },
+        {
+          "count": 2,
+          "p_next_given_current": 1.0,
+          "tool_ids": [
+            "bfcl:calculate_bmi:69b7f944a5b2",
+            "bfcl:celebrity_net_worth.get:ef17c6095b6f"
+          ],
+          "tool_names": [
+            "calculate_bmi",
+            "celebrity_net_worth.get"
+          ]
+        },
+        {
+          "count": 2,
+          "p_next_given_current": 0.4,
+          "tool_ids": [
+            "bfcl:get_song_lyrics:91201f97f0f7",
+            "bfcl:law_case_search.find_historical:435cbd96b276"
+          ],
+          "tool_names": [
+            "get_song_lyrics",
+            "law_case_search.find_historical"
+          ]
+        },
+        {
+          "count": 2,
+          "p_next_given_current": 0.333333,
+          "tool_ids": [
+            "bfcl:chess.rating:4970845289cb",
+            "bfcl:solve_quadratic:b0f6556897b0"
+          ],
+          "tool_names": [
+            "chess.rating",
+            "solve_quadratic"
+          ]
+        },
+        {
+          "count": 2,
+          "p_next_given_current": 0.666667,
+          "tool_ids": [
+            "bfcl:park_information:cab612a951af",
+            "bfcl:legal_case.fetch:fa79072dd9a7"
+          ],
+          "tool_names": [
+            "park_information",
+            "legal_case.fetch"
+          ]
+        },
+        {
+          "count": 2,
+          "p_next_given_current": 0.666667,
+          "tool_ids": [
+            "bfcl:hotel_booking:342a8cc12d2e",
+            "bfcl:sentiment_analysis:93262624eb19"
+          ],
+          "tool_names": [
+            "hotel_booking",
+            "sentiment_analysis"
+          ]
+        },
+        {
+          "count": 2,
+          "p_next_given_current": 0.666667,
+          "tool_ids": [
+            "bfcl:sentiment_analysis:93262624eb19",
+            "bfcl:get_time_difference:6a52e55eff2a"
+          ],
+          "tool_names": [
+            "sentiment_analysis",
+            "get_time_difference"
+          ]
+        },
+        {
+          "count": 2,
+          "p_next_given_current": 1.0,
+          "tool_ids": [
+            "bfcl:musical_scale:f626892ba58f",
+            "bfcl:calculate_paint_needed:b6be088b5cb2"
+          ],
+          "tool_names": [
+            "musical_scale",
+            "calculate_paint_needed"
+          ]
+        },
+        {
+          "count": 2,
+          "p_next_given_current": 1.0,
+          "tool_ids": [
+            "bfcl:get_defense_ranking:dec00b3e1501",
+            "bfcl:array_sort:0a45c290c9d1"
+          ],
+          "tool_names": [
+            "get_defense_ranking",
+            "array_sort"
+          ]
+        },
+        {
+          "count": 2,
+          "p_next_given_current": 0.4,
+          "tool_ids": [
+            "bfcl:board_game.chess.get_top_players:e6dd81b0c6c1",
+            "bfcl:get_historical_GDP:efc6ec045013"
+          ],
+          "tool_names": [
+            "board_game.chess.get_top_players",
+            "get_historical_GDP"
+          ]
+        }
+      ],
+      "top_pairs": [
+        {
+          "count": 2,
+          "tool_ids": [
+            "bfcl:math.circle_area:402b2ef4529e",
+            "bfcl:math.triangle_area_base_height:c00c2531481c"
+          ],
+          "tool_names": [
+            "math.circle_area",
+            "math.triangle_area_base_height"
+          ]
+        },
+        {
+          "count": 2,
+          "tool_ids": [
+            "bfcl:country_info.capital:097cc7334e44",
+            "bfcl:country_info.largest_city:2b57b683d824"
+          ],
+          "tool_names": [
+            "country_info.capital",
+            "country_info.largest_city"
+          ]
+        },
+        {
+          "count": 2,
+          "tool_ids": [
+            "bfcl:country_info.capital:097cc7334e44",
+            "bfcl:country_info.population:52c30c760fa1"
+          ],
+          "tool_names": [
+            "country_info.capital",
+            "country_info.population"
+          ]
+        },
+        {
+          "count": 2,
+          "tool_ids": [
+            "bfcl:country_info.largest_city:2b57b683d824",
+            "bfcl:country_info.population:52c30c760fa1"
+          ],
+          "tool_names": [
+            "country_info.largest_city",
+            "country_info.population"
+          ]
+        },
+        {
+          "count": 2,
+          "tool_ids": [
+            "bfcl:weather.get_by_city_date:207edfb726a6",
+            "bfcl:weather.get_by_coordinates_date:3c90340efc17"
+          ],
+          "tool_names": [
+            "weather.get_by_city_date",
+            "weather.get_by_coordinates_date"
+          ]
+        },
+        {
+          "count": 2,
+          "tool_ids": [
+            "bfcl:weather.get_by_city_date:207edfb726a6",
+            "bfcl:weather.get_forecast_by_coordinates:29ea299fd21c"
+          ],
+          "tool_names": [
+            "weather.get_by_city_date",
+            "weather.get_forecast_by_coordinates"
+          ]
+        },
+        {
+          "count": 2,
+          "tool_ids": [
+            "bfcl:weather.get_by_coordinates_date:3c90340efc17",
+            "bfcl:weather.get_forecast_by_coordinates:29ea299fd21c"
+          ],
+          "tool_names": [
+            "weather.get_by_coordinates_date",
+            "weather.get_forecast_by_coordinates"
+          ]
+        },
+        {
+          "count": 2,
+          "tool_ids": [
+            "bfcl:ecological_impact.analyze:30ff1b8a498c",
+            "bfcl:wildlife_population.assess_growth:72ff10415b1b"
+          ],
+          "tool_names": [
+            "ecological_impact.analyze",
+            "wildlife_population.assess_growth"
+          ]
+        },
+        {
+          "count": 2,
+          "tool_ids": [
+            "bfcl:property_valuation.get:f808d1a63e16",
+            "bfcl:realestate.find_properties:43c0497afce3"
+          ],
+          "tool_names": [
+            "property_valuation.get",
+            "realestate.find_properties"
+          ]
+        },
+        {
+          "count": 2,
+          "tool_ids": [
+            "bfcl:calculate_average:6395b17467dc",
+            "bfcl:calculate_standard_deviation:1350f1b53567"
+          ],
+          "tool_names": [
+            "calculate_average",
+            "calculate_standard_deviation"
+          ]
+        },
+        {
+          "count": 2,
+          "tool_ids": [
+            "bfcl:calculate_average:6395b17467dc",
+            "bfcl:highest_grade:9e197b17f10e"
+          ],
+          "tool_names": [
+            "calculate_average",
+            "highest_grade"
+          ]
+        },
+        {
+          "count": 2,
+          "tool_ids": [
+            "bfcl:calculate_standard_deviation:1350f1b53567",
+            "bfcl:highest_grade:9e197b17f10e"
+          ],
+          "tool_names": [
+            "calculate_standard_deviation",
+            "highest_grade"
+          ]
+        },
+        {
+          "count": 2,
+          "tool_ids": [
+            "bfcl:financial_ratios.calculate_ROA:61d8b86d9e72",
+            "bfcl:financial_ratios.calculate_ROE:dd6908cb0559"
+          ],
+          "tool_names": [
+            "financial_ratios.calculate_ROA",
+            "financial_ratios.calculate_ROE"
+          ]
+        },
+        {
+          "count": 2,
+          "tool_ids": [
+            "bfcl:sculptor_info.get:fcfa4cd914e8",
+            "bfcl:sculpture_availability.check:17be24bb349a"
+          ],
+          "tool_names": [
+            "sculptor_info.get",
+            "sculpture_availability.check"
+          ]
+        },
+        {
+          "count": 2,
+          "tool_ids": [
+            "bfcl:sculptor_info.get:fcfa4cd914e8",
+            "bfcl:sculpture_price.calculate:bca04c71355a"
+          ],
+          "tool_names": [
+            "sculptor_info.get",
+            "sculpture_price.calculate"
+          ]
+        },
+        {
+          "count": 2,
+          "tool_ids": [
+            "bfcl:sculpture_availability.check:17be24bb349a",
+            "bfcl:sculpture_price.calculate:bca04c71355a"
+          ],
+          "tool_names": [
+            "sculpture_availability.check",
+            "sculpture_price.calculate"
+          ]
+        },
+        {
+          "count": 2,
+          "tool_ids": [
+            "bfcl:sports_data.basketball.most_points_career:7732220e350b",
+            "bfcl:sports_data.basketball.most_points_single_game:73d1ddf8ac1e"
+          ],
+          "tool_names": [
+            "sports_data.basketball.most_points_career",
+            "sports_data.basketball.most_points_single_game"
+          ]
+        },
+        {
+          "count": 2,
+          "tool_ids": [
+            "bfcl:sports_data.basketball.most_points_career:7732220e350b",
+            "bfcl:sports_data.basketball.most_points_single_season:a66a10a6c016"
+          ],
+          "tool_names": [
+            "sports_data.basketball.most_points_career",
+            "sports_data.basketball.most_points_single_season"
+          ]
+        },
+        {
+          "count": 2,
+          "tool_ids": [
+            "bfcl:sports_data.basketball.most_points_single_game:73d1ddf8ac1e",
+            "bfcl:sports_data.basketball.most_points_single_season:a66a10a6c016"
+          ],
+          "tool_names": [
+            "sports_data.basketball.most_points_single_game",
+            "sports_data.basketball.most_points_single_season"
+          ]
+        },
+        {
+          "count": 2,
+          "tool_ids": [
+            "bfcl:basketball.player_stats.get:96d018266663",
+            "bfcl:basketball.team_stats.get:66460948e85e"
+          ],
+          "tool_names": [
+            "basketball.player_stats.get",
+            "basketball.team_stats.get"
+          ]
+        },
+        {
+          "count": 2,
+          "tool_ids": [
+            "bfcl:chess_club_details.find:0dac3f17e578",
+            "bfcl:route_planner.calculate_route:70069549488b"
+          ],
+          "tool_names": [
+            "chess_club_details.find",
+            "route_planner.calculate_route"
+          ]
+        },
+        {
+          "count": 2,
+          "tool_ids": [
+            "bfcl:convert.rgb_to_hex:fbde714614d7",
+            "bfcl:perform.string_reverse:b077c0177daf"
+          ],
+          "tool_names": [
+            "convert.rgb_to_hex",
+            "perform.string_reverse"
+          ]
+        },
+        {
+          "count": 2,
+          "tool_ids": [
+            "bfcl:convert.rgb_to_hex:fbde714614d7",
+            "bfcl:solve.quadratic_equation:74a24e523c4b"
+          ],
+          "tool_names": [
+            "convert.rgb_to_hex",
+            "solve.quadratic_equation"
+          ]
+        },
+        {
+          "count": 2,
+          "tool_ids": [
+            "bfcl:perform.string_reverse:b077c0177daf",
+            "bfcl:solve.quadratic_equation:74a24e523c4b"
+          ],
+          "tool_names": [
+            "perform.string_reverse",
+            "solve.quadratic_equation"
+          ]
+        },
+        {
+          "count": 2,
+          "tool_ids": [
+            "bfcl:functions.intersect:b360f91479b2",
+            "bfcl:functions.zero:ad4bbf09c915"
+          ],
+          "tool_names": [
+            "functions.intersect",
+            "functions.zero"
+          ]
+        },
+        {
+          "count": 2,
+          "tool_ids": [
+            "bfcl:geometry_circle.calculate:224edefbbfe1",
+            "bfcl:geometry_rectangle.calculate:904d09d8175b"
+          ],
+          "tool_names": [
+            "geometry_circle.calculate",
+            "geometry_rectangle.calculate"
+          ]
+        },
+        {
+          "count": 2,
+          "tool_ids": [
+            "bfcl:geometry_circle.calculate:224edefbbfe1",
+            "bfcl:geometry_square.calculate:9b0be920f1c3"
+          ],
+          "tool_names": [
+            "geometry_circle.calculate",
+            "geometry_square.calculate"
+          ]
+        },
+        {
+          "count": 2,
+          "tool_ids": [
+            "bfcl:geometry_rectangle.calculate:904d09d8175b",
+            "bfcl:geometry_square.calculate:9b0be920f1c3"
+          ],
+          "tool_names": [
+            "geometry_rectangle.calculate",
+            "geometry_square.calculate"
+          ]
+        },
+        {
+          "count": 2,
+          "tool_ids": [
+            "bfcl:calculate_derivative:386466f609f6",
+            "bfcl:calculate_integral:a6743f41f552"
+          ],
+          "tool_names": [
+            "calculate_derivative",
+            "calculate_integral"
+          ]
+        },
+        {
+          "count": 2,
+          "tool_ids": [
+            "bfcl:math.gcd:41d244ea37a1",
+            "bfcl:math.lcm:03900ad19904"
+          ],
+          "tool_names": [
+            "math.gcd",
+            "math.lcm"
+          ]
+        }
+      ],
+      "top_schema_weighted_tools": [
+        {
+          "domain": "multiple",
+          "name": "event_finder.find_upcoming",
+          "occurrences": 8,
+          "schema_tokens": 111,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:event_finder.find_upcoming:16e523592545",
+          "weighted_tokens": 888
+        },
+        {
+          "domain": "multiple",
+          "name": "weather_forecast",
+          "occurrences": 10,
+          "schema_tokens": 77,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:weather_forecast:79de908d7cbd",
+          "weighted_tokens": 770
+        },
+        {
+          "domain": "multiple",
+          "name": "get_stock_info",
+          "occurrences": 7,
+          "schema_tokens": 109,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:get_stock_info:671e66a37959",
+          "weighted_tokens": 763
+        },
+        {
+          "domain": "multiple",
+          "name": "mutation_type.find",
+          "occurrences": 7,
+          "schema_tokens": 108,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:mutation_type.find:de3246922614",
+          "weighted_tokens": 756
+        },
+        {
+          "domain": "multiple",
+          "name": "calculate_binomial_probability",
+          "occurrences": 6,
+          "schema_tokens": 121,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:calculate_binomial_probability:21e62e64bb2f",
+          "weighted_tokens": 726
+        },
+        {
+          "domain": "multiple",
+          "name": "get_song_lyrics",
+          "occurrences": 6,
+          "schema_tokens": 114,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:get_song_lyrics:91201f97f0f7",
+          "weighted_tokens": 684
+        },
+        {
+          "domain": "multiple",
+          "name": "mix_paint_color",
+          "occurrences": 6,
+          "schema_tokens": 114,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:mix_paint_color:e687eb1b0024",
+          "weighted_tokens": 684
+        },
+        {
+          "domain": "multiple",
+          "name": "book_hotel",
+          "occurrences": 4,
+          "schema_tokens": 170,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:book_hotel:78014cf2f65e",
+          "weighted_tokens": 680
+        },
+        {
+          "domain": "multiple",
+          "name": "chess.rating",
+          "occurrences": 7,
+          "schema_tokens": 97,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:chess.rating:4970845289cb",
+          "weighted_tokens": 679
+        },
+        {
+          "domain": "multiple",
+          "name": "board_game.chess.get_top_players",
+          "occurrences": 6,
+          "schema_tokens": 111,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:board_game.chess.get_top_players:e6dd81b0c6c1",
+          "weighted_tokens": 666
+        },
+        {
+          "domain": "multiple",
+          "name": "cooking_conversion.convert",
+          "occurrences": 6,
+          "schema_tokens": 105,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:cooking_conversion.convert:314bab0d8d2d",
+          "weighted_tokens": 630
+        },
+        {
+          "domain": "multiple",
+          "name": "soccer.get_last_match",
+          "occurrences": 7,
+          "schema_tokens": 89,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:soccer.get_last_match:e0c0cf725ce8",
+          "weighted_tokens": 623
+        },
+        {
+          "domain": "multiple",
+          "name": "get_collectables_in_season",
+          "occurrences": 5,
+          "schema_tokens": 123,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:get_collectables_in_season:863f9e557bf4",
+          "weighted_tokens": 615
+        },
+        {
+          "domain": "multiple",
+          "name": "calculate_probability",
+          "occurrences": 6,
+          "schema_tokens": 101,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:calculate_probability:bc87293c2bff",
+          "weighted_tokens": 606
+        },
+        {
+          "domain": "multiple",
+          "name": "find_recipe",
+          "occurrences": 5,
+          "schema_tokens": 121,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:find_recipe:a1a28daaee91",
+          "weighted_tokens": 605
+        },
+        {
+          "domain": "multiple",
+          "name": "hotel_booking",
+          "occurrences": 4,
+          "schema_tokens": 150,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:hotel_booking:342a8cc12d2e",
+          "weighted_tokens": 600
+        },
+        {
+          "domain": "multiple",
+          "name": "forest_growth_forecast",
+          "occurrences": 5,
+          "schema_tokens": 114,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:forest_growth_forecast:f5bed8b51748",
+          "weighted_tokens": 570
+        },
+        {
+          "domain": "multiple",
+          "name": "calculate_cagr",
+          "occurrences": 5,
+          "schema_tokens": 110,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:calculate_cagr:e95aa7851162",
+          "weighted_tokens": 550
+        },
+        {
+          "domain": "multiple",
+          "name": "calculate_genotype_frequency",
+          "occurrences": 5,
+          "schema_tokens": 108,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:calculate_genotype_frequency:a4ed6dc2eef5",
+          "weighted_tokens": 540
+        },
+        {
+          "domain": "multiple",
+          "name": "poker_probability.full_house",
+          "occurrences": 6,
+          "schema_tokens": 89,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:poker_probability.full_house:11ab945f994d",
+          "weighted_tokens": 534
+        },
+        {
+          "domain": "multiple",
+          "name": "lawsuit_search",
+          "occurrences": 4,
+          "schema_tokens": 133,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:lawsuit_search:bfa26df85d96",
+          "weighted_tokens": 532
+        },
+        {
+          "domain": "multiple",
+          "name": "finance.calculate_future_value",
+          "occurrences": 4,
+          "schema_tokens": 128,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:finance.calculate_future_value:fac7435df531",
+          "weighted_tokens": 512
+        },
+        {
+          "domain": "multiple",
+          "name": "update_user_info",
+          "occurrences": 4,
+          "schema_tokens": 125,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:update_user_info:e665d93b466e",
+          "weighted_tokens": 500
+        },
+        {
+          "domain": "multiple",
+          "name": "hilton_hotel.check_availability",
+          "occurrences": 3,
+          "schema_tokens": 164,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:hilton_hotel.check_availability:59bd62d32410",
+          "weighted_tokens": 492
+        },
+        {
+          "domain": "multiple",
+          "name": "park_information",
+          "occurrences": 5,
+          "schema_tokens": 98,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:park_information:cab612a951af",
+          "weighted_tokens": 490
+        },
+        {
+          "domain": "multiple",
+          "name": "cell_biology.function_lookup",
+          "occurrences": 4,
+          "schema_tokens": 119,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:cell_biology.function_lookup:be2ec9539d34",
+          "weighted_tokens": 476
+        },
+        {
+          "domain": "multiple",
+          "name": "musical_scale",
+          "occurrences": 6,
+          "schema_tokens": 79,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:musical_scale:f626892ba58f",
+          "weighted_tokens": 474
+        },
+        {
+          "domain": "multiple",
+          "name": "fetch_DNA_sequence",
+          "occurrences": 4,
+          "schema_tokens": 118,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:fetch_DNA_sequence:7e8ba49154d8",
+          "weighted_tokens": 472
+        },
+        {
+          "domain": "multiple",
+          "name": "geometry.area_triangle",
+          "occurrences": 5,
+          "schema_tokens": 92,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:geometry.area_triangle:6fe66c6f15dc",
+          "weighted_tokens": 460
+        },
+        {
+          "domain": "multiple",
+          "name": "get_scientist_for_discovery",
+          "occurrences": 7,
+          "schema_tokens": 65,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:get_scientist_for_discovery:23790f87798f",
+          "weighted_tokens": 455
+        },
+        {
+          "domain": "multiple",
+          "name": "t_test",
+          "occurrences": 4,
+          "schema_tokens": 113,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:t_test:80182b71889c",
+          "weighted_tokens": 452
+        },
+        {
+          "domain": "multiple",
+          "name": "music_generator.generate_melody",
+          "occurrences": 3,
+          "schema_tokens": 150,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:music_generator.generate_melody:84966fdd442a",
+          "weighted_tokens": 450
+        },
+        {
+          "domain": "multiple",
+          "name": "calculate_bmi",
+          "occurrences": 4,
+          "schema_tokens": 112,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:calculate_bmi:e81ffc78642b",
+          "weighted_tokens": 448
+        },
+        {
+          "domain": "multiple",
+          "name": "predict_house_price",
+          "occurrences": 4,
+          "schema_tokens": 112,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:predict_house_price:0a61e9dcf12a",
+          "weighted_tokens": 448
+        },
+        {
+          "domain": "multiple",
+          "name": "prediction.evolution",
+          "occurrences": 4,
+          "schema_tokens": 112,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:prediction.evolution:0f27a3207f0c",
+          "weighted_tokens": 448
+        },
+        {
+          "domain": "parallel",
+          "name": "portfolio_future_value",
+          "occurrences": 3,
+          "schema_tokens": 149,
+          "source": "bfcl:parallel",
+          "tool_id": "bfcl:portfolio_future_value:e9513f16654b",
+          "weighted_tokens": 447
+        },
+        {
+          "domain": "multiple",
+          "name": "public_library.find_nearby",
+          "occurrences": 4,
+          "schema_tokens": 111,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:public_library.find_nearby:1abdb2c62e5f",
+          "weighted_tokens": 444
+        },
+        {
+          "domain": "multiple",
+          "name": "find_card_in_deck",
+          "occurrences": 3,
+          "schema_tokens": 146,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:find_card_in_deck:a3e42323c3b0",
+          "weighted_tokens": 438
+        },
+        {
+          "domain": "multiple",
+          "name": "local_nursery.find",
+          "occurrences": 4,
+          "schema_tokens": 108,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:local_nursery.find:21964b1b520d",
+          "weighted_tokens": 432
+        },
+        {
+          "domain": "multiple",
+          "name": "compound_interest",
+          "occurrences": 3,
+          "schema_tokens": 140,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:compound_interest:6b2a6e83c383",
+          "weighted_tokens": 420
+        },
+        {
+          "domain": "multiple",
+          "name": "run_linear_regression",
+          "occurrences": 4,
+          "schema_tokens": 105,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:run_linear_regression:759720069425",
+          "weighted_tokens": 420
+        },
+        {
+          "domain": "multiple",
+          "name": "calculate_final_speed",
+          "occurrences": 4,
+          "schema_tokens": 104,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:calculate_final_speed:31090e52f4d5",
+          "weighted_tokens": 416
+        },
+        {
+          "domain": "multiple",
+          "name": "grocery_store.find_best",
+          "occurrences": 4,
+          "schema_tokens": 104,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:grocery_store.find_best:d527e07b227f",
+          "weighted_tokens": 416
+        },
+        {
+          "domain": "multiple",
+          "name": "calculate_compound_interest",
+          "occurrences": 3,
+          "schema_tokens": 138,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:calculate_compound_interest:7e89138a1d03",
+          "weighted_tokens": 414
+        },
+        {
+          "domain": "multiple",
+          "name": "calculate_bmi",
+          "occurrences": 4,
+          "schema_tokens": 103,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:calculate_bmi:69b7f944a5b2",
+          "weighted_tokens": 412
+        },
+        {
+          "domain": "parallel_multiple",
+          "name": "lawsuits_search",
+          "occurrences": 3,
+          "schema_tokens": 137,
+          "source": "bfcl:parallel_multiple",
+          "tool_id": "bfcl:lawsuits_search:5d45e500cf58",
+          "weighted_tokens": 411
+        },
+        {
+          "domain": "multiple",
+          "name": "prob_dist.binomial",
+          "occurrences": 4,
+          "schema_tokens": 102,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:prob_dist.binomial:c40fbbb49a5b",
+          "weighted_tokens": 408
+        },
+        {
+          "domain": "multiple",
+          "name": "ecology_data.precipitation_stats",
+          "occurrences": 4,
+          "schema_tokens": 99,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:ecology_data.precipitation_stats:7a78cd000608",
+          "weighted_tokens": 396
+        },
+        {
+          "domain": "multiple",
+          "name": "maps.get_distance_duration",
+          "occurrences": 4,
+          "schema_tokens": 99,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:maps.get_distance_duration:e93d1705a433",
+          "weighted_tokens": 396
+        },
+        {
+          "domain": "multiple",
+          "name": "math.gcd",
+          "occurrences": 6,
+          "schema_tokens": 66,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:math.gcd:71f0537c4b0d",
+          "weighted_tokens": 396
+        }
+      ],
+      "top_tools": [
+        {
+          "domain": "multiple",
+          "name": "weather_forecast",
+          "occurrences": 10,
+          "schema_tokens": 77,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:weather_forecast:79de908d7cbd",
+          "weighted_tokens": 770
+        },
+        {
+          "domain": "multiple",
+          "name": "event_finder.find_upcoming",
+          "occurrences": 8,
+          "schema_tokens": 111,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:event_finder.find_upcoming:16e523592545",
+          "weighted_tokens": 888
+        },
+        {
+          "domain": "multiple",
+          "name": "get_stock_info",
+          "occurrences": 7,
+          "schema_tokens": 109,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:get_stock_info:671e66a37959",
+          "weighted_tokens": 763
+        },
+        {
+          "domain": "multiple",
+          "name": "chess.rating",
+          "occurrences": 7,
+          "schema_tokens": 97,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:chess.rating:4970845289cb",
+          "weighted_tokens": 679
+        },
+        {
+          "domain": "multiple",
+          "name": "get_scientist_for_discovery",
+          "occurrences": 7,
+          "schema_tokens": 65,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:get_scientist_for_discovery:23790f87798f",
+          "weighted_tokens": 455
+        },
+        {
+          "domain": "multiple",
+          "name": "mutation_type.find",
+          "occurrences": 7,
+          "schema_tokens": 108,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:mutation_type.find:de3246922614",
+          "weighted_tokens": 756
+        },
+        {
+          "domain": "multiple",
+          "name": "soccer.get_last_match",
+          "occurrences": 7,
+          "schema_tokens": 89,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:soccer.get_last_match:e0c0cf725ce8",
+          "weighted_tokens": 623
+        },
+        {
+          "domain": "multiple",
+          "name": "math.gcd",
+          "occurrences": 6,
+          "schema_tokens": 66,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:math.gcd:71f0537c4b0d",
+          "weighted_tokens": 396
+        },
+        {
+          "domain": "multiple",
+          "name": "musical_scale",
+          "occurrences": 6,
+          "schema_tokens": 79,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:musical_scale:f626892ba58f",
+          "weighted_tokens": 474
+        },
+        {
+          "domain": "multiple",
+          "name": "mix_paint_color",
+          "occurrences": 6,
+          "schema_tokens": 114,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:mix_paint_color:e687eb1b0024",
+          "weighted_tokens": 684
+        },
+        {
+          "domain": "multiple",
+          "name": "cooking_conversion.convert",
+          "occurrences": 6,
+          "schema_tokens": 105,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:cooking_conversion.convert:314bab0d8d2d",
+          "weighted_tokens": 630
+        },
+        {
+          "domain": "multiple",
+          "name": "calculate_probability",
+          "occurrences": 6,
+          "schema_tokens": 101,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:calculate_probability:bc87293c2bff",
+          "weighted_tokens": 606
+        },
+        {
+          "domain": "multiple",
+          "name": "get_song_lyrics",
+          "occurrences": 6,
+          "schema_tokens": 114,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:get_song_lyrics:91201f97f0f7",
+          "weighted_tokens": 684
+        },
+        {
+          "domain": "multiple",
+          "name": "calculate_binomial_probability",
+          "occurrences": 6,
+          "schema_tokens": 121,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:calculate_binomial_probability:21e62e64bb2f",
+          "weighted_tokens": 726
+        },
+        {
+          "domain": "multiple",
+          "name": "poker_probability.full_house",
+          "occurrences": 6,
+          "schema_tokens": 89,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:poker_probability.full_house:11ab945f994d",
+          "weighted_tokens": 534
+        },
+        {
+          "domain": "multiple",
+          "name": "board_game.chess.get_top_players",
+          "occurrences": 6,
+          "schema_tokens": 111,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:board_game.chess.get_top_players:e6dd81b0c6c1",
+          "weighted_tokens": 666
+        },
+        {
+          "domain": "multiple",
+          "name": "get_collectables_in_season",
+          "occurrences": 5,
+          "schema_tokens": 123,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:get_collectables_in_season:863f9e557bf4",
+          "weighted_tokens": 615
+        },
+        {
+          "domain": "multiple",
+          "name": "calculate_genotype_frequency",
+          "occurrences": 5,
+          "schema_tokens": 108,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:calculate_genotype_frequency:a4ed6dc2eef5",
+          "weighted_tokens": 540
+        },
+        {
+          "domain": "multiple",
+          "name": "forest_growth_forecast",
+          "occurrences": 5,
+          "schema_tokens": 114,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:forest_growth_forecast:f5bed8b51748",
+          "weighted_tokens": 570
+        },
+        {
+          "domain": "multiple",
+          "name": "geometry.area_triangle",
+          "occurrences": 5,
+          "schema_tokens": 92,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:geometry.area_triangle:6fe66c6f15dc",
+          "weighted_tokens": 460
+        },
+        {
+          "domain": "multiple",
+          "name": "calculate_cagr",
+          "occurrences": 5,
+          "schema_tokens": 110,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:calculate_cagr:e95aa7851162",
+          "weighted_tokens": 550
+        },
+        {
+          "domain": "multiple",
+          "name": "park_information",
+          "occurrences": 5,
+          "schema_tokens": 98,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:park_information:cab612a951af",
+          "weighted_tokens": 490
+        },
+        {
+          "domain": "multiple",
+          "name": "get_time_difference",
+          "occurrences": 5,
+          "schema_tokens": 73,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:get_time_difference:6a52e55eff2a",
+          "weighted_tokens": 365
+        },
+        {
+          "domain": "multiple",
+          "name": "get_stock_price",
+          "occurrences": 5,
+          "schema_tokens": 69,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:get_stock_price:e54391bd0a58",
+          "weighted_tokens": 345
+        },
+        {
+          "domain": "multiple",
+          "name": "find_recipe",
+          "occurrences": 5,
+          "schema_tokens": 121,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:find_recipe:a1a28daaee91",
+          "weighted_tokens": 605
+        },
+        {
+          "domain": "multiple",
+          "name": "math.hcf",
+          "occurrences": 4,
+          "schema_tokens": 66,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:math.hcf:c92a3a24a1e5",
+          "weighted_tokens": 264
+        },
+        {
+          "domain": "multiple",
+          "name": "calculate_final_speed",
+          "occurrences": 4,
+          "schema_tokens": 104,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:calculate_final_speed:31090e52f4d5",
+          "weighted_tokens": 416
+        },
+        {
+          "domain": "multiple",
+          "name": "get_event_date",
+          "occurrences": 4,
+          "schema_tokens": 74,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:get_event_date:73bebc936f18",
+          "weighted_tokens": 296
+        },
+        {
+          "domain": "multiple",
+          "name": "instrument_price.get",
+          "occurrences": 4,
+          "schema_tokens": 91,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:instrument_price.get:8d388101b86d",
+          "weighted_tokens": 364
+        },
+        {
+          "domain": "multiple",
+          "name": "cell_biology.function_lookup",
+          "occurrences": 4,
+          "schema_tokens": 119,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:cell_biology.function_lookup:be2ec9539d34",
+          "weighted_tokens": 476
+        },
+        {
+          "domain": "multiple",
+          "name": "calculate_density",
+          "occurrences": 4,
+          "schema_tokens": 95,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:calculate_density:7d2fe58971d1",
+          "weighted_tokens": 380
+        },
+        {
+          "domain": "multiple",
+          "name": "cellbio.get_proteins",
+          "occurrences": 4,
+          "schema_tokens": 85,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:cellbio.get_proteins:0118984390da",
+          "weighted_tokens": 340
+        },
+        {
+          "domain": "multiple",
+          "name": "math.factorial",
+          "occurrences": 4,
+          "schema_tokens": 55,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:math.factorial:c843d084d3bd",
+          "weighted_tokens": 220
+        },
+        {
+          "domain": "multiple",
+          "name": "prediction.evolution",
+          "occurrences": 4,
+          "schema_tokens": 112,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:prediction.evolution:0f27a3207f0c",
+          "weighted_tokens": 448
+        },
+        {
+          "domain": "multiple",
+          "name": "calculate_bmi",
+          "occurrences": 4,
+          "schema_tokens": 103,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:calculate_bmi:69b7f944a5b2",
+          "weighted_tokens": 412
+        },
+        {
+          "domain": "multiple",
+          "name": "calculate_BMI",
+          "occurrences": 4,
+          "schema_tokens": 85,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:calculate_BMI:3e27900586c0",
+          "weighted_tokens": 340
+        },
+        {
+          "domain": "multiple",
+          "name": "book_hotel",
+          "occurrences": 4,
+          "schema_tokens": 170,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:book_hotel:78014cf2f65e",
+          "weighted_tokens": 680
+        },
+        {
+          "domain": "multiple",
+          "name": "science_history.get_invention",
+          "occurrences": 4,
+          "schema_tokens": 89,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:science_history.get_invention:85bcb7c42d71",
+          "weighted_tokens": 356
+        },
+        {
+          "domain": "multiple",
+          "name": "run_linear_regression",
+          "occurrences": 4,
+          "schema_tokens": 105,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:run_linear_regression:759720069425",
+          "weighted_tokens": 420
+        },
+        {
+          "domain": "multiple",
+          "name": "predict_house_price",
+          "occurrences": 4,
+          "schema_tokens": 112,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:predict_house_price:0a61e9dcf12a",
+          "weighted_tokens": 448
+        },
+        {
+          "domain": "multiple",
+          "name": "fetch_DNA_sequence",
+          "occurrences": 4,
+          "schema_tokens": 118,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:fetch_DNA_sequence:7e8ba49154d8",
+          "weighted_tokens": 472
+        },
+        {
+          "domain": "multiple",
+          "name": "t_test",
+          "occurrences": 4,
+          "schema_tokens": 113,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:t_test:80182b71889c",
+          "weighted_tokens": 452
+        },
+        {
+          "domain": "multiple",
+          "name": "public_library.find_nearby",
+          "occurrences": 4,
+          "schema_tokens": 111,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:public_library.find_nearby:1abdb2c62e5f",
+          "weighted_tokens": 444
+        },
+        {
+          "domain": "multiple",
+          "name": "finance.calculate_future_value",
+          "occurrences": 4,
+          "schema_tokens": 128,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:finance.calculate_future_value:fac7435df531",
+          "weighted_tokens": 512
+        },
+        {
+          "domain": "multiple",
+          "name": "lawsuit_search",
+          "occurrences": 4,
+          "schema_tokens": 133,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:lawsuit_search:bfa26df85d96",
+          "weighted_tokens": 532
+        },
+        {
+          "domain": "multiple",
+          "name": "grocery_store.find_best",
+          "occurrences": 4,
+          "schema_tokens": 104,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:grocery_store.find_best:d527e07b227f",
+          "weighted_tokens": 416
+        },
+        {
+          "domain": "multiple",
+          "name": "ecology_data.precipitation_stats",
+          "occurrences": 4,
+          "schema_tokens": 99,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:ecology_data.precipitation_stats:7a78cd000608",
+          "weighted_tokens": 396
+        },
+        {
+          "domain": "multiple",
+          "name": "hotel_booking",
+          "occurrences": 4,
+          "schema_tokens": 150,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:hotel_booking:342a8cc12d2e",
+          "weighted_tokens": 600
+        },
+        {
+          "domain": "multiple",
+          "name": "sentiment_analysis",
+          "occurrences": 4,
+          "schema_tokens": 75,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:sentiment_analysis:93262624eb19",
+          "weighted_tokens": 300
+        },
+        {
+          "domain": "multiple",
+          "name": "calculate_bmi",
+          "occurrences": 4,
+          "schema_tokens": 112,
+          "source": "bfcl:multiple",
+          "tool_id": "bfcl:calculate_bmi:e81ffc78642b",
+          "weighted_tokens": 448
+        }
+      ],
+      "top_triples": [
+        {
+          "count": 2,
+          "tool_ids": [
+            "bfcl:country_info.capital:097cc7334e44",
+            "bfcl:country_info.largest_city:2b57b683d824",
+            "bfcl:country_info.population:52c30c760fa1"
+          ],
+          "tool_names": [
+            "country_info.capital",
+            "country_info.largest_city",
+            "country_info.population"
+          ]
+        },
+        {
+          "count": 2,
+          "tool_ids": [
+            "bfcl:weather.get_by_city_date:207edfb726a6",
+            "bfcl:weather.get_by_coordinates_date:3c90340efc17",
+            "bfcl:weather.get_forecast_by_coordinates:29ea299fd21c"
+          ],
+          "tool_names": [
+            "weather.get_by_city_date",
+            "weather.get_by_coordinates_date",
+            "weather.get_forecast_by_coordinates"
+          ]
+        },
+        {
+          "count": 2,
+          "tool_ids": [
+            "bfcl:calculate_average:6395b17467dc",
+            "bfcl:calculate_standard_deviation:1350f1b53567",
+            "bfcl:highest_grade:9e197b17f10e"
+          ],
+          "tool_names": [
+            "calculate_average",
+            "calculate_standard_deviation",
+            "highest_grade"
+          ]
+        },
+        {
+          "count": 2,
+          "tool_ids": [
+            "bfcl:sculptor_info.get:fcfa4cd914e8",
+            "bfcl:sculpture_availability.check:17be24bb349a",
+            "bfcl:sculpture_price.calculate:bca04c71355a"
+          ],
+          "tool_names": [
+            "sculptor_info.get",
+            "sculpture_availability.check",
+            "sculpture_price.calculate"
+          ]
+        },
+        {
+          "count": 2,
+          "tool_ids": [
+            "bfcl:sports_data.basketball.most_points_career:7732220e350b",
+            "bfcl:sports_data.basketball.most_points_single_game:73d1ddf8ac1e",
+            "bfcl:sports_data.basketball.most_points_single_season:a66a10a6c016"
+          ],
+          "tool_names": [
+            "sports_data.basketball.most_points_career",
+            "sports_data.basketball.most_points_single_game",
+            "sports_data.basketball.most_points_single_season"
+          ]
+        },
+        {
+          "count": 2,
+          "tool_ids": [
+            "bfcl:convert.rgb_to_hex:fbde714614d7",
+            "bfcl:perform.string_reverse:b077c0177daf",
+            "bfcl:solve.quadratic_equation:74a24e523c4b"
+          ],
+          "tool_names": [
+            "convert.rgb_to_hex",
+            "perform.string_reverse",
+            "solve.quadratic_equation"
+          ]
+        },
+        {
+          "count": 2,
+          "tool_ids": [
+            "bfcl:geometry_circle.calculate:224edefbbfe1",
+            "bfcl:geometry_rectangle.calculate:904d09d8175b",
+            "bfcl:geometry_square.calculate:9b0be920f1c3"
+          ],
+          "tool_names": [
+            "geometry_circle.calculate",
+            "geometry_rectangle.calculate",
+            "geometry_square.calculate"
+          ]
+        },
+        {
+          "count": 2,
+          "tool_ids": [
+            "bfcl:avg_closing_price:a88d826f30db",
+            "bfcl:total_revenue:bf29c13ae59e",
+            "bfcl:volume_traded:5d3f2520091c"
+          ],
+          "tool_names": [
+            "avg_closing_price",
+            "total_revenue",
+            "volume_traded"
+          ]
+        },
+        {
+          "count": 2,
+          "tool_ids": [
+            "bfcl:air_quality_forecast:44b4893b74cd",
+            "bfcl:news:fcdf6a9edb0d",
+            "bfcl:weather_forecast:79de908d7cbd"
+          ],
+          "tool_names": [
+            "air_quality_forecast",
+            "news",
+            "weather_forecast"
+          ]
+        },
+        {
+          "count": 2,
+          "tool_ids": [
+            "bfcl:games.price.find:d726e547cbbd",
+            "bfcl:games.reviews.find:e4fa58f3ccfc",
+            "bfcl:games.update.find:6dec68432871"
+          ],
+          "tool_names": [
+            "games.price.find",
+            "games.reviews.find",
+            "games.update.find"
+          ]
+        },
+        {
+          "count": 2,
+          "tool_ids": [
+            "bfcl:car_rental_pricing.get:fc9e10139cfa",
+            "bfcl:flight_ticket_pricing.get:c8d6a5338b80",
+            "bfcl:hotel_room_pricing.get:c6f32f214cba"
+          ],
+          "tool_names": [
+            "car_rental_pricing.get",
+            "flight_ticket_pricing.get",
+            "hotel_room_pricing.get"
+          ]
+        },
+        {
+          "count": 2,
+          "tool_ids": [
+            "bfcl:calculate_final_speed:31090e52f4d5",
+            "bfcl:chess.rating:4970845289cb",
+            "bfcl:get_event_date:73bebc936f18"
+          ],
+          "tool_names": [
+            "calculate_final_speed",
+            "chess.rating",
+            "get_event_date"
+          ]
+        },
+        {
+          "count": 2,
+          "tool_ids": [
+            "bfcl:cell_biology.function_lookup:be2ec9539d34",
+            "bfcl:get_scientist_for_discovery:23790f87798f",
+            "bfcl:get_shortest_driving_distance:0d477798afd2"
+          ],
+          "tool_names": [
+            "cell_biology.function_lookup",
+            "get_scientist_for_discovery",
+            "get_shortest_driving_distance"
+          ]
+        },
+        {
+          "count": 2,
+          "tool_ids": [
+            "bfcl:cell_biology.function_lookup:be2ec9539d34",
+            "bfcl:get_scientist_for_discovery:23790f87798f",
+            "bfcl:instrument_price.get:8d388101b86d"
+          ],
+          "tool_names": [
+            "cell_biology.function_lookup",
+            "get_scientist_for_discovery",
+            "instrument_price.get"
+          ]
+        },
+        {
+          "count": 2,
+          "tool_ids": [
+            "bfcl:cell_biology.function_lookup:be2ec9539d34",
+            "bfcl:get_shortest_driving_distance:0d477798afd2",
+            "bfcl:instrument_price.get:8d388101b86d"
+          ],
+          "tool_names": [
+            "cell_biology.function_lookup",
+            "get_shortest_driving_distance",
+            "instrument_price.get"
+          ]
+        },
+        {
+          "count": 2,
+          "tool_ids": [
+            "bfcl:get_scientist_for_discovery:23790f87798f",
+            "bfcl:get_shortest_driving_distance:0d477798afd2",
+            "bfcl:instrument_price.get:8d388101b86d"
+          ],
+          "tool_names": [
+            "get_scientist_for_discovery",
+            "get_shortest_driving_distance",
+            "instrument_price.get"
+          ]
+        },
+        {
+          "count": 2,
+          "tool_ids": [
+            "bfcl:cooking_conversion.convert:314bab0d8d2d",
+            "bfcl:group_dynamics.pattern:49d94ab3ad1d",
+            "bfcl:mix_paint_color:e687eb1b0024"
+          ],
+          "tool_names": [
+            "cooking_conversion.convert",
+            "group_dynamics.pattern",
+            "mix_paint_color"
+          ]
+        },
+        {
+          "count": 2,
+          "tool_ids": [
+            "bfcl:calculate_genotype_frequency:a4ed6dc2eef5",
+            "bfcl:find_flute:2cefe33e6cd2",
+            "bfcl:math.factorial:c843d084d3bd"
+          ],
+          "tool_names": [
+            "calculate_genotype_frequency",
+            "find_flute",
+            "math.factorial"
+          ]
+        },
+        {
+          "count": 2,
+          "tool_ids": [
+            "bfcl:calculate_fitness:e2e37615667b",
+            "bfcl:chess.rating:4970845289cb",
+            "bfcl:lawyer.find_nearby:bec43e8f07f2"
+          ],
+          "tool_names": [
+            "calculate_fitness",
+            "chess.rating",
+            "lawyer.find_nearby"
+          ]
+        },
+        {
+          "count": 2,
+          "tool_ids": [
+            "bfcl:cooking_conversion.convert:314bab0d8d2d",
+            "bfcl:find_recipe:232816d504df",
+            "bfcl:run_linear_regression:759720069425"
+          ],
+          "tool_names": [
+            "cooking_conversion.convert",
+            "find_recipe",
+            "run_linear_regression"
+          ]
+        },
+        {
+          "count": 2,
+          "tool_ids": [
+            "bfcl:calculate_probability:bc87293c2bff",
+            "bfcl:lawsuit_search:cf2596891249",
+            "bfcl:predict_house_price:0a61e9dcf12a"
+          ],
+          "tool_names": [
+            "calculate_probability",
+            "lawsuit_search",
+            "predict_house_price"
+          ]
+        },
+        {
+          "count": 2,
+          "tool_ids": [
+            "bfcl:get_song_lyrics:91201f97f0f7",
+            "bfcl:law_case_search.find_historical:435cbd96b276",
+            "bfcl:public_library.find_nearby:1abdb2c62e5f"
+          ],
+          "tool_names": [
+            "get_song_lyrics",
+            "law_case_search.find_historical",
+            "public_library.find_nearby"
+          ]
+        },
+        {
+          "count": 2,
+          "tool_ids": [
+            "bfcl:calculate_cagr:e95aa7851162",
+            "bfcl:chess.rating:4970845289cb",
+            "bfcl:solve_quadratic:b0f6556897b0"
+          ],
+          "tool_names": [
+            "calculate_cagr",
+            "chess.rating",
+            "solve_quadratic"
+          ]
+        },
+        {
+          "count": 2,
+          "tool_ids": [
+            "bfcl:calculate_binomial_probability:21e62e64bb2f",
+            "bfcl:game_score.highest:3f046bf2ad1f",
+            "bfcl:get_collectables_in_season:863f9e557bf4"
+          ],
+          "tool_names": [
+            "calculate_binomial_probability",
+            "game_score.highest",
+            "get_collectables_in_season"
+          ]
+        },
+        {
+          "count": 2,
+          "tool_ids": [
+            "bfcl:calculate_slope_gradient:e163ce4e590e",
+            "bfcl:concert.find_nearby:13d6f03649c8",
+            "bfcl:poker_probability.full_house:11ab945f994d"
+          ],
+          "tool_names": [
+            "calculate_slope_gradient",
+            "concert.find_nearby",
+            "poker_probability.full_house"
+          ]
+        },
+        {
+          "count": 2,
+          "tool_ids": [
+            "bfcl:calculate_bmi:e81ffc78642b",
+            "bfcl:get_time_difference:6a52e55eff2a",
+            "bfcl:hotel_booking:342a8cc12d2e"
+          ],
+          "tool_names": [
+            "calculate_bmi",
+            "get_time_difference",
+            "hotel_booking"
+          ]
+        },
+        {
+          "count": 2,
+          "tool_ids": [
+            "bfcl:calculate_bmi:e81ffc78642b",
+            "bfcl:get_time_difference:6a52e55eff2a",
+            "bfcl:sentiment_analysis:93262624eb19"
+          ],
+          "tool_names": [
+            "calculate_bmi",
+            "get_time_difference",
+            "sentiment_analysis"
+          ]
+        },
+        {
+          "count": 2,
+          "tool_ids": [
+            "bfcl:calculate_bmi:e81ffc78642b",
+            "bfcl:hotel_booking:342a8cc12d2e",
+            "bfcl:sentiment_analysis:93262624eb19"
+          ],
+          "tool_names": [
+            "calculate_bmi",
+            "hotel_booking",
+            "sentiment_analysis"
+          ]
+        },
+        {
+          "count": 2,
+          "tool_ids": [
+            "bfcl:get_time_difference:6a52e55eff2a",
+            "bfcl:hotel_booking:342a8cc12d2e",
+            "bfcl:sentiment_analysis:93262624eb19"
+          ],
+          "tool_names": [
+            "get_time_difference",
+            "hotel_booking",
+            "sentiment_analysis"
+          ]
+        },
+        {
+          "count": 2,
+          "tool_ids": [
+            "bfcl:US_president.in_year:60340eb9e7cf",
+            "bfcl:soccer.get_last_match:e0c0cf725ce8",
+            "bfcl:update_user_info:e665d93b466e"
+          ],
+          "tool_names": [
+            "US_president.in_year",
+            "soccer.get_last_match",
+            "update_user_info"
+          ]
+        }
+      ],
+      "unique_observed_tools": 1362
+    },
+    "toolret_gold": {
+      "cooccurrence_tasks_skipped_over_25_tools": {
+        "pairs": 0,
+        "triples": 0
+      },
+      "evidence_types": {
+        "gold_relevance": 7961
+      },
+      "locality": [
+        {
+          "adjacent_pairs": 7960,
+          "mean_tool_jaccard": 0.035767,
+          "partition": "toolret_gold",
+          "replay": "empirical",
+          "same_domain_ratio": 0.998618,
+          "shared_tool_ratio": 0.089447
+        },
+        {
+          "adjacent_pairs": 7960,
+          "mean_tool_jaccard": 0.0013,
+          "partition": "toolret_gold",
+          "replay": "uniform",
+          "same_domain_ratio": 0.48706,
+          "shared_tool_ratio": 0.003392
+        },
+        {
+          "adjacent_pairs": 7960,
+          "mean_tool_jaccard": 0.053511,
+          "partition": "toolret_gold",
+          "replay": "skewed",
+          "same_domain_ratio": 0.393467,
+          "shared_tool_ratio": 0.241583
+        },
+        {
+          "adjacent_pairs": 7960,
+          "mean_tool_jaccard": 0.005791,
+          "partition": "toolret_gold",
+          "replay": "session_bursty",
+          "same_domain_ratio": 0.999749,
+          "shared_tool_ratio": 0.019347
+        }
+      ],
+      "ordering_results": [
+        {
+          "block_size": 16,
+          "cacheable_block_tokens": 353312,
+          "estimated_block_reuse_ratio": 0.269088,
+          "naive_nodes": 14106,
+          "node_compression_ratio": 0.294485,
+          "ordering": "original",
+          "partition": "toolret_gold",
+          "replay": "empirical",
+          "requests": 7961,
+          "reusable_tool_tokens": 374622,
+          "total_tool_tokens": 1312998,
+          "trie_nodes": 9952
+        },
+        {
+          "block_size": 16,
+          "cacheable_block_tokens": 352688,
+          "estimated_block_reuse_ratio": 0.268613,
+          "naive_nodes": 14106,
+          "node_compression_ratio": 0.30767,
+          "ordering": "alphabetical",
+          "partition": "toolret_gold",
+          "replay": "empirical",
+          "requests": 7961,
+          "reusable_tool_tokens": 374170,
+          "total_tool_tokens": 1312998,
+          "trie_nodes": 9766
+        },
+        {
+          "block_size": 16,
+          "cacheable_block_tokens": 340976,
+          "estimated_block_reuse_ratio": 0.259693,
+          "naive_nodes": 14106,
+          "node_compression_ratio": 0.297391,
+          "ordering": "random_seed_7",
+          "partition": "toolret_gold",
+          "replay": "empirical",
+          "requests": 7961,
+          "reusable_tool_tokens": 362084,
+          "total_tool_tokens": 1312998,
+          "trie_nodes": 9911
+        },
+        {
+          "block_size": 16,
+          "cacheable_block_tokens": 350592,
+          "estimated_block_reuse_ratio": 0.267016,
+          "naive_nodes": 14106,
+          "node_compression_ratio": 0.308592,
+          "ordering": "random_seed_42",
+          "partition": "toolret_gold",
+          "replay": "empirical",
+          "requests": 7961,
+          "reusable_tool_tokens": 372039,
+          "total_tool_tokens": 1312998,
+          "trie_nodes": 9753
+        },
+        {
+          "block_size": 16,
+          "cacheable_block_tokens": 347024,
+          "estimated_block_reuse_ratio": 0.264299,
+          "naive_nodes": 14106,
+          "node_compression_ratio": 0.297533,
+          "ordering": "random_seed_101",
+          "partition": "toolret_gold",
+          "replay": "empirical",
+          "requests": 7961,
+          "reusable_tool_tokens": 368519,
+          "total_tool_tokens": 1312998,
+          "trie_nodes": 9909
+        },
+        {
+          "block_size": 16,
+          "cacheable_block_tokens": 411584,
+          "estimated_block_reuse_ratio": 0.313469,
+          "naive_nodes": 14106,
+          "node_compression_ratio": 0.368779,
+          "ordering": "frequency",
+          "partition": "toolret_gold",
+          "replay": "empirical",
+          "requests": 7961,
+          "reusable_tool_tokens": 436548,
+          "total_tool_tokens": 1312998,
+          "trie_nodes": 8904
+        },
+        {
+          "block_size": 16,
+          "cacheable_block_tokens": 417488,
+          "estimated_block_reuse_ratio": 0.317965,
+          "naive_nodes": 14106,
+          "node_compression_ratio": 0.365235,
+          "ordering": "schema_cost_weighted",
+          "partition": "toolret_gold",
+          "replay": "empirical",
+          "requests": 7961,
+          "reusable_tool_tokens": 442184,
+          "total_tool_tokens": 1312998,
+          "trie_nodes": 8954
+        },
+        {
+          "block_size": 16,
+          "cacheable_block_tokens": 411584,
+          "estimated_block_reuse_ratio": 0.313469,
+          "naive_nodes": 14106,
+          "node_compression_ratio": 0.368779,
+          "ordering": "fp_tree_global",
+          "partition": "toolret_gold",
+          "replay": "empirical",
+          "requests": 7961,
+          "reusable_tool_tokens": 436548,
+          "total_tool_tokens": 1312998,
+          "trie_nodes": 8904
+        },
+        {
+          "block_size": 16,
+          "cacheable_block_tokens": 643488,
+          "estimated_block_reuse_ratio": 0.490763,
+          "naive_nodes": 14168,
+          "node_compression_ratio": 0.523151,
+          "ordering": "original",
+          "partition": "toolret_gold",
+          "replay": "uniform",
+          "requests": 7961,
+          "reusable_tool_tokens": 675974,
+          "total_tool_tokens": 1311198,
+          "trie_nodes": 6756
+        },
+        {
+          "block_size": 16,
+          "cacheable_block_tokens": 644144,
+          "estimated_block_reuse_ratio": 0.491264,
+          "naive_nodes": 14168,
+          "node_compression_ratio": 0.531832,
+          "ordering": "alphabetical",
+          "partition": "toolret_gold",
+          "replay": "uniform",
+          "requests": 7961,
+          "reusable_tool_tokens": 676607,
+          "total_tool_tokens": 1311198,
+          "trie_nodes": 6633
+        },
+        {
+          "block_size": 16,
+          "cacheable_block_tokens": 637488,
+          "estimated_block_reuse_ratio": 0.486187,
+          "naive_nodes": 14168,
+          "node_compression_ratio": 0.524492,
+          "ordering": "random_seed_7",
+          "partition": "toolret_gold",
+          "replay": "uniform",
+          "requests": 7961,
+          "reusable_tool_tokens": 669654,
+          "total_tool_tokens": 1311198,
+          "trie_nodes": 6737
+        },
+        {
+          "block_size": 16,
+          "cacheable_block_tokens": 643088,
+          "estimated_block_reuse_ratio": 0.490458,
+          "naive_nodes": 14168,
+          "node_compression_ratio": 0.531126,
+          "ordering": "random_seed_42",
+          "partition": "toolret_gold",
+          "replay": "uniform",
+          "requests": 7961,
+          "reusable_tool_tokens": 675285,
+          "total_tool_tokens": 1311198,
+          "trie_nodes": 6643
+        },
+        {
+          "block_size": 16,
+          "cacheable_block_tokens": 642352,
+          "estimated_block_reuse_ratio": 0.489897,
+          "naive_nodes": 14168,
+          "node_compression_ratio": 0.525974,
+          "ordering": "random_seed_101",
+          "partition": "toolret_gold",
+          "replay": "uniform",
+          "requests": 7961,
+          "reusable_tool_tokens": 674883,
+          "total_tool_tokens": 1311198,
+          "trie_nodes": 6716
+        },
+        {
+          "block_size": 16,
+          "cacheable_block_tokens": 679744,
+          "estimated_block_reuse_ratio": 0.518414,
+          "naive_nodes": 14168,
+          "node_compression_ratio": 0.568676,
+          "ordering": "frequency",
+          "partition": "toolret_gold",
+          "replay": "uniform",
+          "requests": 7961,
+          "reusable_tool_tokens": 714441,
+          "total_tool_tokens": 1311198,
+          "trie_nodes": 6111
+        },
+        {
+          "block_size": 16,
+          "cacheable_block_tokens": 683424,
+          "estimated_block_reuse_ratio": 0.521221,
+          "naive_nodes": 14168,
+          "node_compression_ratio": 0.566488,
+          "ordering": "schema_cost_weighted",
+          "partition": "toolret_gold",
+          "replay": "uniform",
+          "requests": 7961,
+          "reusable_tool_tokens": 717939,
+          "total_tool_tokens": 1311198,
+          "trie_nodes": 6142
+        },
+        {
+          "block_size": 16,
+          "cacheable_block_tokens": 679744,
+          "estimated_block_reuse_ratio": 0.518414,
+          "naive_nodes": 14168,
+          "node_compression_ratio": 0.568676,
+          "ordering": "fp_tree_global",
+          "partition": "toolret_gold",
+          "replay": "uniform",
+          "requests": 7961,
+          "reusable_tool_tokens": 714441,
+          "total_tool_tokens": 1311198,
+          "trie_nodes": 6111
+        },
+        {
+          "block_size": 16,
+          "cacheable_block_tokens": 967184,
+          "estimated_block_reuse_ratio": 0.772691,
+          "naive_nodes": 24466,
+          "node_compression_ratio": 0.861154,
+          "ordering": "original",
+          "partition": "toolret_gold",
+          "replay": "skewed",
+          "requests": 7961,
+          "reusable_tool_tokens": 1016040,
+          "total_tool_tokens": 1251709,
+          "trie_nodes": 3397
+        },
+        {
+          "block_size": 16,
+          "cacheable_block_tokens": 973856,
+          "estimated_block_reuse_ratio": 0.778021,
+          "naive_nodes": 24466,
+          "node_compression_ratio": 0.867326,
+          "ordering": "alphabetical",
+          "partition": "toolret_gold",
+          "replay": "skewed",
+          "requests": 7961,
+          "reusable_tool_tokens": 1022891,
+          "total_tool_tokens": 1251709,
+          "trie_nodes": 3246
+        },
+        {
+          "block_size": 16,
+          "cacheable_block_tokens": 965200,
+          "estimated_block_reuse_ratio": 0.771106,
+          "naive_nodes": 24466,
+          "node_compression_ratio": 0.862258,
+          "ordering": "random_seed_7",
+          "partition": "toolret_gold",
+          "replay": "skewed",
+          "requests": 7961,
+          "reusable_tool_tokens": 1014153,
+          "total_tool_tokens": 1251709,
+          "trie_nodes": 3370
+        },
+        {
+          "block_size": 16,
+          "cacheable_block_tokens": 973216,
+          "estimated_block_reuse_ratio": 0.77751,
+          "naive_nodes": 24466,
+          "node_compression_ratio": 0.867735,
+          "ordering": "random_seed_42",
+          "partition": "toolret_gold",
+          "replay": "skewed",
+          "requests": 7961,
+          "reusable_tool_tokens": 1021999,
+          "total_tool_tokens": 1251709,
+          "trie_nodes": 3236
+        },
+        {
+          "block_size": 16,
+          "cacheable_block_tokens": 967808,
+          "estimated_block_reuse_ratio": 0.773189,
+          "naive_nodes": 24466,
+          "node_compression_ratio": 0.861563,
+          "ordering": "random_seed_101",
+          "partition": "toolret_gold",
+          "replay": "skewed",
+          "requests": 7961,
+          "reusable_tool_tokens": 1016814,
+          "total_tool_tokens": 1251709,
+          "trie_nodes": 3387
+        },
+        {
+          "block_size": 16,
+          "cacheable_block_tokens": 1001856,
+          "estimated_block_reuse_ratio": 0.800391,
+          "naive_nodes": 24466,
+          "node_compression_ratio": 0.889438,
+          "ordering": "frequency",
+          "partition": "toolret_gold",
+          "replay": "skewed",
+          "requests": 7961,
+          "reusable_tool_tokens": 1052633,
+          "total_tool_tokens": 1251709,
+          "trie_nodes": 2705
+        },
+        {
+          "block_size": 16,
+          "cacheable_block_tokens": 1003632,
+          "estimated_block_reuse_ratio": 0.801809,
+          "naive_nodes": 24466,
+          "node_compression_ratio": 0.888784,
+          "ordering": "schema_cost_weighted",
+          "partition": "toolret_gold",
+          "replay": "skewed",
+          "requests": 7961,
+          "reusable_tool_tokens": 1054400,
+          "total_tool_tokens": 1251709,
+          "trie_nodes": 2721
+        },
+        {
+          "block_size": 16,
+          "cacheable_block_tokens": 1001856,
+          "estimated_block_reuse_ratio": 0.800391,
+          "naive_nodes": 24466,
+          "node_compression_ratio": 0.889438,
+          "ordering": "fp_tree_global",
+          "partition": "toolret_gold",
+          "replay": "skewed",
+          "requests": 7961,
+          "reusable_tool_tokens": 1052633,
+          "total_tool_tokens": 1251709,
+          "trie_nodes": 2705
+        },
+        {
+          "block_size": 16,
+          "cacheable_block_tokens": 353312,
+          "estimated_block_reuse_ratio": 0.269088,
+          "naive_nodes": 14106,
+          "node_compression_ratio": 0.294485,
+          "ordering": "original",
+          "partition": "toolret_gold",
+          "replay": "session_bursty",
+          "requests": 7961,
+          "reusable_tool_tokens": 374622,
+          "total_tool_tokens": 1312998,
+          "trie_nodes": 9952
+        },
+        {
+          "block_size": 16,
+          "cacheable_block_tokens": 352688,
+          "estimated_block_reuse_ratio": 0.268613,
+          "naive_nodes": 14106,
+          "node_compression_ratio": 0.30767,
+          "ordering": "alphabetical",
+          "partition": "toolret_gold",
+          "replay": "session_bursty",
+          "requests": 7961,
+          "reusable_tool_tokens": 374170,
+          "total_tool_tokens": 1312998,
+          "trie_nodes": 9766
+        },
+        {
+          "block_size": 16,
+          "cacheable_block_tokens": 340976,
+          "estimated_block_reuse_ratio": 0.259693,
+          "naive_nodes": 14106,
+          "node_compression_ratio": 0.297391,
+          "ordering": "random_seed_7",
+          "partition": "toolret_gold",
+          "replay": "session_bursty",
+          "requests": 7961,
+          "reusable_tool_tokens": 362084,
+          "total_tool_tokens": 1312998,
+          "trie_nodes": 9911
+        },
+        {
+          "block_size": 16,
+          "cacheable_block_tokens": 350592,
+          "estimated_block_reuse_ratio": 0.267016,
+          "naive_nodes": 14106,
+          "node_compression_ratio": 0.308592,
+          "ordering": "random_seed_42",
+          "partition": "toolret_gold",
+          "replay": "session_bursty",
+          "requests": 7961,
+          "reusable_tool_tokens": 372039,
+          "total_tool_tokens": 1312998,
+          "trie_nodes": 9753
+        },
+        {
+          "block_size": 16,
+          "cacheable_block_tokens": 347024,
+          "estimated_block_reuse_ratio": 0.264299,
+          "naive_nodes": 14106,
+          "node_compression_ratio": 0.297533,
+          "ordering": "random_seed_101",
+          "partition": "toolret_gold",
+          "replay": "session_bursty",
+          "requests": 7961,
+          "reusable_tool_tokens": 368519,
+          "total_tool_tokens": 1312998,
+          "trie_nodes": 9909
+        },
+        {
+          "block_size": 16,
+          "cacheable_block_tokens": 411584,
+          "estimated_block_reuse_ratio": 0.313469,
+          "naive_nodes": 14106,
+          "node_compression_ratio": 0.368779,
+          "ordering": "frequency",
+          "partition": "toolret_gold",
+          "replay": "session_bursty",
+          "requests": 7961,
+          "reusable_tool_tokens": 436548,
+          "total_tool_tokens": 1312998,
+          "trie_nodes": 8904
+        },
+        {
+          "block_size": 16,
+          "cacheable_block_tokens": 417488,
+          "estimated_block_reuse_ratio": 0.317965,
+          "naive_nodes": 14106,
+          "node_compression_ratio": 0.365235,
+          "ordering": "schema_cost_weighted",
+          "partition": "toolret_gold",
+          "replay": "session_bursty",
+          "requests": 7961,
+          "reusable_tool_tokens": 442184,
+          "total_tool_tokens": 1312998,
+          "trie_nodes": 8954
+        },
+        {
+          "block_size": 16,
+          "cacheable_block_tokens": 411584,
+          "estimated_block_reuse_ratio": 0.313469,
+          "naive_nodes": 14106,
+          "node_compression_ratio": 0.368779,
+          "ordering": "fp_tree_global",
+          "partition": "toolret_gold",
+          "replay": "session_bursty",
+          "requests": 7961,
+          "reusable_tool_tokens": 436548,
+          "total_tool_tokens": 1312998,
+          "trie_nodes": 8904
+        }
+      ],
+      "partition": "toolret_gold",
+      "task_domain_counts": {
+        "code": 1749,
+        "customized": 982,
+        "web": 5230
+      },
+      "task_schema_tokens": {
+        "count": 7961,
+        "max": 4270,
+        "mean": 164.929,
+        "median": 124.0,
+        "min": 30,
+        "p25": 78.0,
+        "p75": 205.0,
+        "p90": 296.0,
+        "p95": 387.0,
+        "p99": 779.0
+      },
+      "task_tool_count": {
+        "count": 7961,
+        "max": 8,
+        "mean": 1.772,
+        "median": 1.0,
+        "min": 1,
+        "p25": 1.0,
+        "p75": 2.0,
+        "p90": 3.0,
+        "p95": 4.0,
+        "p99": 6.0
+      },
+      "tasks": 7961,
+      "top_ordered_adjacency_proxy": [
+        {
+          "count": 70,
+          "p_next_given_current": 1.0,
+          "tool_ids": [
+            "toolink_tool_2",
+            "toolink_tool_3"
+          ],
+          "tool_names": [
+            "get_closing_parenthesis",
+            "stack_insert"
+          ]
+        },
+        {
+          "count": 70,
+          "p_next_given_current": 1.0,
+          "tool_ids": [
+            "toolink_tool_3",
+            "toolink_tool_4"
+          ],
+          "tool_names": [
+            "stack_insert",
+            "stack_pop"
+          ]
+        },
+        {
+          "count": 62,
+          "p_next_given_current": 1.0,
+          "tool_ids": [
+            "toolink_tool_119",
+            "toolink_tool_120"
+          ],
+          "tool_names": [
+            "create_object_dict",
+            "update_object_dict"
+          ]
+        },
+        {
+          "count": 62,
+          "p_next_given_current": 1.0,
+          "tool_ids": [
+            "toolink_tool_120",
+            "toolink_tool_121"
+          ],
+          "tool_names": [
+            "update_object_dict",
+            "get_final_object"
+          ]
+        },
+        {
+          "count": 38,
+          "p_next_given_current": 1.0,
+          "tool_ids": [
+            "toolink_tool_22",
+            "toolink_tool_21"
+          ],
+          "tool_names": [
+            "check_validity",
+            "divide_remain"
+          ]
+        },
+        {
+          "count": 30,
+          "p_next_given_current": 1.0,
+          "tool_ids": [
+            "toolink_tool_103",
+            "toolink_tool_31"
+          ],
+          "tool_names": [
+            "update_orientation",
+            "update_location"
+          ]
+        },
+        {
+          "count": 20,
+          "p_next_given_current": 1.0,
+          "tool_ids": [
+            "ultraTool_tool_524",
+            "ultraTool_tool_519"
+          ],
+          "tool_names": [
+            "search_train",
+            "train_ticket_booking"
+          ]
+        },
+        {
+          "count": 18,
+          "p_next_given_current": 0.514286,
+          "tool_ids": [
+            "toolink_tool_39",
+            "toolink_tool_38"
+          ],
+          "tool_names": [
+            "add_subtract_hadamard",
+            "multiply"
+          ]
+        },
+        {
+          "count": 18,
+          "p_next_given_current": 0.72,
+          "tool_ids": [
+            "ultraTool_tool_2",
+            "ultraTool_tool_18"
+          ],
+          "tool_names": [
+            "file_write",
+            "file_modify"
+          ]
+        },
+        {
+          "count": 17,
+          "p_next_given_current": 1.0,
+          "tool_ids": [
+            "toolbench_tool_9479",
+            "toolbench_tool_6549"
+          ],
+          "tool_names": [
+            "bitly_shorten",
+            "URL_Link_Shortener_Get_a_list_of_domains"
+          ]
+        },
+        {
+          "count": 16,
+          "p_next_given_current": 0.842105,
+          "tool_ids": [
+            "ultraTool_tool_534",
+            "ultraTool_tool_539"
+          ],
+          "tool_names": [
+            "conference_room_query",
+            "conference_room_booking"
+          ]
+        },
+        {
+          "count": 16,
+          "p_next_given_current": 0.8,
+          "tool_ids": [
+            "ultraTool_tool_511",
+            "ultraTool_tool_515"
+          ],
+          "tool_names": [
+            "clock_alarm_cancel",
+            "clock_alarm_set"
+          ]
+        },
+        {
+          "count": 12,
+          "p_next_given_current": 0.133333,
+          "tool_ids": [
+            "tool_be_honest_tool_4",
+            "tool_be_honest_tool_59"
+          ],
+          "tool_names": [
+            "Finish",
+            "ReportGenerator"
+          ]
+        },
+        {
+          "count": 12,
+          "p_next_given_current": 0.4,
+          "tool_ids": [
+            "toolbench_tool_9466",
+            "toolbench_tool_1044"
+          ],
+          "tool_names": [
+            "YTStream_Download_YouTube_Videos_Download_Stream",
+            "Vimeo_SearchVideos"
+          ]
+        },
+        {
+          "count": 12,
+          "p_next_given_current": 0.923077,
+          "tool_ids": [
+            "toolbench_tool_6548",
+            "toolbench_tool_9479"
+          ],
+          "tool_names": [
+            "URL_Link_Shortener_Create_a_new_link",
+            "bitly_shorten"
+          ]
+        },
+        {
+          "count": 10,
+          "p_next_given_current": 0.454545,
+          "tool_ids": [
+            "toolink_tool_38",
+            "toolink_tool_84"
+          ],
+          "tool_names": [
+            "multiply",
+            "kronecker"
+          ]
+        },
+        {
+          "count": 10,
+          "p_next_given_current": 0.769231,
+          "tool_ids": [
+            "ultraTool_tool_18",
+            "ultraTool_tool_8"
+          ],
+          "tool_names": [
+            "file_modify",
+            "file_delete"
+          ]
+        },
+        {
+          "count": 9,
+          "p_next_given_current": 0.642857,
+          "tool_ids": [
+            "tool_be_honest_tool_151",
+            "tool_be_honest_tool_4"
+          ],
+          "tool_names": [
+            "AnalyticsTool",
+            "Finish"
+          ]
+        },
+        {
+          "count": 9,
+          "p_next_given_current": 0.818182,
+          "tool_ids": [
+            "toolbench_tool_12162",
+            "toolbench_tool_9466"
+          ],
+          "tool_names": [
+            "Vimeo_GetCategoryInfo",
+            "YTStream_Download_YouTube_Videos_Download_Stream"
+          ]
+        },
+        {
+          "count": 9,
+          "p_next_given_current": 0.409091,
+          "tool_ids": [
+            "toolink_tool_38",
+            "toolink_tool_85"
+          ],
+          "tool_names": [
+            "multiply",
+            "transpose"
+          ]
+        },
+        {
+          "count": 9,
+          "p_next_given_current": 0.321429,
+          "tool_ids": [
+            "toolLens_tool_17",
+            "toolLens_tool_67"
+          ],
+          "tool_names": [
+            "Search Place",
+            "Search/Autocomplete API"
+          ]
+        },
+        {
+          "count": 9,
+          "p_next_given_current": 0.9,
+          "tool_ids": [
+            "ultraTool_tool_329",
+            "ultraTool_tool_446"
+          ],
+          "tool_names": [
+            "hotel_booking_query",
+            "hotel_booking_modification"
+          ]
+        },
+        {
+          "count": 9,
+          "p_next_given_current": 0.5625,
+          "tool_ids": [
+            "ultraTool_tool_546",
+            "ultraTool_tool_511"
+          ],
+          "tool_names": [
+            "clock_alarm_change",
+            "clock_alarm_cancel"
+          ]
+        },
+        {
+          "count": 8,
+          "p_next_given_current": 0.8,
+          "tool_ids": [
+            "rotbench_tool_16",
+            "rotbench_tool_392"
+          ],
+          "tool_names": [
+            "get_translation_nllb",
+            "get_translation_baidu"
+          ]
+        },
+        {
+          "count": 8,
+          "p_next_given_current": 0.888889,
+          "tool_ids": [
+            "tool_be_honest_tool_281",
+            "tool_be_honest_tool_4"
+          ],
+          "tool_names": [
+            "UserTester",
+            "Finish"
+          ]
+        },
+        {
+          "count": 8,
+          "p_next_given_current": 0.533333,
+          "tool_ids": [
+            "toolLens_tool_28",
+            "toolLens_tool_17"
+          ],
+          "tool_names": [
+            "flights/list-in-boundary",
+            "Search Place"
+          ]
+        },
+        {
+          "count": 8,
+          "p_next_given_current": 0.615385,
+          "tool_ids": [
+            "ultraTool_tool_529",
+            "ultraTool_tool_340"
+          ],
+          "tool_names": [
+            "appliance_repair_request",
+            "appliance_repair_status_query"
+          ]
+        },
+        {
+          "count": 7,
+          "p_next_given_current": 0.7,
+          "tool_ids": [
+            "webtools_music_tool_4",
+            "webtools_music_tool_12"
+          ],
+          "tool_names": [
+            "https://genius-song-lyrics1.p.rapidapi.com/artist/songs/",
+            "https://genius-song-lyrics1.p.rapidapi.com/song/details/"
+          ]
+        },
+        {
+          "count": 7,
+          "p_next_given_current": 0.368421,
+          "tool_ids": [
+            "webtools_music_tool_1",
+            "webtools_music_tool_4"
+          ],
+          "tool_names": [
+            "https://genius-song-lyrics1.p.rapidapi.com/search/multi/",
+            "https://genius-song-lyrics1.p.rapidapi.com/artist/songs/"
+          ]
+        },
+        {
+          "count": 7,
+          "p_next_given_current": 0.875,
+          "tool_ids": [
+            "tool_be_honest_tool_123",
+            "tool_be_honest_tool_4"
+          ],
+          "tool_names": [
+            "DeploymentTool",
+            "Finish"
+          ]
+        }
+      ],
+      "top_pairs": [
+        {
+          "count": 70,
+          "tool_ids": [
+            "toolink_tool_2",
+            "toolink_tool_3"
+          ],
+          "tool_names": [
+            "get_closing_parenthesis",
+            "stack_insert"
+          ]
+        },
+        {
+          "count": 70,
+          "tool_ids": [
+            "toolink_tool_2",
+            "toolink_tool_4"
+          ],
+          "tool_names": [
+            "get_closing_parenthesis",
+            "stack_pop"
+          ]
+        },
+        {
+          "count": 70,
+          "tool_ids": [
+            "toolink_tool_3",
+            "toolink_tool_4"
+          ],
+          "tool_names": [
+            "stack_insert",
+            "stack_pop"
+          ]
+        },
+        {
+          "count": 62,
+          "tool_ids": [
+            "toolink_tool_119",
+            "toolink_tool_120"
+          ],
+          "tool_names": [
+            "create_object_dict",
+            "update_object_dict"
+          ]
+        },
+        {
+          "count": 62,
+          "tool_ids": [
+            "toolink_tool_119",
+            "toolink_tool_121"
+          ],
+          "tool_names": [
+            "create_object_dict",
+            "get_final_object"
+          ]
+        },
+        {
+          "count": 62,
+          "tool_ids": [
+            "toolink_tool_120",
+            "toolink_tool_121"
+          ],
+          "tool_names": [
+            "update_object_dict",
+            "get_final_object"
+          ]
+        },
+        {
+          "count": 38,
+          "tool_ids": [
+            "toolink_tool_21",
+            "toolink_tool_22"
+          ],
+          "tool_names": [
+            "divide_remain",
+            "check_validity"
+          ]
+        },
+        {
+          "count": 30,
+          "tool_ids": [
+            "toolink_tool_103",
+            "toolink_tool_31"
+          ],
+          "tool_names": [
+            "update_orientation",
+            "update_location"
+          ]
+        },
+        {
+          "count": 23,
+          "tool_ids": [
+            "toolink_tool_38",
+            "toolink_tool_39"
+          ],
+          "tool_names": [
+            "multiply",
+            "add_subtract_hadamard"
+          ]
+        },
+        {
+          "count": 22,
+          "tool_ids": [
+            "ultraTool_tool_511",
+            "ultraTool_tool_515"
+          ],
+          "tool_names": [
+            "clock_alarm_cancel",
+            "clock_alarm_set"
+          ]
+        },
+        {
+          "count": 21,
+          "tool_ids": [
+            "tool_be_honest_tool_4",
+            "tool_be_honest_tool_59"
+          ],
+          "tool_names": [
+            "Finish",
+            "ReportGenerator"
+          ]
+        },
+        {
+          "count": 21,
+          "tool_ids": [
+            "toolink_tool_39",
+            "toolink_tool_84"
+          ],
+          "tool_names": [
+            "add_subtract_hadamard",
+            "kronecker"
+          ]
+        },
+        {
+          "count": 20,
+          "tool_ids": [
+            "ultraTool_tool_519",
+            "ultraTool_tool_524"
+          ],
+          "tool_names": [
+            "train_ticket_booking",
+            "search_train"
+          ]
+        },
+        {
+          "count": 19,
+          "tool_ids": [
+            "ultraTool_tool_534",
+            "ultraTool_tool_539"
+          ],
+          "tool_names": [
+            "conference_room_query",
+            "conference_room_booking"
+          ]
+        },
+        {
+          "count": 18,
+          "tool_ids": [
+            "toolbench_tool_6549",
+            "toolbench_tool_9479"
+          ],
+          "tool_names": [
+            "URL_Link_Shortener_Get_a_list_of_domains",
+            "bitly_shorten"
+          ]
+        },
+        {
+          "count": 18,
+          "tool_ids": [
+            "toolink_tool_117",
+            "toolink_tool_39"
+          ],
+          "tool_names": [
+            "sum_over_axis",
+            "add_subtract_hadamard"
+          ]
+        },
+        {
+          "count": 18,
+          "tool_ids": [
+            "toolink_tool_39",
+            "toolink_tool_85"
+          ],
+          "tool_names": [
+            "add_subtract_hadamard",
+            "transpose"
+          ]
+        },
+        {
+          "count": 18,
+          "tool_ids": [
+            "ultraTool_tool_18",
+            "ultraTool_tool_2"
+          ],
+          "tool_names": [
+            "file_modify",
+            "file_write"
+          ]
+        },
+        {
+          "count": 17,
+          "tool_ids": [
+            "toolbench_tool_1044",
+            "toolbench_tool_9466"
+          ],
+          "tool_names": [
+            "Vimeo_SearchVideos",
+            "YTStream_Download_YouTube_Videos_Download_Stream"
+          ]
+        },
+        {
+          "count": 17,
+          "tool_ids": [
+            "toolink_tool_38",
+            "toolink_tool_84"
+          ],
+          "tool_names": [
+            "multiply",
+            "kronecker"
+          ]
+        },
+        {
+          "count": 16,
+          "tool_ids": [
+            "toolink_tool_38",
+            "toolink_tool_85"
+          ],
+          "tool_names": [
+            "multiply",
+            "transpose"
+          ]
+        },
+        {
+          "count": 14,
+          "tool_ids": [
+            "tool_be_honest_tool_151",
+            "tool_be_honest_tool_4"
+          ],
+          "tool_names": [
+            "AnalyticsTool",
+            "Finish"
+          ]
+        },
+        {
+          "count": 13,
+          "tool_ids": [
+            "tool_be_honest_tool_4",
+            "tool_be_honest_tool_82"
+          ],
+          "tool_names": [
+            "Finish",
+            "KeywordExtractor"
+          ]
+        },
+        {
+          "count": 13,
+          "tool_ids": [
+            "toolbench_tool_6548",
+            "toolbench_tool_9479"
+          ],
+          "tool_names": [
+            "URL_Link_Shortener_Create_a_new_link",
+            "bitly_shorten"
+          ]
+        },
+        {
+          "count": 13,
+          "tool_ids": [
+            "toolink_tool_117",
+            "toolink_tool_38"
+          ],
+          "tool_names": [
+            "sum_over_axis",
+            "multiply"
+          ]
+        },
+        {
+          "count": 13,
+          "tool_ids": [
+            "toolLens_tool_17",
+            "toolLens_tool_67"
+          ],
+          "tool_names": [
+            "Search Place",
+            "Search/Autocomplete API"
+          ]
+        },
+        {
+          "count": 13,
+          "tool_ids": [
+            "ultraTool_tool_511",
+            "ultraTool_tool_546"
+          ],
+          "tool_names": [
+            "clock_alarm_cancel",
+            "clock_alarm_change"
+          ]
+        },
+        {
+          "count": 12,
+          "tool_ids": [
+            "rotbench_tool_16",
+            "rotbench_tool_392"
+          ],
+          "tool_names": [
+            "get_translation_nllb",
+            "get_translation_baidu"
+          ]
+        },
+        {
+          "count": 12,
+          "tool_ids": [
+            "tool_be_honest_tool_275",
+            "tool_be_honest_tool_4"
+          ],
+          "tool_names": [
+            "DataAnalyzer",
+            "Finish"
+          ]
+        },
+        {
+          "count": 12,
+          "tool_ids": [
+            "toolink_tool_117",
+            "toolink_tool_84"
+          ],
+          "tool_names": [
+            "sum_over_axis",
+            "kronecker"
+          ]
+        }
+      ],
+      "top_schema_weighted_tools": [
+        {
+          "domain": "toolbench_sam",
+          "name": "Agent.WalkTo",
+          "occurrences": 42,
+          "schema_tokens": 492,
+          "source": "toolret:customized",
+          "tool_id": "toolbench_sam_tool_129",
+          "weighted_tokens": 20664
+        },
+        {
+          "domain": "webtools_spotify",
+          "name": "GET_search",
+          "occurrences": 10,
+          "schema_tokens": 1349,
+          "source": "toolret:web",
+          "tool_id": "webtools_spotify_tool_37",
+          "weighted_tokens": 13490
+        },
+        {
+          "domain": "tool_be_honest",
+          "name": "Finish",
+          "occurrences": 350,
+          "schema_tokens": 33,
+          "source": "toolret:customized",
+          "tool_id": "tool_be_honest_tool_4",
+          "weighted_tokens": 11550
+        },
+        {
+          "domain": "toolbench_sam",
+          "name": "Agent.Find",
+          "occurrences": 12,
+          "schema_tokens": 779,
+          "source": "toolret:customized",
+          "tool_id": "toolbench_sam_tool_135",
+          "weighted_tokens": 9348
+        },
+        {
+          "domain": "rotbench",
+          "name": "list_properties",
+          "occurrences": 8,
+          "schema_tokens": 1090,
+          "source": "toolret:web",
+          "tool_id": "rotbench_tool_413",
+          "weighted_tokens": 8720
+        },
+        {
+          "domain": "rotbench",
+          "name": "finish",
+          "occurrences": 170,
+          "schema_tokens": 49,
+          "source": "toolret:web",
+          "tool_id": "rotbench_tool_3",
+          "weighted_tokens": 8330
+        },
+        {
+          "domain": "ultraTool",
+          "name": "flight_search",
+          "occurrences": 40,
+          "schema_tokens": 190,
+          "source": "toolret:web",
+          "tool_id": "ultraTool_tool_507",
+          "weighted_tokens": 7600
+        },
+        {
+          "domain": "ultraTool",
+          "name": "file_modify",
+          "occurrences": 37,
+          "schema_tokens": 149,
+          "source": "toolret:web",
+          "tool_id": "ultraTool_tool_18",
+          "weighted_tokens": 5513
+        },
+        {
+          "domain": "ultraTool",
+          "name": "appliance_repair_request",
+          "occurrences": 36,
+          "schema_tokens": 150,
+          "source": "toolret:web",
+          "tool_id": "ultraTool_tool_529",
+          "weighted_tokens": 5400
+        },
+        {
+          "domain": "ultraTool",
+          "name": "account_login",
+          "occurrences": 64,
+          "schema_tokens": 76,
+          "source": "toolret:web",
+          "tool_id": "ultraTool_tool_52",
+          "weighted_tokens": 4864
+        },
+        {
+          "domain": "toolbench_sam",
+          "name": "API.select_booking_type",
+          "occurrences": 63,
+          "schema_tokens": 67,
+          "source": "toolret:customized",
+          "tool_id": "toolbench_sam_tool_122",
+          "weighted_tokens": 4221
+        },
+        {
+          "domain": "ultraTool",
+          "name": "train_ticket_booking",
+          "occurrences": 28,
+          "schema_tokens": 149,
+          "source": "toolret:web",
+          "tool_id": "ultraTool_tool_519",
+          "weighted_tokens": 4172
+        },
+        {
+          "domain": "tooleyes",
+          "name": "google_trends_search",
+          "occurrences": 5,
+          "schema_tokens": 825,
+          "source": "toolret:web",
+          "tool_id": "tooleyes_tool_14",
+          "weighted_tokens": 4125
+        },
+        {
+          "domain": "webtools_spotify",
+          "name": "GET_me_player_currently_playing",
+          "occurrences": 7,
+          "schema_tokens": 587,
+          "source": "toolret:web",
+          "tool_id": "webtools_spotify_tool_15",
+          "weighted_tokens": 4109
+        },
+        {
+          "domain": "apibank",
+          "name": "GetUserToken",
+          "occurrences": 33,
+          "schema_tokens": 121,
+          "source": "toolret:web",
+          "tool_id": "apibank_tool_0",
+          "weighted_tokens": 3993
+        },
+        {
+          "domain": "rotbench",
+          "name": "get_translation_nllb",
+          "occurrences": 17,
+          "schema_tokens": 233,
+          "source": "toolret:web",
+          "tool_id": "rotbench_tool_16",
+          "weighted_tokens": 3961
+        },
+        {
+          "domain": "webtools_music",
+          "name": "https://genius-song-lyrics1.p.rapidapi.com/search/multi/",
+          "occurrences": 19,
+          "schema_tokens": 190,
+          "source": "toolret:web",
+          "tool_id": "webtools_music_tool_1",
+          "weighted_tokens": 3610
+        },
+        {
+          "domain": "ultraTool",
+          "name": "clock_alarm_change",
+          "occurrences": 26,
+          "schema_tokens": 136,
+          "source": "toolret:web",
+          "tool_id": "ultraTool_tool_546",
+          "weighted_tokens": 3536
+        },
+        {
+          "domain": "ultraTool",
+          "name": "clock_alarm_cancel",
+          "occurrences": 35,
+          "schema_tokens": 100,
+          "source": "toolret:web",
+          "tool_id": "ultraTool_tool_511",
+          "weighted_tokens": 3500
+        },
+        {
+          "domain": "toolink",
+          "name": "stack_insert",
+          "occurrences": 70,
+          "schema_tokens": 49,
+          "source": "toolret:code",
+          "tool_id": "toolink_tool_3",
+          "weighted_tokens": 3430
+        },
+        {
+          "domain": "apigen",
+          "name": "search",
+          "occurrences": 14,
+          "schema_tokens": 240,
+          "source": "toolret:web",
+          "tool_id": "apigen_tool_94",
+          "weighted_tokens": 3360
+        },
+        {
+          "domain": "toolink",
+          "name": "create_object_dict",
+          "occurrences": 62,
+          "schema_tokens": 53,
+          "source": "toolret:code",
+          "tool_id": "toolink_tool_119",
+          "weighted_tokens": 3286
+        },
+        {
+          "domain": "toolink",
+          "name": "update_object_dict",
+          "occurrences": 62,
+          "schema_tokens": 53,
+          "source": "toolret:code",
+          "tool_id": "toolink_tool_120",
+          "weighted_tokens": 3286
+        },
+        {
+          "domain": "toolink",
+          "name": "get_closing_parenthesis",
+          "occurrences": 70,
+          "schema_tokens": 46,
+          "source": "toolret:code",
+          "tool_id": "toolink_tool_2",
+          "weighted_tokens": 3220
+        },
+        {
+          "domain": "toolink",
+          "name": "update_location",
+          "occurrences": 55,
+          "schema_tokens": 57,
+          "source": "toolret:code",
+          "tool_id": "toolink_tool_31",
+          "weighted_tokens": 3135
+        },
+        {
+          "domain": "webtools_weather",
+          "name": "https://ai-weather-by-meteosource.p.rapidapi.com/daily",
+          "occurrences": 7,
+          "schema_tokens": 441,
+          "source": "toolret:web",
+          "tool_id": "webtools_weather_tool_6",
+          "weighted_tokens": 3087
+        },
+        {
+          "domain": "toolink",
+          "name": "stack_pop",
+          "occurrences": 70,
+          "schema_tokens": 44,
+          "source": "toolret:code",
+          "tool_id": "toolink_tool_4",
+          "weighted_tokens": 3080
+        },
+        {
+          "domain": "ultraTool",
+          "name": "file_write",
+          "occurrences": 37,
+          "schema_tokens": 83,
+          "source": "toolret:web",
+          "tool_id": "ultraTool_tool_2",
+          "weighted_tokens": 3071
+        },
+        {
+          "domain": "ultraTool",
+          "name": "clock_alarm_set",
+          "occurrences": 33,
+          "schema_tokens": 93,
+          "source": "toolret:web",
+          "tool_id": "ultraTool_tool_515",
+          "weighted_tokens": 3069
+        },
+        {
+          "domain": "toolbench",
+          "name": "Realtor_API_for_Real_Estate_Data_RealtorAgentList",
+          "occurrences": 1,
+          "schema_tokens": 3053,
+          "source": "toolret:web",
+          "tool_id": "toolbench_tool_130",
+          "weighted_tokens": 3053
+        },
+        {
+          "domain": "toolbench",
+          "name": "Realtor_Data_API_for_Real_Estate_RealtorAgentList",
+          "occurrences": 1,
+          "schema_tokens": 3053,
+          "source": "toolret:web",
+          "tool_id": "toolbench_tool_5220",
+          "weighted_tokens": 3053
+        },
+        {
+          "domain": "toolbench_sam",
+          "name": "API.set_location",
+          "occurrences": 53,
+          "schema_tokens": 57,
+          "source": "toolret:customized",
+          "tool_id": "toolbench_sam_tool_175",
+          "weighted_tokens": 3021
+        },
+        {
+          "domain": "ultraTool",
+          "name": "conference_room_booking",
+          "occurrences": 28,
+          "schema_tokens": 105,
+          "source": "toolret:web",
+          "tool_id": "ultraTool_tool_539",
+          "weighted_tokens": 2940
+        },
+        {
+          "domain": "toolink",
+          "name": "get_final_object",
+          "occurrences": 62,
+          "schema_tokens": 47,
+          "source": "toolret:code",
+          "tool_id": "toolink_tool_121",
+          "weighted_tokens": 2914
+        },
+        {
+          "domain": "toolink",
+          "name": "add_subtract_hadamard",
+          "occurrences": 46,
+          "schema_tokens": 61,
+          "source": "toolret:code",
+          "tool_id": "toolink_tool_39",
+          "weighted_tokens": 2806
+        },
+        {
+          "domain": "webtools_spotify",
+          "name": "GET_tracks_id",
+          "occurrences": 6,
+          "schema_tokens": 466,
+          "source": "toolret:web",
+          "tool_id": "webtools_spotify_tool_38",
+          "weighted_tokens": 2796
+        },
+        {
+          "domain": "ultraTool",
+          "name": "search_train",
+          "occurrences": 21,
+          "schema_tokens": 130,
+          "source": "toolret:web",
+          "tool_id": "ultraTool_tool_524",
+          "weighted_tokens": 2730
+        },
+        {
+          "domain": "ultraTool",
+          "name": "hotel_booking_query",
+          "occurrences": 21,
+          "schema_tokens": 129,
+          "source": "toolret:web",
+          "tool_id": "ultraTool_tool_329",
+          "weighted_tokens": 2709
+        },
+        {
+          "domain": "webtools_spotify",
+          "name": "GET_artists_id_albums",
+          "occurrences": 3,
+          "schema_tokens": 845,
+          "source": "toolret:web",
+          "tool_id": "webtools_spotify_tool_3",
+          "weighted_tokens": 2535
+        },
+        {
+          "domain": "toolLens",
+          "name": "Search/Autocomplete API",
+          "occurrences": 60,
+          "schema_tokens": 42,
+          "source": "toolret:web",
+          "tool_id": "toolLens_tool_67",
+          "weighted_tokens": 2520
+        },
+        {
+          "domain": "toolLens",
+          "name": "Search Pro",
+          "occurrences": 18,
+          "schema_tokens": 135,
+          "source": "toolret:web",
+          "tool_id": "toolLens_tool_19",
+          "weighted_tokens": 2430
+        },
+        {
+          "domain": "ultraTool",
+          "name": "flight_ticket_changing",
+          "occurrences": 12,
+          "schema_tokens": 200,
+          "source": "toolret:web",
+          "tool_id": "ultraTool_tool_597",
+          "weighted_tokens": 2400
+        },
+        {
+          "domain": "ultraTool",
+          "name": "conference_room_query",
+          "occurrences": 20,
+          "schema_tokens": 117,
+          "source": "toolret:web",
+          "tool_id": "ultraTool_tool_534",
+          "weighted_tokens": 2340
+        },
+        {
+          "domain": "webtools_music",
+          "name": "https://genius-song-lyrics1.p.rapidapi.com/artist/songs/",
+          "occurrences": 11,
+          "schema_tokens": 211,
+          "source": "toolret:web",
+          "tool_id": "webtools_music_tool_4",
+          "weighted_tokens": 2321
+        },
+        {
+          "domain": "webtools_weather",
+          "name": "https://ai-weather-by-meteosource.p.rapidapi.com/weather_statistics",
+          "occurrences": 6,
+          "schema_tokens": 382,
+          "source": "toolret:web",
+          "tool_id": "webtools_weather_tool_10",
+          "weighted_tokens": 2292
+        },
+        {
+          "domain": "rotbench",
+          "name": "get_translation_baidu",
+          "occurrences": 14,
+          "schema_tokens": 158,
+          "source": "toolret:web",
+          "tool_id": "rotbench_tool_392",
+          "weighted_tokens": 2212
+        },
+        {
+          "domain": "ultraTool",
+          "name": "train_ticket_query",
+          "occurrences": 16,
+          "schema_tokens": 138,
+          "source": "toolret:web",
+          "tool_id": "ultraTool_tool_656",
+          "weighted_tokens": 2208
+        },
+        {
+          "domain": "toolbench_sam",
+          "name": "worksheet.update",
+          "occurrences": 8,
+          "schema_tokens": 263,
+          "source": "toolret:customized",
+          "tool_id": "toolbench_sam_tool_85",
+          "weighted_tokens": 2104
+        },
+        {
+          "domain": "webtools_weather",
+          "name": "https://ai-weather-by-meteosource.p.rapidapi.com/hourly",
+          "occurrences": 4,
+          "schema_tokens": 524,
+          "source": "toolret:web",
+          "tool_id": "webtools_weather_tool_5",
+          "weighted_tokens": 2096
+        },
+        {
+          "domain": "toolLens",
+          "name": "Search Place",
+          "occurrences": 45,
+          "schema_tokens": 46,
+          "source": "toolret:web",
+          "tool_id": "toolLens_tool_17",
+          "weighted_tokens": 2070
+        }
+      ],
+      "top_tools": [
+        {
+          "domain": "tool_be_honest",
+          "name": "Finish",
+          "occurrences": 350,
+          "schema_tokens": 33,
+          "source": "toolret:customized",
+          "tool_id": "tool_be_honest_tool_4",
+          "weighted_tokens": 11550
+        },
+        {
+          "domain": "rotbench",
+          "name": "finish",
+          "occurrences": 170,
+          "schema_tokens": 49,
+          "source": "toolret:web",
+          "tool_id": "rotbench_tool_3",
+          "weighted_tokens": 8330
+        },
+        {
+          "domain": "toolink",
+          "name": "get_closing_parenthesis",
+          "occurrences": 70,
+          "schema_tokens": 46,
+          "source": "toolret:code",
+          "tool_id": "toolink_tool_2",
+          "weighted_tokens": 3220
+        },
+        {
+          "domain": "toolink",
+          "name": "stack_insert",
+          "occurrences": 70,
+          "schema_tokens": 49,
+          "source": "toolret:code",
+          "tool_id": "toolink_tool_3",
+          "weighted_tokens": 3430
+        },
+        {
+          "domain": "toolink",
+          "name": "stack_pop",
+          "occurrences": 70,
+          "schema_tokens": 44,
+          "source": "toolret:code",
+          "tool_id": "toolink_tool_4",
+          "weighted_tokens": 3080
+        },
+        {
+          "domain": "ultraTool",
+          "name": "account_login",
+          "occurrences": 64,
+          "schema_tokens": 76,
+          "source": "toolret:web",
+          "tool_id": "ultraTool_tool_52",
+          "weighted_tokens": 4864
+        },
+        {
+          "domain": "toolbench_sam",
+          "name": "API.select_booking_type",
+          "occurrences": 63,
+          "schema_tokens": 67,
+          "source": "toolret:customized",
+          "tool_id": "toolbench_sam_tool_122",
+          "weighted_tokens": 4221
+        },
+        {
+          "domain": "toolink",
+          "name": "create_object_dict",
+          "occurrences": 62,
+          "schema_tokens": 53,
+          "source": "toolret:code",
+          "tool_id": "toolink_tool_119",
+          "weighted_tokens": 3286
+        },
+        {
+          "domain": "toolink",
+          "name": "update_object_dict",
+          "occurrences": 62,
+          "schema_tokens": 53,
+          "source": "toolret:code",
+          "tool_id": "toolink_tool_120",
+          "weighted_tokens": 3286
+        },
+        {
+          "domain": "toolink",
+          "name": "get_final_object",
+          "occurrences": 62,
+          "schema_tokens": 47,
+          "source": "toolret:code",
+          "tool_id": "toolink_tool_121",
+          "weighted_tokens": 2914
+        },
+        {
+          "domain": "toolLens",
+          "name": "Search/Autocomplete API",
+          "occurrences": 60,
+          "schema_tokens": 42,
+          "source": "toolret:web",
+          "tool_id": "toolLens_tool_67",
+          "weighted_tokens": 2520
+        },
+        {
+          "domain": "toolink",
+          "name": "update_location",
+          "occurrences": 55,
+          "schema_tokens": 57,
+          "source": "toolret:code",
+          "tool_id": "toolink_tool_31",
+          "weighted_tokens": 3135
+        },
+        {
+          "domain": "toolbench_sam",
+          "name": "API.set_location",
+          "occurrences": 53,
+          "schema_tokens": 57,
+          "source": "toolret:customized",
+          "tool_id": "toolbench_sam_tool_175",
+          "weighted_tokens": 3021
+        },
+        {
+          "domain": "toolink",
+          "name": "add_subtract_hadamard",
+          "occurrences": 46,
+          "schema_tokens": 61,
+          "source": "toolret:code",
+          "tool_id": "toolink_tool_39",
+          "weighted_tokens": 2806
+        },
+        {
+          "domain": "toolLens",
+          "name": "Search Place",
+          "occurrences": 45,
+          "schema_tokens": 46,
+          "source": "toolret:web",
+          "tool_id": "toolLens_tool_17",
+          "weighted_tokens": 2070
+        },
+        {
+          "domain": "toolbench_sam",
+          "name": "Agent.WalkTo",
+          "occurrences": 42,
+          "schema_tokens": 492,
+          "source": "toolret:customized",
+          "tool_id": "toolbench_sam_tool_129",
+          "weighted_tokens": 20664
+        },
+        {
+          "domain": "ultraTool",
+          "name": "flight_search",
+          "occurrences": 40,
+          "schema_tokens": 190,
+          "source": "toolret:web",
+          "tool_id": "ultraTool_tool_507",
+          "weighted_tokens": 7600
+        },
+        {
+          "domain": "toolink",
+          "name": "check_validity",
+          "occurrences": 38,
+          "schema_tokens": 51,
+          "source": "toolret:code",
+          "tool_id": "toolink_tool_22",
+          "weighted_tokens": 1938
+        },
+        {
+          "domain": "toolink",
+          "name": "divide_remain",
+          "occurrences": 38,
+          "schema_tokens": 53,
+          "source": "toolret:code",
+          "tool_id": "toolink_tool_21",
+          "weighted_tokens": 2014
+        },
+        {
+          "domain": "ultraTool",
+          "name": "file_write",
+          "occurrences": 37,
+          "schema_tokens": 83,
+          "source": "toolret:web",
+          "tool_id": "ultraTool_tool_2",
+          "weighted_tokens": 3071
+        },
+        {
+          "domain": "ultraTool",
+          "name": "file_modify",
+          "occurrences": 37,
+          "schema_tokens": 149,
+          "source": "toolret:web",
+          "tool_id": "ultraTool_tool_18",
+          "weighted_tokens": 5513
+        },
+        {
+          "domain": "ultraTool",
+          "name": "appliance_repair_request",
+          "occurrences": 36,
+          "schema_tokens": 150,
+          "source": "toolret:web",
+          "tool_id": "ultraTool_tool_529",
+          "weighted_tokens": 5400
+        },
+        {
+          "domain": "ultraTool",
+          "name": "clock_alarm_cancel",
+          "occurrences": 35,
+          "schema_tokens": 100,
+          "source": "toolret:web",
+          "tool_id": "ultraTool_tool_511",
+          "weighted_tokens": 3500
+        },
+        {
+          "domain": "toolbench",
+          "name": "YTStream_Download_YouTube_Videos_Download_Stream",
+          "occurrences": 34,
+          "schema_tokens": 42,
+          "source": "toolret:web",
+          "tool_id": "toolbench_tool_9466",
+          "weighted_tokens": 1428
+        },
+        {
+          "domain": "apibank",
+          "name": "GetUserToken",
+          "occurrences": 33,
+          "schema_tokens": 121,
+          "source": "toolret:web",
+          "tool_id": "apibank_tool_0",
+          "weighted_tokens": 3993
+        },
+        {
+          "domain": "toolink",
+          "name": "kronecker",
+          "occurrences": 33,
+          "schema_tokens": 52,
+          "source": "toolret:code",
+          "tool_id": "toolink_tool_84",
+          "weighted_tokens": 1716
+        },
+        {
+          "domain": "ultraTool",
+          "name": "clock_alarm_set",
+          "occurrences": 33,
+          "schema_tokens": 93,
+          "source": "toolret:web",
+          "tool_id": "ultraTool_tool_515",
+          "weighted_tokens": 3069
+        },
+        {
+          "domain": "toolink",
+          "name": "multiply",
+          "occurrences": 32,
+          "schema_tokens": 47,
+          "source": "toolret:code",
+          "tool_id": "toolink_tool_38",
+          "weighted_tokens": 1504
+        },
+        {
+          "domain": "toolink",
+          "name": "update_orientation",
+          "occurrences": 30,
+          "schema_tokens": 67,
+          "source": "toolret:code",
+          "tool_id": "toolink_tool_103",
+          "weighted_tokens": 2010
+        },
+        {
+          "domain": "ultraTool",
+          "name": "conference_room_booking",
+          "occurrences": 28,
+          "schema_tokens": 105,
+          "source": "toolret:web",
+          "tool_id": "ultraTool_tool_539",
+          "weighted_tokens": 2940
+        },
+        {
+          "domain": "ultraTool",
+          "name": "train_ticket_booking",
+          "occurrences": 28,
+          "schema_tokens": 149,
+          "source": "toolret:web",
+          "tool_id": "ultraTool_tool_519",
+          "weighted_tokens": 4172
+        },
+        {
+          "domain": "toolLens",
+          "name": "Get articles",
+          "occurrences": 27,
+          "schema_tokens": 38,
+          "source": "toolret:web",
+          "tool_id": "toolLens_tool_35",
+          "weighted_tokens": 1026
+        },
+        {
+          "domain": "toolink",
+          "name": "sum_over_axis",
+          "occurrences": 26,
+          "schema_tokens": 62,
+          "source": "toolret:code",
+          "tool_id": "toolink_tool_117",
+          "weighted_tokens": 1612
+        },
+        {
+          "domain": "ultraTool",
+          "name": "clock_alarm_change",
+          "occurrences": 26,
+          "schema_tokens": 136,
+          "source": "toolret:web",
+          "tool_id": "ultraTool_tool_546",
+          "weighted_tokens": 3536
+        },
+        {
+          "domain": "toolink",
+          "name": "transpose",
+          "occurrences": 25,
+          "schema_tokens": 51,
+          "source": "toolret:code",
+          "tool_id": "toolink_tool_85",
+          "weighted_tokens": 1275
+        },
+        {
+          "domain": "toolbench",
+          "name": "bitly_shorten",
+          "occurrences": 23,
+          "schema_tokens": 42,
+          "source": "toolret:web",
+          "tool_id": "toolbench_tool_9479",
+          "weighted_tokens": 966
+        },
+        {
+          "domain": "toolbench",
+          "name": "OTT_details_Title_Details",
+          "occurrences": 22,
+          "schema_tokens": 70,
+          "source": "toolret:web",
+          "tool_id": "toolbench_tool_781",
+          "weighted_tokens": 1540
+        },
+        {
+          "domain": "tool_be_honest",
+          "name": "ReportGenerator",
+          "occurrences": 21,
+          "schema_tokens": 35,
+          "source": "toolret:customized",
+          "tool_id": "tool_be_honest_tool_59",
+          "weighted_tokens": 735
+        },
+        {
+          "domain": "ultraTool",
+          "name": "hotel_booking_query",
+          "occurrences": 21,
+          "schema_tokens": 129,
+          "source": "toolret:web",
+          "tool_id": "ultraTool_tool_329",
+          "weighted_tokens": 2709
+        },
+        {
+          "domain": "ultraTool",
+          "name": "search_train",
+          "occurrences": 21,
+          "schema_tokens": 130,
+          "source": "toolret:web",
+          "tool_id": "ultraTool_tool_524",
+          "weighted_tokens": 2730
+        },
+        {
+          "domain": "ultraTool",
+          "name": "file_delete",
+          "occurrences": 20,
+          "schema_tokens": 80,
+          "source": "toolret:web",
+          "tool_id": "ultraTool_tool_8",
+          "weighted_tokens": 1600
+        },
+        {
+          "domain": "ultraTool",
+          "name": "conference_room_query",
+          "occurrences": 20,
+          "schema_tokens": 117,
+          "source": "toolret:web",
+          "tool_id": "ultraTool_tool_534",
+          "weighted_tokens": 2340
+        },
+        {
+          "domain": "webtools_music",
+          "name": "https://genius-song-lyrics1.p.rapidapi.com/search/multi/",
+          "occurrences": 19,
+          "schema_tokens": 190,
+          "source": "toolret:web",
+          "tool_id": "webtools_music_tool_1",
+          "weighted_tokens": 3610
+        },
+        {
+          "domain": "rotbench",
+          "name": "hsinif",
+          "occurrences": 18,
+          "schema_tokens": 51,
+          "source": "toolret:web",
+          "tool_id": "rotbench_tool_15",
+          "weighted_tokens": 918
+        },
+        {
+          "domain": "toolbench",
+          "name": "URL_Link_Shortener_Get_a_list_of_domains",
+          "occurrences": 18,
+          "schema_tokens": 42,
+          "source": "toolret:web",
+          "tool_id": "toolbench_tool_6549",
+          "weighted_tokens": 756
+        },
+        {
+          "domain": "toolbench",
+          "name": "Vimeo_SearchVideos",
+          "occurrences": 18,
+          "schema_tokens": 34,
+          "source": "toolret:web",
+          "tool_id": "toolbench_tool_1044",
+          "weighted_tokens": 612
+        },
+        {
+          "domain": "toolLens",
+          "name": "View All Food Items",
+          "occurrences": 18,
+          "schema_tokens": 72,
+          "source": "toolret:web",
+          "tool_id": "toolLens_tool_50",
+          "weighted_tokens": 1296
+        },
+        {
+          "domain": "toolLens",
+          "name": "Search Pro",
+          "occurrences": 18,
+          "schema_tokens": 135,
+          "source": "toolret:web",
+          "tool_id": "toolLens_tool_19",
+          "weighted_tokens": 2430
+        },
+        {
+          "domain": "mnms",
+          "name": "image generation",
+          "occurrences": 17,
+          "schema_tokens": 99,
+          "source": "toolret:web",
+          "tool_id": "mnms_tool_2",
+          "weighted_tokens": 1683
+        },
+        {
+          "domain": "rotbench",
+          "name": "get_translation_nllb",
+          "occurrences": 17,
+          "schema_tokens": 233,
+          "source": "toolret:web",
+          "tool_id": "rotbench_tool_16",
+          "weighted_tokens": 3961
+        }
+      ],
+      "top_triples": [
+        {
+          "count": 70,
+          "tool_ids": [
+            "toolink_tool_2",
+            "toolink_tool_3",
+            "toolink_tool_4"
+          ],
+          "tool_names": [
+            "get_closing_parenthesis",
+            "stack_insert",
+            "stack_pop"
+          ]
+        },
+        {
+          "count": 62,
+          "tool_ids": [
+            "toolink_tool_119",
+            "toolink_tool_120",
+            "toolink_tool_121"
+          ],
+          "tool_names": [
+            "create_object_dict",
+            "update_object_dict",
+            "get_final_object"
+          ]
+        },
+        {
+          "count": 13,
+          "tool_ids": [
+            "toolink_tool_38",
+            "toolink_tool_39",
+            "toolink_tool_84"
+          ],
+          "tool_names": [
+            "multiply",
+            "add_subtract_hadamard",
+            "kronecker"
+          ]
+        },
+        {
+          "count": 12,
+          "tool_ids": [
+            "toolink_tool_38",
+            "toolink_tool_39",
+            "toolink_tool_85"
+          ],
+          "tool_names": [
+            "multiply",
+            "add_subtract_hadamard",
+            "transpose"
+          ]
+        },
+        {
+          "count": 10,
+          "tool_ids": [
+            "toolink_tool_117",
+            "toolink_tool_38",
+            "toolink_tool_39"
+          ],
+          "tool_names": [
+            "sum_over_axis",
+            "multiply",
+            "add_subtract_hadamard"
+          ]
+        },
+        {
+          "count": 10,
+          "tool_ids": [
+            "toolink_tool_117",
+            "toolink_tool_39",
+            "toolink_tool_84"
+          ],
+          "tool_names": [
+            "sum_over_axis",
+            "add_subtract_hadamard",
+            "kronecker"
+          ]
+        },
+        {
+          "count": 8,
+          "tool_ids": [
+            "toolbench_tool_6548",
+            "toolbench_tool_6549",
+            "toolbench_tool_9479"
+          ],
+          "tool_names": [
+            "URL_Link_Shortener_Create_a_new_link",
+            "URL_Link_Shortener_Get_a_list_of_domains",
+            "bitly_shorten"
+          ]
+        },
+        {
+          "count": 7,
+          "tool_ids": [
+            "t_eval_step_tool_10",
+            "t_eval_step_tool_7",
+            "t_eval_step_tool_8"
+          ],
+          "tool_names": [
+            "PPT.create_file",
+            "PPT.save_file",
+            "PPT.add_text_page"
+          ]
+        },
+        {
+          "count": 7,
+          "tool_ids": [
+            "tool_be_honest_tool_33",
+            "tool_be_honest_tool_333",
+            "tool_be_honest_tool_4"
+          ],
+          "tool_names": [
+            "TextSummarizer",
+            "EntityFrequencyCounter",
+            "Finish"
+          ]
+        },
+        {
+          "count": 7,
+          "tool_ids": [
+            "toolink_tool_117",
+            "toolink_tool_38",
+            "toolink_tool_84"
+          ],
+          "tool_names": [
+            "sum_over_axis",
+            "multiply",
+            "kronecker"
+          ]
+        },
+        {
+          "count": 7,
+          "tool_ids": [
+            "toolink_tool_117",
+            "toolink_tool_39",
+            "toolink_tool_85"
+          ],
+          "tool_names": [
+            "sum_over_axis",
+            "add_subtract_hadamard",
+            "transpose"
+          ]
+        },
+        {
+          "count": 6,
+          "tool_ids": [
+            "webtools_music_tool_1",
+            "webtools_music_tool_12",
+            "webtools_music_tool_4"
+          ],
+          "tool_names": [
+            "https://genius-song-lyrics1.p.rapidapi.com/search/multi/",
+            "https://genius-song-lyrics1.p.rapidapi.com/song/details/",
+            "https://genius-song-lyrics1.p.rapidapi.com/artist/songs/"
+          ]
+        },
+        {
+          "count": 6,
+          "tool_ids": [
+            "tool_be_honest_tool_278",
+            "tool_be_honest_tool_279",
+            "tool_be_honest_tool_4"
+          ],
+          "tool_names": [
+            "SuggestionGenerator",
+            "InterfaceEditor",
+            "Finish"
+          ]
+        },
+        {
+          "count": 6,
+          "tool_ids": [
+            "tool_be_honest_tool_278",
+            "tool_be_honest_tool_281",
+            "tool_be_honest_tool_4"
+          ],
+          "tool_names": [
+            "SuggestionGenerator",
+            "UserTester",
+            "Finish"
+          ]
+        },
+        {
+          "count": 6,
+          "tool_ids": [
+            "tool_be_honest_tool_316",
+            "tool_be_honest_tool_333",
+            "tool_be_honest_tool_4"
+          ],
+          "tool_names": [
+            "NER",
+            "EntityFrequencyCounter",
+            "Finish"
+          ]
+        },
+        {
+          "count": 6,
+          "tool_ids": [
+            "toolbench_tool_1044",
+            "toolbench_tool_10563",
+            "toolbench_tool_9466"
+          ],
+          "tool_names": [
+            "Vimeo_SearchVideos",
+            "Vimeo_GetRelatedVideos",
+            "YTStream_Download_YouTube_Videos_Download_Stream"
+          ]
+        },
+        {
+          "count": 6,
+          "tool_ids": [
+            "toolbench_tool_4520",
+            "toolbench_tool_7499",
+            "toolbench_tool_781"
+          ],
+          "tool_names": [
+            "Watchmode_Title_Details",
+            "Streaming_Availability_Search_Ultra",
+            "OTT_details_Title_Details"
+          ]
+        },
+        {
+          "count": 6,
+          "tool_ids": [
+            "toolbench_tool_1045",
+            "toolbench_tool_1047",
+            "toolbench_tool_12162"
+          ],
+          "tool_names": [
+            "Vimeo_GetChannelInfo",
+            "Vimeo_GetVideosComment",
+            "Vimeo_GetCategoryInfo"
+          ]
+        },
+        {
+          "count": 6,
+          "tool_ids": [
+            "toolbench_tool_1045",
+            "toolbench_tool_1047",
+            "toolbench_tool_9466"
+          ],
+          "tool_names": [
+            "Vimeo_GetChannelInfo",
+            "Vimeo_GetVideosComment",
+            "YTStream_Download_YouTube_Videos_Download_Stream"
+          ]
+        },
+        {
+          "count": 6,
+          "tool_ids": [
+            "toolbench_tool_1045",
+            "toolbench_tool_12162",
+            "toolbench_tool_9466"
+          ],
+          "tool_names": [
+            "Vimeo_GetChannelInfo",
+            "Vimeo_GetCategoryInfo",
+            "YTStream_Download_YouTube_Videos_Download_Stream"
+          ]
+        },
+        {
+          "count": 6,
+          "tool_ids": [
+            "toolbench_tool_1047",
+            "toolbench_tool_12162",
+            "toolbench_tool_9466"
+          ],
+          "tool_names": [
+            "Vimeo_GetVideosComment",
+            "Vimeo_GetCategoryInfo",
+            "YTStream_Download_YouTube_Videos_Download_Stream"
+          ]
+        },
+        {
+          "count": 6,
+          "tool_ids": [
+            "toolink_tool_117",
+            "toolink_tool_38",
+            "toolink_tool_85"
+          ],
+          "tool_names": [
+            "sum_over_axis",
+            "multiply",
+            "transpose"
+          ]
+        },
+        {
+          "count": 6,
+          "tool_ids": [
+            "toolink_tool_39",
+            "toolink_tool_84",
+            "toolink_tool_85"
+          ],
+          "tool_names": [
+            "add_subtract_hadamard",
+            "kronecker",
+            "transpose"
+          ]
+        },
+        {
+          "count": 6,
+          "tool_ids": [
+            "toolLens_tool_2",
+            "toolLens_tool_20",
+            "toolLens_tool_50"
+          ],
+          "tool_names": [
+            "Search a Grocery",
+            "pastry/ingredient",
+            "View All Food Items"
+          ]
+        },
+        {
+          "count": 5,
+          "tool_ids": [
+            "tool_be_honest_tool_316",
+            "tool_be_honest_tool_33",
+            "tool_be_honest_tool_333"
+          ],
+          "tool_names": [
+            "NER",
+            "TextSummarizer",
+            "EntityFrequencyCounter"
+          ]
+        },
+        {
+          "count": 5,
+          "tool_ids": [
+            "tool_be_honest_tool_316",
+            "tool_be_honest_tool_33",
+            "tool_be_honest_tool_4"
+          ],
+          "tool_names": [
+            "NER",
+            "TextSummarizer",
+            "Finish"
+          ]
+        },
+        {
+          "count": 5,
+          "tool_ids": [
+            "tool_be_honest_tool_147",
+            "tool_be_honest_tool_148",
+            "tool_be_honest_tool_151"
+          ],
+          "tool_names": [
+            "KeywordTool",
+            "ContentTool",
+            "AnalyticsTool"
+          ]
+        },
+        {
+          "count": 5,
+          "tool_ids": [
+            "tool_be_honest_tool_147",
+            "tool_be_honest_tool_148",
+            "tool_be_honest_tool_4"
+          ],
+          "tool_names": [
+            "KeywordTool",
+            "ContentTool",
+            "Finish"
+          ]
+        },
+        {
+          "count": 5,
+          "tool_ids": [
+            "tool_be_honest_tool_147",
+            "tool_be_honest_tool_151",
+            "tool_be_honest_tool_4"
+          ],
+          "tool_names": [
+            "KeywordTool",
+            "AnalyticsTool",
+            "Finish"
+          ]
+        },
+        {
+          "count": 5,
+          "tool_ids": [
+            "tool_be_honest_tool_148",
+            "tool_be_honest_tool_151",
+            "tool_be_honest_tool_4"
+          ],
+          "tool_names": [
+            "ContentTool",
+            "AnalyticsTool",
+            "Finish"
+          ]
+        }
+      ],
+      "unique_observed_tools": 7652
+    }
+  },
+  "tokenizer": "Qwen/Qwen3-0.6B"
+}

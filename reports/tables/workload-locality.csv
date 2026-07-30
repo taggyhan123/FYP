@@ -1,0 +1,9 @@
+partition,replay,adjacent_pairs,same_domain_ratio,shared_tool_ratio,mean_tool_jaccard
+toolret_gold,empirical,7960,0.998618,0.089447,0.035767
+toolret_gold,uniform,7960,0.48706,0.003392,0.0013
+toolret_gold,skewed,7960,0.393467,0.241583,0.053511
+toolret_gold,session_bursty,7960,0.999749,0.019347,0.005791
+bfcl_exposed,empirical,1239,0.996772,0.006457,0.002033
+bfcl_exposed,uniform,1239,0.226796,0.000807,0.000807
+bfcl_exposed,skewed,1239,0.232446,0.004843,0.002321
+bfcl_exposed,session_bursty,1239,0.996772,0.0,0.0

@@ -1,0 +1,14 @@
+.DS_Store
+.venv/
+.pytest_cache/
+.cache/
+__pycache__/
+*.py[cod]
+
+# Downloaded and normalized corpora are reproducible and too large for Git.
+data/raw/
+data/processed/
+data/tokenizers/
+
+# Local experiment output.
+cluster/results/

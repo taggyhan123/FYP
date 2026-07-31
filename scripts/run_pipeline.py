@@ -38,6 +38,12 @@ def main() -> None:
         "--tokenizer",
         default="Qwen/Qwen3-0.6B",
     )
+    parser.add_argument(
+        "--results-dir",
+        type=Path,
+        default=PROJECT_ROOT / "cluster" / "results",
+        help="GPU probe results folded into the findings report when present.",
+    )
     args = parser.parse_args()
 
     expected = (
@@ -61,7 +67,7 @@ def main() -> None:
     tools, tasks = load_processed(args.processed_dir)
     print(f"Analyzing {len(tools):,} tools and {len(tasks):,} tasks...")
     summary = analyze_all(tools, tasks, tokenizer=args.tokenizer)
-    write_reports(args.report_dir, metadata, summary)
+    write_reports(args.report_dir, metadata, summary, args.results_dir)
     print(json.dumps(metadata["combined"], indent=2))
     print(f"Reports: {args.report_dir}")
 

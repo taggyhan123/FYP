@@ -6,6 +6,7 @@ import random
 from collections import Counter, defaultdict
 from collections.abc import Callable, Iterable, Sequence
 from dataclasses import dataclass, field
+from heapq import heappop, heappush
 from itertools import combinations
 from pathlib import Path
 from statistics import mean, median
@@ -13,6 +14,11 @@ from typing import Any
 
 from tatm.io import read_jsonl
 from tatm.models import CanonicalTool, TaskRecord
+
+
+# Cache capacities to sweep, as fractions of a partition's distinct-tool token
+# working set. 1.0 means the whole working set fits and nothing is ever evicted.
+CAPACITY_FRACTIONS = (1.0, 0.5, 0.25, 0.1, 0.05)
 
 
 @dataclass
@@ -261,6 +267,137 @@ def trie_metrics(
     }
 
 
+@dataclass
+class _CacheNode:
+    key: str | None = None
+    parent: "_CacheNode | None" = None
+    children: dict[str, "_CacheNode"] = field(default_factory=dict)
+    tokens: int = 0
+    last_used: int = 0
+    live: bool = True
+
+
+def bounded_trie_metrics(
+    sequences: Iterable[tuple[str, ...]],
+    tools: dict[str, CanonicalTool],
+    *,
+    block_size: int = 16,
+    capacity_tokens: int | None = None,
+) -> dict[str, int | float | None]:
+    """Trie reuse under a finite cache with leaf-first LRU eviction.
+
+    `trie_metrics` retains every node forever, which makes its output depend
+    only on the multiset of sequences and not on their order: a bursty replay
+    and a uniformly interleaved replay of the same requests score identically.
+    Request ordering can only matter once capacity forces eviction, so locality
+    questions need this function rather than `trie_metrics`.
+
+    A node is evictable only when it has no children, mirroring a radix tree
+    that cannot free a block while a longer path still depends on it.
+    `capacity_tokens=None` disables eviction and reproduces `trie_metrics`.
+    """
+    root = _CacheNode()
+    created = 0
+    live_nodes = 0
+    naive_nodes = 0
+    request_count = 0
+    total_tool_tokens = 0
+    reusable_tool_tokens = 0
+    cacheable_block_tokens = 0
+    retained_tokens = 0
+    evictions = 0
+    clock = 0
+    # (last_used, tiebreak, node); stale entries are skipped at pop time.
+    eviction_heap: list[tuple[int, int, _CacheNode]] = []
+    sequence_number = 0
+
+    def touch(node: _CacheNode) -> None:
+        nonlocal clock, sequence_number
+        clock += 1
+        sequence_number += 1
+        node.last_used = clock
+        heappush(eviction_heap, (node.last_used, sequence_number, node))
+
+    def evict_one() -> bool:
+        nonlocal retained_tokens, evictions, live_nodes, sequence_number
+        while eviction_heap:
+            last_used, _, node = heappop(eviction_heap)
+            if not node.live or node.children or node.last_used != last_used:
+                continue  # stale entry, already evicted, or not a leaf
+            node.live = False
+            live_nodes -= 1
+            retained_tokens -= node.tokens
+            evictions += 1
+            parent = node.parent
+            if parent is not None and node.key is not None:
+                parent.children.pop(node.key, None)
+                if parent is not root and not parent.children:
+                    # The parent just became a leaf and is now evictable.
+                    sequence_number += 1
+                    heappush(
+                        eviction_heap,
+                        (parent.last_used, sequence_number, parent),
+                    )
+            return True
+        return False
+
+    for sequence in sequences:
+        request_count += 1
+        naive_nodes += len(sequence)
+        total_tool_tokens += sum(tools[item].schema_tokens for item in sequence)
+
+        node = root
+        shared_tokens = 0
+        matching = True
+        for tool_id in sequence:
+            if matching and tool_id in node.children:
+                node = node.children[tool_id]
+                shared_tokens += tools[tool_id].schema_tokens
+                touch(node)
+                continue
+            matching = False
+            child = node.children.get(tool_id)
+            if child is None:
+                child = _CacheNode(
+                    key=tool_id,
+                    parent=node,
+                    tokens=tools[tool_id].schema_tokens,
+                )
+                node.children[tool_id] = child
+                created += 1
+                live_nodes += 1
+                retained_tokens += child.tokens
+            node = child
+            touch(node)
+
+        reusable_tool_tokens += shared_tokens
+        cacheable_block_tokens += (shared_tokens // block_size) * block_size
+
+        if capacity_tokens is not None:
+            while retained_tokens > capacity_tokens and evict_one():
+                pass
+
+    compression = 1.0 - (created / naive_nodes) if naive_nodes else 0.0
+    reuse_ratio = (
+        cacheable_block_tokens / total_tool_tokens if total_tool_tokens else 0.0
+    )
+    return {
+        "requests": request_count,
+        "trie_nodes": created,
+        "naive_nodes": naive_nodes,
+        "node_compression_ratio": round(compression, 6),
+        "total_tool_tokens": total_tool_tokens,
+        "reusable_tool_tokens": reusable_tool_tokens,
+        "cacheable_block_tokens": cacheable_block_tokens,
+        "estimated_block_reuse_ratio": round(reuse_ratio, 6),
+        "block_size": block_size,
+        "capacity_tokens": capacity_tokens,
+        "evictions": evictions,
+        "live_nodes": live_nodes,
+        "final_retained_tokens": retained_tokens,
+    }
+
+
 def locality_metrics(
     replay: Sequence[TaskRecord],
     tools: dict[str, CanonicalTool],
@@ -344,6 +481,13 @@ def analyze_partition(
     replays = replay_workloads(tasks, tools)
     ordering_results: list[dict[str, Any]] = []
     locality_results: list[dict[str, Any]] = []
+    capacity_results: list[dict[str, Any]] = []
+
+    observed_ids = {
+        tool_id for task in tasks for tool_id in deduplicated_existing_ids(task, tools)
+    }
+    working_set_tokens = sum(tools[tool_id].schema_tokens for tool_id in observed_ids)
+
     for replay_name, replay in replays.items():
         locality_results.append(
             {
@@ -356,17 +500,33 @@ def analyze_partition(
             deduplicated_existing_ids(task, tools) for task in replay
         ]
         for ordering_name, orderer in orderers.items():
+            ordered_sequences = [orderer(sequence) for sequence in base_sequences]
             ordering_results.append(
                 {
                     "partition": name,
                     "replay": replay_name,
                     "ordering": ordering_name,
-                    **trie_metrics(
-                        (orderer(sequence) for sequence in base_sequences),
-                        tools,
-                    ),
+                    **trie_metrics(ordered_sequences, tools),
                 }
             )
+            # Unbounded retention makes reuse order-invariant, so the replays
+            # above cannot express locality. Repeat under finite capacity.
+            for fraction in CAPACITY_FRACTIONS:
+                capacity = max(1, int(working_set_tokens * fraction))
+                capacity_results.append(
+                    {
+                        "partition": name,
+                        "replay": replay_name,
+                        "ordering": ordering_name,
+                        "capacity_fraction": fraction,
+                        "working_set_tokens": working_set_tokens,
+                        **bounded_trie_metrics(
+                            ordered_sequences,
+                            tools,
+                            capacity_tokens=capacity,
+                        ),
+                    }
+                )
 
     top_tools = [
         {
@@ -431,6 +591,8 @@ def analyze_partition(
         },
         "locality": locality_results,
         "ordering_results": ordering_results,
+        "capacity_results": capacity_results,
+        "working_set_tokens": working_set_tokens,
     }
 
 

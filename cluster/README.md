@@ -118,7 +118,41 @@ python scripts/compare_probe_runs.py \
   --disabled cluster/results/cache-disabled.json
 ```
 
-## 5. Generate a benchmark workload
+## 5. Locate the measurement floor before any ordering experiment
+
+```bash
+python scripts/prefill_sweep.py \
+  --run-label sweep-cache-enabled \
+  --repeats 5 \
+  --output cluster/results/prefill-sweep-enabled.json
+```
+
+Repeat against a `--no-enable-prefix-caching` server with
+`--run-label sweep-cache-disabled`. Trust the cache-on versus cache-off
+comparison, not within-run cold-versus-warm separation: the control "separates"
+at one tool, where no cache exists.
+
+Ordering results below the crossover are not interpretable.
+
+## 6. Validate the analytical estimate against real cache hits
+
+```bash
+python scripts/build_cluster_workload.py \
+  --partition bfcl --ordering alphabetical \
+  --menu-size 64 --limit 200 \
+  --output data/processed/bfcl-alpha-menu64.jsonl
+
+python scripts/validate_reuse_estimate.py \
+  --input data/processed/bfcl-alpha-menu64.jsonl \
+  --run-label validate-menu64-alphabetical \
+  --output cluster/results/validate-menu64-alphabetical.json
+```
+
+`--menu-size` pads each task's gold tools with distractors from a fixed global
+catalog. Without it the median task exposes one tool, which cannot be reordered
+and sits below the crossover.
+
+## 7. Generate a benchmark workload
 
 After the local normalization pipeline has run:
 

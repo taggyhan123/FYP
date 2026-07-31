@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import csv
+import json
 from pathlib import Path
 from typing import Any
 
@@ -253,6 +254,18 @@ def write_access_patterns(path: Path, summary: dict[str, Any]) -> None:
             ]
             for row in partition["locality"]
         ]
+        # One ordering is enough to show the locality effect; sweeping every
+        # ordering across every capacity would bury it in rows.
+        capacity_rows = [
+            [
+                _percent(row["capacity_fraction"]),
+                row["replay"],
+                _percent(row["estimated_block_reuse_ratio"]),
+                f'{row["evictions"]:,}',
+            ]
+            for row in partition["capacity_results"]
+            if row["ordering"] == "frequency"
+        ]
         pair_rows = [
             [
                 " + ".join(row["tool_names"]),
@@ -388,6 +401,31 @@ def write_access_patterns(path: Path, summary: dict[str, Any]) -> None:
                     replay_best_rows,
                 ),
                 "",
+                "The three tables above assume unbounded retention. Under that "
+                "assumption trie reuse depends only on the multiset of requests "
+                "and not on their order, so `session_bursty` — a permutation of "
+                "`empirical` — is identical to it **by construction**, and the "
+                "`uniform`/`skewed` differences come from resampling with "
+                "replacement rather than from locality. Request order can only "
+                "matter once capacity forces eviction, so the locality question "
+                "is answered by the next table, not by these.",
+                "",
+                "### Reuse under a finite cache (frequency ordering)",
+                "",
+                "Capacity is a fraction of this partition's distinct-tool token "
+                f'working set ({partition["working_set_tokens"]:,} tokens), '
+                "evicted leaf-first by least-recently-used.",
+                "",
+                _table(
+                    [
+                        "Capacity",
+                        "Replay",
+                        "Estimated token reuse",
+                        "Evictions",
+                    ],
+                    capacity_rows,
+                ),
+                "",
                 f"Pair/triple calculations skipped "
                 f'{partition["cooccurrence_tasks_skipped_over_25_tools"]["pairs"]}'
                 " tasks with more than 25 exposed tools to avoid combinatorial "
@@ -401,11 +439,13 @@ def write_access_patterns(path: Path, summary: dict[str, Any]) -> None:
             "## Interpretation boundary",
             "",
             "The cache result is an analytical tool-unit trie estimate. It rounds "
-            "shared canonical tool tokens down to 16-token blocks and assumes an "
-            "unbounded retained trie. It excludes constant system/user prefixes, "
-            "chat-template separators, eviction, GPU pressure, and scheduler "
-            "effects. The CUDA vLLM probe in `cluster/` is required before making "
-            "latency or cache-hit claims.",
+            "shared canonical tool tokens down to 16-token blocks. It excludes "
+            "constant system/user prefixes, chat-template separators, GPU "
+            "pressure, and scheduler effects, and it counts reuse at tool "
+            "boundaries while real block boundaries fall wherever the rendered "
+            "prompt puts them — so it is an upper bound, not a prediction. The "
+            "finite-cache tables model eviction; the unbounded tables do not. "
+            "Measured vLLM cache hits are required before any latency claim.",
             "",
             "A useful positive signal is ordering-dependent block reuse on "
             "multi-tool workloads, especially under bursty replay. A negative or "
@@ -418,7 +458,267 @@ def write_access_patterns(path: Path, summary: dict[str, Any]) -> None:
     path.write_text("\n".join(sections), encoding="utf-8")
 
 
-def write_initial_findings(path: Path, summary: dict[str, Any]) -> None:
+def load_probe_results(results_dir: Path) -> dict[str, Any] | None:
+    """Load the Task B probe outputs if they have been produced on a GPU.
+
+    Reports are regenerated from scratch by the pipeline, so measured results
+    have to be read back in here rather than hand-written into the markdown;
+    anything typed directly into `reports/*.md` is destroyed on the next run.
+    """
+    def read(name: str) -> dict[str, Any] | None:
+        path = results_dir / name
+        if not path.exists():
+            return None
+        return json.loads(path.read_text(encoding="utf-8"))
+
+    enabled = read("cache-enabled.json")
+    if enabled is not None and enabled.get("format_version", 1) < 2:
+        enabled = None  # single-trial format has no intervals; treat as absent
+
+    validations = [
+        json.loads(path.read_text(encoding="utf-8"))
+        for path in sorted(results_dir.glob("validate-*.json"))
+    ]
+    bundle = {
+        "enabled": enabled,
+        "disabled": read("cache-disabled.json"),
+        "sweep_enabled": read("prefill-sweep-enabled.json"),
+        "sweep_disabled": read("prefill-sweep-disabled.json"),
+        "validations": validations,
+    }
+    return bundle if any(bundle.values()) else None
+
+
+_PROBE_SCENARIOS = (
+    ("original_cold", "Cold prompt"),
+    ("original_identical", "Identical prompt reuse"),
+    ("changed_second_tool", "Changed second tool"),
+    ("reordered_first_two", "Reordered first two tools"),
+    ("original_restored", "Original restored"),
+)
+
+
+def _sweep_section(probe: dict[str, Any] | None) -> str:
+    """Where prefix caching starts to pay, measured against a control."""
+    if probe is None or probe.get("sweep_enabled") is None:
+        return ""
+    enabled = probe["sweep_enabled"]
+    disabled = probe.get("sweep_disabled")
+    off_by_size = {}
+    if disabled is not None:
+        off_by_size = {row["menu_tools"]: row for row in disabled["results"]}
+
+    rows = []
+    crossover = None
+    for row in enabled["results"]:
+        warm = row["warm_ttft_seconds"]["mean"]
+        cold = row["cold_ttft_seconds"]["mean"]
+        off_row = off_by_size.get(row["menu_tools"])
+        off_warm = off_row["warm_ttft_seconds"]["mean"] if off_row else None
+        speedup = f"{off_warm / warm:.1f}x" if off_warm and warm else "—"
+        if off_warm and off_warm / warm >= 1.2 and crossover is None:
+            crossover = row["menu_tools"]
+        rows.append(
+            [
+                row["menu_tools"],
+                f'{row["prompt_tokens"]:,}',
+                f"{cold * 1000:.1f}",
+                f"{warm * 1000:.1f}",
+                f"{off_warm * 1000:.1f}" if off_warm else "—",
+                speedup,
+            ]
+        )
+
+    crossover_text = (
+        f"Prefix caching first produces a material gain at **{crossover} tools** "
+        "and grows steeply from there."
+        if crossover
+        else "No menu size showed a material cache-on/cache-off gap."
+    )
+    return "\n".join(
+        [
+            "## Prefill cost and the measurement floor",
+            "",
+            "Menus are one gold tool padded with distractors from a fixed global "
+            "catalog. Cold is measured after a prefix-cache reset; warm is an "
+            f'identical repeat. {enabled["repeats"]} trials per point.',
+            "",
+            _table(
+                [
+                    "Menu tools",
+                    "Prompt tokens",
+                    "Cold TTFT on (ms)",
+                    "Warm TTFT on (ms)",
+                    "Warm TTFT off (ms)",
+                    "Speedup",
+                ],
+                rows,
+            ),
+            "",
+            crossover_text,
+            "",
+            "The cache-disabled control shows cold and warm within noise of each "
+            "other at every size, so the gap above is prefix caching and not a "
+            "warmup artifact. Note that within-run cold-vs-warm separation alone "
+            "is not sufficient evidence: the control also 'separates' at one tool, "
+            "where no cache exists. The cache-on/cache-off comparison is the "
+            "trustworthy one.",
+            "",
+            "This supersedes the earlier reading that prefix reuse buys nothing. "
+            "It buys nothing *at 303 tokens*, which is simply below the floor.",
+            "",
+        ]
+    )
+
+
+def _validation_section(probe: dict[str, Any] | None) -> str:
+    """Analytical trie estimate versus what vLLM actually cached."""
+    if probe is None or not probe.get("validations"):
+        return ""
+    rows = []
+    for run in probe["validations"]:
+        predicted = run["predicted"]
+        measured = run["measured"]
+        rows.append(
+            [
+                run["run_label"].replace("validate-", ""),
+                f'{predicted["cacheable_block_tokens"]:,}',
+                f'{measured["cached_prompt_tokens"]:,.0f}',
+                f'{run["measured_over_predicted_ratio"]:.2f}x'
+                if run.get("measured_over_predicted_ratio")
+                else "—",
+                _percent(predicted["estimated_block_reuse_ratio"]),
+                _percent(measured["measured_reuse_ratio"]),
+            ]
+        )
+    return "\n".join(
+        [
+            "## Analytical estimate versus measured cache hits",
+            "",
+            _table(
+                [
+                    "Workload",
+                    "Predicted cacheable",
+                    "Measured cached",
+                    "Measured/predicted",
+                    "Predicted reuse",
+                    "Measured reuse",
+                ],
+                rows,
+            ),
+            "",
+            "The tool-unit model under-predicts rather than over-predicts. It "
+            "ignores the chat template and system preamble, which are identical "
+            "across requests and are themselves cached, and that outweighs the "
+            "partial blocks it loses at tool boundaries.",
+            "",
+            "The ordering comparison inverts the gold-only recommendation. On "
+            "padded menus, ordering by benchmark support puts the *task-specific* "
+            "tools first and pushes the shared catalog behind them, destroying the "
+            "common prefix. A stable global order that ignores task-specificity "
+            "keeps the shared catalog in front. Frequency ordering is the right "
+            "choice only when the whole menu is task-specific, which is not what a "
+            "connected tool catalog looks like.",
+            "",
+        ]
+    )
+
+
+def _probe_section(probe: dict[str, Any] | None) -> str:
+    if probe is None or probe.get("enabled") is None:
+        return (
+            "## Prefix-cache sanity status\n\n"
+            "Not yet measured. Run `scripts/vllm_prefix_cache_probe.py` on a "
+            "CUDA GPU as described in `cluster/README.md`; no synthetic number "
+            "is substituted here.\n"
+        )
+
+    enabled = probe["enabled"]
+    disabled = probe.get("disabled")
+    config = enabled.get("server_cache_config", {})
+    rows = []
+    for key, label in _PROBE_SCENARIOS:
+        summary_row = enabled["summary"][key]
+        cached = summary_row["cached_prompt_tokens"]["mean"]
+        prompt_tokens = summary_row["prompt_tokens"]
+        ttft = summary_row["ttft_seconds"]
+        cell = f'{ttft["mean"] * 1000:.1f} ± {ttft.get("ci95_half_width", 0) * 1000:.1f}'
+        off_cell = "—"
+        if disabled is not None:
+            off = disabled["summary"][key]["ttft_seconds"]
+            off_cell = (
+                f'{off["mean"] * 1000:.1f} ± '
+                f'{off.get("ci95_half_width", 0) * 1000:.1f}'
+            )
+        rows.append(
+            [
+                label,
+                f'{cached:.0f} / {"/".join(str(v) for v in prompt_tokens)}',
+                _percent(summary_row["reuse_fraction"]),
+                cell,
+                off_cell,
+            ]
+        )
+
+    control_note = (
+        "No cache-disabled control has been run, so output equality is "
+        "unverified."
+    )
+    if disabled is not None:
+        control_flag = disabled.get("server_cache_config", {}).get(
+            "enable_prefix_caching"
+        )
+        max_cached = max(
+            row["cached_prompt_tokens"]["max"]
+            for row in disabled["summary"].values()
+        )
+        if control_flag is False and max_cached == 0:
+            control_note = (
+                "The control served `enable_prefix_caching=False` and reported "
+                "0 cached tokens in every scenario, so the cache-on/cache-off "
+                "output comparison is meaningful."
+            )
+        else:
+            control_note = (
+                "**The control is invalid**: it served "
+                f"`enable_prefix_caching={control_flag}` and reported up to "
+                f"{max_cached:.0f} cached tokens. Omitting "
+                "`--enable-prefix-caching` does not disable the feature in "
+                "vLLM V1; restart with `--no-enable-prefix-caching`."
+            )
+
+    return "\n".join(
+        [
+            "## Prefix-cache sanity results",
+            "",
+            f'Measured on {enabled["model"]}, block size '
+            f'{config.get("block_size")}, {config.get("num_gpu_blocks")} GPU '
+            f'blocks, {enabled["repeats"]} trials per scenario with the prefix '
+            "cache reset before each trial. Intervals are 95% Student-t "
+            "half-widths.",
+            "",
+            _table(
+                [
+                    "Check",
+                    "Cached / prompt tokens",
+                    "Reuse",
+                    "TTFT on (ms)",
+                    "TTFT off (ms)",
+                ],
+                rows,
+            ),
+            "",
+            control_note,
+            "",
+        ]
+    )
+
+
+def write_initial_findings(
+    path: Path,
+    summary: dict[str, Any],
+    probe: dict[str, Any] | None = None,
+) -> None:
     token_dist = summary["inventory"]["schema_token_distribution"]
     toolret = summary["partitions"]["toolret_gold"]
     bfcl = summary["partitions"]["bfcl_exposed"]
@@ -441,6 +741,15 @@ def write_initial_findings(path: Path, summary: dict[str, Any]) -> None:
     bf_gain = (
         bf_frequency["estimated_block_reuse_ratio"]
         - bf_original["estimated_block_reuse_ratio"]
+    )
+    prefix_section = "\n".join(
+        section
+        for section in (
+            _probe_section(probe),
+            _sweep_section(probe),
+            _validation_section(probe),
+        )
+        if section
     )
     flagged = summary["inventory"]["tools_with_any_issue"]
     total_tools = summary["inventory"]["tools"]
@@ -474,24 +783,13 @@ points). These are analytical estimates, not vLLM hit-rate or latency results.
   empty parameter objects, which can be legitimate; malformed and missing-field
   counts are reported separately.
 - Controlled support-skewed replay produces much more reuse than uniform or
-  empirical access, confirming that any systems claim must state its workload
-  locality rather than assume production-like skew.
+  empirical access, but under unbounded retention that gap comes from
+  resampling with replacement — repeated requests — not from locality. Only the
+  finite-cache tables in `access-patterns.md` speak to request ordering.
 - Classic FP-tree global order equals the frequency order in this baseline.
   Conditional pattern mining is still untested.
 
-## Prefix-cache sanity status
-
-| Check | Local status | Required cluster evidence |
-| --- | --- | --- |
-| Identical prompt reuse | Pending CUDA vLLM | cached/computed prompt tokens and TTFT |
-| Changed second tool | Pending CUDA vLLM | first differing block boundary |
-| Reordered tools | Pending CUDA vLLM | rendered token IDs and hit boundary |
-| Cache on/off equivalence | Pending CUDA vLLM | identical generated token sequence |
-| GPU/KV memory | Unavailable on this Mac | GPU type, cache usage, eviction settings |
-
-The runnable probe and procedure are in `cluster/README.md`; no synthetic GPU
-number is substituted here.
-
+{prefix_section}
 ## Recommendation
 
 Proceed with the exact prompt-level ToolTrie baseline on the cluster, focusing
@@ -529,6 +827,7 @@ def write_reports(
     report_dir: Path,
     metadata: dict[str, Any],
     summary: dict[str, Any],
+    results_dir: Path | None = None,
 ) -> None:
     report_dir.mkdir(parents=True, exist_ok=True)
     write_json(report_dir / "analysis-summary.json", summary)
@@ -538,7 +837,8 @@ def write_reports(
         summary,
     )
     write_access_patterns(report_dir / "access-patterns.md", summary)
-    write_initial_findings(report_dir / "initial-findings.md", summary)
+    probe = load_probe_results(results_dir) if results_dir is not None else None
+    write_initial_findings(report_dir / "initial-findings.md", summary, probe)
 
     table_dir = report_dir / "tables"
     issue_rows = [

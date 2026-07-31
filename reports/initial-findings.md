@@ -27,46 +27,55 @@ points). These are analytical estimates, not vLLM hit-rate or latency results.
   empty parameter objects, which can be legitimate; malformed and missing-field
   counts are reported separately.
 - Controlled support-skewed replay produces much more reuse than uniform or
-  empirical access, confirming that any systems claim must state its workload
-  locality rather than assume production-like skew.
+  empirical access, but under unbounded retention that gap comes from
+  resampling with replacement — repeated requests — not from locality. Only the
+  finite-cache tables in `access-patterns.md` speak to request ordering.
 - Classic FP-tree global order equals the frequency order in this baseline.
   Conditional pattern mining is still untested.
 
-## Prefix-cache sanity status
+## Prefix-cache sanity results
 
-Measured on an RTX 3090 (23.56 GiB) with vLLM 0.26.0 and `Qwen/Qwen3-0.6B`,
-block size 16, 11,807 GPU blocks. Five trials per scenario with the prefix cache
-reset before each trial (`cluster/results/`). Prompt length is 303 tokens except
-for `changed_second_tool` at 309.
+Measured on Qwen/Qwen3-0.6B, block size 16, 11807 GPU blocks, 5 trials per scenario with the prefix cache reset before each trial. Intervals are 95% Student-t half-widths.
 
-| Check | Cached prompt tokens | Reuse | TTFT on (ms) | TTFT off (ms) |
+| Check | Cached / prompt tokens | Reuse | TTFT on (ms) | TTFT off (ms) |
 | --- | --- | --- | --- | --- |
-| Cold prompt | 0 / 303 | 0.0% | 52.4 ± 28.8 | 51.5 ± 27.3 |
-| Identical prompt reuse | 288 / 303 | 95.0% | 43.0 ± 1.2 | 40.5 ± 2.3 |
-| Changed second tool | 128 / 309 | 41.4% | 41.4 ± 1.1 | 42.3 ± 2.2 |
-| Reordered first two tools | 48 / 303 | 15.8% | 37.7 ± 5.7 | 43.0 ± 4.2 |
-| Original restored | 288 / 303 | 95.0% | 41.1 ± 2.1 | 39.4 ± 2.8 |
+| Cold prompt | 0 / 303 | 0.00% | 52.4 ± 28.8 | 51.5 ± 27.3 |
+| Identical prompt reuse | 288 / 303 | 95.05% | 43.0 ± 1.2 | 40.5 ± 2.3 |
+| Changed second tool | 128 / 309 | 41.42% | 41.4 ± 1.1 | 42.3 ± 2.2 |
+| Reordered first two tools | 48 / 303 | 15.84% | 37.7 ± 5.7 | 43.0 ± 4.2 |
+| Original restored | 288 / 303 | 95.05% | 41.1 ± 2.1 | 39.4 ± 2.8 |
 
-All five Task B checks pass. Reuse behaves exactly as the exact-prefix model
-predicts: an identical prompt reuses 95% of it, editing one tool description
-cuts reuse to 41%, and reordering the first two tools cuts it to 16%. Cache-on
-and cache-off produce identical output text and tool calls in every scenario,
-with the control verified at `enable_prefix_caching=False` and 0 cached tokens
-throughout. Peak KV-cache usage per request is 0.0019% of an 11,807-block
-cache, and mean inter-token latency is ~2.5 ms across all scenarios.
+The control served `enable_prefix_caching=False` and reported 0 cached tokens in every scenario, so the cache-on/cache-off output comparison is meaningful.
 
-**Prefix reuse produced no measurable TTFT benefit at this prompt size.**
-Intervals above are 95% Student-t half-widths over five trials; no scenario
-separates cache-on from cache-off, and reuse fraction does not order TTFT — the
-15.8%-reuse case has the lowest mean. This is a measurement-floor result rather
-than evidence against the hypothesis: 303 tokens prefill in ~40 ms end-to-end,
-dominated by fixed per-request overhead, so eliminating 288 tokens of prefill
-work is not resolvable above noise.
+## Prefill cost and the measurement floor
 
-A single-trial version of this experiment appeared to show a 3x gain (69 ms cold
-vs 23 ms warm). That was entirely the server's first-ever request: per-trial cold
-TTFT is 93.9, 41.8, 42.7, 42.5, 41.3 ms. Any latency claim in this project needs
-repeated trials and a discarded warmup.
+Menus are one gold tool padded with distractors from a fixed global catalog. Cold is measured after a prefix-cache reset; warm is an identical repeat. 5 trials per point.
+
+| Menu tools | Prompt tokens | Cold TTFT on (ms) | Warm TTFT on (ms) | Warm TTFT off (ms) | Speedup |
+| --- | --- | --- | --- | --- | --- |
+| 1 | 250 | 25.6 | 23.4 | 23.1 | 1.0x |
+| 4 | 433 | 25.2 | 16.9 | 23.7 | 1.4x |
+| 16 | 1,771 | 62.1 | 35.3 | 56.5 | 1.6x |
+| 64 | 6,742 | 248.8 | 54.1 | 245.6 | 4.5x |
+| 128 | 13,422 | 647.8 | 85.2 | 640.7 | 7.5x |
+| 200 | 20,627 | 1282.7 | 120.7 | 1275.2 | 10.6x |
+
+Prefix caching first produces a material gain at **4 tools** and grows steeply from there.
+
+The cache-disabled control shows cold and warm within noise of each other at every size, so the gap above is prefix caching and not a warmup artifact. Note that within-run cold-vs-warm separation alone is not sufficient evidence: the control also 'separates' at one tool, where no cache exists. The cache-on/cache-off comparison is the trustworthy one.
+
+This supersedes the earlier reading that prefix reuse buys nothing. It buys nothing *at 303 tokens*, which is simply below the floor.
+
+## Analytical estimate versus measured cache hits
+
+| Workload | Predicted cacheable | Measured cached | Measured/predicted | Predicted reuse | Measured reuse |
+| --- | --- | --- | --- | --- | --- |
+| menu64-alphabetical | 428,016 | 526,432 | 1.23x | 38.42% | 38.15% |
+| menu64-frequency | 40,448 | 60,864 | 1.50x | 3.63% | 4.41% |
+
+The tool-unit model under-predicts rather than over-predicts. It ignores the chat template and system preamble, which are identical across requests and are themselves cached, and that outweighs the partial blocks it loses at tool boundaries.
+
+The ordering comparison inverts the gold-only recommendation. On padded menus, ordering by benchmark support puts the *task-specific* tools first and pushes the shared catalog behind them, destroying the common prefix. A stable global order that ignores task-specificity keeps the shared catalog in front. Frequency ordering is the right choice only when the whole menu is task-specific, which is not what a connected tool catalog looks like.
 
 ## Recommendation
 
@@ -87,28 +96,12 @@ native exact APC converts the local token-reuse signal into repeatable TTFT
 benefit without a BFCL quality regression. If it does not, narrow the project to
 characterizing the crossover regimes or pivot toward retrieval/menu reduction.
 
-Task B has now partly answered that, negatively, at small scale: 95% token reuse
-bought no measurable TTFT at a 303-token prompt. Before any ordering experiment
-can produce an interpretable latency number, Task E must first find the prompt
-size at which schema prefill dominates TTFT. The concrete next measurement is a
-prefill-cost sweep — TTFT against tool-catalog token count, cache-on and
-cache-off, holding the request shape fixed — to locate the point where the
-cache-on and cache-off curves separate beyond their confidence intervals. Every
-ordering comparison should then be run above that threshold. Running the
-existing workload orderings at 303-token prompts would produce differences
-indistinguishable from noise and invite exactly the over-claim the single-trial
-run already produced once.
+## Immediate cluster run
 
-## Immediate next GPU run
-
-Done: model/vLLM/GPU/block size frozen and recorded (step 1), and the
-cache-enabled and cache-disabled sanity probes both run and compared (step 2).
-Remaining:
-
-1. Sweep TTFT against tool-catalog token count, cache-on and cache-off, to find
-   where schema prefill dominates TTFT. No ordering result is interpretable
-   below that threshold.
-2. Render and save complete prompt token IDs for each ordering.
-3. Replay original, frequency, and schema-cost-weighted workloads above the
-   threshold, with documented cold/warm policies and repeated trials.
-4. Add BFCL name/argument/no-tool scores before interpreting latency.
+1. Freeze model revision, tokenizer, chat template, vLLM version, GPU, block
+   size, dtype, and server flags.
+2. Run the cache-enabled and cache-disabled sanity probe.
+3. Render and save complete prompt token IDs for each ordering.
+4. Replay original, frequency, and schema-cost-weighted workloads with
+   documented cold/warm policies and repeated trials.
+5. Add BFCL name/argument/no-tool scores before interpreting latency.

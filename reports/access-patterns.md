@@ -99,6 +99,35 @@ FP-tree-style global ordering is descending global support, so it is intentional
 | skewed | schema_cost_weighted | 80.18% | 88.88% |
 | session_bursty | schema_cost_weighted | 31.80% | 36.52% |
 
+The three tables above assume unbounded retention. Under that assumption trie reuse depends only on the multiset of requests and not on their order, so `session_bursty` — a permutation of `empirical` — is identical to it **by construction**, and the `uniform`/`skewed` differences come from resampling with replacement rather than from locality. Request order can only matter once capacity forces eviction, so the locality question is answered by the next table, not by these.
+
+### Reuse under a finite cache (frequency ordering)
+
+Capacity is a fraction of this partition's distinct-tool token working set (775,435 tokens), evicted leaf-first by least-recently-used.
+
+| Capacity | Replay | Estimated token reuse | Evictions |
+| --- | --- | --- | --- |
+| 100.00% | empirical | 31.35% | 928 |
+| 50.00% | empirical | 31.35% | 3,908 |
+| 25.00% | empirical | 31.35% | 6,050 |
+| 10.00% | empirical | 31.01% | 7,929 |
+| 5.00% | empirical | 29.62% | 8,876 |
+| 100.00% | uniform | 51.84% | 0 |
+| 50.00% | uniform | 46.89% | 2,875 |
+| 25.00% | uniform | 33.31% | 6,772 |
+| 10.00% | uniform | 19.81% | 9,840 |
+| 5.00% | uniform | 13.10% | 11,299 |
+| 100.00% | skewed | 80.04% | 0 |
+| 50.00% | skewed | 80.04% | 0 |
+| 25.00% | skewed | 80.04% | 61 |
+| 10.00% | skewed | 72.87% | 2,968 |
+| 5.00% | skewed | 59.22% | 7,335 |
+| 100.00% | session_bursty | 31.35% | 1,700 |
+| 50.00% | session_bursty | 30.53% | 6,025 |
+| 25.00% | session_bursty | 27.10% | 8,439 |
+| 10.00% | session_bursty | 20.34% | 10,062 |
+| 5.00% | session_bursty | 15.81% | 10,954 |
+
 Pair/triple calculations skipped 0 tasks with more than 25 exposed tools to avoid combinatorial distortion.
 
 ## bfcl_exposed
@@ -198,10 +227,39 @@ FP-tree-style global ordering is descending global support, so it is intentional
 | skewed | frequency | 61.39% | 64.00% |
 | session_bursty | frequency | 18.88% | 21.07% |
 
+The three tables above assume unbounded retention. Under that assumption trie reuse depends only on the multiset of requests and not on their order, so `session_bursty` — a permutation of `empirical` — is identical to it **by construction**, and the `uniform`/`skewed` differences come from resampling with replacement rather than from locality. Request order can only matter once capacity forces eviction, so the locality question is answered by the next table, not by these.
+
+### Reuse under a finite cache (frequency ordering)
+
+Capacity is a fraction of this partition's distinct-tool token working set (145,101 tokens), evicted leaf-first by least-recently-used.
+
+| Capacity | Replay | Estimated token reuse | Evictions |
+| --- | --- | --- | --- |
+| 100.00% | empirical | 18.88% | 150 |
+| 50.00% | empirical | 10.91% | 1,016 |
+| 25.00% | empirical | 4.72% | 1,486 |
+| 10.00% | empirical | 3.03% | 1,719 |
+| 5.00% | empirical | 1.84% | 1,812 |
+| 100.00% | uniform | 41.11% | 0 |
+| 50.00% | uniform | 36.67% | 454 |
+| 25.00% | uniform | 23.36% | 1,068 |
+| 10.00% | uniform | 10.58% | 1,535 |
+| 5.00% | uniform | 4.78% | 1,722 |
+| 100.00% | skewed | 61.39% | 0 |
+| 50.00% | skewed | 57.84% | 362 |
+| 25.00% | skewed | 41.58% | 1,137 |
+| 10.00% | skewed | 22.65% | 1,852 |
+| 5.00% | skewed | 12.71% | 2,202 |
+| 100.00% | session_bursty | 18.03% | 174 |
+| 50.00% | session_bursty | 13.97% | 952 |
+| 25.00% | session_bursty | 6.37% | 1,451 |
+| 10.00% | session_bursty | 2.52% | 1,729 |
+| 5.00% | session_bursty | 1.14% | 1,826 |
+
 Pair/triple calculations skipped 0 tasks with more than 25 exposed tools to avoid combinatorial distortion.
 
 ## Interpretation boundary
 
-The cache result is an analytical tool-unit trie estimate. It rounds shared canonical tool tokens down to 16-token blocks and assumes an unbounded retained trie. It excludes constant system/user prefixes, chat-template separators, eviction, GPU pressure, and scheduler effects. The CUDA vLLM probe in `cluster/` is required before making latency or cache-hit claims.
+The cache result is an analytical tool-unit trie estimate. It rounds shared canonical tool tokens down to 16-token blocks. It excludes constant system/user prefixes, chat-template separators, GPU pressure, and scheduler effects, and it counts reuse at tool boundaries while real block boundaries fall wherever the rendered prompt puts them — so it is an upper bound, not a prediction. The finite-cache tables model eviction; the unbounded tables do not. Measured vLLM cache hits are required before any latency claim.
 
 A useful positive signal is ordering-dependent block reuse on multi-tool workloads, especially under bursty replay. A negative or flat ToolRet result is also expected when most relevance sets contain one tool; reordering cannot improve a one-item sequence.

@@ -8,8 +8,8 @@ Status after the first local research pass:
 | B — exact prefix caching | Complete; all five checks measured on GPU | See "Task B detail" below |
 | C — normalize datasets | Complete for ToolRet and five BFCL V4 static subsets | `scripts/download_datasets.py`, `scripts/run_pipeline.py`, `reports/dataset-inventory.md` |
 | D — access patterns | Complete for benchmark evidence and four controlled replays | `reports/access-patterns.md` and `reports/tables/` |
-| E — exact ToolTrie baseline | Local planner/workload builder and replay client complete; serving run pending | `src/tatm/prompting.py`, `scripts/build_cluster_workload.py`, `scripts/replay_vllm_workload.py`, `cluster/README.md` |
-| F — initial report | Local findings complete; GPU section explicitly pending | `reports/initial-findings.md` |
+| E — exact ToolTrie baseline | Measured on GPU: prefill sweep, crossover, and two orderings validated against real cache hits | `scripts/prefill_sweep.py`, `scripts/validate_reuse_estimate.py`, "Task E" below |
+| F — initial report | Complete and regenerated from measured results | `reports/initial-findings.md` |
 
 ## Task B detail
 
@@ -32,7 +32,11 @@ serves `enable_prefix_caching=False` and reports 0 cached tokens everywhere;
 `scripts/compare_probe_runs.py` refuses to report equality unless it can verify
 both conditions from the results file.
 
-### Prefix reuse does not yield a TTFT gain at this prompt size
+### Prefix reuse yields no TTFT gain *at this prompt size*
+
+Superseded in scope by the prefill sweep below: the null result here is a
+measurement floor, not a property of prefix caching. At 200-tool menus the same
+mechanism gives a 10.6x TTFT reduction.
 
 | Scenario | Reuse | TTFT cache-on (ms) | TTFT cache-off (ms) |
 | --- | --- | --- | --- |
@@ -51,13 +55,71 @@ cold and 95%-reuse requests cost the same.
 This is a measurement-floor result, not evidence against the hypothesis. A
 303-token prompt prefills in roughly 40 ms end-to-end, which is dominated by
 fixed per-request overhead, so removing 288 tokens of prefill work is not
-resolvable. Task E must use tool catalogs large enough that schema prefill
-dominates TTFT before any ordering claim can be tested. Establishing that
-threshold is now the first thing Task E should measure.
+resolvable.
 
 The earlier single-trial run appeared to show a 3x TTFT gain (69 ms cold vs
 23 ms warm). That was the first-request warmup artifact, and it is the concrete
 reason repeated trials are mandatory here.
+
+## Task E — measurements on padded menus
+
+Benchmark tasks expose a median of one tool, which is both unreorderable and
+below the floor above. Menus are therefore one gold tool plus distractors drawn
+from a fixed global catalog, matching a deployment that keeps the same connected
+tools loaded across requests.
+
+### Prefill sweep: prefix caching pays once catalogs are realistic
+
+| Menu tools | Prompt tokens | Cold TTFT (ms) | Warm TTFT (ms) | Warm, cache off (ms) | Speedup |
+| --- | --- | --- | --- | --- | --- |
+| 1 | 250 | 25.6 | 23.4 | 23.1 | 1.0x |
+| 4 | 433 | 25.2 | 16.9 | 23.7 | 1.4x |
+| 16 | 1,771 | 62.1 | 35.3 | 56.5 | 1.6x |
+| 64 | 6,742 | 248.8 | 54.1 | 245.6 | 4.5x |
+| 128 | 13,422 | 647.8 | 85.2 | 640.7 | 7.5x |
+| 200 | 20,627 | 1282.7 | 120.7 | 1275.2 | 10.6x |
+
+The cache-disabled control stays flat (cold within noise of warm at every size),
+so the gap is caching. Crossover is around 4 tools / 433 prompt tokens. Every
+ordering experiment must run above it.
+
+Caveat on method: within-run cold-vs-warm separation is not sufficient evidence.
+The control "separates" at one tool where no cache exists, so the cache-on
+versus cache-off comparison is the one to trust.
+
+### Ordering: the gold-only recommendation inverts
+
+| Ordering, 64-tool menus | Measured cached tokens | Measured reuse |
+| --- | --- | --- |
+| alphabetical | 526,432 | 38.15% |
+| frequency | 60,864 | 4.41% |
+
+Task D recommended frequency ordering from an analytical model over gold-only
+menus. On padded menus it is nearly 9x worse. Ordering by benchmark support
+ranks the task-specific gold tools first and pushes the shared catalog behind
+them, so the common prefix is destroyed. A stable global order that ignores
+task-specificity keeps the shared catalog in front. Frequency ordering only wins
+when the entire menu is task-specific, which is not what a connected catalog
+looks like.
+
+### Trie model calibration
+
+The analytical estimate **under**-predicts measured cache hits: 1.23x for
+alphabetical, 1.50x for frequency. It ignores the chat template and system
+preamble, which are identical across requests and cached, and that outweighs the
+partial blocks it loses at tool boundaries. Calibration is tighter where reuse
+is high, so the model is most trustworthy exactly where it matters.
+
+## Task D — locality is now measurable
+
+`trie_metrics` retained every node forever, making reuse depend only on the
+multiset of requests and not their order; `session_bursty` was therefore
+identical to `empirical` by construction, and the skewed-replay gap came from
+resampling with replacement rather than locality. `bounded_trie_metrics` adds
+capacity with leaf-first LRU eviction, and the replays now diverge. ToolRet's
+natural file order turns out to be *more* local than the synthetic bursty replay
+(31.35% vs 27.10% reuse at 25% capacity), because its file order is already
+99.86% same-domain adjacent.
 
 ## Verified locally
 
@@ -65,17 +127,27 @@ reason repeated trials are mandatory here.
 - 1,362 canonical BFCL functions and 1,240 BFCL tasks;
 - 45,815 total schemas tokenized with `Qwen/Qwen3-0.6B`;
 - all ToolRet label references resolve to the downloaded corpus;
-- eight unit tests pass;
-- a ten-request OpenAI-compatible BFCL workload smoke test succeeds.
+- 32 unit tests pass.
 
-## Cluster-only evidence still required
+## Reports are generated, not hand-written
+
+`reports/*.md` are produced by `src/tatm/reporting.py` and overwritten on every
+`scripts/run_pipeline.py` run. Anything typed directly into them is destroyed.
+Measured GPU results are read back from `cluster/results/` by
+`load_probe_results` and rendered into the findings report, so they survive
+regeneration. `PROJECT_STATUS.md` and `cluster/README.md` are the only
+hand-maintained documents.
+
+## Evidence still required
 
 - rendered full-prompt token IDs and exact vLLM block boundaries;
-- prefix cache hits/queries and cached/computed prompt tokens;
-- prefill time, TTFT, repeated-trial latency, and confidence intervals;
-- GPU/KV memory and eviction behavior;
-- cache-on/off output-token equality;
-- BFCL tool-name, argument, and no-tool quality under every ordering.
+- BFCL tool-name, argument, and no-tool quality under every ordering — no
+  quality measurement has been taken yet, so no ordering can currently be
+  recommended for production on latency grounds alone;
+- ordering comparisons across all six orderings above the crossover, not just
+  the two validated so far;
+- GPU/KV memory under eviction pressure at large menu sizes.
 
-The local analytical reuse estimates must not be described as vLLM cache-hit
-rates or latency speedups.
+Analytical reuse estimates must still be labelled as estimates, but they are no
+longer unvalidated: they under-predict measured hits by 1.2-1.5x on the two
+workloads checked.

@@ -19,6 +19,7 @@ from typing import Any
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
+from tatm.stats import describe
 from tatm.vllm_client import (
     KvUsageSampler,
     fetch_text,
@@ -30,14 +31,6 @@ from tatm.vllm_client import (
     served_model,
     server_cache_config,
 )
-
-# Two-sided 95% Student-t critical values by degrees of freedom.
-T_95 = {
-    1: 12.706, 2: 4.303, 3: 3.182, 4: 2.776, 5: 2.571, 6: 2.447, 7: 2.365,
-    8: 2.306, 9: 2.262, 10: 2.228, 11: 2.201, 12: 2.179, 13: 2.160, 14: 2.145,
-    15: 2.131, 16: 2.120, 17: 2.110, 18: 2.101, 19: 2.093, 20: 2.086,
-    25: 2.060, 30: 2.042,
-}
 
 
 def functions() -> list[dict[str, Any]]:
@@ -144,23 +137,6 @@ def run_scenario(
         "peak_gauges": {k: round(v, 6) for k, v in sorted(sampler.peak.items())},
         "gauge_samples": sampler.samples,
     }
-
-
-def describe(values: list[float]) -> dict[str, Any]:
-    n = len(values)
-    mean = statistics.fmean(values)
-    row: dict[str, Any] = {
-        "n": n,
-        "mean": round(mean, 6),
-        "min": round(min(values), 6),
-        "max": round(max(values), 6),
-    }
-    if n > 1:
-        stdev = statistics.stdev(values)
-        critical = T_95.get(n - 1, 1.96)
-        row["stdev"] = round(stdev, 6)
-        row["ci95_half_width"] = round(critical * stdev / (n**0.5), 6)
-    return row
 
 
 def summarize(trials: list[list[dict[str, Any]]]) -> dict[str, Any]:

@@ -11,7 +11,7 @@ sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
 from tatm.analysis import deduplicated_existing_ids, load_processed
 from tatm.io import write_jsonl
-from tatm.prompting import order_tool_ids, workload_record
+from tatm.prompting import build_menu, order_tool_ids, workload_record
 
 
 def main() -> None:
@@ -47,6 +47,22 @@ def main() -> None:
     )
     parser.add_argument("--limit", type=int, default=500)
     parser.add_argument("--random-seed", type=int, default=42)
+    parser.add_argument(
+        "--menu-size",
+        type=int,
+        default=0,
+        help=(
+            "Pad each task's gold tools with distractors up to this many tools. "
+            "0 keeps the benchmark's own menu, which has a median of one tool "
+            "and is too small to measure prefill effects."
+        ),
+    )
+    parser.add_argument(
+        "--max-schema-tokens",
+        type=int,
+        default=300,
+        help="Exclude outlier schemas from the distractor pool.",
+    )
     args = parser.parse_args()
 
     tools, tasks = load_processed(args.processed_dir)
@@ -56,10 +72,24 @@ def main() -> None:
     for task in selected_tasks:
         support.update(deduplicated_existing_ids(task, tools))
 
+    distractor_pool = sorted(
+        tool_id
+        for tool_id, tool in tools.items()
+        if 0 < tool.schema_tokens <= args.max_schema_tokens
+    )
+
     records = []
     for task in selected_tasks[: args.limit]:
+        tool_ids = deduplicated_existing_ids(task, tools)
+        if args.menu_size:
+            tool_ids = build_menu(
+                tool_ids,
+                distractor_pool,
+                args.menu_size,
+                seed=args.random_seed,
+            )
         ordered = order_tool_ids(
-            task.tool_ids,
+            tool_ids,
             tools,
             support,
             args.ordering,

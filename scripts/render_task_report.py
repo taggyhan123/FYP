@@ -4,11 +4,68 @@ from __future__ import annotations
 import argparse
 import sys
 from pathlib import Path
+from typing import Any
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
 
-def render(source: Path, output: Path) -> None:
+DEFAULT_COVER = {
+    "doc_title": "Task C &amp; D — TATM Research Report",
+    "title": "Task C &amp; Task D",
+    "subtitle": (
+        "Dataset normalization, schema-token accounting, tool-access patterns, "
+        "deterministic ordering, and analytical trie reuse."
+    ),
+    "status": "Local analysis complete · Cluster validation pending",
+    "metrics": [
+        ("45,815", "Canonical tools"),
+        ("9,201", "Benchmark tasks"),
+        ("70", "Median schema tokens"),
+        ("31.80%", "Best ToolRet estimate"),
+        ("18.88%", "Best BFCL estimate"),
+    ],
+    "executive": (
+        "Task C establishes a reproducible canonical tool corpus and token "
+        "accounting pipeline. Task D finds that deterministic ordering improves "
+        "analytical prefix sharing on multi-tool workloads: schema-cost "
+        "weighting is strongest for ToolRet, while frequency ordering is "
+        "strongest for the selected BFCL subset. GPU latency and correctness "
+        "remain cluster measurements."
+    ),
+}
+
+TASK_B_E_COVER = {
+    "doc_title": "Task B &amp; E — TATM Research Report",
+    "title": "Task B &amp; Task E",
+    "subtitle": (
+        "Exact prefix-cache verification, the prefill measurement floor, "
+        "tool-ordering effects on real cache hits, and trie-model calibration."
+    ),
+    "status": "Measured on GPU · Function-call quality not yet evaluated",
+    "metrics": [
+        ("10.6×", "TTFT gain at 200 tools"),
+        ("4", "Crossover menu size"),
+        ("38.15%", "Measured reuse, alphabetical"),
+        ("4.41%", "Measured reuse, frequency"),
+        ("1.2–1.5×", "Model under-prediction"),
+    ],
+    "executive": (
+        "All five Task B checks pass. Prefix reuse buys no TTFT at a 303-token "
+        "prompt, but that is a measurement floor: padding tool menus to "
+        "deployment-realistic sizes yields a 10.6× TTFT reduction at 200 tools, "
+        "with a crossover near 4 tools. Validating the analytical trie estimate "
+        "against measured cache hits inverts the earlier ordering "
+        "recommendation — on shared catalogs, ordering by benchmark support "
+        "front-loads task-specific tools and destroys the common prefix, making "
+        "it nearly 9× worse than a stable global order."
+    ),
+}
+
+
+COVERS = {"task_c_d": DEFAULT_COVER, "task_b_e": TASK_B_E_COVER}
+
+
+def render(source: Path, output: Path, cover: dict[str, Any] | None = None) -> None:
     try:
         import markdown
     except ImportError as error:
@@ -40,13 +97,25 @@ def render(source: Path, output: Path) -> None:
     body_html = renderer.convert(body_source)
     toc_html = renderer.toc
 
+    cover = {**DEFAULT_COVER, **(cover or {})}
+    doc_title = cover["doc_title"]
+    hero_title = cover["title"]
+    hero_subtitle = cover["subtitle"]
+    status_text = cover["status"]
+    executive_text = cover["executive"]
+    metrics_html = "\n      ".join(
+        f'<div class="metric"><strong>{value}</strong><span>{label}</span></div>'
+        for value, label in cover["metrics"]
+    )
+    footer_note = f"TATM FYP · Public benchmark analysis · Generated from {source.name}"
+
     html = f"""<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light">
-  <title>Task C &amp; D — TATM Research Report</title>
+  <title>{doc_title}</title>
   <style>
     :root {{
       --ink: #172033;
@@ -617,20 +686,15 @@ def render(source: Path, output: Path) -> None:
   <div class="page">
     <header class="hero">
       <p class="eyebrow">Trie-Aware Tool Memory · FYP Research Report</p>
-      <h1>Task C &amp; Task D</h1>
+      <h1>{hero_title}</h1>
       <p class="hero-subtitle">
-        Dataset normalization, schema-token accounting, tool-access patterns,
-        deterministic ordering, and analytical trie reuse.
+        {hero_subtitle}
       </p>
-      <span class="status-pill">Local analysis complete · Cluster validation pending</span>
+      <span class="status-pill">{status_text}</span>
     </header>
 
     <section class="metrics" aria-label="Key findings">
-      <div class="metric"><strong>45,815</strong><span>Canonical tools</span></div>
-      <div class="metric"><strong>9,201</strong><span>Benchmark tasks</span></div>
-      <div class="metric"><strong>70</strong><span>Median schema tokens</span></div>
-      <div class="metric"><strong>31.80%</strong><span>Best ToolRet estimate</span></div>
-      <div class="metric"><strong>18.88%</strong><span>Best BFCL estimate</span></div>
+      {metrics_html}
     </section>
 
     <div class="layout">
@@ -643,19 +707,14 @@ def render(source: Path, output: Path) -> None:
         <aside class="executive">
           <strong>Executive answer</strong>
           <p>
-            Task C establishes a reproducible canonical tool corpus and token
-            accounting pipeline. Task D finds that deterministic ordering
-            improves analytical prefix sharing on multi-tool workloads:
-            schema-cost weighting is strongest for ToolRet, while frequency
-            ordering is strongest for the selected BFCL subset. GPU latency and
-            correctness remain cluster measurements.
+            {executive_text}
           </p>
         </aside>
 
         {body_html}
 
         <footer class="footer">
-          TATM FYP · Public benchmark analysis · Generated from task_c_d.md
+          {footer_note}
         </footer>
       </main>
     </div>
@@ -697,8 +756,14 @@ def main() -> None:
         type=Path,
         default=PROJECT_ROOT / "task_c_d.html",
     )
+    parser.add_argument(
+        "--cover",
+        choices=sorted(COVERS),
+        help="Cover page preset. Inferred from the source filename if omitted.",
+    )
     args = parser.parse_args()
-    render(args.source, args.output)
+    cover_key = args.cover or args.source.stem
+    render(args.source, args.output, COVERS.get(cover_key))
     print(f"Wrote {args.output}")
 
 

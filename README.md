@@ -33,6 +33,9 @@ if the cluster experiment uses a different model.
 
 ## Main outputs
 
+- `task_c_d.html` — polished browser report for Tasks C and D;
+- `task_c_d.pdf` — print-ready version of the same report;
+- `task_c_d.md` — maintainable source used to generate both versions;
 - `notes/reading-note.md` — Task A reading note and request-flow diagram;
 - `reports/dataset-inventory.md` — Task C dataset and schema report;
 - `reports/access-patterns.md` — Task D workload and trie analysis;

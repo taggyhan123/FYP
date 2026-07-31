@@ -1,0 +1,1467 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Task C &amp; D — TATM Research Report</title>
+  <style>
+    :root {
+      --ink: #172033;
+      --muted: #5c667a;
+      --line: #dfe5ef;
+      --soft: #f4f7fb;
+      --paper: #ffffff;
+      --navy: #102341;
+      --blue: #2563eb;
+      --cyan: #06b6d4;
+      --green: #0f9f6e;
+      --orange: #e27720;
+      --shadow: 0 18px 55px rgba(21, 42, 78, 0.13);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 8% 5%, rgba(37, 99, 235, 0.10), transparent 24rem),
+        radial-gradient(circle at 92% 16%, rgba(6, 182, 212, 0.09), transparent 25rem),
+        #eef2f8;
+      font: 16px/1.68 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    a {
+      color: #1d5fd1;
+      text-decoration-thickness: 1px;
+      text-underline-offset: 3px;
+    }
+
+    .page {
+      width: min(1180px, calc(100% - 40px));
+      margin: 28px auto 70px;
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      padding: 62px 66px 55px;
+      color: #fff;
+      background:
+        linear-gradient(125deg, rgba(16, 35, 65, 0.98), rgba(23, 72, 141, 0.96)),
+        var(--navy);
+      border-radius: 26px;
+      box-shadow: var(--shadow);
+    }
+
+    .hero::before,
+    .hero::after {
+      content: "";
+      position: absolute;
+      border-radius: 999px;
+      pointer-events: none;
+    }
+
+    .hero::before {
+      width: 390px;
+      height: 390px;
+      top: -260px;
+      right: -60px;
+      border: 56px solid rgba(94, 234, 212, 0.12);
+    }
+
+    .hero::after {
+      width: 210px;
+      height: 210px;
+      right: 155px;
+      bottom: -155px;
+      background: rgba(37, 99, 235, 0.32);
+    }
+
+    .eyebrow {
+      position: relative;
+      z-index: 1;
+      margin: 0 0 15px;
+      color: #9ee7f2;
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0.17em;
+      text-transform: uppercase;
+    }
+
+    .hero h1 {
+      position: relative;
+      z-index: 1;
+      max-width: 800px;
+      margin: 0;
+      color: #fff;
+      font-size: clamp(2.25rem, 5vw, 4.3rem);
+      line-height: 1.02;
+      letter-spacing: -0.045em;
+    }
+
+    .hero-subtitle {
+      position: relative;
+      z-index: 1;
+      max-width: 760px;
+      margin: 22px 0 0;
+      color: #d9e8ff;
+      font-size: 1.1rem;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      position: relative;
+      z-index: 1;
+      align-items: center;
+      gap: 8px;
+      margin-top: 24px;
+      padding: 8px 13px;
+      color: #d9fff3;
+      background: rgba(15, 159, 110, 0.18);
+      border: 1px solid rgba(94, 234, 212, 0.32);
+      border-radius: 999px;
+      font-size: 0.86rem;
+      font-weight: 700;
+    }
+
+    .status-pill::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      background: #5eead4;
+      border-radius: 50%;
+      box-shadow: 0 0 0 5px rgba(94, 234, 212, 0.10);
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+      margin: 18px 0;
+    }
+
+    .metric {
+      padding: 20px 18px;
+      background: rgba(255, 255, 255, 0.94);
+      border: 1px solid rgba(215, 224, 238, 0.95);
+      border-radius: 15px;
+      box-shadow: 0 7px 24px rgba(21, 42, 78, 0.07);
+    }
+
+    .metric strong {
+      display: block;
+      color: var(--navy);
+      font-size: 1.55rem;
+      line-height: 1.1;
+      letter-spacing: -0.025em;
+    }
+
+    .metric span {
+      display: block;
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 700;
+      line-height: 1.3;
+      text-transform: uppercase;
+      letter-spacing: 0.055em;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 255px minmax(0, 1fr);
+      gap: 20px;
+      align-items: start;
+    }
+
+    .toc-card {
+      position: sticky;
+      top: 18px;
+      max-height: calc(100vh - 36px);
+      overflow: auto;
+      padding: 22px 20px;
+      background: rgba(255, 255, 255, 0.94);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      box-shadow: 0 8px 30px rgba(21, 42, 78, 0.08);
+    }
+
+    .toc-card > strong {
+      display: block;
+      margin-bottom: 12px;
+      color: var(--navy);
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .toc-card ul {
+      margin: 0;
+      padding-left: 0;
+      list-style: none;
+    }
+
+    .toc-card ul ul {
+      margin: 4px 0 8px 12px;
+      padding-left: 10px;
+      border-left: 1px solid var(--line);
+    }
+
+    .toc-card li {
+      margin: 4px 0;
+    }
+
+    .toc-card a {
+      display: block;
+      padding: 4px 7px;
+      color: #536078;
+      border-radius: 6px;
+      font-size: 0.82rem;
+      line-height: 1.35;
+      text-decoration: none;
+    }
+
+    .toc-card a:hover {
+      color: var(--blue);
+      background: #edf4ff;
+    }
+
+    .report {
+      min-width: 0;
+      padding: 50px 58px 62px;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+    }
+
+    .executive {
+      margin: 0 0 42px;
+      padding: 24px 26px;
+      background: linear-gradient(135deg, #eff6ff, #f0fdfa);
+      border: 1px solid #bfdbfe;
+      border-left: 5px solid var(--blue);
+      border-radius: 12px;
+    }
+
+    .executive strong {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--navy);
+      font-size: 1.05rem;
+    }
+
+    .executive p {
+      margin: 0;
+      color: #3f4c63;
+    }
+
+    h2, h3, h4 {
+      color: var(--navy);
+      letter-spacing: -0.025em;
+    }
+
+    h2 {
+      margin: 66px 0 22px;
+      padding-top: 8px;
+      font-size: 2rem;
+      line-height: 1.2;
+      border-top: 1px solid var(--line);
+    }
+
+    .report > h2:first-of-type {
+      margin-top: 12px;
+      border-top: 0;
+    }
+
+    h3 {
+      margin: 38px 0 14px;
+      font-size: 1.35rem;
+    }
+
+    h4 {
+      margin: 28px 0 10px;
+      font-size: 1.05rem;
+    }
+
+    h2 .headerlink,
+    h3 .headerlink,
+    h4 .headerlink {
+      margin-left: 8px;
+      color: #a8b2c3;
+      font-size: 0.72em;
+      text-decoration: none;
+      opacity: 0;
+    }
+
+    h2:hover .headerlink,
+    h3:hover .headerlink,
+    h4:hover .headerlink {
+      opacity: 1;
+    }
+
+    p {
+      margin: 0 0 16px;
+    }
+
+    ul, ol {
+      padding-left: 24px;
+    }
+
+    li {
+      margin: 6px 0;
+    }
+
+    blockquote {
+      margin: 24px 0;
+      padding: 18px 22px;
+      color: #37445c;
+      background: #f7f9fc;
+      border-left: 4px solid var(--cyan);
+      border-radius: 4px 10px 10px 4px;
+    }
+
+    .table-wrap {
+      width: 100%;
+      margin: 20px 0 30px;
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.91rem;
+      font-variant-numeric: tabular-nums;
+    }
+
+    th {
+      padding: 12px 14px;
+      color: #fff;
+      background: var(--navy);
+      font-size: 0.76rem;
+      line-height: 1.3;
+      text-align: left;
+      text-transform: uppercase;
+      letter-spacing: 0.055em;
+    }
+
+    td {
+      padding: 11px 14px;
+      border-top: 1px solid #e7ebf2;
+      vertical-align: top;
+    }
+
+    tbody tr:nth-child(even) {
+      background: #f8fafc;
+    }
+
+    tbody tr:hover {
+      background: #eff6ff;
+    }
+
+    code {
+      padding: 0.13em 0.36em;
+      color: #a51d52;
+      background: #f5f0f4;
+      border: 1px solid #ebdde5;
+      border-radius: 5px;
+      font: 0.9em/1.45 ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+
+    pre {
+      position: relative;
+      margin: 18px 0 26px;
+      padding: 20px 22px;
+      overflow: auto;
+      color: #dbeafe;
+      background: #111d32;
+      border: 1px solid #243653;
+      border-radius: 11px;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    }
+
+    pre code {
+      padding: 0;
+      color: inherit;
+      background: transparent;
+      border: 0;
+      font-size: 0.86rem;
+    }
+
+    strong {
+      color: #102341;
+    }
+
+    .footer {
+      margin-top: 45px;
+      padding-top: 20px;
+      color: #738096;
+      border-top: 1px solid var(--line);
+      font-size: 0.82rem;
+      text-align: center;
+    }
+
+    .print-button {
+      position: fixed;
+      right: 22px;
+      bottom: 22px;
+      z-index: 5;
+      padding: 11px 16px;
+      color: #fff;
+      background: var(--blue);
+      border: 0;
+      border-radius: 999px;
+      box-shadow: 0 10px 30px rgba(37, 99, 235, 0.3);
+      cursor: pointer;
+      font: 700 0.85rem/1 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    @media (max-width: 940px) {
+      .page {
+        width: min(100% - 22px, 820px);
+        margin-top: 11px;
+      }
+
+      .hero {
+        padding: 42px 28px;
+        border-radius: 18px;
+      }
+
+      .metrics {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .toc-card {
+        position: relative;
+        top: 0;
+        max-height: none;
+      }
+
+      .report {
+        padding: 35px 25px 45px;
+      }
+    }
+
+    @media print {
+      @page {
+        size: A4;
+        margin: 16mm 14mm 17mm;
+      }
+
+      body {
+        background: #fff;
+        font-size: 10.4pt;
+      }
+
+      .page {
+        width: 100%;
+        margin: 0;
+      }
+
+      .hero {
+        min-height: 185mm;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 30mm 20mm;
+        border-radius: 0;
+        box-shadow: none;
+        break-after: page;
+      }
+
+      .hero h1 {
+        font-size: 38pt;
+      }
+
+      .metrics {
+        grid-template-columns: repeat(5, 1fr);
+        margin: 0 0 8mm;
+        break-after: page;
+      }
+
+      .metric {
+        padding: 12px 8px;
+        box-shadow: none;
+      }
+
+      .metric strong {
+        font-size: 15pt;
+      }
+
+      .metric span {
+        font-size: 6.7pt;
+      }
+
+      .layout {
+        display: block;
+      }
+
+      .toc-card {
+        position: static;
+        max-height: none;
+        margin-bottom: 10mm;
+        box-shadow: none;
+        break-after: page;
+      }
+
+      .report {
+        padding: 0;
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+      }
+
+      h2 {
+        break-before: auto;
+        break-after: avoid;
+      }
+
+      h3, h4 {
+        break-after: avoid;
+      }
+
+      p, li {
+        orphans: 3;
+        widows: 3;
+      }
+
+      table, pre, blockquote, .executive {
+        break-inside: avoid;
+      }
+
+      .table-wrap {
+        overflow: visible;
+      }
+
+      table {
+        font-size: 8.1pt;
+      }
+
+      th, td {
+        padding: 6px 7px;
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      .headerlink,
+      .print-button {
+        display: none !important;
+      }
+
+      .footer {
+        margin-top: 16mm;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header class="hero">
+      <p class="eyebrow">Trie-Aware Tool Memory · FYP Research Report</p>
+      <h1>Task C &amp; Task D</h1>
+      <p class="hero-subtitle">
+        Dataset normalization, schema-token accounting, tool-access patterns,
+        deterministic ordering, and analytical trie reuse.
+      </p>
+      <span class="status-pill">Local analysis complete · Cluster validation pending</span>
+    </header>
+
+    <section class="metrics" aria-label="Key findings">
+      <div class="metric"><strong>45,815</strong><span>Canonical tools</span></div>
+      <div class="metric"><strong>9,201</strong><span>Benchmark tasks</span></div>
+      <div class="metric"><strong>70</strong><span>Median schema tokens</span></div>
+      <div class="metric"><strong>31.80%</strong><span>Best ToolRet estimate</span></div>
+      <div class="metric"><strong>18.88%</strong><span>Best BFCL estimate</span></div>
+    </section>
+
+    <div class="layout">
+      <nav class="toc-card" aria-label="Table of contents">
+        <strong>Contents</strong>
+        <div class="toc">
+<ul>
+<li><a href="#dataset-provenance">Dataset provenance</a><ul>
+<li><a href="#toolret">ToolRet</a></li>
+<li><a href="#bfcl-v4">BFCL V4</a></li>
+</ul>
+</li>
+<li><a href="#task-c-inspect-and-normalize-tool-datasets">Task C — Inspect and normalize tool datasets</a><ul>
+<li><a href="#question-from-the-research-brief">Question from the research brief</a></li>
+<li><a href="#method-and-reasoning">Method and reasoning</a></li>
+<li><a href="#task-c-results">Task C results</a></li>
+<li><a href="#task-c-answer">Task C answer</a></li>
+</ul>
+</li>
+<li><a href="#task-d-analyze-initial-tool-access-patterns">Task D — Analyze initial tool-access patterns</a><ul>
+<li><a href="#question-from-the-research-brief_1">Question from the research brief</a></li>
+<li><a href="#method-and-reasoning_1">Method and reasoning</a></li>
+<li><a href="#task-d-results">Task D results</a></li>
+<li><a href="#task-d-answer">Task D answer</a></li>
+</ul>
+</li>
+<li><a href="#reproduction">Reproduction</a></li>
+</ul>
+</div>
+
+      </nav>
+
+      <main class="report">
+        <aside class="executive">
+          <strong>Executive answer</strong>
+          <p>
+            Task C establishes a reproducible canonical tool corpus and token
+            accounting pipeline. Task D finds that deterministic ordering
+            improves analytical prefix sharing on multi-tool workloads:
+            schema-cost weighting is strongest for ToolRet, while frequency
+            ordering is strongest for the selected BFCL subset. GPU latency and
+            correctness remain cluster measurements.
+          </p>
+        </aside>
+
+        <p>This document answers Task C and Task D from
+<a href="initial-research-brief.md"><code>initial-research-brief.md</code></a>. It records the
+reproducible methodology and reasoning used to reach the conclusions. It does
+not claim that the local analytical cache estimates are measured vLLM or GPU
+results.</p>
+<h2 id="dataset-provenance">Dataset provenance<a class="headerlink" href="#dataset-provenance" title="Link to this section">&para;</a></h2>
+<p>All inputs are public research datasets. No SoC, PayPal, private MCP, or
+production request data was used.</p>
+<h3 id="toolret">ToolRet<a class="headerlink" href="#toolret" title="Link to this section">&para;</a></h3>
+<p>Sources:</p>
+<ul>
+<li><a href="https://arxiv.org/abs/2503.01763">ToolRet paper</a></li>
+<li><a href="https://huggingface.co/datasets/mangopy/ToolRet-Tools">ToolRet tool corpus</a></li>
+<li><a href="https://huggingface.co/datasets/mangopy/ToolRet-Queries">ToolRet query corpus</a></li>
+</ul>
+<p>Downloaded inventory:</p>
+<table>
+<thead>
+<tr>
+<th>Tool corpus configuration</th>
+<th style="text-align: right;">Tools</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Web</td>
+<td style="text-align: right;">37,292</td>
+</tr>
+<tr>
+<td>Code</td>
+<td style="text-align: right;">3,794</td>
+</tr>
+<tr>
+<td>Customized</td>
+<td style="text-align: right;">3,367</td>
+</tr>
+<tr>
+<td><strong>Total</strong></td>
+<td style="text-align: right;"><strong>44,453</strong></td>
+</tr>
+</tbody>
+</table>
+<p>The query corpus contains 7,961 tasks across 35 configurations. Each query has
+gold relevance labels identifying the tools considered relevant to that query.
+All 7,961 tasks had parsed labels, and every label resolved to a tool in the
+downloaded corpus.</p>
+<h3 id="bfcl-v4">BFCL V4<a class="headerlink" href="#bfcl-v4" title="Link to this section">&para;</a></h3>
+<p>Source:</p>
+<ul>
+<li><a href="https://github.com/ShishirPatil/gorilla/tree/main/berkeley-function-call-leaderboard/bfcl_eval/data">Berkeley Function Calling Leaderboard data</a></li>
+</ul>
+<p>Downloaded subset:</p>
+<table>
+<thead>
+<tr>
+<th>BFCL file/category</th>
+<th style="text-align: right;">Tasks</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Simple Python</td>
+<td style="text-align: right;">400</td>
+</tr>
+<tr>
+<td>Multiple</td>
+<td style="text-align: right;">200</td>
+</tr>
+<tr>
+<td>Parallel</td>
+<td style="text-align: right;">200</td>
+</tr>
+<tr>
+<td>Parallel multiple</td>
+<td style="text-align: right;">200</td>
+</tr>
+<tr>
+<td>Irrelevance/no-tool</td>
+<td style="text-align: right;">240</td>
+</tr>
+<tr>
+<td><strong>Total</strong></td>
+<td style="text-align: right;"><strong>1,240</strong></td>
+</tr>
+</tbody>
+</table>
+<p>The files contain 1,362 distinct canonical function definitions after 555
+repeated identical definitions were merged.</p>
+<h2 id="task-c-inspect-and-normalize-tool-datasets">Task C — Inspect and normalize tool datasets<a class="headerlink" href="#task-c-inspect-and-normalize-tool-datasets" title="Link to this section">&para;</a></h2>
+<h3 id="question-from-the-research-brief">Question from the research brief<a class="headerlink" href="#question-from-the-research-brief" title="Link to this section">&para;</a></h3>
+<p>For ToolRet and a manageable BFCL subset:</p>
+<ol>
+<li>document the available fields and file formats;</li>
+<li>parse tool names, descriptions, parameters, required fields, and examples;</li>
+<li>implement one canonical serialization format;</li>
+<li>measure token length per tool;</li>
+<li>report missing or malformed schema fields; and</li>
+<li>group tools by source, domain, or server where possible.</li>
+</ol>
+<p>The required output is a reproducible script and a short data report.</p>
+<h3 id="method-and-reasoning">Method and reasoning<a class="headerlink" href="#method-and-reasoning" title="Link to this section">&para;</a></h3>
+<h4 id="1-keep-the-two-datasets-conceptually-separate">1. Keep the two datasets conceptually separate<a class="headerlink" href="#1-keep-the-two-datasets-conceptually-separate" title="Link to this section">&para;</a></h4>
+<p>ToolRet and BFCL provide different evidence:</p>
+<ul>
+<li>ToolRet labels indicate <strong>gold relevance</strong> for retrieval.</li>
+<li>BFCL <code>function</code> arrays indicate <strong>tools exposed in a task menu</strong>.</li>
+</ul>
+<p>BFCL menu exposure is not a successful model call, and neither source is a
+chronological production trace. Combining the frequencies without preserving
+this distinction would produce an ambiguous statistic, so the pipeline
+normalizes both datasets but analyzes their tasks separately.</p>
+<h4 id="2-parse-the-source-formats">2. Parse the source formats<a class="headerlink" href="#2-parse-the-source-formats" title="Link to this section">&para;</a></h4>
+<p>ToolRet corpus files are Parquet records containing an <code>id</code> and a heterogeneous
+JSON-encoded <code>documentation</code> field. Query Parquet records contain an <code>id</code>,
+query/instruction text, JSON-encoded relevance <code>labels</code>, and category metadata.</p>
+<p>BFCL files use JSON Lines despite the <code>.json</code> extension. Each task contains a
+conversation-like <code>question</code> and one or more inline function definitions in its
+<code>function</code> array.</p>
+<p>The normalizer accepts common variants such as:</p>
+<ul>
+<li><code>name</code>, <code>tool_name</code>, <code>function_name</code>, or <code>api_name</code>;</li>
+<li><code>description</code>, <code>functionality</code>, or <code>summary</code>;</li>
+<li><code>parameters</code>, <code>input_schema</code>, <code>doc_arguments</code>, <code>arguments</code>, or
+  <code>api_arguments</code>; and</li>
+<li><code>examples</code>, <code>example</code>, <code>example_code</code>, or <code>usage</code>.</li>
+</ul>
+<p>Examples are preserved as normalized metadata. They are not inserted into the
+initial canonical prompt serialization because many records do not provide
+them consistently.</p>
+<h4 id="3-use-one-deterministic-serialization">3. Use one deterministic serialization<a class="headerlink" href="#3-use-one-deterministic-serialization" title="Link to this section">&para;</a></h4>
+<p>Each tool is converted to an OpenAI-compatible function shape:</p>
+<pre><code class="language-json">{
+  &quot;type&quot;: &quot;function&quot;,
+  &quot;function&quot;: {
+    &quot;name&quot;: &quot;...&quot;,
+    &quot;description&quot;: &quot;...&quot;,
+    &quot;parameters&quot;: {
+      &quot;type&quot;: &quot;object&quot;,
+      &quot;properties&quot;: {},
+      &quot;required&quot;: []
+    }
+  }
+}
+</code></pre>
+<p>Object keys are sorted, unnecessary whitespace is removed, and UTF-8 text is
+preserved. Deterministic serialization is necessary because exact prefix
+caching depends on token identity and order, not merely semantic equivalence.</p>
+<p>BFCL functions are assigned a stable identity using their function name and a
+hash of the canonical serialization. This merges repeated identical
+definitions while keeping different schemas separate.</p>
+<h4 id="4-count-canonical-schema-tokens">4. Count canonical schema tokens<a class="headerlink" href="#4-count-canonical-schema-tokens" title="Link to this section">&para;</a></h4>
+<p><code>schema_tokens</code> is the number of tokens in one canonical tool definition using
+the official <code>Qwen/Qwen3-0.6B</code> tokenizer:</p>
+<pre><code class="language-text">schema_tokens(tool) =
+    number of tokenizer tokens in canonical_json(tool)
+</code></pre>
+<p>Only the tokenizer is used locally. Qwen model weights are not downloaded and
+no model inference occurs. These counts exclude the final model chat template,
+tool-list separators, system message, and user message. The complete rendered
+prompt must therefore be re-tokenized on the cluster.</p>
+<h4 id="5-preserve-problems-as-explicit-flags">5. Preserve problems as explicit flags<a class="headerlink" href="#5-preserve-problems-as-explicit-flags" title="Link to this section">&para;</a></h4>
+<p>The pipeline records missing or malformed fields instead of silently inventing
+rich schemas. Empty parameter objects are flagged for visibility but can be
+legitimate for no-argument functions.</p>
+<h3 id="task-c-results">Task C results<a class="headerlink" href="#task-c-results" title="Link to this section">&para;</a></h3>
+<h4 id="combined-inventory">Combined inventory<a class="headerlink" href="#combined-inventory" title="Link to this section">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Dataset</th>
+<th style="text-align: right;">Canonical tools</th>
+<th style="text-align: right;">Tasks</th>
+<th>Task evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ToolRet</td>
+<td style="text-align: right;">44,453</td>
+<td style="text-align: right;">7,961</td>
+<td>Gold relevance</td>
+</tr>
+<tr>
+<td>BFCL subset</td>
+<td style="text-align: right;">1,362</td>
+<td style="text-align: right;">1,240</td>
+<td>Exposed menu</td>
+</tr>
+<tr>
+<td><strong>Combined</strong></td>
+<td style="text-align: right;"><strong>45,815</strong></td>
+<td style="text-align: right;"><strong>9,201</strong></td>
+<td>Kept separate in analysis</td>
+</tr>
+</tbody>
+</table>
+<h4 id="canonical-schema-token-distribution">Canonical schema-token distribution<a class="headerlink" href="#canonical-schema-token-distribution" title="Link to this section">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Statistic</th>
+<th style="text-align: right;">Schema tokens</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Minimum</td>
+<td style="text-align: right;">28</td>
+</tr>
+<tr>
+<td>P25</td>
+<td style="text-align: right;">49</td>
+</tr>
+<tr>
+<td>Median</td>
+<td style="text-align: right;">70</td>
+</tr>
+<tr>
+<td>Mean</td>
+<td style="text-align: right;">92.08</td>
+</tr>
+<tr>
+<td>P75</td>
+<td style="text-align: right;">109</td>
+</tr>
+<tr>
+<td>P90</td>
+<td style="text-align: right;">169</td>
+</tr>
+<tr>
+<td>P95</td>
+<td style="text-align: right;">220</td>
+</tr>
+<tr>
+<td>P99</td>
+<td style="text-align: right;">357</td>
+</tr>
+<tr>
+<td>Maximum</td>
+<td style="text-align: right;">8,652</td>
+</tr>
+</tbody>
+</table>
+<p>Most tools are relatively short, but the long tail is substantial. The largest
+canonical schema, <code>Crypto_Arbitrage_crypto_arb</code>, contains 8,652 tokenizer
+tokens. Large schemas can dominate prompt-prefill cost even when they occur
+less frequently.</p>
+<h4 id="schema-quality-flags">Schema-quality flags<a class="headerlink" href="#schema-quality-flags" title="Link to this section">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Flag</th>
+<th style="text-align: right;">Tools</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Empty parameters</td>
+<td style="text-align: right;">19,887</td>
+</tr>
+<tr>
+<td>Missing description</td>
+<td style="text-align: right;">994</td>
+</tr>
+<tr>
+<td>Missing parameters</td>
+<td style="text-align: right;">155</td>
+</tr>
+<tr>
+<td>Malformed parameters</td>
+<td style="text-align: right;">150</td>
+</tr>
+<tr>
+<td>Missing name</td>
+<td style="text-align: right;">2</td>
+</tr>
+<tr>
+<td>Required field absent from properties</td>
+<td style="text-align: right;">1</td>
+</tr>
+</tbody>
+</table>
+<p>There are 19,921 tools with at least one flag. This number should not be read as
+19,921 unusable tools: nearly all are flagged because they have an empty
+parameter object.</p>
+<h4 id="source-grouping">Source grouping<a class="headerlink" href="#source-grouping" title="Link to this section">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Source</th>
+<th style="text-align: right;">Canonical tools</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ToolRet web</td>
+<td style="text-align: right;">37,292</td>
+</tr>
+<tr>
+<td>ToolRet code</td>
+<td style="text-align: right;">3,794</td>
+</tr>
+<tr>
+<td>ToolRet customized</td>
+<td style="text-align: right;">3,367</td>
+</tr>
+<tr>
+<td>BFCL simple Python</td>
+<td style="text-align: right;">220</td>
+</tr>
+<tr>
+<td>BFCL multiple</td>
+<td style="text-align: right;">480</td>
+</tr>
+<tr>
+<td>BFCL parallel</td>
+<td style="text-align: right;">153</td>
+</tr>
+<tr>
+<td>BFCL parallel multiple</td>
+<td style="text-align: right;">270</td>
+</tr>
+<tr>
+<td>BFCL irrelevance</td>
+<td style="text-align: right;">239</td>
+</tr>
+</tbody>
+</table>
+<p>The BFCL source counts are distinct canonical definitions rather than the
+number of tasks.</p>
+<h3 id="task-c-answer">Task C answer<a class="headerlink" href="#task-c-answer" title="Link to this section">&para;</a></h3>
+<p>Task C is complete for all ToolRet tools/queries and the five selected BFCL V4
+categories.</p>
+<p>The data can be parsed into one deterministic representation, and all ToolRet
+gold labels resolve correctly. Median canonical schema length is 70 Qwen
+tokens, but schema cost has a long tail reaching 8,652 tokens. The main data
+quality issue is widespread empty parameter objects; malformed and truly
+missing fields are much less common.</p>
+<p>Reproducible artifacts:</p>
+<ul>
+<li><code>scripts/download_datasets.py</code></li>
+<li><code>scripts/run_pipeline.py</code></li>
+<li><code>src/tatm/normalize.py</code></li>
+<li><code>src/tatm/serialization.py</code></li>
+<li><code>reports/dataset-inventory.md</code></li>
+</ul>
+<h2 id="task-d-analyze-initial-tool-access-patterns">Task D — Analyze initial tool-access patterns<a class="headerlink" href="#task-d-analyze-initial-tool-access-patterns" title="Link to this section">&para;</a></h2>
+<h3 id="question-from-the-research-brief_1">Question from the research brief<a class="headerlink" href="#question-from-the-research-brief_1" title="Link to this section">&para;</a></h3>
+<p>Using gold labels or successful trajectories where available, compute:</p>
+<ol>
+<li>tool occurrence frequency;</li>
+<li>schema-token-weighted frequency;</li>
+<li>pair and triple co-occurrence;</li>
+<li>conditional transitions between tools;</li>
+<li>number of tools per task;</li>
+<li>total schema tokens per task;</li>
+<li>domain-level locality; and</li>
+<li>trie size and compression under different orderings.</li>
+</ol>
+<p>Compare original, alphabetical, fixed-seed random, frequency,
+schema-cost-weighted frequency, and FP-tree-style global order. Clearly
+separate benchmark statistics from generated replay statistics.</p>
+<h3 id="method-and-reasoning_1">Method and reasoning<a class="headerlink" href="#method-and-reasoning_1" title="Link to this section">&para;</a></h3>
+<h4 id="1-define-frequency-according-to-the-available-evidence">1. Define frequency according to the available evidence<a class="headerlink" href="#1-define-frequency-according-to-the-available-evidence" title="Link to this section">&para;</a></h4>
+<p>For ToolRet:</p>
+<pre><code class="language-text">frequency(tool) =
+    number of tasks whose gold relevance labels contain the tool
+</code></pre>
+<p>For BFCL:</p>
+<pre><code class="language-text">frequency(tool) =
+    number of task menus that expose the tool
+</code></pre>
+<p>A tool is counted at most once per task. ToolRet frequency is a gold
+requirement/relevance signal. BFCL frequency is only an exposure signal.
+Neither is automatically production popularity.</p>
+<h4 id="2-define-a-cost-aware-score">2. Define a cost-aware score<a class="headerlink" href="#2-define-a-cost-aware-score" title="Link to this section">&para;</a></h4>
+<p>The first approximation of reusable prefill value is:</p>
+<pre><code class="language-text">schema_cost_weighted_score(tool) =
+    frequency(tool) × schema_tokens(tool)
+</code></pre>
+<p>This prioritizes a long, moderately frequent schema over a very short schema
+when the expected repeated prefill work is larger. It remains an approximation:
+actual value also depends on co-occurrence, prefix position, cache residency,
+block boundaries, eviction, and measured prefill latency.</p>
+<h4 id="3-make-every-ordering-deterministic">3. Make every ordering deterministic<a class="headerlink" href="#3-make-every-ordering-deterministic" title="Link to this section">&para;</a></h4>
+<p>Only the already-selected tool set is reordered. Retrieval is not changed.</p>
+<p>Frequency order:</p>
+<pre><code class="language-text">sort key = (-frequency, tool_id)
+</code></pre>
+<p>Schema-cost-weighted order:</p>
+<pre><code class="language-text">sort key = (
+    -(frequency × schema_tokens),
+    -frequency,
+    tool_id
+)
+</code></pre>
+<p>The stable <code>tool_id</code> resolves all ties. Fixed-seed random baselines use a stable
+SHA-256 rank of <code>seed:tool_id</code>, so rerunning the experiment produces the same
+order.</p>
+<p>Classic FP-tree global order is descending global support. It is therefore
+intentionally identical to the frequency baseline in this first
+implementation. Conditional FP-tree mining would be a later, distinct method.</p>
+<h4 id="4-measure-co-occurrence-and-adjacency-without-overclaiming">4. Measure co-occurrence and adjacency without overclaiming<a class="headerlink" href="#4-measure-co-occurrence-and-adjacency-without-overclaiming" title="Link to this section">&para;</a></h4>
+<p>Pair and triple co-occurrence count unordered combinations appearing in the
+same task.</p>
+<p>Ordered adjacency is calculated from consecutive tool IDs in a task:</p>
+<pre><code class="language-text">P(next = B | current = A) =
+    count(A followed by B) / all outgoing adjacency counts from A
+</code></pre>
+<p>ToolRet label order and BFCL menu order are not confirmed execution order.
+These statistics are therefore reported as ordered-adjacency proxies, not as
+successful-call transitions.</p>
+<h4 id="5-compare-trie-sharing">5. Compare trie sharing<a class="headerlink" href="#5-compare-trie-sharing" title="Link to this section">&para;</a></h4>
+<p>For a workload of ordered tool sequences:</p>
+<pre><code class="language-text">naive_nodes = sum(number of tools in every request)
+
+trie_compression =
+    1 - (unique trie nodes / naive_nodes)
+</code></pre>
+<p>Before inserting each sequence, the analysis finds its longest prefix already
+present in the trie. Shared canonical schema tokens are rounded down to
+16-token blocks:</p>
+<pre><code class="language-text">cacheable_tokens =
+    floor(shared_schema_tokens / 16) × 16
+
+estimated_reuse =
+    total_cacheable_tokens / total_schema_tokens
+</code></pre>
+<p>This is a tool-level analytical estimate with an unbounded retained trie. It
+does not include the final chat template, physical vLLM cache eviction, GPU
+pressure, or scheduler behavior.</p>
+<h4 id="6-test-different-workload-assumptions">6. Test different workload assumptions<a class="headerlink" href="#6-test-different-workload-assumptions" title="Link to this section">&para;</a></h4>
+<p>Four replays are compared:</p>
+<ul>
+<li><strong>Empirical:</strong> public dataset file/configuration order.</li>
+<li><strong>Uniform:</strong> uniform task sampling with replacement.</li>
+<li><strong>Skewed:</strong> controlled sampling weighted by aggregate benchmark tool support.</li>
+<li><strong>Session-bursty:</strong> tasks from the same domain grouped contiguously.</li>
+</ul>
+<p>Uniform and skewed replays can repeat tasks. Session-bursty replay rearranges
+each task once. These are controlled systems workloads, not claims about
+production traffic.</p>
+<h3 id="task-d-results">Task D results<a class="headerlink" href="#task-d-results" title="Link to this section">&para;</a></h3>
+<h4 id="tools-and-schema-tokens-per-task">Tools and schema tokens per task<a class="headerlink" href="#tools-and-schema-tokens-per-task" title="Link to this section">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Dataset partition</th>
+<th style="text-align: right;">Median tools</th>
+<th style="text-align: right;">Mean tools</th>
+<th style="text-align: right;">P95 tools</th>
+<th style="text-align: right;">Median schema tokens</th>
+<th style="text-align: right;">P95 schema tokens</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ToolRet gold</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1.77</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">124</td>
+<td style="text-align: right;">387</td>
+</tr>
+<tr>
+<td>BFCL exposed</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1.55</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">119</td>
+<td style="text-align: right;">362.2</td>
+</tr>
+</tbody>
+</table>
+<p>The median task contains only one tool in both datasets. Reordering cannot
+improve a one-tool sequence, so the useful regime is repeated multi-tool
+workflows.</p>
+<h4 id="highest-toolret-gold-label-frequencies">Highest ToolRet gold-label frequencies<a class="headerlink" href="#highest-toolret-gold-label-frequencies" title="Link to this section">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th style="text-align: right;">Frequency</th>
+<th style="text-align: right;">Schema tokens</th>
+<th style="text-align: right;">Frequency × tokens</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Finish</code></td>
+<td style="text-align: right;">350</td>
+<td style="text-align: right;">33</td>
+<td style="text-align: right;">11,550</td>
+</tr>
+<tr>
+<td><code>finish</code></td>
+<td style="text-align: right;">170</td>
+<td style="text-align: right;">49</td>
+<td style="text-align: right;">8,330</td>
+</tr>
+<tr>
+<td><code>get_closing_parenthesis</code></td>
+<td style="text-align: right;">70</td>
+<td style="text-align: right;">46</td>
+<td style="text-align: right;">3,220</td>
+</tr>
+<tr>
+<td><code>stack_insert</code></td>
+<td style="text-align: right;">70</td>
+<td style="text-align: right;">49</td>
+<td style="text-align: right;">3,430</td>
+</tr>
+<tr>
+<td><code>stack_pop</code></td>
+<td style="text-align: right;">70</td>
+<td style="text-align: right;">44</td>
+<td style="text-align: right;">3,080</td>
+</tr>
+<tr>
+<td><code>account_login</code></td>
+<td style="text-align: right;">64</td>
+<td style="text-align: right;">76</td>
+<td style="text-align: right;">4,864</td>
+</tr>
+</tbody>
+</table>
+<p>The two <code>Finish</code> entries have different stable IDs and come from different
+sources, so they remain distinct tools.</p>
+<h4 id="highest-toolret-schema-cost-weighted-scores">Highest ToolRet schema-cost-weighted scores<a class="headerlink" href="#highest-toolret-schema-cost-weighted-scores" title="Link to this section">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th style="text-align: right;">Frequency</th>
+<th style="text-align: right;">Schema tokens</th>
+<th style="text-align: right;">Weighted score</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Agent.WalkTo</code></td>
+<td style="text-align: right;">42</td>
+<td style="text-align: right;">492</td>
+<td style="text-align: right;">20,664</td>
+</tr>
+<tr>
+<td><code>GET_search</code></td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">1,349</td>
+<td style="text-align: right;">13,490</td>
+</tr>
+<tr>
+<td><code>Finish</code></td>
+<td style="text-align: right;">350</td>
+<td style="text-align: right;">33</td>
+<td style="text-align: right;">11,550</td>
+</tr>
+<tr>
+<td><code>Agent.Find</code></td>
+<td style="text-align: right;">12</td>
+<td style="text-align: right;">779</td>
+<td style="text-align: right;">9,348</td>
+</tr>
+<tr>
+<td><code>list_properties</code></td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">1,090</td>
+<td style="text-align: right;">8,720</td>
+</tr>
+</tbody>
+</table>
+<p>This demonstrates why frequency and expected saved prefill work are not
+identical rankings.</p>
+<h4 id="co-occurrence">Co-occurrence<a class="headerlink" href="#co-occurrence" title="Link to this section">&para;</a></h4>
+<p>ToolRet contains several strong repeated multi-tool patterns:</p>
+<pre><code class="language-text">get_closing_parenthesis
+→ stack_insert
+→ stack_pop
+</code></pre>
+<p>This triple appears in 70 tasks.</p>
+<pre><code class="language-text">create_object_dict
+→ update_object_dict
+→ get_final_object
+</code></pre>
+<p>This triple appears in 62 tasks.</p>
+<p>BFCL co-occurrence is much weaker in the selected subset: its leading pairs and
+triples generally appear in only two tasks.</p>
+<h4 id="empirical-order-trie-comparison">Empirical-order trie comparison<a class="headerlink" href="#empirical-order-trie-comparison" title="Link to this section">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Dataset</th>
+<th>Ordering</th>
+<th style="text-align: right;">Trie-node compression</th>
+<th style="text-align: right;">Estimated block-token reuse</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ToolRet</td>
+<td>Original</td>
+<td style="text-align: right;">29.45%</td>
+<td style="text-align: right;">26.91%</td>
+</tr>
+<tr>
+<td>ToolRet</td>
+<td>Alphabetical</td>
+<td style="text-align: right;">30.77%</td>
+<td style="text-align: right;">26.86%</td>
+</tr>
+<tr>
+<td>ToolRet</td>
+<td>Random seed 7</td>
+<td style="text-align: right;">29.74%</td>
+<td style="text-align: right;">25.97%</td>
+</tr>
+<tr>
+<td>ToolRet</td>
+<td>Random seed 42</td>
+<td style="text-align: right;">30.86%</td>
+<td style="text-align: right;">26.70%</td>
+</tr>
+<tr>
+<td>ToolRet</td>
+<td>Random seed 101</td>
+<td style="text-align: right;">29.75%</td>
+<td style="text-align: right;">26.43%</td>
+</tr>
+<tr>
+<td>ToolRet</td>
+<td>Frequency</td>
+<td style="text-align: right;"><strong>36.88%</strong></td>
+<td style="text-align: right;">31.35%</td>
+</tr>
+<tr>
+<td>ToolRet</td>
+<td>Schema-cost weighted</td>
+<td style="text-align: right;">36.52%</td>
+<td style="text-align: right;"><strong>31.80%</strong></td>
+</tr>
+<tr>
+<td>ToolRet</td>
+<td>FP-tree global</td>
+<td style="text-align: right;"><strong>36.88%</strong></td>
+<td style="text-align: right;">31.35%</td>
+</tr>
+<tr>
+<td>BFCL</td>
+<td>Original</td>
+<td style="text-align: right;">11.89%</td>
+<td style="text-align: right;">10.98%</td>
+</tr>
+<tr>
+<td>BFCL</td>
+<td>Alphabetical</td>
+<td style="text-align: right;">16.64%</td>
+<td style="text-align: right;">15.38%</td>
+</tr>
+<tr>
+<td>BFCL</td>
+<td>Random seed 7</td>
+<td style="text-align: right;">16.54%</td>
+<td style="text-align: right;">14.60%</td>
+</tr>
+<tr>
+<td>BFCL</td>
+<td>Random seed 42</td>
+<td style="text-align: right;">16.22%</td>
+<td style="text-align: right;">14.25%</td>
+</tr>
+<tr>
+<td>BFCL</td>
+<td>Random seed 101</td>
+<td style="text-align: right;">16.17%</td>
+<td style="text-align: right;">14.59%</td>
+</tr>
+<tr>
+<td>BFCL</td>
+<td>Frequency</td>
+<td style="text-align: right;"><strong>21.07%</strong></td>
+<td style="text-align: right;"><strong>18.88%</strong></td>
+</tr>
+<tr>
+<td>BFCL</td>
+<td>Schema-cost weighted</td>
+<td style="text-align: right;">20.55%</td>
+<td style="text-align: right;">18.76%</td>
+</tr>
+<tr>
+<td>BFCL</td>
+<td>FP-tree global</td>
+<td style="text-align: right;"><strong>21.07%</strong></td>
+<td style="text-align: right;"><strong>18.88%</strong></td>
+</tr>
+</tbody>
+</table>
+<p>For ToolRet, schema-cost weighting improves the estimated reusable token ratio
+from 26.91% to 31.80%, a gain of 4.89 percentage points over original order.</p>
+<p>For BFCL, frequency ordering improves the estimate from 10.98% to 18.88%, a
+gain of 7.90 percentage points over original menu order.</p>
+<h4 id="sensitivity-to-replay-assumptions">Sensitivity to replay assumptions<a class="headerlink" href="#sensitivity-to-replay-assumptions" title="Link to this section">&para;</a></h4>
+<p>Best ordering within each replay:</p>
+<table>
+<thead>
+<tr>
+<th>Dataset</th>
+<th>Replay</th>
+<th style="text-align: right;">Best estimated reuse</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ToolRet</td>
+<td>Empirical</td>
+<td style="text-align: right;">31.80%</td>
+</tr>
+<tr>
+<td>ToolRet</td>
+<td>Uniform with replacement</td>
+<td style="text-align: right;">52.12%</td>
+</tr>
+<tr>
+<td>ToolRet</td>
+<td>Support-skewed</td>
+<td style="text-align: right;">80.18%</td>
+</tr>
+<tr>
+<td>ToolRet</td>
+<td>Session-bursty</td>
+<td style="text-align: right;">31.80%</td>
+</tr>
+<tr>
+<td>BFCL</td>
+<td>Empirical</td>
+<td style="text-align: right;">18.88%</td>
+</tr>
+<tr>
+<td>BFCL</td>
+<td>Uniform with replacement</td>
+<td style="text-align: right;">41.11%</td>
+</tr>
+<tr>
+<td>BFCL</td>
+<td>Support-skewed</td>
+<td style="text-align: right;">61.39%</td>
+</tr>
+<tr>
+<td>BFCL</td>
+<td>Session-bursty</td>
+<td style="text-align: right;">18.88%</td>
+</tr>
+</tbody>
+</table>
+<p>The large replay differences show that repeated requests and popularity skew
+can matter more than the choice between two good ordering rules. They also show
+why a claimed cache benefit must state its traffic assumptions.</p>
+<p>The empirical and session-bursty orders have very high same-domain adjacency
+because the public files are already grouped by configuration. This should not
+be interpreted as naturally occurring production session locality.</p>
+<h3 id="task-d-answer">Task D answer<a class="headerlink" href="#task-d-answer" title="Link to this section">&para;</a></h3>
+<p>Task D is complete as a benchmark and controlled-replay analysis.</p>
+<p>The data provides evidence that deterministic ordering can increase analytical
+prefix sharing, particularly for repeated multi-tool workflows:</p>
+<ul>
+<li>ToolRet performs best on reusable token volume with
+  schema-cost-weighted ordering.</li>
+<li>BFCL performs best with frequency ordering in the selected subset.</li>
+<li>Frequency/FP-tree order creates the smallest ToolRet trie, while
+  schema-cost weighting reuses slightly more token volume.</li>
+<li>ToolRet contains stronger repeated co-occurrence patterns than the selected
+  BFCL subset.</li>
+<li>Most tasks contain only one tool, where reordering cannot help.</li>
+<li>Replay locality and repeated requests strongly affect the result.</li>
+</ul>
+<p>The current recommended deterministic rules are:</p>
+<pre><code class="language-text">ToolRet:
+    sort by -(frequency × schema_tokens), -frequency, tool_id
+
+BFCL:
+    sort by -frequency, tool_id
+</code></pre>
+<p>These are benchmark-derived rules, not production policies. With approved
+production traces, ToolRet gold frequency and BFCL menu frequency should be
+replaced or supplemented by successful-call frequency, measured prefill time,
+session locality, authorization, and cache residency.</p>
+<p>The analysis does <strong>not</strong> yet prove a latency speedup. CUDA vLLM experiments
+must validate exact rendered token prefixes, cache hits, computed prompt tokens,
+prefill latency, TTFT, cache eviction, GPU memory, and BFCL correctness.</p>
+<p>Reproducible artifacts:</p>
+<ul>
+<li><code>src/tatm/analysis.py</code></li>
+<li><code>src/tatm/prompting.py</code></li>
+<li><code>scripts/build_cluster_workload.py</code></li>
+<li><code>reports/access-patterns.md</code></li>
+<li><code>reports/analysis-summary.json</code></li>
+<li><code>reports/tables/ordering-results.csv</code></li>
+</ul>
+<h2 id="reproduction">Reproduction<a class="headerlink" href="#reproduction" title="Link to this section">&para;</a></h2>
+<pre><code class="language-bash">uv sync
+uv run python scripts/download_datasets.py
+uv run python scripts/run_pipeline.py
+uv run pytest
+</code></pre>
+<p>Raw and normalized datasets are intentionally ignored by Git. The compact
+reports and source tables are stored under <code>reports/</code>.</p>
+
+        <footer class="footer">
+          TATM FYP · Public benchmark analysis · Generated from task_c_d.md
+        </footer>
+      </main>
+    </div>
+  </div>
+
+  <button class="print-button" type="button" onclick="window.print()">
+    Print / Save PDF
+  </button>
+
+  <script>
+    document.querySelectorAll("table").forEach((table) => {
+      const wrapper = document.createElement("div");
+      wrapper.className = "table-wrap";
+      table.parentNode.insertBefore(wrapper, table);
+      wrapper.appendChild(table);
+    });
+    document.querySelectorAll('a[href^="http"]').forEach((link) => {
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+    });
+  </script>
+</body>
+</html>

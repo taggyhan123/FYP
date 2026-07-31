@@ -1,37 +1,57 @@
-# CUDA cluster hand-off: exact prefix-cache experiments
+# GPU procedure: exact prefix-cache experiments
 
 Tasks B and E require a CUDA-capable vLLM server. The local pipeline prepares
 schemas and workloads without claiming GPU measurements.
 
-## 1. Copy or clone the repository on the SoC cluster
+## 1. Environment
 
-Use the cluster's approved storage and environment. Do not commit credentials,
-tokens, model weights, raw datasets, or `cluster/results/`.
+The workstation itself has four RTX 3090s and a vLLM 0.26.0 environment at
+`/home/taghan/tatm/.venv`, so these steps run locally; no separate cluster is
+needed. Pick an idle GPU with `nvidia-smi` and pin it — other users share this
+machine.
 
-## 2. Start the cache-enabled server
+Two environment prerequisites, both discovered the hard way:
 
-Use the model and vLLM module/version approved for the cluster. A representative
-command is:
-
-```bash
-vllm serve Qwen/Qwen3-0.6B \
-  --enable-prefix-caching \
-  --host 127.0.0.1 \
-  --port 8000
-```
+- `CPATH` must point at Python 3.12 headers. Triton JIT-compiles a small
+  `cuda_utils.c` and the system `python3.12-dev` package is not installed, so
+  startup dies with `fatal error: Python.h: No such file or directory` whenever
+  the torch compile cache misses. Headers are provided by the `hdr312` conda
+  env.
+- `VLLM_SERVER_DEV_MODE=1` is required to expose `POST /reset_prefix_cache`,
+  which the probe uses to make each trial genuinely cold.
+- The venv's `bin` must be on `PATH`, not just used to resolve the `vllm`
+  executable. FlashInfer JIT-builds its sampling kernel by shelling out to
+  `ninja`, which only exists inside the venv; without it startup dies with
+  `FileNotFoundError: 'ninja'` during KV-cache initialization.
 
 Record the exact model revision, vLLM version, GPU type, block size, dtype,
 maximum model length, tensor parallelism, and every server flag.
+
+## 2. Start the cache-enabled server
+
+```bash
+PATH=/home/taghan/tatm/.venv/bin:$PATH \
+VLLM_SERVER_DEV_MODE=1 \
+CUDA_VISIBLE_DEVICES=2 \
+CPATH=/home/taghan/miniconda3/envs/hdr312/include/python3.12 \
+vllm serve Qwen/Qwen3-0.6B \
+  --enable-prefix-caching \
+  --enable-auto-tool-choice \
+  --tool-call-parser hermes \
+  --host 127.0.0.1 \
+  --port 8000
+```
 
 ## 3. Run the black-box sanity probe
 
 ```bash
 python scripts/vllm_prefix_cache_probe.py \
   --run-label cache-enabled \
+  --repeats 5 \
   --output cluster/results/cache-enabled.json
 ```
 
-The fixed sequence checks:
+Each trial resets the prefix cache and then walks the fixed sequence:
 
 1. an initially cold prompt;
 2. the identical prompt;
@@ -39,19 +59,50 @@ The fixed sequence checks:
 4. the first two tools reordered;
 5. the original prompt restored.
 
+`--repeats` controls how many trials run. One trial produces point estimates
+with no error bars, which is not enough to compare latencies; the summary block
+reports mean, standard deviation, and a 95% Student-t half-width per scenario.
+
 The probe records API usage, wall time, tool-call output, and deltas for the
-vLLM Prometheus metrics that exist in the installed version, including prefix
-cache hits/queries, cached prompt tokens, computed prefill KV tokens, prefill
-time, TTFT, and KV-cache usage.
+vLLM Prometheus metrics present in the installed version: prefix cache
+hits/queries, cached prompt tokens, prefill time, TTFT, inter-token latency, and
+decode time. It also reads back `vllm:cache_config_info` so the served
+`enable_prefix_caching` value is stored with the results rather than assumed.
+
+KV-cache usage is sampled by a background thread *while each request is in
+flight*. `vllm:kv_cache_usage_perc` is an instantaneous gauge, so scraping it
+only after a request returns always reads ~0 — the blocks have already been
+freed. Peak values land in `peak_gauges`.
 
 ## 4. Run the cache-disabled control
 
-Stop the server, restart it with identical settings but without
-`--enable-prefix-caching`, and run:
+Stop the server, restart it with identical settings but with prefix caching
+explicitly turned off, and run:
+
+```bash
+PATH=/home/taghan/tatm/.venv/bin:$PATH \
+VLLM_SERVER_DEV_MODE=1 \
+CUDA_VISIBLE_DEVICES=2 \
+CPATH=/home/taghan/miniconda3/envs/hdr312/include/python3.12 \
+vllm serve Qwen/Qwen3-0.6B \
+  --no-enable-prefix-caching \
+  --enable-auto-tool-choice \
+  --tool-call-parser hermes \
+  --host 127.0.0.1 \
+  --port 8000
+```
+
+`--no-enable-prefix-caching` is required. Merely omitting `--enable-prefix-caching`
+does **not** disable it: vLLM V1 defaults `enable_prefix_caching=True`, so the
+control silently runs with caching on. This exact mistake invalidated the first
+attempt at check 4.
+
+Then run:
 
 ```bash
 python scripts/vllm_prefix_cache_probe.py \
   --run-label cache-disabled \
+  --repeats 5 \
   --output cluster/results/cache-disabled.json
 ```
 

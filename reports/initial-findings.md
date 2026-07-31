@@ -34,16 +34,39 @@ points). These are analytical estimates, not vLLM hit-rate or latency results.
 
 ## Prefix-cache sanity status
 
-| Check | Local status | Required cluster evidence |
-| --- | --- | --- |
-| Identical prompt reuse | Pending CUDA vLLM | cached/computed prompt tokens and TTFT |
-| Changed second tool | Pending CUDA vLLM | first differing block boundary |
-| Reordered tools | Pending CUDA vLLM | rendered token IDs and hit boundary |
-| Cache on/off equivalence | Pending CUDA vLLM | identical generated token sequence |
-| GPU/KV memory | Unavailable on this Mac | GPU type, cache usage, eviction settings |
+Measured on an RTX 3090 (23.56 GiB) with vLLM 0.26.0 and `Qwen/Qwen3-0.6B`,
+block size 16, 11,807 GPU blocks. Five trials per scenario with the prefix cache
+reset before each trial (`cluster/results/`). Prompt length is 303 tokens except
+for `changed_second_tool` at 309.
 
-The runnable probe and procedure are in `cluster/README.md`; no synthetic GPU
-number is substituted here.
+| Check | Cached prompt tokens | Reuse | TTFT on (ms) | TTFT off (ms) |
+| --- | --- | --- | --- | --- |
+| Cold prompt | 0 / 303 | 0.0% | 52.4 ± 28.8 | 51.5 ± 27.3 |
+| Identical prompt reuse | 288 / 303 | 95.0% | 43.0 ± 1.2 | 40.5 ± 2.3 |
+| Changed second tool | 128 / 309 | 41.4% | 41.4 ± 1.1 | 42.3 ± 2.2 |
+| Reordered first two tools | 48 / 303 | 15.8% | 37.7 ± 5.7 | 43.0 ± 4.2 |
+| Original restored | 288 / 303 | 95.0% | 41.1 ± 2.1 | 39.4 ± 2.8 |
+
+All five Task B checks pass. Reuse behaves exactly as the exact-prefix model
+predicts: an identical prompt reuses 95% of it, editing one tool description
+cuts reuse to 41%, and reordering the first two tools cuts it to 16%. Cache-on
+and cache-off produce identical output text and tool calls in every scenario,
+with the control verified at `enable_prefix_caching=False` and 0 cached tokens
+throughout. Peak KV-cache usage per request is 0.0019% of an 11,807-block
+cache, and mean inter-token latency is ~2.5 ms across all scenarios.
+
+**Prefix reuse produced no measurable TTFT benefit at this prompt size.**
+Intervals above are 95% Student-t half-widths over five trials; no scenario
+separates cache-on from cache-off, and reuse fraction does not order TTFT — the
+15.8%-reuse case has the lowest mean. This is a measurement-floor result rather
+than evidence against the hypothesis: 303 tokens prefill in ~40 ms end-to-end,
+dominated by fixed per-request overhead, so eliminating 288 tokens of prefill
+work is not resolvable above noise.
+
+A single-trial version of this experiment appeared to show a 3x gain (69 ms cold
+vs 23 ms warm). That was entirely the server's first-ever request: per-trial cold
+TTFT is 93.9, 41.8, 42.7, 42.5, 41.3 ms. Any latency claim in this project needs
+repeated trials and a discarded warmup.
 
 ## Recommendation
 
@@ -64,12 +87,28 @@ native exact APC converts the local token-reuse signal into repeatable TTFT
 benefit without a BFCL quality regression. If it does not, narrow the project to
 characterizing the crossover regimes or pivot toward retrieval/menu reduction.
 
-## Immediate cluster run
+Task B has now partly answered that, negatively, at small scale: 95% token reuse
+bought no measurable TTFT at a 303-token prompt. Before any ordering experiment
+can produce an interpretable latency number, Task E must first find the prompt
+size at which schema prefill dominates TTFT. The concrete next measurement is a
+prefill-cost sweep — TTFT against tool-catalog token count, cache-on and
+cache-off, holding the request shape fixed — to locate the point where the
+cache-on and cache-off curves separate beyond their confidence intervals. Every
+ordering comparison should then be run above that threshold. Running the
+existing workload orderings at 303-token prompts would produce differences
+indistinguishable from noise and invite exactly the over-claim the single-trial
+run already produced once.
 
-1. Freeze model revision, tokenizer, chat template, vLLM version, GPU, block
-   size, dtype, and server flags.
-2. Run the cache-enabled and cache-disabled sanity probe.
-3. Render and save complete prompt token IDs for each ordering.
-4. Replay original, frequency, and schema-cost-weighted workloads with
-   documented cold/warm policies and repeated trials.
-5. Add BFCL name/argument/no-tool scores before interpreting latency.
+## Immediate next GPU run
+
+Done: model/vLLM/GPU/block size frozen and recorded (step 1), and the
+cache-enabled and cache-disabled sanity probes both run and compared (step 2).
+Remaining:
+
+1. Sweep TTFT against tool-catalog token count, cache-on and cache-off, to find
+   where schema prefill dominates TTFT. No ordering result is interpretable
+   below that threshold.
+2. Render and save complete prompt token IDs for each ordering.
+3. Replay original, frequency, and schema-cost-weighted workloads above the
+   threshold, with documented cold/warm policies and repeated trials.
+4. Add BFCL name/argument/no-tool scores before interpreting latency.

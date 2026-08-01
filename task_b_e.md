@@ -261,6 +261,40 @@ five-trial means. 20 tasks per category is small enough that domain-level splits
 should be read as directional, not conclusive. A larger, repeated run is needed
 before this becomes a number to design a system around.
 
+### Does the quality gap survive a stronger model?
+
+The 0.6B result above raises an obvious question: is the ordering→quality
+tradeoff a real effect of prompt structure, or a symptom of a model too weak to
+reliably pick the right tool out of 64 regardless of order? Same 100-task
+workload, same menus, same two orderings, replayed against `Qwen/Qwen3-8B`
+(`--max-model-len 16384` — the default 40,960 does not fit this model's KV
+cache in the available GPU memory alongside its weights).
+
+| Ordering | Function-name accuracy | Full accuracy | No-tool accuracy |
+| --- | ---: | ---: | ---: |
+| alphabetical | 91.25% | 81.25% | 95.0% |
+| frequency | 91.25% | 81.25% | 90.0% |
+
+**Answer: mostly no.** Absolute accuracy jumps sharply at 8B, as expected — but
+the ordering-driven gap on name and full accuracy that looked real at 0.6B (10
+and 3.75 points) is exactly zero at 8B. That supports the concern motivating
+this run: the 0.6B selection-accuracy tradeoff was substantially a small-model
+artefact, not a robust property of tool ordering.
+
+**What does survive at both scales:** alphabetical still beats frequency on
+no-tool accuracy — 95.0% vs 85.0% at 0.6B, 95.0% vs 90.0% at 8B. Smaller gap at
+scale, same direction both times, now with two independent data points instead
+of one. This is the part of the original finding worth taking seriously; the
+name/argument-accuracy tradeoff is not.
+
+**Revised practical reading:** at deployment-grade model capability, ordering by
+cache reuse (alphabetical) does not cost function-selection accuracy the way the
+0.6B result suggested — the earlier "neither ordering dominates" conclusion
+overstated the tradeoff. What remains is a smaller, narrower caution: alphabetical
+may be modestly better at correctly declining irrelevant requests, worth
+confirming with a larger sample before treating as settled, but not a reason to
+avoid it on selection-accuracy grounds.
+
 ### Is TTFT optimizable?
 
 Decomposing the sweep over its two clean high-size points (6,742 → 20,627 prompt

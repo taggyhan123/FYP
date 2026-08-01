@@ -22,12 +22,16 @@ The counterintuitive results, in order of how surprising they were:
    that changes request to request. It optimizes for "important" and
    accidentally destroys "identical," which is the only thing the cache
    rewards.
-2. **The ordering that wins on speed is not the ordering that wins on
-   quality.** Alphabetical wins reuse by 9x, but frequency scores higher on
-   function-name and full accuracy (77.5%/51.25% vs 67.5%/47.5%); alphabetical
-   is markedly better at correctly declining when no tool applies (95.0% vs
-   85.0%). See "Ordering does not win on both axes" below. Faster and better
-   are not the same claim.
+2. **A quality tradeoff that looked real turned out to be mostly a small-model
+   artefact.** On `Qwen3-0.6B`, alphabetical won reuse by 9x but frequency
+   scored higher on function-name and full accuracy (77.5%/51.25% vs
+   67.5%/47.5%). Re-run on `Qwen3-8B` with the same workload: that gap is
+   exactly zero (91.25%/81.25% for both). What survives at both scales is
+   narrower — alphabetical is modestly better at correctly declining when no
+   tool applies (95.0% vs 90.0% at 8B, 95.0% vs 85.0% at 0.6B). Checking a
+   counterintuitive result against a second model size was what caught this;
+   the 0.6B number alone would have overstated the tradeoff. See "Ordering does
+   not win on both axes" below.
 3. **A metric we trusted couldn't answer the question it existed for.** The
    original locality trie retained every request forever, so a "bursty" replay
    and a shuffled replay of the *same* requests always scored identically, by
@@ -161,6 +165,15 @@ declining when no tool applies. Neither ordering dominates once quality is
 included. One run, no repeats, small per-category samples (n=20); read as
 directional, not final. This is what closes brief question 7 for the first
 time, at least partially.
+
+**Update, same workload replayed on `Qwen/Qwen3-8B`:** the name/full-accuracy
+gap above was mostly a small-model artefact. At 8B both orderings score
+identically on function-name (91.25%) and full accuracy (81.25%) — the gap that
+looked real at 0.6B vanishes at deployment-grade model capability. The
+no-tool-accuracy gap survives, smaller: 95.0% vs 90.0% at 8B (was 95.0% vs
+85.0% at 0.6B), same direction both times. Revised reading: alphabetical does
+not cost selection accuracy the way the 0.6B run suggested; the caution that
+remains is narrower and only about correctly declining irrelevant requests.
 
 ## Task D — locality is now measurable
 

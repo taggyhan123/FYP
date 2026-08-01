@@ -609,6 +609,7 @@
 <li><a href="#task-e-results">Task E results</a></li>
 <li><a href="#task-e-answer">Task E answer</a></li>
 <li><a href="#does-the-winning-ordering-preserve-function-call-quality">Does the winning ordering preserve function-call quality?</a></li>
+<li><a href="#does-the-quality-gap-survive-a-stronger-model">Does the quality gap survive a stronger model?</a></li>
 <li><a href="#is-ttft-optimizable">Is TTFT optimizable?</a></li>
 </ul>
 </li>
@@ -1016,6 +1017,54 @@ the latency tables above, these are point estimates from 100 requests each, not
 five-trial means. 20 tasks per category is small enough that domain-level splits
 should be read as directional, not conclusive. A larger, repeated run is needed
 before this becomes a number to design a system around.</p>
+<h3 id="does-the-quality-gap-survive-a-stronger-model">Does the quality gap survive a stronger model?<a class="headerlink" href="#does-the-quality-gap-survive-a-stronger-model" title="Link to this section">&para;</a></h3>
+<p>The 0.6B result above raises an obvious question: is the ordering→quality
+tradeoff a real effect of prompt structure, or a symptom of a model too weak to
+reliably pick the right tool out of 64 regardless of order? Same 100-task
+workload, same menus, same two orderings, replayed against <code>Qwen/Qwen3-8B</code>
+(<code>--max-model-len 16384</code> — the default 40,960 does not fit this model's KV
+cache in the available GPU memory alongside its weights).</p>
+<table>
+<thead>
+<tr>
+<th>Ordering</th>
+<th style="text-align: right;">Function-name accuracy</th>
+<th style="text-align: right;">Full accuracy</th>
+<th style="text-align: right;">No-tool accuracy</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>alphabetical</td>
+<td style="text-align: right;">91.25%</td>
+<td style="text-align: right;">81.25%</td>
+<td style="text-align: right;">95.0%</td>
+</tr>
+<tr>
+<td>frequency</td>
+<td style="text-align: right;">91.25%</td>
+<td style="text-align: right;">81.25%</td>
+<td style="text-align: right;">90.0%</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Answer: mostly no.</strong> Absolute accuracy jumps sharply at 8B, as expected — but
+the ordering-driven gap on name and full accuracy that looked real at 0.6B (10
+and 3.75 points) is exactly zero at 8B. That supports the concern motivating
+this run: the 0.6B selection-accuracy tradeoff was substantially a small-model
+artefact, not a robust property of tool ordering.</p>
+<p><strong>What does survive at both scales:</strong> alphabetical still beats frequency on
+no-tool accuracy — 95.0% vs 85.0% at 0.6B, 95.0% vs 90.0% at 8B. Smaller gap at
+scale, same direction both times, now with two independent data points instead
+of one. This is the part of the original finding worth taking seriously; the
+name/argument-accuracy tradeoff is not.</p>
+<p><strong>Revised practical reading:</strong> at deployment-grade model capability, ordering by
+cache reuse (alphabetical) does not cost function-selection accuracy the way the
+0.6B result suggested — the earlier "neither ordering dominates" conclusion
+overstated the tradeoff. What remains is a smaller, narrower caution: alphabetical
+may be modestly better at correctly declining irrelevant requests, worth
+confirming with a larger sample before treating as settled, but not a reason to
+avoid it on selection-accuracy grounds.</p>
 <h3 id="is-ttft-optimizable">Is TTFT optimizable?<a class="headerlink" href="#is-ttft-optimizable" title="Link to this section">&para;</a></h3>
 <p>Decomposing the sweep over its two clean high-size points (6,742 → 20,627 prompt
 tokens):</p>

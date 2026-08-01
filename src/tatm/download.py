@@ -27,6 +27,13 @@ BFCL_FILES = (
     "BFCL_v4_parallel_multiple.json",
     "BFCL_v4_irrelevance.json",
 )
+# Irrelevance has no possible_answer file: its ground truth is "call nothing."
+BFCL_GROUND_TRUTH_FILES = (
+    "BFCL_v4_simple_python.json",
+    "BFCL_v4_multiple.json",
+    "BFCL_v4_parallel.json",
+    "BFCL_v4_parallel_multiple.json",
+)
 
 
 def _request(url: str) -> urllib.request.Request:
@@ -98,6 +105,16 @@ def download_all(data_dir: Path, force: bool = False) -> dict[str, Any]:
         destination = data_dir / "bfcl" / filename
         entry = download_file(f"{BFCL_RAW_ROOT}/{filename}", destination, force)
         entry.update(dataset="bfcl", config=filename.removesuffix(".json"))
+        entries.append(entry)
+
+    for filename in BFCL_GROUND_TRUTH_FILES:
+        destination = data_dir / "bfcl" / "possible_answer" / filename
+        entry = download_file(
+            f"{BFCL_RAW_ROOT}/possible_answer/{filename}", destination, force
+        )
+        entry.update(
+            dataset="bfcl-ground-truth", config=filename.removesuffix(".json")
+        )
         entries.append(entry)
 
     manifest = {

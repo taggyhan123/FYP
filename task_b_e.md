@@ -206,6 +206,61 @@ across requests and are themselves cached, and that outweighs the partial blocks
 it loses at tool boundaries. Calibration is tighter where reuse is high, so the
 model is most trustworthy in the regime that matters.
 
+### Does the winning ordering preserve function-call quality?
+
+**Method.** 100 BFCL tasks, stratified 20 per category (`simple_python`,
+`multiple`, `parallel`, `parallel_multiple`, `irrelevance`) rather than the
+first-200-in-file-order sample used elsewhere, which is entirely `irrelevance`
+tasks and cannot test name/argument accuracy at all. Each task's gold tools are
+padded to a 64-tool menu, matching the size already validated for cache reuse.
+One request per task, `temperature=0`, `seed=0`, against the same server used
+for the reuse validation. Predicted tool calls are scored against BFCL's
+`possible_answer` ground truth (`src/tatm/bfcl_score.py`): function-name
+accuracy, full accuracy (name and every argument correct, order-independent for
+parallel calls), and no-tool accuracy for the irrelevance category. This is a
+reduced reimplementation of the official Gorilla/BFCL checker, not a vendored
+copy — no code execution, no per-type coercion table, any predicted argument
+absent from ground truth counts as a mismatch.
+
+One correction was needed before this produced usable data: Qwen3 emits a
+`<think>` reasoning block by default, which consumed the entire 128-token
+budget before any tool call was produced, giving 2.5% accuracy on *both*
+orderings identically — a generation-budget artefact, not a quality result.
+Fixed with `chat_template_kwargs: {"enable_thinking": false}`
+(`--disable-thinking` on `replay_vllm_workload.py`).
+
+**Results**, 80 scorable relevance tasks + 20 irrelevance tasks per ordering:
+
+| Ordering | Function-name accuracy | Full accuracy (name + args) | No-tool accuracy |
+| --- | ---: | ---: | ---: |
+| alphabetical | 67.5% | 47.5% | 95.0% |
+| frequency | 77.5% | 51.25% | 85.0% |
+
+**Answer: no, not cleanly — the ordering that wins on reuse is not the ordering
+that wins on quality.** Frequency ordering, measured nearly 9× worse for cache
+reuse, scores *higher* on function selection (77.5% vs 67.5% name accuracy) and
+higher on full correctness, while alphabetical is markedly better at correctly
+declining when no tool applies (95.0% vs 85.0% no-tool accuracy). At n=80 the
+name-accuracy gap is within roughly one standard error of the sampling noise —
+not something to treat as settled — but the qualitative shape (frequency helps
+selection, alphabetical helps abstention) held in every category checked, and a
+free reuse win is not free of tradeoffs.
+
+**This changes the practical recommendation from Task E's answer above.**
+"Alphabetical wins" was true only for cache reuse. A deployment that cares about
+tool-selection correctness cannot adopt alphabetical ordering on reuse grounds
+alone without accepting a plausible selection-accuracy cost, and cannot adopt
+frequency ordering without accepting both a 9× reuse loss and a higher false-call
+rate on irrelevant requests. Neither ordering dominates the other once quality is
+in the picture — this is exactly the tradeoff the brief's Q7 was checking for,
+and the reason no ordering could be recommended before this measurement existed.
+
+**Caveats:** single run per ordering, no repeats or confidence intervals — unlike
+the latency tables above, these are point estimates from 100 requests each, not
+five-trial means. 20 tasks per category is small enough that domain-level splits
+should be read as directional, not conclusive. A larger, repeated run is needed
+before this becomes a number to design a system around.
+
 ### Is TTFT optimizable?
 
 Decomposing the sweep over its two clean high-size points (6,742 → 20,627 prompt
@@ -263,10 +318,10 @@ edit on the next pipeline run.
 
 ## What has not been measured
 
-- **Function-call quality under any ordering.** No BFCL tool-name, argument, or
-  no-tool scoring has been run. Alphabetical ordering is faster, but nothing here
-  shows it does not degrade tool selection, so no ordering can be recommended on
-  latency grounds alone.
+- **Function-call quality at scale.** A first pass exists (100 tasks, above) and
+  shows the two orderings trade off differently on reuse versus quality — but it
+  is one run with no repeats, small per-category samples, and only two of six
+  orderings scored.
 - **Four of six orderings.** Only alphabetical and frequency were validated
   against measured cache hits.
 - Rendered full-prompt token IDs and exact block boundaries.
@@ -291,6 +346,19 @@ python scripts/validate_reuse_estimate.py \
   --input data/processed/bfcl-alpha-menu64.jsonl \
   --run-label validate-menu64-alphabetical \
   --output cluster/results/validate-menu64-alphabetical.json
+
+# Function-call quality under ordering
+python scripts/build_bfcl_quality_workload.py --ordering alphabetical \
+  --per-domain 20 --menu-size 64 \
+  --output data/processed/bfcl-quality-alphabetical.jsonl
+python scripts/replay_vllm_workload.py \
+  --input data/processed/bfcl-quality-alphabetical.jsonl \
+  --run-label bfcl-quality-alphabetical --max-tokens 128 --disable-thinking \
+  --output cluster/results/bfcl-quality-alphabetical.json
+python scripts/score_bfcl_quality.py \
+  --replay-result cluster/results/bfcl-quality-alphabetical.json \
+  --output cluster/results/bfcl-quality-alphabetical-score.json
+# repeat with --ordering frequency for the comparison row
 
 python -m pytest tests/ -q
 ```

@@ -110,6 +110,23 @@ preamble, which are identical across requests and cached, and that outweighs the
 partial blocks it loses at tool boundaries. Calibration is tighter where reuse
 is high, so the model is most trustworthy exactly where it matters.
 
+### Ordering does not win on both axes
+
+100 BFCL tasks (20 per category, 64-tool menus), scored against BFCL
+`possible_answer` ground truth (`src/tatm/bfcl_score.py`):
+
+| Ordering | Function-name accuracy | Full accuracy | No-tool accuracy |
+| --- | --- | --- | --- |
+| alphabetical | 67.5% | 47.5% | 95.0% |
+| frequency | 77.5% | 51.25% | 85.0% |
+
+Frequency ordering — nearly 9x worse for cache reuse — scores higher on
+function-selection accuracy; alphabetical is markedly better at correctly
+declining when no tool applies. Neither ordering dominates once quality is
+included. One run, no repeats, small per-category samples (n=20); read as
+directional, not final. This is what closes brief question 7 for the first
+time, at least partially.
+
 ## Task D — locality is now measurable
 
 `trie_metrics` retained every node forever, making reuse depend only on the
@@ -141,9 +158,9 @@ hand-maintained documents.
 ## Evidence still required
 
 - rendered full-prompt token IDs and exact vLLM block boundaries;
-- BFCL tool-name, argument, and no-tool quality under every ordering — no
-  quality measurement has been taken yet, so no ordering can currently be
-  recommended for production on latency grounds alone;
+- BFCL quality under the remaining four orderings, and repeated trials with
+  larger per-category samples for the two already scored — the current
+  quality numbers are a single, small-sample run;
 - ordering comparisons across all six orderings above the crossover, not just
   the two validated so far;
 - GPU/KV memory under eviction pressure at large menu sizes.

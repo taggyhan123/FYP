@@ -38,6 +38,15 @@ def main() -> None:
         choices=("auto", "required", "none"),
         default="auto",
     )
+    parser.add_argument(
+        "--disable-thinking",
+        action="store_true",
+        help=(
+            "Set chat_template_kwargs.enable_thinking=false. Qwen3 emits a "
+            "<think> block by default, which can consume the whole "
+            "--max-tokens budget before any tool call is produced."
+        ),
+    )
     args = parser.parse_args()
 
     base_url = args.base_url.rstrip("/")
@@ -59,6 +68,8 @@ def main() -> None:
             "seed": 0,
             "max_tokens": args.max_tokens,
         }
+        if args.disable_thinking:
+            payload["chat_template_kwargs"] = {"enable_thinking": False}
         before = parse_prometheus(fetch_text(f"{base_url}/metrics"))
         request_started = time.perf_counter()
         response = request_json(

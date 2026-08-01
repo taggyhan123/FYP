@@ -152,6 +152,38 @@ python scripts/validate_reuse_estimate.py \
 catalog. Without it the median task exposes one tool, which cannot be reordered
 and sits below the crossover.
 
+## 6a. Score function-call quality under an ordering
+
+`build_cluster_workload.py --partition bfcl` samples tasks in dataset order,
+which is alphabetically `irrelevance` first — the first 200 tasks are entirely
+no-tool cases and cannot test name/argument accuracy. Use the stratified
+builder instead:
+
+```bash
+python scripts/build_bfcl_quality_workload.py \
+  --ordering alphabetical --per-domain 20 --menu-size 64 \
+  --output data/processed/bfcl-quality-alphabetical.jsonl
+
+python scripts/replay_vllm_workload.py \
+  --input data/processed/bfcl-quality-alphabetical.jsonl \
+  --run-label bfcl-quality-alphabetical --max-tokens 128 --disable-thinking \
+  --output cluster/results/bfcl-quality-alphabetical.json
+
+python scripts/score_bfcl_quality.py \
+  --replay-result cluster/results/bfcl-quality-alphabetical.json \
+  --output cluster/results/bfcl-quality-alphabetical-score.json
+```
+
+`--disable-thinking` is not optional here: Qwen3 emits a `<think>` block by
+default, which consumes the whole `--max-tokens` budget before any tool call is
+produced, silently zeroing every score. Scoring requires
+`data/raw/bfcl/possible_answer/*.json`, fetched by `download_datasets.py`; the
+`irrelevance` config has no such file since its ground truth is "call nothing."
+
+`scripts/score_bfcl_quality.py` is a reduced reimplementation of the official
+Gorilla/BFCL AST checker, not a vendored copy — it does not execute code and
+treats any predicted argument absent from ground truth as a mismatch.
+
 ## 7. Generate a benchmark workload
 
 After the local normalization pipeline has run:

@@ -62,7 +62,41 @@ TASK_B_E_COVER = {
 }
 
 
-COVERS = {"task_c_d": DEFAULT_COVER, "task_b_e": TASK_B_E_COVER}
+INITIAL_FINDINGS_COVER = {
+    "doc_title": "Initial Research Findings — TATM Report",
+    "title": "Initial Research Findings",
+    "subtitle": (
+        "Task F deliverable: dataset inventory, schema-length and frequency "
+        "figures, prefix-cache sanity results, ordering comparisons, and the "
+        "recommendation for the next research stage."
+    ),
+    "status": "Local analysis and measured GPU results",
+    "metrics": [
+        ("45,815", "Canonical tools"),
+        ("9,201", "Benchmark tasks"),
+        ("10.6×", "TTFT gain at 200 tools"),
+        ("31.80%", "Best ToolRet estimate"),
+        ("18.88%", "Best BFCL estimate"),
+    ],
+    "executive": (
+        "Public tool workloads contain a measurable analytical prefix-locality "
+        "signal, but it is workload- and evidence-dependent. Deterministic "
+        "ordering raises estimated block reuse over empirical order for both "
+        "ToolRet and BFCL. Measured on vLLM, prefix caching yields no TTFT "
+        "benefit at 303-token prompts but up to a 10.6x reduction once tool "
+        "menus reach realistic, deployment-scale sizes, with an analytical "
+        "reuse estimate that under-predicts measured cache hits by 1.2-1.5x. "
+        "The recommendation is to proceed with the exact prompt-level ToolTrie "
+        "baseline, focused on tool-specific cache admission rather than a "
+        "generic reordering claim."
+    ),
+}
+
+COVERS = {
+    "task_c_d": DEFAULT_COVER,
+    "task_b_e": TASK_B_E_COVER,
+    "initial-findings": INITIAL_FINDINGS_COVER,
+}
 
 
 def render(source: Path, output: Path, cover: dict[str, Any] | None = None) -> None:

@@ -1,0 +1,850 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Initial Research Findings — TATM Report</title>
+  <style>
+    :root {
+      --ink: #172033;
+      --muted: #5c667a;
+      --line: #dfe5ef;
+      --soft: #f4f7fb;
+      --paper: #ffffff;
+      --navy: #102341;
+      --blue: #2563eb;
+      --cyan: #06b6d4;
+      --green: #0f9f6e;
+      --orange: #e27720;
+      --shadow: 0 18px 55px rgba(21, 42, 78, 0.13);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 8% 5%, rgba(37, 99, 235, 0.10), transparent 24rem),
+        radial-gradient(circle at 92% 16%, rgba(6, 182, 212, 0.09), transparent 25rem),
+        #eef2f8;
+      font: 16px/1.68 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    a {
+      color: #1d5fd1;
+      text-decoration-thickness: 1px;
+      text-underline-offset: 3px;
+    }
+
+    .page {
+      width: min(1180px, calc(100% - 40px));
+      margin: 28px auto 70px;
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      padding: 62px 66px 55px;
+      color: #fff;
+      background:
+        linear-gradient(125deg, rgba(16, 35, 65, 0.98), rgba(23, 72, 141, 0.96)),
+        var(--navy);
+      border-radius: 26px;
+      box-shadow: var(--shadow);
+    }
+
+    .hero::before,
+    .hero::after {
+      content: "";
+      position: absolute;
+      border-radius: 999px;
+      pointer-events: none;
+    }
+
+    .hero::before {
+      width: 390px;
+      height: 390px;
+      top: -260px;
+      right: -60px;
+      border: 56px solid rgba(94, 234, 212, 0.12);
+    }
+
+    .hero::after {
+      width: 210px;
+      height: 210px;
+      right: 155px;
+      bottom: -155px;
+      background: rgba(37, 99, 235, 0.32);
+    }
+
+    .eyebrow {
+      position: relative;
+      z-index: 1;
+      margin: 0 0 15px;
+      color: #9ee7f2;
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0.17em;
+      text-transform: uppercase;
+    }
+
+    .hero h1 {
+      position: relative;
+      z-index: 1;
+      max-width: 800px;
+      margin: 0;
+      color: #fff;
+      font-size: clamp(2.25rem, 5vw, 4.3rem);
+      line-height: 1.02;
+      letter-spacing: -0.045em;
+    }
+
+    .hero-subtitle {
+      position: relative;
+      z-index: 1;
+      max-width: 760px;
+      margin: 22px 0 0;
+      color: #d9e8ff;
+      font-size: 1.1rem;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      position: relative;
+      z-index: 1;
+      align-items: center;
+      gap: 8px;
+      margin-top: 24px;
+      padding: 8px 13px;
+      color: #d9fff3;
+      background: rgba(15, 159, 110, 0.18);
+      border: 1px solid rgba(94, 234, 212, 0.32);
+      border-radius: 999px;
+      font-size: 0.86rem;
+      font-weight: 700;
+    }
+
+    .status-pill::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      background: #5eead4;
+      border-radius: 50%;
+      box-shadow: 0 0 0 5px rgba(94, 234, 212, 0.10);
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+      margin: 18px 0;
+    }
+
+    .metric {
+      padding: 20px 18px;
+      background: rgba(255, 255, 255, 0.94);
+      border: 1px solid rgba(215, 224, 238, 0.95);
+      border-radius: 15px;
+      box-shadow: 0 7px 24px rgba(21, 42, 78, 0.07);
+    }
+
+    .metric strong {
+      display: block;
+      color: var(--navy);
+      font-size: 1.55rem;
+      line-height: 1.1;
+      letter-spacing: -0.025em;
+    }
+
+    .metric span {
+      display: block;
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 700;
+      line-height: 1.3;
+      text-transform: uppercase;
+      letter-spacing: 0.055em;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 255px minmax(0, 1fr);
+      gap: 20px;
+      align-items: start;
+    }
+
+    .toc-card {
+      position: sticky;
+      top: 18px;
+      max-height: calc(100vh - 36px);
+      overflow: auto;
+      padding: 22px 20px;
+      background: rgba(255, 255, 255, 0.94);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      box-shadow: 0 8px 30px rgba(21, 42, 78, 0.08);
+    }
+
+    .toc-card > strong {
+      display: block;
+      margin-bottom: 12px;
+      color: var(--navy);
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .toc-card ul {
+      margin: 0;
+      padding-left: 0;
+      list-style: none;
+    }
+
+    .toc-card ul ul {
+      margin: 4px 0 8px 12px;
+      padding-left: 10px;
+      border-left: 1px solid var(--line);
+    }
+
+    .toc-card li {
+      margin: 4px 0;
+    }
+
+    .toc-card a {
+      display: block;
+      padding: 4px 7px;
+      color: #536078;
+      border-radius: 6px;
+      font-size: 0.82rem;
+      line-height: 1.35;
+      text-decoration: none;
+    }
+
+    .toc-card a:hover {
+      color: var(--blue);
+      background: #edf4ff;
+    }
+
+    .report {
+      min-width: 0;
+      padding: 50px 58px 62px;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+    }
+
+    .executive {
+      margin: 0 0 42px;
+      padding: 24px 26px;
+      background: linear-gradient(135deg, #eff6ff, #f0fdfa);
+      border: 1px solid #bfdbfe;
+      border-left: 5px solid var(--blue);
+      border-radius: 12px;
+    }
+
+    .executive strong {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--navy);
+      font-size: 1.05rem;
+    }
+
+    .executive p {
+      margin: 0;
+      color: #3f4c63;
+    }
+
+    h2, h3, h4 {
+      color: var(--navy);
+      letter-spacing: -0.025em;
+    }
+
+    h2 {
+      margin: 66px 0 22px;
+      padding-top: 8px;
+      font-size: 2rem;
+      line-height: 1.2;
+      border-top: 1px solid var(--line);
+    }
+
+    .report > h2:first-of-type {
+      margin-top: 12px;
+      border-top: 0;
+    }
+
+    h3 {
+      margin: 38px 0 14px;
+      font-size: 1.35rem;
+    }
+
+    h4 {
+      margin: 28px 0 10px;
+      font-size: 1.05rem;
+    }
+
+    h2 .headerlink,
+    h3 .headerlink,
+    h4 .headerlink {
+      margin-left: 8px;
+      color: #a8b2c3;
+      font-size: 0.72em;
+      text-decoration: none;
+      opacity: 0;
+    }
+
+    h2:hover .headerlink,
+    h3:hover .headerlink,
+    h4:hover .headerlink {
+      opacity: 1;
+    }
+
+    p {
+      margin: 0 0 16px;
+    }
+
+    ul, ol {
+      padding-left: 24px;
+    }
+
+    li {
+      margin: 6px 0;
+    }
+
+    blockquote {
+      margin: 24px 0;
+      padding: 18px 22px;
+      color: #37445c;
+      background: #f7f9fc;
+      border-left: 4px solid var(--cyan);
+      border-radius: 4px 10px 10px 4px;
+    }
+
+    .table-wrap {
+      width: 100%;
+      margin: 20px 0 30px;
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.91rem;
+      font-variant-numeric: tabular-nums;
+    }
+
+    th {
+      padding: 12px 14px;
+      color: #fff;
+      background: var(--navy);
+      font-size: 0.76rem;
+      line-height: 1.3;
+      text-align: left;
+      text-transform: uppercase;
+      letter-spacing: 0.055em;
+    }
+
+    td {
+      padding: 11px 14px;
+      border-top: 1px solid #e7ebf2;
+      vertical-align: top;
+    }
+
+    tbody tr:nth-child(even) {
+      background: #f8fafc;
+    }
+
+    tbody tr:hover {
+      background: #eff6ff;
+    }
+
+    code {
+      padding: 0.13em 0.36em;
+      color: #a51d52;
+      background: #f5f0f4;
+      border: 1px solid #ebdde5;
+      border-radius: 5px;
+      font: 0.9em/1.45 ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+
+    pre {
+      position: relative;
+      margin: 18px 0 26px;
+      padding: 20px 22px;
+      overflow: auto;
+      color: #dbeafe;
+      background: #111d32;
+      border: 1px solid #243653;
+      border-radius: 11px;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    }
+
+    pre code {
+      padding: 0;
+      color: inherit;
+      background: transparent;
+      border: 0;
+      font-size: 0.86rem;
+    }
+
+    strong {
+      color: #102341;
+    }
+
+    .footer {
+      margin-top: 45px;
+      padding-top: 20px;
+      color: #738096;
+      border-top: 1px solid var(--line);
+      font-size: 0.82rem;
+      text-align: center;
+    }
+
+    .print-button {
+      position: fixed;
+      right: 22px;
+      bottom: 22px;
+      z-index: 5;
+      padding: 11px 16px;
+      color: #fff;
+      background: var(--blue);
+      border: 0;
+      border-radius: 999px;
+      box-shadow: 0 10px 30px rgba(37, 99, 235, 0.3);
+      cursor: pointer;
+      font: 700 0.85rem/1 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    @media (max-width: 940px) {
+      .page {
+        width: min(100% - 22px, 820px);
+        margin-top: 11px;
+      }
+
+      .hero {
+        padding: 42px 28px;
+        border-radius: 18px;
+      }
+
+      .metrics {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .toc-card {
+        position: relative;
+        top: 0;
+        max-height: none;
+      }
+
+      .report {
+        padding: 35px 25px 45px;
+      }
+    }
+
+    @media print {
+      @page {
+        size: A4;
+        margin: 16mm 14mm 17mm;
+      }
+
+      body {
+        background: #fff;
+        font-size: 10.4pt;
+      }
+
+      .page {
+        width: 100%;
+        margin: 0;
+      }
+
+      .hero {
+        min-height: 185mm;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 30mm 20mm;
+        border-radius: 0;
+        box-shadow: none;
+        break-after: page;
+      }
+
+      .hero h1 {
+        font-size: 38pt;
+      }
+
+      .metrics {
+        grid-template-columns: repeat(5, 1fr);
+        margin: 0 0 8mm;
+        break-after: page;
+      }
+
+      .metric {
+        padding: 12px 8px;
+        box-shadow: none;
+      }
+
+      .metric strong {
+        font-size: 15pt;
+      }
+
+      .metric span {
+        font-size: 6.7pt;
+      }
+
+      .layout {
+        display: block;
+      }
+
+      .toc-card {
+        position: static;
+        max-height: none;
+        margin-bottom: 10mm;
+        box-shadow: none;
+        break-after: page;
+      }
+
+      .report {
+        padding: 0;
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+      }
+
+      h2 {
+        break-before: auto;
+        break-after: avoid;
+      }
+
+      h3, h4 {
+        break-after: avoid;
+      }
+
+      p, li {
+        orphans: 3;
+        widows: 3;
+      }
+
+      table, pre, blockquote, .executive {
+        break-inside: avoid;
+      }
+
+      .table-wrap {
+        overflow: visible;
+      }
+
+      table {
+        font-size: 8.1pt;
+      }
+
+      th, td {
+        padding: 6px 7px;
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      .headerlink,
+      .print-button {
+        display: none !important;
+      }
+
+      .footer {
+        margin-top: 16mm;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header class="hero">
+      <p class="eyebrow">Trie-Aware Tool Memory · FYP Research Report</p>
+      <h1>Initial Research Findings</h1>
+      <p class="hero-subtitle">
+        Task F deliverable: dataset inventory, schema-length and frequency figures, prefix-cache sanity results, ordering comparisons, and the recommendation for the next research stage.
+      </p>
+      <span class="status-pill">Local analysis and measured GPU results</span>
+    </header>
+
+    <section class="metrics" aria-label="Key findings">
+      <div class="metric"><strong>45,815</strong><span>Canonical tools</span></div>
+      <div class="metric"><strong>9,201</strong><span>Benchmark tasks</span></div>
+      <div class="metric"><strong>10.6×</strong><span>TTFT gain at 200 tools</span></div>
+      <div class="metric"><strong>31.80%</strong><span>Best ToolRet estimate</span></div>
+      <div class="metric"><strong>18.88%</strong><span>Best BFCL estimate</span></div>
+    </section>
+
+    <div class="layout">
+      <nav class="toc-card" aria-label="Table of contents">
+        <strong>Contents</strong>
+        <div class="toc">
+<ul>
+<li><a href="#result-in-one-paragraph">Result in one paragraph</a></li>
+<li><a href="#evidence-obtained-locally">Evidence obtained locally</a></li>
+<li><a href="#prefix-cache-sanity-results">Prefix-cache sanity results</a></li>
+<li><a href="#prefill-cost-and-the-measurement-floor">Prefill cost and the measurement floor</a></li>
+<li><a href="#analytical-estimate-versus-measured-cache-hits">Analytical estimate versus measured cache hits</a></li>
+<li><a href="#recommendation">Recommendation</a></li>
+<li><a href="#immediate-cluster-run">Immediate cluster run</a></li>
+</ul>
+</div>
+
+      </nav>
+
+      <main class="report">
+        <aside class="executive">
+          <strong>Executive answer</strong>
+          <p>
+            Public tool workloads contain a measurable analytical prefix-locality signal, but it is workload- and evidence-dependent. Deterministic ordering raises estimated block reuse over empirical order for both ToolRet and BFCL. Measured on vLLM, prefix caching yields no TTFT benefit at 303-token prompts but up to a 10.6x reduction once tool menus reach realistic, deployment-scale sizes, with an analytical reuse estimate that under-predicts measured cache hits by 1.2-1.5x. The recommendation is to proceed with the exact prompt-level ToolTrie baseline, focused on tool-specific cache admission rather than a generic reordering claim.
+          </p>
+        </aside>
+
+        <h2 id="result-in-one-paragraph">Result in one paragraph<a class="headerlink" href="#result-in-one-paragraph" title="Link to this section">&para;</a></h2>
+<p>The public workloads contain a measurable analytical prefix-locality signal,
+but it is workload- and evidence-dependent. Across 45,815 canonical
+tools, median schema length is 70 Qwen tokens and P95 is
+220. ToolRet's median relevance set and BFCL's median
+exposed menu both contain one tool, which limits what reordering can achieve on
+many tasks. On empirical dataset order, schema-cost-weighted ordering raises the
+ToolRet tool-prefix block-reuse estimate from
+26.91% to
+31.80% (4.89
+percentage points). Frequency ordering raises the BFCL menu estimate from
+10.98% to
+18.88% (7.90
+points). These are analytical estimates, not vLLM hit-rate or latency results.</p>
+<h2 id="evidence-obtained-locally">Evidence obtained locally<a class="headerlink" href="#evidence-obtained-locally" title="Link to this section">&para;</a></h2>
+<ul>
+<li>ToolRet: 7,961 tasks, 7,652
+  tools appearing in gold relevance labels, with every label resolved.</li>
+<li>BFCL subset: 1,240 tasks and
+  1,362 distinct canonical functions appearing in
+  exposed menus.</li>
+<li>Schema diagnostics flag 19,921/45,815 tools. Most flags are
+  empty parameter objects, which can be legitimate; malformed and missing-field
+  counts are reported separately.</li>
+<li>Controlled support-skewed replay produces much more reuse than uniform or
+  empirical access, but under unbounded retention that gap comes from
+  resampling with replacement — repeated requests — not from locality. Only the
+  finite-cache tables in <code>access-patterns.md</code> speak to request ordering.</li>
+<li>Classic FP-tree global order equals the frequency order in this baseline.
+  Conditional pattern mining is still untested.</li>
+</ul>
+<h2 id="prefix-cache-sanity-results">Prefix-cache sanity results<a class="headerlink" href="#prefix-cache-sanity-results" title="Link to this section">&para;</a></h2>
+<p>Measured on Qwen/Qwen3-0.6B, block size 16, 11807 GPU blocks, 5 trials per scenario with the prefix cache reset before each trial. Intervals are 95% Student-t half-widths.</p>
+<table>
+<thead>
+<tr>
+<th>Check</th>
+<th>Cached / prompt tokens</th>
+<th>Reuse</th>
+<th>TTFT on (ms)</th>
+<th>TTFT off (ms)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Cold prompt</td>
+<td>0 / 303</td>
+<td>0.00%</td>
+<td>52.4 ± 28.8</td>
+<td>51.5 ± 27.3</td>
+</tr>
+<tr>
+<td>Identical prompt reuse</td>
+<td>288 / 303</td>
+<td>95.05%</td>
+<td>43.0 ± 1.2</td>
+<td>40.5 ± 2.3</td>
+</tr>
+<tr>
+<td>Changed second tool</td>
+<td>128 / 309</td>
+<td>41.42%</td>
+<td>41.4 ± 1.1</td>
+<td>42.3 ± 2.2</td>
+</tr>
+<tr>
+<td>Reordered first two tools</td>
+<td>48 / 303</td>
+<td>15.84%</td>
+<td>37.7 ± 5.7</td>
+<td>43.0 ± 4.2</td>
+</tr>
+<tr>
+<td>Original restored</td>
+<td>288 / 303</td>
+<td>95.05%</td>
+<td>41.1 ± 2.1</td>
+<td>39.4 ± 2.8</td>
+</tr>
+</tbody>
+</table>
+<p>The control served <code>enable_prefix_caching=False</code> and reported 0 cached tokens in every scenario, so the cache-on/cache-off output comparison is meaningful.</p>
+<h2 id="prefill-cost-and-the-measurement-floor">Prefill cost and the measurement floor<a class="headerlink" href="#prefill-cost-and-the-measurement-floor" title="Link to this section">&para;</a></h2>
+<p>Menus are one gold tool padded with distractors from a fixed global catalog. Cold is measured after a prefix-cache reset; warm is an identical repeat. 5 trials per point.</p>
+<table>
+<thead>
+<tr>
+<th>Menu tools</th>
+<th>Prompt tokens</th>
+<th>Cold TTFT on (ms)</th>
+<th>Warm TTFT on (ms)</th>
+<th>Warm TTFT off (ms)</th>
+<th>Speedup</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>250</td>
+<td>25.6</td>
+<td>23.4</td>
+<td>23.1</td>
+<td>1.0x</td>
+</tr>
+<tr>
+<td>4</td>
+<td>433</td>
+<td>25.2</td>
+<td>16.9</td>
+<td>23.7</td>
+<td>1.4x</td>
+</tr>
+<tr>
+<td>16</td>
+<td>1,771</td>
+<td>62.1</td>
+<td>35.3</td>
+<td>56.5</td>
+<td>1.6x</td>
+</tr>
+<tr>
+<td>64</td>
+<td>6,742</td>
+<td>248.8</td>
+<td>54.1</td>
+<td>245.6</td>
+<td>4.5x</td>
+</tr>
+<tr>
+<td>128</td>
+<td>13,422</td>
+<td>647.8</td>
+<td>85.2</td>
+<td>640.7</td>
+<td>7.5x</td>
+</tr>
+<tr>
+<td>200</td>
+<td>20,627</td>
+<td>1282.7</td>
+<td>120.7</td>
+<td>1275.2</td>
+<td>10.6x</td>
+</tr>
+</tbody>
+</table>
+<p>Prefix caching first produces a material gain at <strong>4 tools</strong> and grows steeply from there.</p>
+<p>The cache-disabled control shows cold and warm within noise of each other at every size, so the gap above is prefix caching and not a warmup artifact. Note that within-run cold-vs-warm separation alone is not sufficient evidence: the control also 'separates' at one tool, where no cache exists. The cache-on/cache-off comparison is the trustworthy one.</p>
+<p>This supersedes the earlier reading that prefix reuse buys nothing. It buys nothing <em>at 303 tokens</em>, which is simply below the floor.</p>
+<h2 id="analytical-estimate-versus-measured-cache-hits">Analytical estimate versus measured cache hits<a class="headerlink" href="#analytical-estimate-versus-measured-cache-hits" title="Link to this section">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Workload</th>
+<th>Predicted cacheable</th>
+<th>Measured cached</th>
+<th>Measured/predicted</th>
+<th>Predicted reuse</th>
+<th>Measured reuse</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>menu64-alphabetical</td>
+<td>428,016</td>
+<td>526,432</td>
+<td>1.23x</td>
+<td>38.42%</td>
+<td>38.15%</td>
+</tr>
+<tr>
+<td>menu64-frequency</td>
+<td>40,448</td>
+<td>60,864</td>
+<td>1.50x</td>
+<td>3.63%</td>
+<td>4.41%</td>
+</tr>
+</tbody>
+</table>
+<p>The tool-unit model under-predicts rather than over-predicts. It ignores the chat template and system preamble, which are identical across requests and are themselves cached, and that outweighs the partial blocks it loses at tool boundaries.</p>
+<p>The ordering comparison inverts the gold-only recommendation. On padded menus, ordering by benchmark support puts the <em>task-specific</em> tools first and pushes the shared catalog behind them, destroying the common prefix. A stable global order that ignores task-specificity keeps the shared catalog in front. Frequency ordering is the right choice only when the whole menu is task-specific, which is not what a connected tool catalog looks like.</p>
+<h2 id="recommendation">Recommendation<a class="headerlink" href="#recommendation" title="Link to this section">&para;</a></h2>
+<p>Proceed with the exact prompt-level ToolTrie baseline on the cluster, focusing
+on multi-tool tasks and session-local replay. Use schema-cost-weighted ordering
+as the strongest ToolRet candidate and frequency ordering as the strongest BFCL
+candidate from this first analysis. Report the original order and fixed-random
+controls alongside them.</p>
+<p>The likely publishable refinement is not a generic “reorder context into a
+trie” claim, because closely related cache-aware context ordering already
+exists. The more defensible direction is tool-specific cache admission using
+schema cost plus workflow co-occurrence, while preserving an active/authorized
+tool manifest and measuring function-call quality.</p>
+<p>Do not pursue arbitrary independent KV concatenation yet. First establish that
+native exact APC converts the local token-reuse signal into repeatable TTFT
+benefit without a BFCL quality regression. If it does not, narrow the project to
+characterizing the crossover regimes or pivot toward retrieval/menu reduction.</p>
+<h2 id="immediate-cluster-run">Immediate cluster run<a class="headerlink" href="#immediate-cluster-run" title="Link to this section">&para;</a></h2>
+<ol>
+<li>Freeze model revision, tokenizer, chat template, vLLM version, GPU, block
+   size, dtype, and server flags.</li>
+<li>Run the cache-enabled and cache-disabled sanity probe.</li>
+<li>Render and save complete prompt token IDs for each ordering.</li>
+<li>Replay original, frequency, and schema-cost-weighted workloads with
+   documented cold/warm policies and repeated trials.</li>
+<li>Add BFCL name/argument/no-tool scores before interpreting latency.</li>
+</ol>
+
+        <footer class="footer">
+          TATM FYP · Public benchmark analysis · Generated from initial-findings.md
+        </footer>
+      </main>
+    </div>
+  </div>
+
+  <button class="print-button" type="button" onclick="window.print()">
+    Print / Save PDF
+  </button>
+
+  <script>
+    document.querySelectorAll("table").forEach((table) => {
+      const wrapper = document.createElement("div");
+      wrapper.className = "table-wrap";
+      table.parentNode.insertBefore(wrapper, table);
+      wrapper.appendChild(table);
+    });
+    document.querySelectorAll('a[href^="http"]').forEach((link) => {
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+    });
+  </script>
+</body>
+</html>

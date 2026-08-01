@@ -613,7 +613,10 @@
 <li><a href="#is-ttft-optimizable">Is TTFT optimizable?</a></li>
 </ul>
 </li>
-<li><a href="#task-d-correction-locality-was-not-measurable">Task D correction — locality was not measurable</a></li>
+<li><a href="#task-d-correction-locality-was-not-measurable">Task D correction — locality was not measurable</a><ul>
+<li><a href="#does-this-hold-on-the-live-gpu-cache-not-just-the-offline-trie">Does this hold on the live GPU cache, not just the offline trie?</a></li>
+</ul>
+</li>
 <li><a href="#operational-note-the-reports-are-generated">Operational note: the reports are generated</a></li>
 <li><a href="#what-has-not-been-measured">What has not been measured</a></li>
 <li><a href="#reproduction">Reproduction</a></li>
@@ -1125,6 +1128,72 @@ than the synthetic bursty replay (31.35% versus 27.10% reuse at 25% capacity),
 because its file order is already 99.86% same-domain adjacent. The synthetic
 replay, which shuffles groups and shuffles within them, is less local than the
 data already was.</p>
+<h3 id="does-this-hold-on-the-live-gpu-cache-not-just-the-offline-trie">Does this hold on the live GPU cache, not just the offline trie?<a class="headerlink" href="#does-this-hold-on-the-live-gpu-cache-not-just-the-offline-trie" title="Link to this section">&para;</a></h3>
+<p>Every earlier GPU experiment resets the prefix cache before each trial, which
+is what makes them clean and repeatable, but it also erases exactly the
+cross-request dependency the locality question is about. <code>scripts/locality_replay.py</code>
+instead runs one continuous session per replay condition — a single reset at the
+start, then every request in sequence with no resets in between — comparing
+<code>empirical</code> against <code>session_bursty</code>, the one pair from <code>replay_workloads</code> that
+is a strict permutation of the same task multiset (<code>uniform</code>/<code>skewed</code> resample
+with replacement and so differ in content, not just order).</p>
+<p>120 BFCL tasks, 64-tool menus, alphabetical intra-menu order (the ordering
+Task E measured as strongest for reuse), against <code>Qwen/Qwen3-0.6B</code>. Total token
+volume across the session (668,440 tokens) is 3.5x the server's real cache
+capacity (190,896 tokens = 11,806 blocks x 16), so eviction genuinely
+happens — <code>bounded_trie_metrics</code> predicted 2,918-2,927 evictions per condition,
+consistent with the 190,888/190,877 final retained tokens sitting right at
+capacity.</p>
+<table>
+<thead>
+<tr>
+<th>Replay</th>
+<th style="text-align: right;">Total prompt tokens</th>
+<th style="text-align: right;">Measured cached tokens</th>
+<th style="text-align: right;">Measured reuse</th>
+<th style="text-align: right;">Predicted reuse (bounded trie)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>empirical</td>
+<td style="text-align: right;">668,440</td>
+<td style="text-align: right;">287,200</td>
+<td style="text-align: right;">42.97%</td>
+<td style="text-align: right;">35.00%</td>
+</tr>
+<tr>
+<td>session_bursty</td>
+<td style="text-align: right;">668,440</td>
+<td style="text-align: right;">287,616</td>
+<td style="text-align: right;">43.03%</td>
+<td style="text-align: right;">35.03%</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Answer: real eviction happens, but session order barely moves measured
+reuse here (42.97% vs 43.03%) — a much smaller gap than the offline-only
+result above (31.35% vs 27.10%) predicted for this regime.</strong> The reason is not
+a failure of the offline model — it predicted the same near-parity
+(35.00% vs 35.03%) before the GPU run happened. The mechanism: the offline
+divergence was measured on raw, unordered, unpadded task tool sequences, where
+similarity between requests comes only from tasks sharing domain-clustered gold
+tools. Here every menu is padded from one shared catalog <em>and</em> forced into the
+same alphabetical order — the intervention Task E found strongest for reuse.
+That ordering makes most of every request's prefix identical regardless of
+which task it came from, which swamps whatever weaker signal session
+clustering would otherwise contribute. Put plainly: <strong>once you apply the
+ordering that already wins on reuse, request scheduling stops being a
+second lever worth pulling</strong> — at least in this padded, globally-ordered
+regime; the original offline finding likely still holds for un-ordered or
+sparsely-shared catalogs.</p>
+<p><strong>This also re-confirms the trie model's calibration, independently.</strong> Measured
+reuse exceeds prediction by 1.228x (empirical) and 1.228x (session_bursty) —
+matching the 1.23x under-prediction factor found for alphabetical ordering in
+the static Task E validation (a different experimental design: per-trial reset
+versus one continuous session). The same correction factor holding across two
+unrelated measurement setups is stronger evidence for it than either result
+alone.</p>
 <h2 id="operational-note-the-reports-are-generated">Operational note: the reports are generated<a class="headerlink" href="#operational-note-the-reports-are-generated" title="Link to this section">&para;</a></h2>
 <p><code>reports/*.md</code> are produced by <code>src/tatm/reporting.py</code> and overwritten on every
 <code>scripts/run_pipeline.py</code> run. Measured GPU results are read back from
@@ -1141,7 +1210,11 @@ edit on the next pipeline run.</p>
   against measured cache hits.</li>
 <li>Rendered full-prompt token IDs and exact block boundaries.</li>
 <li>TTFT on partial-reuse workloads (see the extrapolation above).</li>
-<li>GPU/KV memory under eviction pressure at large menu sizes.</li>
+<li>Live-cache eviction under other orderings and other replay pairs
+  (<code>uniform</code>/<code>skewed</code> were excluded from the locality replay above because
+  they resample with replacement; only <code>empirical</code> vs <code>session_bursty</code> was
+  checked). GPU/KV memory <em>usage</em> under eviction pressure -- as opposed to
+  eviction's effect on reuse, which is now measured -- is still unrecorded.</li>
 </ul>
 <h2 id="reproduction">Reproduction<a class="headerlink" href="#reproduction" title="Link to this section">&para;</a></h2>
 <pre><code class="language-bash"># Data and local analysis
@@ -1172,6 +1245,12 @@ python scripts/score_bfcl_quality.py \
   --replay-result cluster/results/bfcl-quality-alphabetical.json \
   --output cluster/results/bfcl-quality-alphabetical-score.json
 # repeat with --ordering frequency for the comparison row
+
+# Session-ordering effect on the live cache (no resets between requests)
+python scripts/locality_replay.py \
+  --run-label locality-replay-bfcl-alpha64 \
+  --limit 120 --menu-size 64 --ordering alphabetical \
+  --output cluster/results/locality-replay-bfcl-alpha64.json
 
 python -m pytest tests/ -q
 </code></pre>

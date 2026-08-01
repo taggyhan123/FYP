@@ -342,6 +342,55 @@ because its file order is already 99.86% same-domain adjacent. The synthetic
 replay, which shuffles groups and shuffles within them, is less local than the
 data already was.
 
+### Does this hold on the live GPU cache, not just the offline trie?
+
+Every earlier GPU experiment resets the prefix cache before each trial, which
+is what makes them clean and repeatable, but it also erases exactly the
+cross-request dependency the locality question is about. `scripts/locality_replay.py`
+instead runs one continuous session per replay condition — a single reset at the
+start, then every request in sequence with no resets in between — comparing
+`empirical` against `session_bursty`, the one pair from `replay_workloads` that
+is a strict permutation of the same task multiset (`uniform`/`skewed` resample
+with replacement and so differ in content, not just order).
+
+120 BFCL tasks, 64-tool menus, alphabetical intra-menu order (the ordering
+Task E measured as strongest for reuse), against `Qwen/Qwen3-0.6B`. Total token
+volume across the session (668,440 tokens) is 3.5x the server's real cache
+capacity (190,896 tokens = 11,806 blocks x 16), so eviction genuinely
+happens — `bounded_trie_metrics` predicted 2,918-2,927 evictions per condition,
+consistent with the 190,888/190,877 final retained tokens sitting right at
+capacity.
+
+| Replay | Total prompt tokens | Measured cached tokens | Measured reuse | Predicted reuse (bounded trie) |
+| --- | ---: | ---: | ---: | ---: |
+| empirical | 668,440 | 287,200 | 42.97% | 35.00% |
+| session_bursty | 668,440 | 287,616 | 43.03% | 35.03% |
+
+**Answer: real eviction happens, but session order barely moves measured
+reuse here (42.97% vs 43.03%) — a much smaller gap than the offline-only
+result above (31.35% vs 27.10%) predicted for this regime.** The reason is not
+a failure of the offline model — it predicted the same near-parity
+(35.00% vs 35.03%) before the GPU run happened. The mechanism: the offline
+divergence was measured on raw, unordered, unpadded task tool sequences, where
+similarity between requests comes only from tasks sharing domain-clustered gold
+tools. Here every menu is padded from one shared catalog *and* forced into the
+same alphabetical order — the intervention Task E found strongest for reuse.
+That ordering makes most of every request's prefix identical regardless of
+which task it came from, which swamps whatever weaker signal session
+clustering would otherwise contribute. Put plainly: **once you apply the
+ordering that already wins on reuse, request scheduling stops being a
+second lever worth pulling** — at least in this padded, globally-ordered
+regime; the original offline finding likely still holds for un-ordered or
+sparsely-shared catalogs.
+
+**This also re-confirms the trie model's calibration, independently.** Measured
+reuse exceeds prediction by 1.228x (empirical) and 1.228x (session_bursty) —
+matching the 1.23x under-prediction factor found for alphabetical ordering in
+the static Task E validation (a different experimental design: per-trial reset
+versus one continuous session). The same correction factor holding across two
+unrelated measurement setups is stronger evidence for it than either result
+alone.
+
 ## Operational note: the reports are generated
 
 `reports/*.md` are produced by `src/tatm/reporting.py` and overwritten on every
@@ -360,7 +409,11 @@ edit on the next pipeline run.
   against measured cache hits.
 - Rendered full-prompt token IDs and exact block boundaries.
 - TTFT on partial-reuse workloads (see the extrapolation above).
-- GPU/KV memory under eviction pressure at large menu sizes.
+- Live-cache eviction under other orderings and other replay pairs
+  (`uniform`/`skewed` were excluded from the locality replay above because
+  they resample with replacement; only `empirical` vs `session_bursty` was
+  checked). GPU/KV memory *usage* under eviction pressure -- as opposed to
+  eviction's effect on reuse, which is now measured -- is still unrecorded.
 
 ## Reproduction
 
@@ -393,6 +446,12 @@ python scripts/score_bfcl_quality.py \
   --replay-result cluster/results/bfcl-quality-alphabetical.json \
   --output cluster/results/bfcl-quality-alphabetical-score.json
 # repeat with --ordering frequency for the comparison row
+
+# Session-ordering effect on the live cache (no resets between requests)
+python scripts/locality_replay.py \
+  --run-label locality-replay-bfcl-alpha64 \
+  --limit 120 --menu-size 64 --ordering alphabetical \
+  --output cluster/results/locality-replay-bfcl-alpha64.json
 
 python -m pytest tests/ -q
 ```

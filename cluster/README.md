@@ -184,6 +184,29 @@ produced, silently zeroing every score. Scoring requires
 Gorilla/BFCL AST checker, not a vendored copy — it does not execute code and
 treats any predicted argument absent from ground truth as a mismatch.
 
+## 6b. Measure whether request order matters on the live cache
+
+Every experiment above resets the prefix cache before each trial, which is
+what makes them repeatable, but it also erases the cross-request dependency
+that a locality question is actually about. This runs one continuous session
+per replay condition instead — a single reset at the start, then every
+request in sequence, no resets in between:
+
+```bash
+python scripts/locality_replay.py \
+  --run-label locality-replay-bfcl-alpha64 \
+  --limit 120 --menu-size 64 --ordering alphabetical \
+  --output cluster/results/locality-replay-bfcl-alpha64.json
+```
+
+Compares `empirical` against `session_bursty` from `replay_workloads` — the one
+pair that is a strict permutation of the same task multiset (`uniform` and
+`skewed` resample with replacement, so they differ in content, not just
+order). `--limit`/`--menu-size` should produce enough total token volume to
+exceed the server's real cache capacity (`block_size * num_gpu_blocks`, read
+back from `vllm:cache_config_info`) or no eviction happens and the comparison
+is trivial by construction, same as the unbounded offline trie.
+
 ## 7. Generate a benchmark workload
 
 After the local normalization pipeline has run:

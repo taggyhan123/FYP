@@ -32,12 +32,19 @@ The counterintuitive results, in order of how surprising they were:
    counterintuitive result against a second model size was what caught this;
    the 0.6B number alone would have overstated the tradeoff. See "Ordering does
    not win on both axes" below.
-3. **A metric we trusted couldn't answer the question it existed for.** The
-   original locality trie retained every request forever, so a "bursty" replay
-   and a shuffled replay of the *same* requests always scored identically, by
-   construction, regardless of what the data looked like. Fixed by
-   `bounded_trie_metrics` with capacity eviction. See "Task D — locality is now
-   measurable" below.
+3. **A metric we trusted couldn't answer the question it existed for — and
+   once it could, the answer changed again on real hardware.** The original
+   locality trie retained every request forever, so a "bursty" replay and a
+   shuffled replay of the *same* requests always scored identically, by
+   construction. `bounded_trie_metrics` with capacity eviction fixed that
+   offline and found a real gap (31.35% vs 27.10%). Checked on the live GPU
+   cache under genuine eviction (668k tokens vs 191k capacity, ~2,920
+   evictions): the gap nearly disappears (42.97% vs 43.03%), because applying
+   the winning ordering plus shared-catalog padding makes almost every
+   request's prefix identical regardless of task clustering, swamping the
+   locality signal the offline-only result found. Both offline predictions
+   were right for the setup they described; the setups just weren't the same.
+   See "Task D — locality is now measurable" below.
 4. **The prediction model's error runs the "wrong" way.** A simplified
    tool-unit reuse estimate would be expected to overestimate, since it ignores
    messy block-alignment realities. It actually *under*-predicts by 1.2-1.5x,
@@ -186,13 +193,27 @@ natural file order turns out to be *more* local than the synthetic bursty replay
 (31.35% vs 27.10% reuse at 25% capacity), because its file order is already
 99.86% same-domain adjacent.
 
+**Checked on the live GPU cache** (`scripts/locality_replay.py`, one continuous
+session per replay condition, no resets between requests, so real eviction can
+happen): 120 padded/alphabetically-ordered BFCL tasks, 668,440 total tokens vs
+190,896 real cache capacity — genuine eviction occurred (~2,920 evictions per
+condition). Measured reuse for `empirical` vs `session_bursty` was 42.97% vs
+43.03%, essentially no gap, matching the offline model's own prediction of
+35.00% vs 35.03% for this exact setup. The offline finding above still holds
+for raw, unordered task sequences; it does not survive once menus are padded
+from a shared catalog and forced into the ordering that already wins on
+reuse — that ordering dominates request-to-request similarity and swamps
+whatever weaker signal session clustering would otherwise contribute. Measured
+reuse also exceeded prediction by 1.228x in both conditions, independently
+matching the 1.23x calibration factor from the static Task E validation.
+
 ## Verified locally
 
 - 44,453 ToolRet tools and 7,961 ToolRet tasks;
 - 1,362 canonical BFCL functions and 1,240 BFCL tasks;
 - 45,815 total schemas tokenized with `Qwen/Qwen3-0.6B`;
 - all ToolRet label references resolve to the downloaded corpus;
-- 32 unit tests pass.
+- 47 unit tests pass.
 
 ## Reports are generated, not hand-written
 
@@ -211,7 +232,10 @@ hand-maintained documents.
   quality numbers are a single, small-sample run;
 - ordering comparisons across all six orderings above the crossover, not just
   the two validated so far;
-- GPU/KV memory under eviction pressure at large menu sizes.
+- live-cache eviction under other orderings and other replay pairs (`uniform`
+  and `skewed` were excluded above since they resample with replacement);
+  actual GPU/KV memory *usage* under eviction pressure, as opposed to
+  eviction's effect on reuse, which is now measured.
 
 Analytical reuse estimates must still be labelled as estimates, but they are no
 longer unvalidated: they under-predict measured hits by 1.2-1.5x on the two

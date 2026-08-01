@@ -11,6 +11,41 @@ Status after the first local research pass:
 | E — exact ToolTrie baseline | Measured on GPU: prefill sweep, crossover, and two orderings validated against real cache hits | `scripts/prefill_sweep.py`, `scripts/validate_reuse_estimate.py`, "Task E" below |
 | F — initial report | Complete and regenerated from measured results | `reports/initial-findings.md` |
 
+## Notable findings
+
+The counterintuitive results, in order of how surprising they were:
+
+1. **The obvious ordering choice is close to the worst one.** Sorting tools by
+   how often they're needed (frequency) is nearly 9x worse for cache reuse than
+   plain alphabetical order (4.41% vs 38.15% measured). Frequency ranks each
+   request's own gold tool near the front — but the gold tool is the one thing
+   that changes request to request. It optimizes for "important" and
+   accidentally destroys "identical," which is the only thing the cache
+   rewards.
+2. **The ordering that wins on speed is not the ordering that wins on
+   quality.** Alphabetical wins reuse by 9x, but frequency scores higher on
+   function-name and full accuracy (77.5%/51.25% vs 67.5%/47.5%); alphabetical
+   is markedly better at correctly declining when no tool applies (95.0% vs
+   85.0%). See "Ordering does not win on both axes" below. Faster and better
+   are not the same claim.
+3. **A metric we trusted couldn't answer the question it existed for.** The
+   original locality trie retained every request forever, so a "bursty" replay
+   and a shuffled replay of the *same* requests always scored identically, by
+   construction, regardless of what the data looked like. Fixed by
+   `bounded_trie_metrics` with capacity eviction. See "Task D — locality is now
+   measurable" below.
+4. **The prediction model's error runs the "wrong" way.** A simplified
+   tool-unit reuse estimate would be expected to overestimate, since it ignores
+   messy block-alignment realities. It actually *under*-predicts by 1.2-1.5x,
+   because it ignores the chat template and system preamble — boring, fixed
+   text that is cached every time and outweighs everything the model gets
+   wrong about tool boundaries.
+5. **The framing result underneath all of the above: benchmark tasks, as
+   distributed, sit below the size where any of this matters.** Median tools
+   per task is 1, well under the ~433-token crossover. Every finding above only
+   exists because menus were padded to deployment-realistic sizes — the
+   benchmarks alone would have produced a false negative.
+
 ## Task B detail
 
 RTX 3090 (23.56 GiB), vLLM 0.26.0, `Qwen/Qwen3-0.6B`, block size 16, 11,807 GPU

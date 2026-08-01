@@ -479,12 +479,27 @@ def load_probe_results(results_dir: Path) -> dict[str, Any] | None:
         json.loads(path.read_text(encoding="utf-8"))
         for path in sorted(results_dir.glob("validate-*.json"))
     ]
+    quality_06b = {
+        "alphabetical": read("bfcl-quality-alphabetical-score.json"),
+        "frequency": read("bfcl-quality-frequency-score.json"),
+    }
+    quality_8b = {
+        "alphabetical": read("bfcl-quality-alphabetical-8b-score.json"),
+        "frequency": read("bfcl-quality-frequency-8b-score.json"),
+    }
+    locality_replays = [
+        json.loads(path.read_text(encoding="utf-8"))
+        for path in sorted(results_dir.glob("locality-replay-*.json"))
+    ]
     bundle = {
         "enabled": enabled,
         "disabled": read("cache-disabled.json"),
         "sweep_enabled": read("prefill-sweep-enabled.json"),
         "sweep_disabled": read("prefill-sweep-disabled.json"),
         "validations": validations,
+        "quality_06b": quality_06b if any(quality_06b.values()) else None,
+        "quality_8b": quality_8b if any(quality_8b.values()) else None,
+        "locality_replays": locality_replays,
     }
     return bundle if any(bundle.values()) else None
 
@@ -624,6 +639,161 @@ def _validation_section(probe: dict[str, Any] | None) -> str:
     )
 
 
+def _quality_section(probe: dict[str, Any] | None) -> str:
+    """Function-call quality under ordering, at whichever model sizes were run."""
+    if probe is None:
+        return ""
+    quality_06b = probe.get("quality_06b")
+    quality_8b = probe.get("quality_8b")
+    if not quality_06b and not quality_8b:
+        return ""
+
+    def rows_for(bundle: dict[str, Any] | None) -> list[list[Any]]:
+        rows = []
+        for ordering in ("alphabetical", "frequency"):
+            score = (bundle or {}).get(ordering)
+            if score is None:
+                continue
+            overall = score["overall"]
+            rows.append(
+                [
+                    ordering,
+                    _percent(overall["function_name_accuracy"] or 0),
+                    _percent(overall["full_accuracy"] or 0),
+                    _percent(overall["no_tool_accuracy"] or 0),
+                ]
+            )
+        return rows
+
+    sections = [
+        "## Does the winning ordering preserve function-call quality?",
+        "",
+        "100 BFCL tasks (20 per category, 64-tool menus), scored against BFCL "
+        "`possible_answer` ground truth. Alphabetical is the ordering measured "
+        "strongest for cache reuse; frequency is the comparison Task D's "
+        "analytical model originally recommended.",
+        "",
+    ]
+    rows_06b = rows_for(quality_06b)
+    if rows_06b:
+        sections.extend(
+            [
+                "`Qwen/Qwen3-0.6B`:",
+                "",
+                _table(
+                    [
+                        "Ordering",
+                        "Function-name accuracy",
+                        "Full accuracy",
+                        "No-tool accuracy",
+                    ],
+                    rows_06b,
+                ),
+                "",
+            ]
+        )
+    rows_8b = rows_for(quality_8b)
+    if rows_8b:
+        sections.extend(
+            [
+                "`Qwen/Qwen3-8B`, identical workload:",
+                "",
+                _table(
+                    [
+                        "Ordering",
+                        "Function-name accuracy",
+                        "Full accuracy",
+                        "No-tool accuracy",
+                    ],
+                    rows_8b,
+                ),
+                "",
+            ]
+        )
+    if rows_06b and rows_8b:
+        sections.append(
+            "The name/full-accuracy gap that looked real at 0.6B is not present "
+            "at 8B — both orderings score identically there. Checking a "
+            "counterintuitive small-model result against a second model size "
+            "found that most of the apparent quality tradeoff was a small-model "
+            "artefact; only a smaller no-tool-accuracy gap favouring alphabetical "
+            "survives at both scales. One run per condition, no repeats; read as "
+            "directional rather than final."
+        )
+    else:
+        sections.append(
+            "One run per condition, no repeats or confidence intervals, and only "
+            "two of six orderings scored; read as directional rather than final."
+        )
+    sections.append("")
+    return "\n".join(sections)
+
+
+def _locality_replay_section(probe: dict[str, Any] | None) -> str:
+    """Whether request order changes reuse under real GPU cache eviction."""
+    if probe is None or not probe.get("locality_replays"):
+        return ""
+    rows = []
+    note = None
+    for run in probe["locality_replays"]:
+        capacity = run.get("cache_capacity_tokens")
+        for name, condition in run.get("conditions", {}).items():
+            predicted = condition.get("predicted", {})
+            rows.append(
+                [
+                    name,
+                    f'{condition["total_prompt_tokens"]:,}',
+                    _percent(condition["measured_reuse_ratio"]),
+                    _percent(predicted.get("estimated_block_reuse_ratio", 0)),
+                    f'{predicted.get("evictions", 0):,}',
+                ]
+            )
+        if note is None and capacity:
+            total = next(iter(run.get("conditions", {}).values()), {}).get(
+                "total_prompt_tokens", 0
+            )
+            note = (
+                f"Total token volume ({total:,}) versus real cache capacity "
+                f"({capacity:,} tokens) for this run."
+            )
+    if not rows:
+        return ""
+    return "\n".join(
+        [
+            "## Does request order matter on the live GPU cache?",
+            "",
+            "Every other GPU experiment above resets the prefix cache before each "
+            "trial, which is repeatable but erases the cross-request dependency "
+            "locality is actually about. This instead runs one continuous session "
+            "per replay condition — a single reset, then every request in "
+            "sequence — comparing `empirical` against `session_bursty`, the one "
+            "replay pair that is a strict permutation of the same task multiset.",
+            "",
+            _table(
+                [
+                    "Replay",
+                    "Total prompt tokens",
+                    "Measured reuse",
+                    "Predicted reuse (bounded trie)",
+                    "Predicted evictions",
+                ],
+                rows,
+            ),
+            "",
+            note or "",
+            "",
+            "Real eviction happens here, but session order barely moves measured "
+            "reuse — a much smaller gap than the offline-only analysis in "
+            "`access-patterns.md` found for raw, unordered task sequences. "
+            "Applying the ordering that already wins on reuse, plus "
+            "shared-catalog padding, makes almost every request's prefix similar "
+            "regardless of task clustering, which swamps whatever weaker signal "
+            "session locality would otherwise contribute in this regime.",
+            "",
+        ]
+    )
+
+
 def _probe_section(probe: dict[str, Any] | None) -> str:
     if probe is None or probe.get("enabled") is None:
         return (
@@ -748,6 +918,8 @@ def write_initial_findings(
             _probe_section(probe),
             _sweep_section(probe),
             _validation_section(probe),
+            _quality_section(probe),
+            _locality_replay_section(probe),
         )
         if section
     )
@@ -792,32 +964,40 @@ points). These are analytical estimates, not vLLM hit-rate or latency results.
 {prefix_section}
 ## Recommendation
 
-Proceed with the exact prompt-level ToolTrie baseline on the cluster, focusing
-on multi-tool tasks and session-local replay. Use schema-cost-weighted ordering
-as the strongest ToolRet candidate and frequency ordering as the strongest BFCL
-candidate from this first analysis. Report the original order and fixed-random
-controls alongside them.
+Measured evidence now supports alphabetical ordering over the frequency
+ordering this analysis originally recommended: on padded, deployment-realistic
+menus, alphabetical measures 38.15% cache reuse versus frequency's 4.41%, and
+a follow-up quality check found this does not cost function-selection accuracy
+at deployment-grade model scale (identical on `Qwen3-8B`), with only a smaller
+no-tool-accuracy gap surviving at both model sizes checked. Continue the exact
+prompt-level ToolTrie baseline with alphabetical as the default ordering,
+reporting the original order and fixed-random controls alongside it.
 
-The likely publishable refinement is not a generic “reorder context into a
-trie” claim, because closely related cache-aware context ordering already
+The likely publishable refinement is not a generic "reorder context into a
+trie" claim, because closely related cache-aware context ordering already
 exists. The more defensible direction is tool-specific cache admission using
 schema cost plus workflow co-occurrence, while preserving an active/authorized
-tool manifest and measuring function-call quality.
+tool manifest — the quality measurement this recommendation previously lacked
+now exists for the leading ordering, though not yet for the other five.
 
-Do not pursue arbitrary independent KV concatenation yet. First establish that
-native exact APC converts the local token-reuse signal into repeatable TTFT
-benefit without a BFCL quality regression. If it does not, narrow the project to
-characterizing the crossover regimes or pivot toward retrieval/menu reduction.
+Do not pursue arbitrary independent KV concatenation yet. Native exact APC
+already converts the local token-reuse signal into a repeatable TTFT benefit
+(10.6x at 200 tools) without a measured BFCL quality regression for the
+strongest ordering. The open question is coverage, not whether the mechanism
+works at all.
 
-## Immediate cluster run
+## What remains before the extensions in the brief
 
-1. Freeze model revision, tokenizer, chat template, vLLM version, GPU, block
-   size, dtype, and server flags.
-2. Run the cache-enabled and cache-disabled sanity probe.
-3. Render and save complete prompt token IDs for each ordering.
-4. Replay original, frequency, and schema-cost-weighted workloads with
-   documented cold/warm policies and repeated trials.
-5. Add BFCL name/argument/no-tool scores before interpreting latency.
+1. Function-call quality for the remaining four orderings, and repeated trials
+   with larger per-category samples for the two already scored.
+2. TTFT measured directly on partial-reuse workloads, rather than
+   extrapolated from the 0%/100%-reuse endpoints.
+3. Live-cache eviction checked under orderings other than alphabetical, and
+   replay pairs other than empirical/session_bursty.
+4. GPU/KV memory *usage* under eviction pressure — eviction's effect on
+   reuse is now measured; memory footprint during eviction is not.
+5. A text-prefill fallback path that preserves model semantics, which Task E
+   specifies but which has not been built.
 """
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(text, encoding="utf-8")

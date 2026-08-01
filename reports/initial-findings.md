@@ -77,31 +77,72 @@ The tool-unit model under-predicts rather than over-predicts. It ignores the cha
 
 The ordering comparison inverts the gold-only recommendation. On padded menus, ordering by benchmark support puts the *task-specific* tools first and pushes the shared catalog behind them, destroying the common prefix. A stable global order that ignores task-specificity keeps the shared catalog in front. Frequency ordering is the right choice only when the whole menu is task-specific, which is not what a connected tool catalog looks like.
 
+## Does the winning ordering preserve function-call quality?
+
+100 BFCL tasks (20 per category, 64-tool menus), scored against BFCL `possible_answer` ground truth. Alphabetical is the ordering measured strongest for cache reuse; frequency is the comparison Task D's analytical model originally recommended.
+
+`Qwen/Qwen3-0.6B`:
+
+| Ordering | Function-name accuracy | Full accuracy | No-tool accuracy |
+| --- | --- | --- | --- |
+| alphabetical | 67.50% | 47.50% | 95.00% |
+| frequency | 77.50% | 51.25% | 85.00% |
+
+`Qwen/Qwen3-8B`, identical workload:
+
+| Ordering | Function-name accuracy | Full accuracy | No-tool accuracy |
+| --- | --- | --- | --- |
+| alphabetical | 91.25% | 81.25% | 95.00% |
+| frequency | 91.25% | 81.25% | 90.00% |
+
+The name/full-accuracy gap that looked real at 0.6B is not present at 8B — both orderings score identically there. Checking a counterintuitive small-model result against a second model size found that most of the apparent quality tradeoff was a small-model artefact; only a smaller no-tool-accuracy gap favouring alphabetical survives at both scales. One run per condition, no repeats; read as directional rather than final.
+
+## Does request order matter on the live GPU cache?
+
+Every other GPU experiment above resets the prefix cache before each trial, which is repeatable but erases the cross-request dependency locality is actually about. This instead runs one continuous session per replay condition — a single reset, then every request in sequence — comparing `empirical` against `session_bursty`, the one replay pair that is a strict permutation of the same task multiset.
+
+| Replay | Total prompt tokens | Measured reuse | Predicted reuse (bounded trie) | Predicted evictions |
+| --- | --- | --- | --- | --- |
+| empirical | 668,440 | 42.97% | 35.00% | 2,927 |
+| session_bursty | 668,440 | 43.03% | 35.03% | 2,918 |
+
+Total token volume (668,440) versus real cache capacity (190,896 tokens) for this run.
+
+Real eviction happens here, but session order barely moves measured reuse — a much smaller gap than the offline-only analysis in `access-patterns.md` found for raw, unordered task sequences. Applying the ordering that already wins on reuse, plus shared-catalog padding, makes almost every request's prefix similar regardless of task clustering, which swamps whatever weaker signal session locality would otherwise contribute in this regime.
+
 ## Recommendation
 
-Proceed with the exact prompt-level ToolTrie baseline on the cluster, focusing
-on multi-tool tasks and session-local replay. Use schema-cost-weighted ordering
-as the strongest ToolRet candidate and frequency ordering as the strongest BFCL
-candidate from this first analysis. Report the original order and fixed-random
-controls alongside them.
+Measured evidence now supports alphabetical ordering over the frequency
+ordering this analysis originally recommended: on padded, deployment-realistic
+menus, alphabetical measures 38.15% cache reuse versus frequency's 4.41%, and
+a follow-up quality check found this does not cost function-selection accuracy
+at deployment-grade model scale (identical on `Qwen3-8B`), with only a smaller
+no-tool-accuracy gap surviving at both model sizes checked. Continue the exact
+prompt-level ToolTrie baseline with alphabetical as the default ordering,
+reporting the original order and fixed-random controls alongside it.
 
-The likely publishable refinement is not a generic “reorder context into a
-trie” claim, because closely related cache-aware context ordering already
+The likely publishable refinement is not a generic "reorder context into a
+trie" claim, because closely related cache-aware context ordering already
 exists. The more defensible direction is tool-specific cache admission using
 schema cost plus workflow co-occurrence, while preserving an active/authorized
-tool manifest and measuring function-call quality.
+tool manifest — the quality measurement this recommendation previously lacked
+now exists for the leading ordering, though not yet for the other five.
 
-Do not pursue arbitrary independent KV concatenation yet. First establish that
-native exact APC converts the local token-reuse signal into repeatable TTFT
-benefit without a BFCL quality regression. If it does not, narrow the project to
-characterizing the crossover regimes or pivot toward retrieval/menu reduction.
+Do not pursue arbitrary independent KV concatenation yet. Native exact APC
+already converts the local token-reuse signal into a repeatable TTFT benefit
+(10.6x at 200 tools) without a measured BFCL quality regression for the
+strongest ordering. The open question is coverage, not whether the mechanism
+works at all.
 
-## Immediate cluster run
+## What remains before the extensions in the brief
 
-1. Freeze model revision, tokenizer, chat template, vLLM version, GPU, block
-   size, dtype, and server flags.
-2. Run the cache-enabled and cache-disabled sanity probe.
-3. Render and save complete prompt token IDs for each ordering.
-4. Replay original, frequency, and schema-cost-weighted workloads with
-   documented cold/warm policies and repeated trials.
-5. Add BFCL name/argument/no-tool scores before interpreting latency.
+1. Function-call quality for the remaining four orderings, and repeated trials
+   with larger per-category samples for the two already scored.
+2. TTFT measured directly on partial-reuse workloads, rather than
+   extrapolated from the 0%/100%-reuse endpoints.
+3. Live-cache eviction checked under orderings other than alphabetical, and
+   replay pairs other than empirical/session_bursty.
+4. GPU/KV memory *usage* under eviction pressure — eviction's effect on
+   reuse is now measured; memory footprint during eviction is not.
+5. A text-prefill fallback path that preserves model semantics, which Task E
+   specifies but which has not been built.

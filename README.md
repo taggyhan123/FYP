@@ -12,7 +12,7 @@ Implemented locally:
 - canonical tool-schema normalization and Qwen tokenizer accounting;
 - schema-quality, frequency, co-occurrence, locality, replay, ordering, and
   tool-trie analyses;
-- a prompt-level exact ToolTrie workload builder;
+- a causal recent-path ToolTrie planner and prompt-level workload builders;
 - a vLLM prefix-cache probe that can be run later on the SoC CUDA cluster.
 
 The raw and normalized datasets are reproducible and ignored by Git. Compact
@@ -26,6 +26,24 @@ uv run python scripts/download_datasets.py
 uv run python scripts/run_pipeline.py
 uv run pytest
 ```
+
+The ToolTrie-v0 planner itself is CPU-only. Generate a base selected-tool
+workload, then causally reorder it without using the current or future request:
+
+```bash
+uv run python scripts/build_cluster_workload.py \
+  --partition bfcl --ordering original --menu-size 64 --limit 200 \
+  --output data/processed/bfcl-base-menu64.jsonl
+
+uv run python scripts/build_tooltrie_workload.py \
+  --input data/processed/bfcl-base-menu64.jsonl \
+  --fallback alphabetical --recency-window 128 \
+  --output data/processed/bfcl-tooltrie-menu64.jsonl
+```
+
+The second file is directly compatible with `replay_vllm_workload.py` and
+`score_bfcl_quality.py`. Real APC hits and latency still require the CUDA vLLM
+server described in `cluster/README.md`.
 
 The default tokenizer is `Qwen/Qwen3-0.6B`. Its official `tokenizer.json` is
 cached under ignored `data/tokenizers/`. Override it with `--tokenizer MODEL_ID`

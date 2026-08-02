@@ -236,7 +236,61 @@ python scripts/replay_vllm_workload.py \
 Repeat the complete workload under each ordering and cache condition. Generate
 all compared files from the same task partition and limit.
 
-## 6. Capture the cluster environment
+## 8. Run the causal ToolTrie-v0 workflow
+
+The ToolTrie is prompt-layer CPU metadata. It reorders selected tool IDs and
+does not patch vLLM, CUDA, attention, or KV tensors. Build one base workload so
+the static and ToolTrie conditions receive exactly the same selected tool sets
+and request order:
+
+```bash
+python scripts/build_cluster_workload.py \
+  --partition bfcl --ordering original --menu-size 64 --limit 200 \
+  --output data/processed/bfcl-base-menu64.jsonl
+
+python scripts/build_tooltrie_workload.py \
+  --input data/processed/bfcl-base-menu64.jsonl \
+  --fallback alphabetical --recency-window 128 \
+  --capacity-tokens 188912 \
+  --output data/processed/bfcl-tooltrie-menu64.jsonl
+```
+
+`188912 = 16 * 11807` matches the measured block size and GPU-block count of
+the current Qwen3-0.6B RTX 3090 setup. Recalculate it from
+`vllm:cache_config_info` if the model, GPU allocation, or server configuration
+changes. It is only a planner hint; measured vLLM counters remain authoritative.
+
+Planning for record *n* occurs before that record is inserted, so the generated
+ordering uses only records `0..n-1`. Frequency fallback is intentionally refused
+unless a distinct training workload is supplied with `--training-input`.
+
+Start each compared replay from the same documented cache state. With
+`VLLM_SERVER_DEV_MODE=1`, reset once immediately before each complete replay:
+
+```bash
+curl -fsS -X POST -H 'Content-Type: application/json' \
+  -d '{}' http://127.0.0.1:8000/reset_prefix_cache
+
+python scripts/replay_vllm_workload.py \
+  --input data/processed/bfcl-tooltrie-menu64.jsonl \
+  --run-label bfcl-tooltrie-v0-menu64 --disable-thinking \
+  --output cluster/results/bfcl-tooltrie-v0-menu64.json
+```
+
+For the static control, reset again and replay the base workload, or generate an
+alphabetical workload from the same partition and limit. Do not compare runs
+that began from different warm-cache states.
+
+For the ToolRet systems workload, use the same commands with `--partition
+toolret`; score only APC/TTFT outcomes because ToolRet provides retrieval
+relevance labels rather than BFCL function-call outputs.
+
+For BFCL quality, substitute `build_bfcl_quality_workload.py --ordering
+original` for the base builder, pass its output through
+`build_tooltrie_workload.py`, replay with `--max-tokens 128
+--disable-thinking`, then run `score_bfcl_quality.py` exactly as in section 6a.
+
+## 9. Capture the cluster environment
 
 ```bash
 python -c 'import platform, torch, vllm; print(platform.platform()); print(torch.__version__); print(vllm.__version__)'

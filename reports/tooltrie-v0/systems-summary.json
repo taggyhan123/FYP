@@ -1,0 +1,324 @@
+{
+  "bfcl": {
+    "alphabetical": {
+      "cached_prompt_tokens": {
+        "ci95_half_width": 0.0,
+        "max": 526432.0,
+        "mean": 526432.0,
+        "min": 526432.0,
+        "n": 3,
+        "stdev": 0.0
+      },
+      "cached_ratio": {
+        "ci95_half_width": 0.0,
+        "max": 0.381281,
+        "mean": 0.381281,
+        "min": 0.381281,
+        "n": 3,
+        "stdev": 0.0
+      },
+      "failed": [],
+      "prefill_kv_computed_tokens": {
+        "ci95_half_width": 0.0,
+        "max": 854262.0,
+        "mean": 854262.0,
+        "min": 854262.0,
+        "n": 3,
+        "stdev": 0.0
+      },
+      "prefill_seconds": {
+        "ci95_half_width": 0.361777,
+        "max": 32.535013,
+        "mean": 32.436443,
+        "min": 32.269179,
+        "n": 3,
+        "stdev": 0.145623
+      },
+      "prompt_tokens": 1380694,
+      "requests": 200,
+      "ttft_seconds": {
+        "ci95_half_width": 0.636064,
+        "max": 40.527576,
+        "mean": 40.32421,
+        "min": 40.036697,
+        "n": 3,
+        "stdev": 0.25603
+      },
+      "wall_seconds": {
+        "ci95_half_width": 0.651014,
+        "max": 73.585641,
+        "mean": 73.373464,
+        "min": 73.080548,
+        "n": 3,
+        "stdev": 0.262047
+      }
+    },
+    "original": {
+      "cached_prompt_tokens": {
+        "ci95_half_width": 0.0,
+        "max": 16384.0,
+        "mean": 16384.0,
+        "min": 16384.0,
+        "n": 3,
+        "stdev": 0.0
+      },
+      "cached_ratio": {
+        "ci95_half_width": 0.0,
+        "max": 0.011866,
+        "mean": 0.011866,
+        "min": 0.011866,
+        "n": 3,
+        "stdev": 0.0
+      },
+      "failed": [],
+      "prefill_kv_computed_tokens": {
+        "ci95_half_width": 0.0,
+        "max": 1364310.0,
+        "mean": 1364310.0,
+        "min": 1364310.0,
+        "n": 3,
+        "stdev": 0.0
+      },
+      "prefill_seconds": {
+        "ci95_half_width": 0.979897,
+        "max": 45.710808,
+        "mean": 45.376423,
+        "min": 44.941434,
+        "n": 3,
+        "stdev": 0.39443
+      },
+      "prompt_tokens": 1380694,
+      "requests": 200,
+      "ttft_seconds": {
+        "ci95_half_width": 1.753301,
+        "max": 53.680467,
+        "mean": 53.140483,
+        "min": 52.341923,
+        "n": 3,
+        "stdev": 0.705742
+      },
+      "wall_seconds": {
+        "ci95_half_width": 2.474784,
+        "max": 85.17396,
+        "mean": 84.59101,
+        "min": 83.440786,
+        "n": 3,
+        "stdev": 0.996154
+      }
+    },
+    "tooltrie": {
+      "cached_prompt_tokens": {
+        "ci95_half_width": 0.0,
+        "max": 1203760.0,
+        "mean": 1203760.0,
+        "min": 1203760.0,
+        "n": 3,
+        "stdev": 0.0
+      },
+      "cached_ratio": {
+        "ci95_half_width": 0.0,
+        "max": 0.871851,
+        "mean": 0.871851,
+        "min": 0.871851,
+        "n": 3,
+        "stdev": 0.0
+      },
+      "failed": [],
+      "prefill_kv_computed_tokens": {
+        "ci95_half_width": 0.0,
+        "max": 176934.0,
+        "mean": 176934.0,
+        "min": 176934.0,
+        "n": 3,
+        "stdev": 0.0
+      },
+      "prefill_seconds": {
+        "ci95_half_width": 0.566931,
+        "max": 9.690751,
+        "mean": 9.537372,
+        "min": 9.275123,
+        "n": 3,
+        "stdev": 0.228202
+      },
+      "prompt_tokens": 1380694,
+      "requests": 200,
+      "ttft_seconds": {
+        "ci95_half_width": 0.741429,
+        "max": 17.653459,
+        "mean": 17.377667,
+        "min": 17.060826,
+        "n": 3,
+        "stdev": 0.298441
+      },
+      "wall_seconds": {
+        "ci95_half_width": 0.747203,
+        "max": 50.128836,
+        "mean": 49.883166,
+        "min": 49.547741,
+        "n": 3,
+        "stdev": 0.300765
+      }
+    }
+  },
+  "toolret": {
+    "alphabetical": {
+      "cached_prompt_tokens": {
+        "ci95_half_width": 0.0,
+        "max": 710576.0,
+        "mean": 710576.0,
+        "min": 710576.0,
+        "n": 3,
+        "stdev": 0.0
+      },
+      "cached_ratio": {
+        "ci95_half_width": 0.0,
+        "max": 0.510507,
+        "mean": 0.510507,
+        "min": 0.510507,
+        "n": 3,
+        "stdev": 0.0
+      },
+      "failed": [],
+      "prefill_kv_computed_tokens": {
+        "ci95_half_width": 0.0,
+        "max": 681326.0,
+        "mean": 681326.0,
+        "min": 681326.0,
+        "n": 3,
+        "stdev": 0.0
+      },
+      "prefill_seconds": {
+        "ci95_half_width": 0.481012,
+        "max": 26.801855,
+        "mean": 26.600617,
+        "min": 26.415646,
+        "n": 3,
+        "stdev": 0.193618
+      },
+      "prompt_tokens": 1391902,
+      "requests": 200,
+      "ttft_seconds": {
+        "ci95_half_width": 0.366357,
+        "max": 34.770539,
+        "mean": 34.64737,
+        "min": 34.48396,
+        "n": 3,
+        "stdev": 0.147467
+      },
+      "wall_seconds": {
+        "ci95_half_width": 0.709128,
+        "max": 69.173546,
+        "mean": 68.989176,
+        "min": 68.660387,
+        "n": 3,
+        "stdev": 0.285439
+      }
+    },
+    "original": {
+      "cached_prompt_tokens": {
+        "ci95_half_width": 0.0,
+        "max": 193040.0,
+        "mean": 193040.0,
+        "min": 193040.0,
+        "n": 3,
+        "stdev": 0.0
+      },
+      "cached_ratio": {
+        "ci95_half_width": 0.0,
+        "max": 0.138688,
+        "mean": 0.138688,
+        "min": 0.138688,
+        "n": 3,
+        "stdev": 0.0
+      },
+      "failed": [],
+      "prefill_kv_computed_tokens": {
+        "ci95_half_width": 0.0,
+        "max": 1198862.0,
+        "mean": 1198862.0,
+        "min": 1198862.0,
+        "n": 3,
+        "stdev": 0.0
+      },
+      "prefill_seconds": {
+        "ci95_half_width": 0.321618,
+        "max": 40.747634,
+        "mean": 40.602106,
+        "min": 40.499752,
+        "n": 3,
+        "stdev": 0.129458
+      },
+      "prompt_tokens": 1391902,
+      "requests": 200,
+      "ttft_seconds": {
+        "ci95_half_width": 0.148711,
+        "max": 48.756463,
+        "mean": 48.687875,
+        "min": 48.64617,
+        "n": 3,
+        "stdev": 0.059859
+      },
+      "wall_seconds": {
+        "ci95_half_width": 0.182285,
+        "max": 82.814792,
+        "mean": 82.730269,
+        "min": 82.682944,
+        "n": 3,
+        "stdev": 0.073374
+      }
+    },
+    "tooltrie": {
+      "cached_prompt_tokens": {
+        "ci95_half_width": 0.0,
+        "max": 1163408.0,
+        "mean": 1163408.0,
+        "min": 1163408.0,
+        "n": 3,
+        "stdev": 0.0
+      },
+      "cached_ratio": {
+        "ci95_half_width": 0.0,
+        "max": 0.83584,
+        "mean": 0.83584,
+        "min": 0.83584,
+        "n": 3,
+        "stdev": 0.0
+      },
+      "failed": [],
+      "prefill_kv_computed_tokens": {
+        "ci95_half_width": 0.0,
+        "max": 228494.0,
+        "mean": 228494.0,
+        "min": 228494.0,
+        "n": 3,
+        "stdev": 0.0
+      },
+      "prefill_seconds": {
+        "ci95_half_width": 0.215101,
+        "max": 12.008294,
+        "mean": 11.938823,
+        "min": 11.841823,
+        "n": 3,
+        "stdev": 0.086583
+      },
+      "prompt_tokens": 1391902,
+      "requests": 200,
+      "ttft_seconds": {
+        "ci95_half_width": 0.846345,
+        "max": 20.003125,
+        "mean": 19.761889,
+        "min": 19.372177,
+        "n": 3,
+        "stdev": 0.340672
+      },
+      "wall_seconds": {
+        "ci95_half_width": 1.129957,
+        "max": 54.439988,
+        "mean": 54.1504,
+        "min": 53.626164,
+        "n": 3,
+        "stdev": 0.454832
+      }
+    }
+  }
+}

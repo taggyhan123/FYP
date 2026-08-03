@@ -1,0 +1,20 @@
+These 10 replays are INVALID and must not be used for any claim.
+
+Cause: the session running the first systems driver was torn down at ~01:26:33
+while bfcl/tooltrie/trial2 was in flight. That driver survived the teardown and
+kept replaying. A second driver was launched at 01:27:18, so from 01:27 to
+~01:43 two drivers issued replays against the same vLLM server concurrently.
+
+Symptom: vllm:prompt_tokens_cached is a global counter, so each run's
+metric_delta window also captured the other run's cache hits. Several runs
+report cached ratios above 100% (impossible), and wall times roughly doubled
+(85s -> 122s) from GPU contention.
+
+This is the condition runbook section 10.5 asks to be reported: unrelated
+traffic reached the server during a replay.
+
+Still valid and retained in the parent directory:
+  - all six trial-1 runs (01:16:58-01:23:53, entirely before the disruption)
+  - bfcl-original-trial2 and bfcl-alphabetical-trial2 (ended 01:25:19 / 01:26:33)
+Those two trial-2 runs are byte-identical to their trial-1 counterparts, which
+confirms cached-token counts are deterministic across repeats when clean.

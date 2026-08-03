@@ -1,0 +1,15 @@
+Linux-6.8.0-136-generic-x86_64-with-glibc2.39
+torch 2.11.0+cu130
+vllm 0.26.0
+index, name, driver_version, memory.total [MiB]
+0, NVIDIA GeForce RTX 3090, 580.173.02, 24576 MiB
+1, NVIDIA GeForce RTX 3090, 580.173.02, 24576 MiB
+2, NVIDIA GeForce RTX 3090, 580.173.02, 24576 MiB
+3, NVIDIA GeForce RTX 3090, 580.173.02, 24576 MiB
+
+# client venv (workload build / replay / scoring)
+python 3.12.3 /home/taghan/FYP/.venv/bin/python
+# server venv: /home/taghan/tatm/.venv (vllm binary)
+# physical GPU used: 2
+# 0.6B cache capacity: 190896 tokens (block_size 16 x 11931 blocks)
+# 8B   cache capacity: 44656 tokens (block_size 16 x 2791 blocks)

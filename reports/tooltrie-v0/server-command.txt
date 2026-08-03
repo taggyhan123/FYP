@@ -1,0 +1,24 @@
+# Physical GPU selected: 2 (RTX 3090, idle at launch: 1 MiB used)
+# GPU0 in use by user pzx (VLLM::EngineCore, 22.3 GB); GPU1 in use by user yongan.
+# vLLM binary from /home/taghan/tatm/.venv (vllm 0.26.0, torch 2.11.0+cu130);
+# client scripts run from /home/taghan/FYP/.venv.
+PATH=/home/taghan/tatm/.venv/bin:$PATH \
+VLLM_SERVER_DEV_MODE=1 \
+VLLM_USE_FLASHINFER_SAMPLER=0 \
+CUDA_VISIBLE_DEVICES=2 \
+CPATH=/home/taghan/miniconda3/envs/hdr312/include/python3.12 \
+vllm serve Qwen/Qwen3-0.6B \
+  --enable-prefix-caching \
+  --enable-auto-tool-choice \
+  --tool-call-parser hermes \
+  --host 127.0.0.1 \
+  --port 8000
+
+# --- Phase 5: Qwen3-8B quality gate (same GPU 2) ---
+PATH=/home/taghan/tatm/.venv/bin:$PATH \
+VLLM_SERVER_DEV_MODE=1 \
+VLLM_USE_FLASHINFER_SAMPLER=0 \
+CUDA_VISIBLE_DEVICES=2 \
+vllm serve Qwen/Qwen3-8B \
+  --enable-prefix-caching --enable-auto-tool-choice --tool-call-parser hermes \
+  --host 127.0.0.1 --port 8000

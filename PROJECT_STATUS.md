@@ -8,7 +8,7 @@ Status after the first local research pass:
 | B — exact prefix caching | Complete; all five checks measured on GPU | See "Task B detail" below |
 | C — normalize datasets | Complete for ToolRet and five BFCL V4 static subsets | `scripts/download_datasets.py`, `scripts/run_pipeline.py`, `reports/dataset-inventory.md` |
 | D — access patterns | Complete for benchmark evidence and four controlled replays | `reports/access-patterns.md` and `reports/tables/` |
-| E — exact ToolTrie baseline | Measured on GPU: prefill sweep, crossover, and two orderings validated against real cache hits | `scripts/prefill_sweep.py`, `scripts/validate_reuse_estimate.py`, "Task E" below |
+| E — exact ToolTrie baseline | Measured on GPU: prefill sweep, crossover, and two orderings validated against real cache hits. Causal ToolTrie-v0 now measured end to end against both static orderings | `scripts/prefill_sweep.py`, `scripts/validate_reuse_estimate.py`, `src/tatm/tooltrie.py`, "Task E" and "ToolTrie-v0" below, `reports/tooltrie-v0/findings.md` |
 | F — initial report | Complete and regenerated from measured results | `reports/initial-findings.md` |
 
 ## Notable findings
@@ -56,6 +56,64 @@ The counterintuitive results, in order of how surprising they were:
    per task is 1, well under the ~433-token crossover. Every finding above only
    exists because menus were padded to deployment-realistic sizes — the
    benchmarks alone would have produced a false negative.
+
+## ToolTrie-v0 — first causal run (measured on GPU)
+
+Full report: `reports/tooltrie-v0/findings.md`. Raw run:
+`cluster/results/tooltrie-v0-20260803-011418/` (git-ignored). RTX 3090,
+vLLM 0.26.0, commit `558e923`, 3 trials per systems condition, APC reset once
+before each replay, 200 requests on 64-tool menus.
+
+| Ordering | BFCL cached ratio | BFCL TTFT (s) | ToolRet cached ratio | ToolRet TTFT (s) |
+| --- | --- | --- | --- | --- |
+| original | 1.19% | 53.140 ± 1.753 | 13.87% | 48.688 ± 0.149 |
+| alphabetical | 38.13% | 40.324 ± 0.636 | 51.05% | 34.647 ± 0.366 |
+| ToolTrie-v0 | **87.19%** | **17.378 ± 0.741** | **83.58%** | **19.762 ± 0.846** |
+
+Every ToolTrie-vs-baseline difference has non-overlapping 95% intervals.
+Alphabetical reproduced at 38.13% against the 38.15% recorded earlier in this
+file, which is the cross-check that the setup had not drifted. Cached-token
+counts were bit-identical across the three trials.
+
+The mechanism is the inverse of the frequency-ordering failure above: the
+planner re-derives the shared catalog order from already-served requests and
+pushes each request's novel tools to the tail through its alphabetical
+fallback, so the varying part of the menu stops breaking the common prefix.
+
+### The quality gate fails at 8B, and only checking both scales revealed it
+
+100 stratified BFCL tasks, 20 per domain, scored against `possible_answer`.
+
+| Ordering | 0.6B name / full / no-tool | 8B name / full / no-tool |
+| --- | --- | --- |
+| original | 78.8% / 52.5% / 90.0% | 87.5% / 78.8% / 90.0% |
+| alphabetical | 67.5% / 47.5% / 95.0% | **91.2% / 81.2% / 95.0%** |
+| ToolTrie-v0 | 75.0% / 53.8% / 95.0% | 87.5% / 75.0% / 95.0% |
+
+ToolTrie minus alphabetical is **+7.50pp** name and **+6.25pp** full at 0.6B but
+**−3.75pp** and **−6.25pp** at 8B. The sign flips with model scale. This is the
+third time in this project that a 0.6B quality reading did not survive to 8B,
+but the first time the direction reverses rather than merely shrinking, so the
+0.6B run alone would have reported ToolTrie as quality-free.
+
+Against the predeclared one-percentage-point regression threshold, ToolTrie-v0
+**does not pass** at 8B despite winning decisively on every systems metric. Two
+cautions: the gate is below its own resolution (n=100 means 1pp is one task, and
+the observed gap is 6 tasks), and the quality runs are single-pass. The 8B
+planner ran at a 44,656-token capacity versus 190,896 at 0.6B and evicted 424
+nodes, yet produced byte-identical orderings on all 100 records, so this is a
+clean model-size comparison with no capacity confound.
+
+### Unrelated traffic during the first attempt
+
+Two replay drivers issued requests against the same server between 01:27 and
+01:43. Because `vllm:prompt_tokens_cached` is a global counter, each run's
+metric window also captured the other's hits, producing impossible cached ratios
+above 100%. A trial is accepted only when `vllm:prefix_cache_queries` for its
+window equals its own prompt-token total; the 10 failing replays are quarantined
+and excluded, and their conditions were re-run single-driver. All 18 trials
+behind the table above pass that check. See
+`reports/tooltrie-v0/contamination-incident.txt`.
 
 ## Task B detail
 
@@ -228,8 +286,12 @@ hand-maintained documents.
 
 - rendered full-prompt token IDs and exact vLLM block boundaries;
 - BFCL quality under the remaining four orderings, and repeated trials with
-  larger per-category samples for the two already scored — the current
-  quality numbers are a single, small-sample run;
+  larger per-category samples for the three already scored — the current
+  quality numbers are a single, small-sample run. **This is now the highest
+  priority item:** it is the only thing standing between the ToolTrie-v0
+  systems result and a defensible claim, since the 4-6pp regression measured
+  against alphabetical at 8B rests on one pass of 100 tasks and a threshold
+  finer than the sample can resolve;
 - ordering comparisons across all six orderings above the crossover, not just
   the two validated so far;
 - live-cache eviction under other orderings and other replay pairs (`uniform`

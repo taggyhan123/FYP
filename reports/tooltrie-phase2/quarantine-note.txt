@@ -1,0 +1,11 @@
+These ToolRet replays used sanitized workloads built BEFORE the root-property
+relocation fix (one ToolRet tool declared a parameter named `title` at the schema
+root, which JSON Schema reserves as a string annotation).
+
+They are superseded, not contaminated: the vLLM runs completed normally, but
+their input files differ from the post-fix files SGLang could accept, so keeping
+them would compare the two engines on different prompt text.
+
+BFCL is unaffected — the relocation never fires there (0/200 requests), so the
+BFCL sanitized files are byte-identical before and after the fix, and the BFCL
+runs in the parent directory remain valid.

@@ -1,0 +1,119 @@
+{
+  "all_conditions_have_same_case_set": true,
+  "all_conditions_have_same_request_sequence": false,
+  "all_conditions_have_same_selected_tool_sets": true,
+  "conditions": {
+    "contextpilot_intra": {
+      "measurements": {
+        "cached_prompt_tokens": {
+          "ci95_half_width": 0.0,
+          "max": 1340256.0,
+          "mean": 1340256.0,
+          "min": 1340256.0,
+          "n": 3,
+          "stdev": 0.0
+        },
+        "cached_ratio": {
+          "ci95_half_width": 0.0,
+          "max": 0.963347,
+          "mean": 0.963347,
+          "min": 0.963347,
+          "n": 3,
+          "stdev": 0.0
+        },
+        "computed_prompt_tokens": {
+          "ci95_half_width": 0.0,
+          "max": 50993.0,
+          "mean": 50993.0,
+          "min": 50993.0,
+          "n": 3,
+          "stdev": 0.0
+        },
+        "prefill_seconds": {
+          "ci95_half_width": 0.176057,
+          "max": 5.167084,
+          "mean": 5.101709,
+          "min": 5.026399,
+          "n": 3,
+          "stdev": 0.070867
+        },
+        "ttft_seconds": {
+          "ci95_half_width": 0.830441,
+          "max": 12.38209,
+          "mean": 11.998718,
+          "min": 11.768225,
+          "n": 3,
+          "stdev": 0.33427
+        },
+        "wall_seconds": {
+          "ci95_half_width": 1.178785,
+          "max": 46.238028,
+          "mean": 45.692349,
+          "min": 45.376931,
+          "n": 3,
+          "stdev": 0.474486
+        }
+      },
+      "prompt_tokens": 1391249,
+      "requests": 200,
+      "trials": 3
+    },
+    "contextpilot_intra_schedule": {
+      "measurements": {
+        "cached_prompt_tokens": {
+          "ci95_half_width": 0.0,
+          "max": 1340256.0,
+          "mean": 1340256.0,
+          "min": 1340256.0,
+          "n": 3,
+          "stdev": 0.0
+        },
+        "cached_ratio": {
+          "ci95_half_width": 0.0,
+          "max": 0.963347,
+          "mean": 0.963347,
+          "min": 0.963347,
+          "n": 3,
+          "stdev": 0.0
+        },
+        "computed_prompt_tokens": {
+          "ci95_half_width": 0.0,
+          "max": 50993.0,
+          "mean": 50993.0,
+          "min": 50993.0,
+          "n": 3,
+          "stdev": 0.0
+        },
+        "prefill_seconds": {
+          "ci95_half_width": 0.197063,
+          "max": 5.204325,
+          "mean": 5.126717,
+          "min": 5.045785,
+          "n": 3,
+          "stdev": 0.079322
+        },
+        "ttft_seconds": {
+          "ci95_half_width": 0.343676,
+          "max": 12.489841,
+          "mean": 12.330319,
+          "min": 12.243371,
+          "n": 3,
+          "stdev": 0.138337
+        },
+        "wall_seconds": {
+          "ci95_half_width": 0.197974,
+          "max": 45.886512,
+          "mean": 45.794616,
+          "min": 45.744584,
+          "n": 3,
+          "stdev": 0.079689
+        }
+      },
+      "prompt_tokens": 1391249,
+      "requests": 200,
+      "trials": 3
+    }
+  },
+  "engine": "vllm",
+  "format_version": 1
+}

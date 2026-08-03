@@ -1,0 +1,27 @@
+{
+  "baseline_accuracy": 0.89375,
+  "baseline_files": [
+    "/home/taghan/FYP/cluster/results/tooltrie-phase2-20260803-181133/metric-scoped/alphabetical-no_tool_correct.json"
+  ],
+  "bootstrap_samples": 50000,
+  "bootstrap_seed": 42,
+  "candidate_accuracy": 0.88125,
+  "candidate_files": [
+    "/home/taghan/FYP/cluster/results/tooltrie-phase2-20260803-181133/metric-scoped/conditional_pair_triple-no_tool_correct.json"
+  ],
+  "cluster_bootstrap_95_ci_percentage_points": [
+    -3.125,
+    0.0
+  ],
+  "difference_percentage_points": -1.25,
+  "discordant_pairs": {
+    "baseline_only_correct": 2,
+    "candidate_only_correct": 0
+  },
+  "mcnemar_exact_two_sided_p": 0.5,
+  "mcnemar_independence_assumption_met": true,
+  "mcnemar_note": "Exact McNemar is secondary/descriptive when several menu cases share a task; the task-clustered bootstrap interval is primary.",
+  "metric": "no_tool_correct",
+  "paired_cases": 160,
+  "task_clusters": 160
+}

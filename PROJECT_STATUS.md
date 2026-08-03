@@ -11,6 +11,13 @@ Status after the first local research pass:
 | E — exact ToolTrie baseline | Measured on GPU: prefill sweep, crossover, and two orderings validated against real cache hits. Causal ToolTrie-v0 now measured end to end against both static orderings | `scripts/prefill_sweep.py`, `scripts/validate_reuse_estimate.py`, `src/tatm/tooltrie.py`, "Task E" and "ToolTrie-v0" below, `reports/tooltrie-v0/findings.md` |
 | F — initial report | Complete and regenerated from measured results | `reports/initial-findings.md` |
 
+The external-comparison implementation is now staged but **not yet measured**.
+`NUS_GPU_PHASE2_INSTRUCTIONS.md` runs the remaining work in the required order:
+targeted irrelevance/no-tool evaluation; CacheWeaver and fitted
+FP-tree/co-occurrence baselines on the same vLLM server; actual pinned
+ContextPilot ordering; then a separate stock SGLang/RadixAttention engine
+comparison. No result should be inferred from the presence of that harness.
+
 ## Notable findings
 
 The counterintuitive results, in order of how surprising they were:

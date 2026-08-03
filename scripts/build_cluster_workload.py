@@ -46,6 +46,15 @@ def main() -> None:
         default="frequency",
     )
     parser.add_argument("--limit", type=int, default=500)
+    parser.add_argument(
+        "--offset",
+        type=int,
+        default=0,
+        help=(
+            "Skip this many tasks in the selected partition before applying "
+            "--limit. This supports disjoint training/evaluation workloads."
+        ),
+    )
     parser.add_argument("--random-seed", type=int, default=42)
     parser.add_argument(
         "--menu-size",
@@ -65,6 +74,11 @@ def main() -> None:
     )
     args = parser.parse_args()
 
+    if args.offset < 0:
+        parser.error("--offset must be >= 0")
+    if args.limit < 1:
+        parser.error("--limit must be >= 1")
+
     tools, tasks = load_processed(args.processed_dir)
     evidence = "gold_relevance" if args.partition == "toolret" else "exposed_menu"
     selected_tasks = [task for task in tasks if task.evidence_type == evidence]
@@ -79,7 +93,8 @@ def main() -> None:
     )
 
     records = []
-    for task in selected_tasks[: args.limit]:
+    selected_slice = selected_tasks[args.offset : args.offset + args.limit]
+    for task in selected_slice:
         tool_ids = deduplicated_existing_ids(task, tools)
         if args.menu_size:
             tool_ids = build_menu(

@@ -43,6 +43,8 @@ def main() -> None:
             skipped += 1
             continue
         score["ordering"] = result["ordering"]
+        score["case_id"] = result.get("case_id", result["task_id"])
+        score["menu_seed"] = result.get("menu_seed")
         scores.append(score)
 
     by_domain: dict[str, list] = {}
@@ -50,13 +52,14 @@ def main() -> None:
         by_domain.setdefault(score["domain"], []).append(score)
 
     output = {
-        "format_version": 1,
+        "format_version": 2,
         "replay_result": args.replay_result.as_posix(),
         "ordering": replay.get("results", [{}])[0].get("ordering"),
         "run_label": replay.get("run_label"),
         "skipped_no_ground_truth": skipped,
         "overall": aggregate(scores),
         "by_domain": {domain: aggregate(items) for domain, items in sorted(by_domain.items())},
+        "scores": scores,
     }
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(

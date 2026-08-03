@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+"""Replay a TATM workload against stock SGLang/RadixAttention."""
+
 from __future__ import annotations
 
 import argparse
@@ -11,12 +13,15 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
 from tatm.io import read_jsonl
-from tatm.vllm_client import (
-    fetch_text,
+from tatm.sglang_client import (
+    cached_token_projection,
+    flush_cache,
     metric_delta,
     parse_prometheus,
+)
+from tatm.vllm_client import (
+    fetch_text,
     request_json,
-    reset_prefix_cache,
     response_projection,
     served_model,
 )
@@ -24,12 +29,12 @@ from tatm.vllm_client import (
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Replay a generated TATM workload against vLLM."
+        description="Replay a generated TATM workload against SGLang."
     )
     parser.add_argument("--input", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--run-label", required=True)
-    parser.add_argument("--base-url", default="http://127.0.0.1:8000")
+    parser.add_argument("--base-url", default="http://127.0.0.1:30000")
     parser.add_argument("--model")
     parser.add_argument("--limit", type=int)
     parser.add_argument("--max-tokens", type=int, default=48)
@@ -42,19 +47,12 @@ def main() -> None:
     parser.add_argument(
         "--disable-thinking",
         action="store_true",
-        help=(
-            "Set chat_template_kwargs.enable_thinking=false. Qwen3 emits a "
-            "<think> block by default, which can consume the whole "
-            "--max-tokens budget before any tool call is produced."
-        ),
+        help="Set chat_template_kwargs.enable_thinking=false for Qwen3.",
     )
     parser.add_argument(
-        "--reset-before",
+        "--flush-before",
         action="store_true",
-        help=(
-            "Reset APC once immediately before this replay. Requires the "
-            "server to run with VLLM_SERVER_DEV_MODE=1."
-        ),
+        help="Flush RadixAttention once immediately before this replay.",
     )
     parser.add_argument(
         "--allow-counter-mismatch",
@@ -66,19 +64,24 @@ def main() -> None:
     )
     args = parser.parse_args()
 
+    if args.max_tokens < 1:
+        parser.error("--max-tokens must be >= 1")
+    if args.pause_seconds < 0:
+        parser.error("--pause-seconds must be >= 0")
+    if args.limit is not None and args.limit < 1:
+        parser.error("--limit must be >= 1")
+
     base_url = args.base_url.rstrip("/")
     model = served_model(base_url, args.model)
     workload = list(read_jsonl(args.input))
     if args.limit is not None:
         workload = workload[: args.limit]
+    if not workload:
+        parser.error("Input workload is empty")
 
-    if args.reset_before and not reset_prefix_cache(base_url):
-        raise SystemExit(
-            "vLLM prefix-cache reset failed; verify VLLM_SERVER_DEV_MODE=1"
-        )
-
-    results = []
+    flush_message = flush_cache(base_url) if args.flush_before else None
     aggregate_before = parse_prometheus(fetch_text(f"{base_url}/metrics"))
+    results = []
     started = time.perf_counter()
     for index, record in enumerate(workload):
         payload = {
@@ -89,6 +92,7 @@ def main() -> None:
             "temperature": 0,
             "seed": 0,
             "max_tokens": args.max_tokens,
+            "return_cached_tokens_details": True,
         }
         if args.disable_thinking:
             payload["chat_template_kwargs"] = {"enable_thinking": False}
@@ -116,6 +120,7 @@ def main() -> None:
                 "canonical_tool_tokens": record["canonical_tool_tokens"],
                 "wall_seconds": round(wall_seconds, 6),
                 **response_projection(response),
+                **cached_token_projection(response),
                 "metric_delta": metric_delta(before, after),
             }
         )
@@ -123,46 +128,49 @@ def main() -> None:
             time.sleep(args.pause_seconds)
 
     aggregate_after = parse_prometheus(fetch_text(f"{base_url}/metrics"))
-    aggregate_delta = metric_delta(
-        aggregate_before,
-        aggregate_after,
-    )
+    aggregate_delta = metric_delta(aggregate_before, aggregate_after)
     prompt_tokens_from_responses = sum(
         int((result.get("usage") or {}).get("prompt_tokens", 0))
         for result in results
     )
-    query_tokens = aggregate_delta.get("vllm:prefix_cache_queries")
-    cached_tokens = aggregate_delta.get("vllm:prompt_tokens_cached")
-    computed_tokens = aggregate_delta.get(
-        "vllm:request_prefill_kv_computed_tokens_sum"
-    )
-    validation = {
-        "query_counter_matches_response_prompt_tokens": (
-            query_tokens == prompt_tokens_from_responses
+    response_cached_values = [
+        result["cached_prompt_tokens"]
+        for result in results
+        if result.get("cached_prompt_tokens") is not None
+    ]
+    cached_tokens_from_responses = sum(response_cached_values)
+    validations = {
+        "request_counter_matches": (
+            aggregate_delta.get("sglang:num_requests_total") == len(results)
         ),
-        "cached_plus_computed_matches_queries": (
-            query_tokens is not None
-            and cached_tokens is not None
-            and computed_tokens is not None
-            and cached_tokens + computed_tokens == query_tokens
+        "prompt_counter_matches": (
+            aggregate_delta.get("sglang:prompt_tokens_total")
+            == prompt_tokens_from_responses
+        ),
+        "cached_counter_matches": (
+            len(response_cached_values) == len(results)
+            and aggregate_delta.get("sglang:cached_tokens_total")
+            == cached_tokens_from_responses
         ),
     }
-    counters_clean = all(validation.values())
+    counters_clean = all(validations.values())
     output = {
         "format_version": 1,
-        "engine": "vllm",
+        "engine": "sglang",
         "run_label": args.run_label,
         "server": base_url,
         "model": model,
         "input": args.input.as_posix(),
         "request_count": len(results),
         "wall_seconds": round(time.perf_counter() - started, 6),
-        "cache_reset_before": args.reset_before,
+        "cache_flushed_before": args.flush_before,
+        "flush_message": flush_message,
         "aggregate_metric_delta": aggregate_delta,
         "counter_validation": {
-            **validation,
+            **validations,
             "clean": counters_clean,
             "response_prompt_tokens": prompt_tokens_from_responses,
+            "response_cached_tokens": cached_tokens_from_responses,
         },
         "results": results,
     }
@@ -171,11 +179,11 @@ def main() -> None:
         json.dumps(output, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )
-    print(f"Wrote {len(results)} results to {args.output}")
+    print(f"Wrote {len(results)} SGLang results to {args.output}")
     print(json.dumps(output["counter_validation"], indent=2, sort_keys=True))
     if not counters_clean and not args.allow_counter_mismatch:
         raise SystemExit(
-            "vLLM counters do not match this replay; preserve and quarantine "
+            "SGLang counters do not match this replay; preserve and quarantine "
             "the result, then rerun with no other traffic"
         )
 

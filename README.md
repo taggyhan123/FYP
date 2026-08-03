@@ -13,7 +13,9 @@ Implemented locally:
 - schema-quality, frequency, co-occurrence, locality, replay, ordering, and
   tool-trie analyses;
 - a causal recent-path ToolTrie planner and prompt-level workload builders;
-- a vLLM prefix-cache probe that can be run later on the SoC CUDA cluster.
+- measured vLLM prefix-cache and ToolTrie-v0 experiments;
+- a phase-2 harness for CacheWeaver, training-only FP-tree/co-occurrence,
+  pinned upstream ContextPilot, and stock SGLang/RadixAttention comparisons.
 
 The raw and normalized datasets are reproducible and ignored by Git. Compact
 Markdown, JSON, and CSV reports are written to `reports/` and may be committed.
@@ -45,6 +47,11 @@ The second file is directly compatible with `replay_vllm_workload.py` and
 `score_bfcl_quality.py`. Real APC hits and latency still require the CUDA vLLM
 server described in `cluster/README.md`.
 
+The external-comparison sequence—including the targeted BFCL no-tool test,
+same-server vLLM controls, and separately labeled SGLang run—is in
+[`NUS_GPU_PHASE2_INSTRUCTIONS.md`](NUS_GPU_PHASE2_INSTRUCTIONS.md). Its GPU
+measurements remain pending until that runbook is executed on the NUS server.
+
 The default tokenizer is `Qwen/Qwen3-0.6B`. Its official `tokenizer.json` is
 cached under ignored `data/tokenizers/`. Override it with `--tokenizer MODEL_ID`
 if the cluster experiment uses a different model.
@@ -59,7 +66,8 @@ if the cluster experiment uses a different model.
 - `reports/access-patterns.md` — Task D workload and trie analysis;
 - `reports/analysis-summary.json` — machine-readable analysis;
 - `reports/tables/` — compact source tables;
-- `cluster/README.md` — exact steps for Task B/E on a CUDA vLLM server.
+- `cluster/README.md` — exact steps for Task B/E on a CUDA vLLM server;
+- `NUS_GPU_PHASE2_INSTRUCTIONS.md` — reproducible external-comparison runbook.
 
 The public datasets are benchmarks, not production traces. Reports deliberately
 label ToolRet relevance as **gold requirement** and BFCL function lists as

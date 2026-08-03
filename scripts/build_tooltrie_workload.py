@@ -21,6 +21,7 @@ sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
 from tatm.analysis import load_processed
 from tatm.io import read_jsonl, write_jsonl
+from tatm.baselines import CacheWeaverPlanner
 from tatm.tooltrie import ToolTrie
 
 
@@ -53,6 +54,15 @@ def main() -> None:
     parser.add_argument("--input", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument(
+        "--policy",
+        choices=("tooltrie_v0", "cacheweaver"),
+        default="tooltrie_v0",
+        help=(
+            "Planner to apply. cacheweaver is a faithful transcription of "
+            "Algorithm 1 and always falls back to original input order."
+        ),
+    )
+    parser.add_argument(
         "--processed-dir",
         type=Path,
         default=PROJECT_ROOT / "data" / "processed",
@@ -84,7 +94,11 @@ def main() -> None:
     parser.add_argument("--max-nodes", type=int, default=100_000)
     args = parser.parse_args()
 
-    if args.fallback == "frequency" and args.training_input is None:
+    if (
+        args.policy == "tooltrie_v0"
+        and args.fallback == "frequency"
+        and args.training_input is None
+    ):
         parser.error("--fallback frequency requires --training-input")
     if (
         args.training_input is not None
@@ -98,14 +112,19 @@ def main() -> None:
         if args.training_input is not None
         else None
     )
-    planner = ToolTrie(
-        tools,
-        fallback=args.fallback,
-        support=support,
-        recency_window=args.recency_window,
-        capacity_tokens=args.capacity_tokens,
-        max_nodes=args.max_nodes,
-    )
+    if args.policy == "cacheweaver":
+        if args.training_input is not None:
+            parser.error("CacheWeaver does not fit support from --training-input")
+        planner = CacheWeaverPlanner(tools, history_window=args.recency_window)
+    else:
+        planner = ToolTrie(
+            tools,
+            fallback=args.fallback,
+            support=support,
+            recency_window=args.recency_window,
+            capacity_tokens=args.capacity_tokens,
+            max_nodes=args.max_nodes,
+        )
 
     source_records = list(read_jsonl(args.input))
     if args.limit is not None:
@@ -124,20 +143,31 @@ def main() -> None:
 
         reordered = dict(record)
         reordered["base_ordering"] = record.get("ordering")
-        reordered["ordering"] = "tooltrie_v0"
+        reordered["ordering"] = args.policy
         reordered["tool_ids"] = list(plan.ordered_ids)
         reordered["tools"] = [payload_by_id[item] for item in plan.ordered_ids]
-        reordered["tooltrie_plan"] = plan.to_record()
+        plan_field = (
+            "cacheweaver_plan"
+            if args.policy == "cacheweaver"
+            else "tooltrie_plan"
+        )
+        state_field = (
+            "cacheweaver_state_after"
+            if args.policy == "cacheweaver"
+            else "tooltrie_state_after"
+        )
+        reordered[plan_field] = plan.to_record()
         # Observe only after the decision has been recorded.
-        reordered["tooltrie_state_after"] = planner.observe(plan.ordered_ids)
+        reordered[state_field] = planner.observe(plan.ordered_ids)
         output_records.append(reordered)
 
     count = write_jsonl(args.output, output_records)
     summary = {
         "requests": count,
+        "policy": args.policy,
         "requests_with_hinted_prefix": matched_requests,
         "hinted_schema_tokens": total_hinted_tokens,
-        "fallback": args.fallback,
+        "fallback": args.fallback if args.policy == "tooltrie_v0" else "original",
         "training_input": (
             args.training_input.as_posix() if args.training_input else None
         ),

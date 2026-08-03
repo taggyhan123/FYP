@@ -3,6 +3,10 @@
 Tasks B and E require a CUDA-capable vLLM server. The local pipeline prepares
 schemas and workloads without claiming GPU measurements.
 
+Tasks B/E and ToolTrie-v0 have now been measured. For the next targeted
+no-tool, CacheWeaver, FP-tree/ContextPilot, and SGLang comparison sequence, use
+[`../NUS_GPU_PHASE2_INSTRUCTIONS.md`](../NUS_GPU_PHASE2_INSTRUCTIONS.md).
+
 ## 1. Environment
 
 The workstation itself has four RTX 3090s and a vLLM 0.26.0 environment at

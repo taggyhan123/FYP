@@ -45,10 +45,37 @@ def main() -> None:
         required=True,
     )
     parser.add_argument("--per-domain", type=int, default=20)
+    parser.add_argument(
+        "--domain",
+        dest="domains",
+        action="append",
+        choices=(
+            "irrelevance",
+            "multiple",
+            "parallel",
+            "parallel_multiple",
+            "simple_python",
+        ),
+        help=(
+            "Restrict the workload to one or more BFCL domains. Repeat the "
+            "flag to select multiple domains. By default all domains are used."
+        ),
+    )
+    parser.add_argument(
+        "--offset-per-domain",
+        type=int,
+        default=0,
+        help="Skip this many records at the start of every selected domain.",
+    )
     parser.add_argument("--menu-size", type=int, default=64)
     parser.add_argument("--random-seed", type=int, default=42)
     parser.add_argument("--max-schema-tokens", type=int, default=300)
     args = parser.parse_args()
+
+    if args.per_domain < 1:
+        parser.error("--per-domain must be >= 1")
+    if args.offset_per_domain < 0:
+        parser.error("--offset-per-domain must be >= 0")
 
     tools, tasks = load_processed(args.processed_dir)
     bfcl_tasks = [task for task in tasks if task.evidence_type == "exposed_menu"]
@@ -67,9 +94,16 @@ def main() -> None:
     for task in bfcl_tasks:
         by_domain[task.domain].append(task)
 
+    selected_domains = args.domains or sorted(by_domain)
+    missing_domains = sorted(set(selected_domains) - set(by_domain))
+    if missing_domains:
+        parser.error(f"No processed BFCL tasks for: {', '.join(missing_domains)}")
+
     selected = []
-    for domain in sorted(by_domain):
-        selected.extend(by_domain[domain][: args.per_domain])
+    for domain in selected_domains:
+        start = args.offset_per_domain
+        stop = start + args.per_domain
+        selected.extend(by_domain[domain][start:stop])
 
     records = []
     for task in selected:
@@ -81,7 +115,13 @@ def main() -> None:
         ordered = order_tool_ids(
             tool_ids, tools, support, args.ordering, random_seed=args.random_seed
         )
-        records.append(workload_record(task, ordered, tools, args.ordering))
+        record = workload_record(task, ordered, tools, args.ordering)
+        # ``case_id`` distinguishes the same BFCL task evaluated against
+        # several fixed distractor catalogs.  The task ID remains unchanged so
+        # official/reduced BFCL ground truth lookup still works.
+        record["menu_seed"] = args.random_seed
+        record["case_id"] = f"{task.task_id}:menu_seed={args.random_seed}"
+        records.append(record)
 
     count = write_jsonl(args.output, records)
     domain_counts = Counter(task.domain for task in selected)

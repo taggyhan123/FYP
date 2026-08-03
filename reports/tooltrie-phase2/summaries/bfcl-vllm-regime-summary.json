@@ -1,0 +1,669 @@
+{
+  "all_conditions_have_same_case_set": true,
+  "all_conditions_have_same_request_sequence": true,
+  "all_conditions_have_same_selected_tool_sets": true,
+  "conditions": {
+    "alphabetical": {
+      "measurements": {
+        "cached_prompt_tokens": {
+          "ci95_half_width": 0.0,
+          "max": 526432.0,
+          "mean": 526432.0,
+          "min": 526432.0,
+          "n": 3,
+          "stdev": 0.0
+        },
+        "cached_ratio": {
+          "ci95_half_width": 0.0,
+          "max": 0.381281,
+          "mean": 0.381281,
+          "min": 0.381281,
+          "n": 3,
+          "stdev": 0.0
+        },
+        "computed_prompt_tokens": {
+          "ci95_half_width": 0.0,
+          "max": 854262.0,
+          "mean": 854262.0,
+          "min": 854262.0,
+          "n": 3,
+          "stdev": 0.0
+        },
+        "prefill_seconds": {
+          "ci95_half_width": 0.088195,
+          "max": 32.82982,
+          "mean": 32.796795,
+          "min": 32.759252,
+          "n": 3,
+          "stdev": 0.0355
+        },
+        "ttft_seconds": {
+          "ci95_half_width": 0.514081,
+          "max": 40.549918,
+          "mean": 40.327306,
+          "min": 40.140818,
+          "n": 3,
+          "stdev": 0.206929
+        },
+        "wall_seconds": {
+          "ci95_half_width": 0.561988,
+          "max": 73.886655,
+          "mean": 73.633016,
+          "min": 73.452136,
+          "n": 3,
+          "stdev": 0.226212
+        }
+      },
+      "prompt_tokens": 1380694,
+      "requests": 200,
+      "trials": 3
+    },
+    "cacheweaver": {
+      "measurements": {
+        "cached_prompt_tokens": {
+          "ci95_half_width": 0.0,
+          "max": 16384.0,
+          "mean": 16384.0,
+          "min": 16384.0,
+          "n": 3,
+          "stdev": 0.0
+        },
+        "cached_ratio": {
+          "ci95_half_width": 0.0,
+          "max": 0.011866,
+          "mean": 0.011866,
+          "min": 0.011866,
+          "n": 3,
+          "stdev": 0.0
+        },
+        "computed_prompt_tokens": {
+          "ci95_half_width": 0.0,
+          "max": 1364310.0,
+          "mean": 1364310.0,
+          "min": 1364310.0,
+          "n": 3,
+          "stdev": 0.0
+        },
+        "prefill_seconds": {
+          "ci95_half_width": 0.196055,
+          "max": 46.150054,
+          "mean": 46.099473,
+          "min": 46.00854,
+          "n": 3,
+          "stdev": 0.078916
+        },
+        "ttft_seconds": {
+          "ci95_half_width": 0.472322,
+          "max": 53.86691,
+          "mean": 53.729691,
+          "min": 53.512677,
+          "n": 3,
+          "stdev": 0.19012
+        },
+        "wall_seconds": {
+          "ci95_half_width": 0.44934,
+          "max": 86.154315,
+          "mean": 85.945845,
+          "min": 85.830708,
+          "n": 3,
+          "stdev": 0.180869
+        }
+      },
+      "prompt_tokens": 1380694,
+      "requests": 200,
+      "trials": 3
+    },
+    "conditional_pair": {
+      "measurements": {
+        "cached_prompt_tokens": {
+          "ci95_half_width": 0.0,
+          "max": 547968.0,
+          "mean": 547968.0,
+          "min": 547968.0,
+          "n": 3,
+          "stdev": 0.0
+        },
+        "cached_ratio": {
+          "ci95_half_width": 0.0,
+          "max": 0.396879,
+          "mean": 0.396879,
+          "min": 0.396879,
+          "n": 3,
+          "stdev": 0.0
+        },
+        "computed_prompt_tokens": {
+          "ci95_half_width": 0.0,
+          "max": 832726.0,
+          "mean": 832726.0,
+          "min": 832726.0,
+          "n": 3,
+          "stdev": 0.0
+        },
+        "prefill_seconds": {
+          "ci95_half_width": 0.464156,
+          "max": 32.32906,
+          "mean": 32.166847,
+          "min": 31.962567,
+          "n": 3,
+          "stdev": 0.186833
+        },
+        "ttft_seconds": {
+          "ci95_half_width": 0.572309,
+          "max": 40.004866,
+          "mean": 39.814832,
+          "min": 39.558619,
+          "n": 3,
+          "stdev": 0.230367
+        },
+        "wall_seconds": {
+          "ci95_half_width": 0.550338,
+          "max": 73.193542,
+          "mean": 72.938034,
+          "min": 72.799825,
+          "n": 3,
+          "stdev": 0.221523
+        }
+      },
+      "prompt_tokens": 1380694,
+      "requests": 200,
+      "trials": 3
+    },
+    "conditional_pair_triple": {
+      "measurements": {
+        "cached_prompt_tokens": {
+          "ci95_half_width": 0.0,
+          "max": 547968.0,
+          "mean": 547968.0,
+          "min": 547968.0,
+          "n": 3,
+          "stdev": 0.0
+        },
+        "cached_ratio": {
+          "ci95_half_width": 0.0,
+          "max": 0.396879,
+          "mean": 0.396879,
+          "min": 0.396879,
+          "n": 3,
+          "stdev": 0.0
+        },
+        "computed_prompt_tokens": {
+          "ci95_half_width": 0.0,
+          "max": 832726.0,
+          "mean": 832726.0,
+          "min": 832726.0,
+          "n": 3,
+          "stdev": 0.0
+        },
+        "prefill_seconds": {
+          "ci95_half_width": 0.072739,
+          "max": 32.276426,
+          "mean": 32.256402,
+          "min": 32.222799,
+          "n": 3,
+          "stdev": 0.029279
+        },
+        "ttft_seconds": {
+          "ci95_half_width": 0.141259,
+          "max": 39.998414,
+          "mean": 39.934011,
+          "min": 39.890755,
+          "n": 3,
+          "stdev": 0.05686
+        },
+        "wall_seconds": {
+          "ci95_half_width": 0.466817,
+          "max": 72.811964,
+          "mean": 72.675784,
+          "min": 72.46141,
+          "n": 3,
+          "stdev": 0.187904
+        }
+      },
+      "prompt_tokens": 1380694,
+      "requests": 200,
+      "trials": 3
+    },
+    "contextpilot_causal": {
+      "measurements": {
+        "cached_prompt_tokens": {
+          "ci95_half_width": 0.0,
+          "max": 1327632.0,
+          "mean": 1327632.0,
+          "min": 1327632.0,
+          "n": 3,
+          "stdev": 0.0
+        },
+        "cached_ratio": {
+          "ci95_half_width": 0.0,
+          "max": 0.961569,
+          "mean": 0.961569,
+          "min": 0.961569,
+          "n": 3,
+          "stdev": 0.0
+        },
+        "computed_prompt_tokens": {
+          "ci95_half_width": 0.0,
+          "max": 53062.0,
+          "mean": 53062.0,
+          "min": 53062.0,
+          "n": 3,
+          "stdev": 0.0
+        },
+        "prefill_seconds": {
+          "ci95_half_width": 0.184097,
+          "max": 5.237629,
+          "mean": 5.152209,
+          "min": 5.105164,
+          "n": 3,
+          "stdev": 0.074103
+        },
+        "ttft_seconds": {
+          "ci95_half_width": 0.414157,
+          "max": 13.495076,
+          "mean": 13.321117,
+          "min": 13.162758,
+          "n": 3,
+          "stdev": 0.166707
+        },
+        "wall_seconds": {
+          "ci95_half_width": 0.61007,
+          "max": 45.876748,
+          "mean": 45.593892,
+          "min": 45.435228,
+          "n": 3,
+          "stdev": 0.245566
+        }
+      },
+      "prompt_tokens": 1380694,
+      "requests": 200,
+      "trials": 3
+    },
+    "contextpilot_intra": {
+      "measurements": {
+        "cached_prompt_tokens": {
+          "ci95_half_width": 0.0,
+          "max": 1334288.0,
+          "mean": 1334288.0,
+          "min": 1334288.0,
+          "n": 3,
+          "stdev": 0.0
+        },
+        "cached_ratio": {
+          "ci95_half_width": 0.0,
+          "max": 0.966389,
+          "mean": 0.966389,
+          "min": 0.966389,
+          "n": 3,
+          "stdev": 0.0
+        },
+        "computed_prompt_tokens": {
+          "ci95_half_width": 0.0,
+          "max": 46406.0,
+          "mean": 46406.0,
+          "min": 46406.0,
+          "n": 3,
+          "stdev": 0.0
+        },
+        "prefill_seconds": {
+          "ci95_half_width": 0.215201,
+          "max": 4.929408,
+          "mean": 4.829392,
+          "min": 4.778296,
+          "n": 3,
+          "stdev": 0.086623
+        },
+        "ttft_seconds": {
+          "ci95_half_width": 0.032971,
+          "max": 12.340359,
+          "mean": 12.325171,
+          "min": 12.315806,
+          "n": 3,
+          "stdev": 0.013272
+        },
+        "wall_seconds": {
+          "ci95_half_width": 0.763343,
+          "max": 44.228309,
+          "mean": 43.886948,
+          "min": 43.632515,
+          "n": 3,
+          "stdev": 0.307262
+        }
+      },
+      "prompt_tokens": 1380694,
+      "requests": 200,
+      "trials": 3
+    },
+    "fp_tree_conditional": {
+      "measurements": {
+        "cached_prompt_tokens": {
+          "ci95_half_width": 0.0,
+          "max": 547968.0,
+          "mean": 547968.0,
+          "min": 547968.0,
+          "n": 3,
+          "stdev": 0.0
+        },
+        "cached_ratio": {
+          "ci95_half_width": 0.0,
+          "max": 0.396879,
+          "mean": 0.396879,
+          "min": 0.396879,
+          "n": 3,
+          "stdev": 0.0
+        },
+        "computed_prompt_tokens": {
+          "ci95_half_width": 0.0,
+          "max": 832726.0,
+          "mean": 832726.0,
+          "min": 832726.0,
+          "n": 3,
+          "stdev": 0.0
+        },
+        "prefill_seconds": {
+          "ci95_half_width": 0.122739,
+          "max": 32.298165,
+          "mean": 32.253959,
+          "min": 32.200627,
+          "n": 3,
+          "stdev": 0.049405
+        },
+        "ttft_seconds": {
+          "ci95_half_width": 0.541465,
+          "max": 40.089361,
+          "mean": 39.851483,
+          "min": 39.661387,
+          "n": 3,
+          "stdev": 0.217951
+        },
+        "wall_seconds": {
+          "ci95_half_width": 0.734566,
+          "max": 73.318029,
+          "mean": 72.97866,
+          "min": 72.77661,
+          "n": 3,
+          "stdev": 0.295679
+        }
+      },
+      "prompt_tokens": 1380694,
+      "requests": 200,
+      "trials": 3
+    },
+    "frequency_fitted": {
+      "measurements": {
+        "cached_prompt_tokens": {
+          "ci95_half_width": 0.0,
+          "max": 547968.0,
+          "mean": 547968.0,
+          "min": 547968.0,
+          "n": 3,
+          "stdev": 0.0
+        },
+        "cached_ratio": {
+          "ci95_half_width": 0.0,
+          "max": 0.396879,
+          "mean": 0.396879,
+          "min": 0.396879,
+          "n": 3,
+          "stdev": 0.0
+        },
+        "computed_prompt_tokens": {
+          "ci95_half_width": 0.0,
+          "max": 832726.0,
+          "mean": 832726.0,
+          "min": 832726.0,
+          "n": 3,
+          "stdev": 0.0
+        },
+        "prefill_seconds": {
+          "ci95_half_width": 0.12034,
+          "max": 32.307118,
+          "mean": 32.270307,
+          "min": 32.215431,
+          "n": 3,
+          "stdev": 0.048439
+        },
+        "ttft_seconds": {
+          "ci95_half_width": 0.25793,
+          "max": 39.973142,
+          "mean": 39.865116,
+          "min": 39.766082,
+          "n": 3,
+          "stdev": 0.103822
+        },
+        "wall_seconds": {
+          "ci95_half_width": 0.53799,
+          "max": 73.221662,
+          "mean": 72.971674,
+          "min": 72.841735,
+          "n": 3,
+          "stdev": 0.216553
+        }
+      },
+      "prompt_tokens": 1380694,
+      "requests": 200,
+      "trials": 3
+    },
+    "original": {
+      "measurements": {
+        "cached_prompt_tokens": {
+          "ci95_half_width": 0.0,
+          "max": 16384.0,
+          "mean": 16384.0,
+          "min": 16384.0,
+          "n": 3,
+          "stdev": 0.0
+        },
+        "cached_ratio": {
+          "ci95_half_width": 0.0,
+          "max": 0.011866,
+          "mean": 0.011866,
+          "min": 0.011866,
+          "n": 3,
+          "stdev": 0.0
+        },
+        "computed_prompt_tokens": {
+          "ci95_half_width": 0.0,
+          "max": 1364310.0,
+          "mean": 1364310.0,
+          "min": 1364310.0,
+          "n": 3,
+          "stdev": 0.0
+        },
+        "prefill_seconds": {
+          "ci95_half_width": 1.362212,
+          "max": 46.057835,
+          "mean": 45.671859,
+          "min": 45.04422,
+          "n": 3,
+          "stdev": 0.54832
+        },
+        "ttft_seconds": {
+          "ci95_half_width": 1.185202,
+          "max": 53.651883,
+          "mean": 53.332533,
+          "min": 52.784133,
+          "n": 3,
+          "stdev": 0.47707
+        },
+        "wall_seconds": {
+          "ci95_half_width": 1.647668,
+          "max": 85.899952,
+          "mean": 85.455302,
+          "min": 84.692997,
+          "n": 3,
+          "stdev": 0.663222
+        }
+      },
+      "prompt_tokens": 1380694,
+      "requests": 200,
+      "trials": 3
+    },
+    "schema_cost_fitted": {
+      "measurements": {
+        "cached_prompt_tokens": {
+          "ci95_half_width": 0.0,
+          "max": 547968.0,
+          "mean": 547968.0,
+          "min": 547968.0,
+          "n": 3,
+          "stdev": 0.0
+        },
+        "cached_ratio": {
+          "ci95_half_width": 0.0,
+          "max": 0.396879,
+          "mean": 0.396879,
+          "min": 0.396879,
+          "n": 3,
+          "stdev": 0.0
+        },
+        "computed_prompt_tokens": {
+          "ci95_half_width": 0.0,
+          "max": 832726.0,
+          "mean": 832726.0,
+          "min": 832726.0,
+          "n": 3,
+          "stdev": 0.0
+        },
+        "prefill_seconds": {
+          "ci95_half_width": 0.226209,
+          "max": 32.162247,
+          "mean": 32.084389,
+          "min": 31.984268,
+          "n": 3,
+          "stdev": 0.091054
+        },
+        "ttft_seconds": {
+          "ci95_half_width": 0.772947,
+          "max": 39.657941,
+          "mean": 39.348993,
+          "min": 39.03573,
+          "n": 3,
+          "stdev": 0.311128
+        },
+        "wall_seconds": {
+          "ci95_half_width": 1.754275,
+          "max": 72.490534,
+          "mean": 71.679785,
+          "min": 71.199314,
+          "n": 3,
+          "stdev": 0.706134
+        }
+      },
+      "prompt_tokens": 1380694,
+      "requests": 200,
+      "trials": 3
+    },
+    "tooltrie_offline": {
+      "measurements": {
+        "cached_prompt_tokens": {
+          "ci95_half_width": 0.0,
+          "max": 413616.0,
+          "mean": 413616.0,
+          "min": 413616.0,
+          "n": 3,
+          "stdev": 0.0
+        },
+        "cached_ratio": {
+          "ci95_half_width": 0.0,
+          "max": 0.299571,
+          "mean": 0.299571,
+          "min": 0.299571,
+          "n": 3,
+          "stdev": 0.0
+        },
+        "computed_prompt_tokens": {
+          "ci95_half_width": 0.0,
+          "max": 967078.0,
+          "mean": 967078.0,
+          "min": 967078.0,
+          "n": 3,
+          "stdev": 0.0
+        },
+        "prefill_seconds": {
+          "ci95_half_width": 0.53914,
+          "max": 35.703814,
+          "mean": 35.573181,
+          "min": 35.32267,
+          "n": 3,
+          "stdev": 0.217016
+        },
+        "ttft_seconds": {
+          "ci95_half_width": 1.345945,
+          "max": 44.132272,
+          "mean": 43.719056,
+          "min": 43.105685,
+          "n": 3,
+          "stdev": 0.541772
+        },
+        "wall_seconds": {
+          "ci95_half_width": 1.218957,
+          "max": 77.793238,
+          "mean": 77.48234,
+          "min": 76.916707,
+          "n": 3,
+          "stdev": 0.490657
+        }
+      },
+      "prompt_tokens": 1380694,
+      "requests": 200,
+      "trials": 3
+    },
+    "tooltrie_v0": {
+      "measurements": {
+        "cached_prompt_tokens": {
+          "ci95_half_width": 0.0,
+          "max": 1203760.0,
+          "mean": 1203760.0,
+          "min": 1203760.0,
+          "n": 3,
+          "stdev": 0.0
+        },
+        "cached_ratio": {
+          "ci95_half_width": 0.0,
+          "max": 0.871851,
+          "mean": 0.871851,
+          "min": 0.871851,
+          "n": 3,
+          "stdev": 0.0
+        },
+        "computed_prompt_tokens": {
+          "ci95_half_width": 0.0,
+          "max": 176934.0,
+          "mean": 176934.0,
+          "min": 176934.0,
+          "n": 3,
+          "stdev": 0.0
+        },
+        "prefill_seconds": {
+          "ci95_half_width": 0.074126,
+          "max": 9.813296,
+          "mean": 9.783722,
+          "min": 9.753628,
+          "n": 3,
+          "stdev": 0.029837
+        },
+        "ttft_seconds": {
+          "ci95_half_width": 0.650847,
+          "max": 17.521039,
+          "mean": 17.352966,
+          "min": 17.051106,
+          "n": 3,
+          "stdev": 0.26198
+        },
+        "wall_seconds": {
+          "ci95_half_width": 0.606805,
+          "max": 50.481078,
+          "mean": 50.313844,
+          "min": 50.033545,
+          "n": 3,
+          "stdev": 0.244252
+        }
+      },
+      "prompt_tokens": 1380694,
+      "requests": 200,
+      "trials": 3
+    }
+  },
+  "engine": "vllm",
+  "format_version": 1
+}

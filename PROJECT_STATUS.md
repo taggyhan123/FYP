@@ -11,12 +11,15 @@ Status after the first local research pass:
 | E — exact ToolTrie baseline | Measured on GPU: prefill sweep, crossover, and two orderings validated against real cache hits. Causal ToolTrie-v0 now measured end to end against both static orderings | `scripts/prefill_sweep.py`, `scripts/validate_reuse_estimate.py`, `src/tatm/tooltrie.py`, "Task E" and "ToolTrie-v0" below, `reports/tooltrie-v0/findings.md` |
 | F — initial report | Complete and regenerated from measured results | `reports/initial-findings.md` |
 
-The external-comparison implementation is now staged but **not yet measured**.
-`NUS_GPU_PHASE2_INSTRUCTIONS.md` runs the remaining work in the required order:
-targeted irrelevance/no-tool evaluation; CacheWeaver and fitted
-FP-tree/co-occurrence baselines on the same vLLM server; actual pinned
-ContextPilot ordering; then a separate stock SGLang/RadixAttention engine
-comparison. No result should be inferred from the presence of that harness.
+The external comparison from `NUS_GPU_PHASE2_INSTRUCTIONS.md` has now been
+**measured on GPU** — targeted no-tool evaluation, CacheWeaver, fitted
+FP-tree/co-occurrence baselines, pinned ContextPilot, and a separate stock
+SGLang/RadixAttention engine comparison. See "Phase 2" below.
+
+Two arms remain in flight and are **not yet in the tables**: `contextpilot_causal`
+on the sanitized-vLLM and SGLang engine arms, and on the n=800 quality set. Until
+those land, the §4 quality and §5 engine tables in the Phase 2 report contain only
+the *offline* ContextPilot variant and must not be read as causal comparisons.
 
 ## Notable findings
 
@@ -142,6 +145,59 @@ window equals its own prompt-token total; the 10 failing replays are quarantined
 and excluded, and their conditions were re-run single-driver. All 18 trials
 behind the table above pass that check. See
 `reports/tooltrie-v0/contamination-incident.txt`.
+
+## Phase 2 — external comparison (measured on GPU)
+
+Full report: `reports/tooltrie-phase2/findings.md`.
+
+**The no-tool regression is confirmed.** All 240 BFCL irrelevance tasks x 5 menu
+seeds on Qwen3-8B, bootstrap clustered on the 240 tasks: ToolTrie-v0 is
+**-3.75pp** vs alphabetical, 95% CI **[-5.67, -2.00]**, discordant pairs 54 vs 9.
+The interval excludes zero. The same ~4pp effect was seen underpowered at n=100
+and n=1000; this run resolved it.
+
+**ToolTrie beats every causal baseline except ContextPilot.** vLLM Qwen3-0.6B,
+200 requests, 3 trials:
+
+| condition | regime | BFCL cached | ToolRet cached |
+| --- | --- | --- | --- |
+| contextpilot_causal | causal | **96.16%** | **94.82%** |
+| tooltrie_v0 | causal | 87.19% | 83.58% |
+| alphabetical | causal | 38.13% | 51.05% |
+| tooltrie_offline | offline | 29.96% | 43.20% |
+| cacheweaver | causal | 1.19% | 22.46% |
+
+Two results that overturned earlier drafts:
+
+1. **ContextPilot's lead is not an offline artifact.** Restricting it to a causal
+   regime costs only 0.48pp (BFCL). It beats ToolTrie-v0 by ~9pp as a legitimate
+   causal policy. An earlier draft dismissed it as offline-only; that was wrong.
+2. **ToolTrie's causality is the source of its benefit.** Given the whole batch
+   it collapses to 29.96%, below alphabetical. Early requests establish a path
+   that later ones follow; treating the batch atemporally destroys that
+   self-reinforcement.
+
+**CacheWeaver does nothing here.** The Algorithm-1 reimplementation returned the
+unmodified input order on 200/200 BFCL requests, so it scores identically to
+`original`. All five fitted policies (frequency, schema-cost, FP-tree, pair,
+triple) collapse to within 0.01pp of each other and of alphabetical.
+
+**A systematic quality trade-off.** At n=800 on 8B, ranking orderings by
+function-name accuracy reverses their ranking on no-tool accuracy. Alphabetical
+is worst at selection (82.81%) and best at declining (89.38%); ContextPilot the
+reverse. ToolTrie sits mid-curve with a smaller no-tool cost (-1.88pp) than
+CacheWeaver or ContextPilot (both -6.88pp, CIs excluding zero). The regression is
+a property of reuse-optimizing orderings, not a ToolTrie defect.
+
+**SGLang/RadixAttention replicates the ordering effect** (87.11% vLLM vs 87.29%
+SGLang for ToolTrie on BFCL, identical ranking). Only cached *ratios* are
+cross-engine comparable: the two engines render the same tools through different
+chat templates, costing SGLang a constant +640 tokens per request.
+
+**Both benchmarks ship invalid JSON Schema** - 74 BFCL and 187 ToolRet tools use
+Python type names, plus one ToolRet tool colliding with the reserved `title`
+annotation. vLLM tolerates it; SGLang rejects every request. See
+`reports/tooltrie-phase2/schema_sanitizer.py`.
 
 ## Task B detail
 

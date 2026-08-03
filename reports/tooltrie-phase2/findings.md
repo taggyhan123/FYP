@@ -4,10 +4,12 @@ Runbook: `NUS_GPU_PHASE2_INSTRUCTIONS.md`. All cache and latency claims come fro
 each engine's own counters. The planner's analytical `hinted_schema_tokens` is
 never used to support a cache claim.
 
-**Headline.** ToolTrie-v0 beats every *causal* baseline on cache reuse by a wide
-margin and is matched only by an offline method that sees the whole batch. Its
-one measured cost is real: it declines irrelevant requests less reliably than
-alphabetical ordering, −3.75pp with a 95% interval excluding zero.
+**Headline.** ToolTrie-v0 raises measured prefix-cache reuse from 38.13% to
+87.19% on BFCL and cuts aggregate TTFT 2.3×, beating every baseline **except
+ContextPilot, which beats it by ~9pp under an equally causal regime** (§2a —
+this corrects an earlier draft that dismissed ContextPilot as offline-only). Its
+one measured quality cost is real: it declines irrelevant requests less reliably
+than alphabetical ordering, −3.75pp with a 95% interval excluding zero.
 
 ## 7. Provenance (stated first, because three conditions are not upstream code)
 
@@ -90,13 +92,64 @@ Three findings:
    (39.69% on BFCL). Five different statistical policies, trained on disjoint
    data, rediscover essentially one stable global order — consistent with Task
    E's finding that the cache rewards *identical*, not *important*.
-3. **ContextPilot leads but is not a competitor.** It is offline: it sees the
-   entire evaluation batch before ordering, whereas ToolTrie may use only
-   already-served requests. Read 96.6% as an **upper bound showing ~10pp of
-   headroom** a causal policy has yet to capture.
+3. **ContextPilot leads — and §2a shows this is NOT an artifact of its offline
+   regime.** An earlier draft of this report claimed ContextPilot was "not a
+   competitor" because it sees the whole evaluation batch. That claim was tested
+   and is **wrong**; see §2a.
 
 **Reproducibility.** `tooltrie_v0` measured 87.19% and `original` 1.19%, matching
 Phase 1's independent run to the digit on a different day and GPU.
+
+## 2a. Information regime — the comparison is now standardised
+
+The §2 table mixed two information regimes. ToolTrie-v0 is **causal**: it may use
+only already-served requests, because a deployed server cannot see the future.
+ContextPilot is **offline**: `fit_transform` is fitted over the entire evaluation
+batch. Comparing 87.19% against 96.64% therefore conflated *which algorithm* with
+*how much it was allowed to see*.
+
+Both missing cells were built and measured. `contextpilot_causal` recomputes the
+ordering for request *n* from `fit_transform(contexts[0..n])` only.
+`tooltrie_offline` grants ToolTrie the batch: a trie observes every request's
+ordering, all requests are re-planned against it, iterated to a fixpoint
+(converged in 2 iterations on both datasets) with the recency window disabled.
+
+| condition | regime | BFCL cached | ToolRet cached |
+| --- | --- | --- | --- |
+| contextpilot_intra | offline | 96.64% | 96.30% |
+| **contextpilot_causal** | **causal** | **96.16%** | **94.82%** |
+| **tooltrie_v0** | **causal** | **87.19%** | **83.58%** |
+| alphabetical | causal | 38.13% | 51.05% |
+| tooltrie_offline | offline | 29.96% | 43.20% |
+
+**Two corrections follow, both against the earlier draft.**
+
+1. **ContextPilot's advantage is not the regime.** Restricting it to causal costs
+   only **0.48pp** on BFCL and 1.48pp on ToolRet. It still beats ToolTrie-v0 by
+   ~9pp as a legitimate causal policy. The previous framing — that 96.6% was an
+   artifact of batch visibility — does not survive the test, and it was the most
+   load-bearing caveat in this report.
+2. **ToolTrie's causality is load-bearing, not a handicap.** Given the batch it
+   *collapses*, 87.19% → **29.96%**, below plain alphabetical. The mechanism is
+   self-reinforcement: early requests establish a path, later ones follow it, and
+   the shared prefix converges. Treating the batch atemporally destroys exactly
+   that. "Offline" is therefore not an upper bound for ToolTrie — it is a
+   different, worse algorithm.
+
+Caveat: `tooltrie_offline` is our construction, one of several possible offline
+formulations. It shows *this* formulation fails, not that none could work.
+
+**Every other condition is already causal**, verified rather than assumed: the
+five fitted policies train on disjoint data (200 evaluation tasks vs 1,040
+training tasks, **intersection empty**), ToolTrie and CacheWeaver are strictly
+plan-before-observe, and alphabetical/original do no learning. ContextPilot was
+the only non-causal condition in the study.
+
+**Still outstanding at the time of writing:** `contextpilot_causal` has been
+measured on the unsanitized vLLM arm only. Its replays on the sanitized vLLM and
+SGLang arms (§5) and on the n=800 quality set (§4) were in flight when this
+revision was committed, so those two tables still show only the offline
+ContextPilot variant and must not be read as causal comparisons yet.
 
 ## 3. ContextPilot scheduling table (kept separate)
 
@@ -149,7 +202,22 @@ zero where this smaller 160-task arm's does not.
 
 ## 5. SGLang/RadixAttention — separate engine table
 
-Byte-identical sanitized inputs on both engines (see §6). Qwen3-0.6B, 3 trials.
+Identical sanitized **input files** on both engines (see §6), Qwen3-0.6B, 3 trials.
+
+**The rendered prompts are not identical, and this bounds what may be compared.**
+vLLM serves with `--tool-call-parser hermes`, SGLang with `--tool-call-parser
+qwen`, so each engine serializes the same tool definitions through a different
+chat template. SGLang's rendering costs **exactly +640 tokens on every request**
+(6,868 → 7,508 on BFCL request 0; the delta is constant across all 200, so it is
+fixed template overhead, not content drift). Totals therefore differ by ~9%
+(1,380,294 vs 1,508,294 on BFCL).
+
+Consequently **only cached *ratios* are cross-engine comparable** — each is
+normalized by its own engine's prompt tokens. Absolute token counts, prefill
+tokens, and TTFT are not. That the ratios still agree to ~0.2pp *despite* a
+different prompt rendering strengthens rather than weakens the conclusion: the
+ordering effect survives both a different cache architecture and a different
+template.
 
 | BFCL | vLLM cached | vLLM TTFT | SGLang cached | SGLang TTFT |
 | --- | --- | --- | --- | --- |

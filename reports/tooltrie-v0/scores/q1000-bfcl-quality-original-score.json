@@ -1,0 +1,57 @@
+{
+  "by_domain": {
+    "irrelevance": {
+      "full_accuracy": null,
+      "function_name_accuracy": null,
+      "irrelevance_tasks": 200,
+      "no_tool_accuracy": 0.785,
+      "relevance_tasks": 0,
+      "tasks_scored": 200
+    },
+    "multiple": {
+      "full_accuracy": 0.88,
+      "function_name_accuracy": 0.96,
+      "irrelevance_tasks": 0,
+      "no_tool_accuracy": null,
+      "relevance_tasks": 200,
+      "tasks_scored": 200
+    },
+    "parallel": {
+      "full_accuracy": 0.715,
+      "function_name_accuracy": 0.75,
+      "irrelevance_tasks": 0,
+      "no_tool_accuracy": null,
+      "relevance_tasks": 200,
+      "tasks_scored": 200
+    },
+    "parallel_multiple": {
+      "full_accuracy": 0.555,
+      "function_name_accuracy": 0.615,
+      "irrelevance_tasks": 0,
+      "no_tool_accuracy": null,
+      "relevance_tasks": 200,
+      "tasks_scored": 200
+    },
+    "simple_python": {
+      "full_accuracy": 0.96,
+      "function_name_accuracy": 1.0,
+      "irrelevance_tasks": 0,
+      "no_tool_accuracy": null,
+      "relevance_tasks": 200,
+      "tasks_scored": 200
+    }
+  },
+  "format_version": 1,
+  "ordering": "original",
+  "overall": {
+    "full_accuracy": 0.7775,
+    "function_name_accuracy": 0.8313,
+    "irrelevance_tasks": 200,
+    "no_tool_accuracy": 0.785,
+    "relevance_tasks": 800,
+    "tasks_scored": 1000
+  },
+  "replay_result": "cluster/results/tooltrie-v0-20260803-011418/q1000-bfcl-quality-original-replay.json",
+  "run_label": "q1000-bfcl-quality-original",
+  "skipped_no_ground_truth": 0
+}

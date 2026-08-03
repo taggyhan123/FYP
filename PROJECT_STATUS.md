@@ -91,18 +91,39 @@ fallback, so the varying part of the menu stops breaking the common prefix.
 | ToolTrie-v0 | 75.0% / 53.8% / 95.0% | 87.5% / 75.0% / 95.0% |
 
 ToolTrie minus alphabetical is **+7.50pp** name and **+6.25pp** full at 0.6B but
-**−3.75pp** and **−6.25pp** at 8B. The sign flips with model scale. This is the
-third time in this project that a 0.6B quality reading did not survive to 8B,
-but the first time the direction reverses rather than merely shrinking, so the
-0.6B run alone would have reported ToolTrie as quality-free.
+**−3.75pp** and **−6.25pp** at 8B. The 8B planner ran at a 44,656-token capacity
+versus 190,896 at 0.6B and evicted 424 nodes, yet produced byte-identical
+orderings on all 100 records, so this is a clean model-size comparison with no
+capacity confound.
 
-Against the predeclared one-percentage-point regression threshold, ToolTrie-v0
-**does not pass** at 8B despite winning decisively on every systems metric. Two
-cautions: the gate is below its own resolution (n=100 means 1pp is one task, and
-the observed gap is 6 tasks), and the quality runs are single-pass. The 8B
-planner ran at a 44,656-token capacity versus 190,896 at 0.6B and evicted 424
-nodes, yet produced byte-identical orderings on all 100 records, so this is a
-clean model-size comparison with no capacity confound.
+### …and the 8B regression was itself sampling noise
+
+Repeated at the maximum balanced sample, **200 per domain (n=1000)**, a nested
+superset of the 100 above:
+
+| ToolTrie − alphabetical, Qwen3-8B | n=100 | n=1000 | 95% CI at n=1000 |
+| --- | --- | --- | --- |
+| function-name | −3.75pp | **+0.75pp** | −3.03 … +4.53pp |
+| full | −6.25pp | **+1.50pp** | −2.66 … +5.66pp |
+| no-tool | +0.00pp | −4.00pp | −10.89 … +2.89pp |
+
+Both headline metrics reverse sign and zero sits inside every interval: **no
+quality cost is detectable at 8B**. Two further lessons. The n=100 sample was
+optimistic as well as noisy — absolute accuracy fell for every condition on the
+larger set (alphabetical full 81.25%→75.62%), so the first 20 tasks per domain
+were easier than the remaining 180. And a 100-task BFCL sample got the *sign*
+wrong, not merely the magnitude, so results at that size are pilots.
+
+**The predeclared ≤1pp gate is unfalsifiable at any affordable sample size.**
+The 95% CI on the full-accuracy difference is ±4.2pp at n=1000; resolving 1pp
+needs roughly n=15,000 (~12 GPU-hours per condition at 8B). It should be
+restated as an equivalence test with a declared margin. The defensible claim is
+*no detectable quality cost at n=1000*, not *passes the gate*.
+
+Open: no-tool accuracy is the one metric whose point estimate favours
+alphabetical (−4.00pp, not significant), and it is the same direction
+alphabetical won at 0.6B. Two appearances is worth a targeted irrelevance-only
+run, since declining irrelevant requests is safety-relevant.
 
 ### Unrelated traffic during the first attempt
 
@@ -285,13 +306,11 @@ hand-maintained documents.
 ## Evidence still required
 
 - rendered full-prompt token IDs and exact vLLM block boundaries;
-- BFCL quality under the remaining four orderings, and repeated trials with
-  larger per-category samples for the three already scored — the current
-  quality numbers are a single, small-sample run. **This is now the highest
-  priority item:** it is the only thing standing between the ToolTrie-v0
-  systems result and a defensible claim, since the 4-6pp regression measured
-  against alphabetical at 8B rests on one pass of 100 tasks and a threshold
-  finer than the sample can resolve;
+- BFCL quality under the remaining four orderings. The three scored orderings
+  are now settled at n=1000 on 8B, so the ToolTrie-v0 quality blocker is closed
+  to the resolution available; what remains is an irrelevance-only run to
+  resolve the −4.00pp no-tool point estimate, and an external comparison
+  (CacheWeaver / SGLang RadixAttention) rather than further self-comparison;
 - ordering comparisons across all six orderings above the crossover, not just
   the two validated so far;
 - live-cache eviction under other orderings and other replay pairs (`uniform`

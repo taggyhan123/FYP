@@ -99,19 +99,72 @@ comparison with no capacity confound.
 at 8B **−3.75pp** name, **−6.25pp** full. No-tool accuracy is identical (95.0%)
 at both scales, which is expected since ToolTrie falls back to alphabetical.
 
-**The sign flips with model scale.** The 0.6B run alone would have concluded
-ToolTrie is quality-free or better. Running both was decisive, and it repeats the
-pattern already documented in `PROJECT_STATUS.md`, where a 0.6B ordering-quality
-gap vanished at 8B. Here the 8B result does not merely shrink the 0.6B gap, it
-reverses it.
-
-By-domain tables for both models are in `bfcl-quality-*-score.json` and
-`8b-bfcl-quality-*-score.json`. At 8B the regression concentrates in
-`multiple` (full 85%→75%) and `parallel_multiple` (full 80%→70%);
-`parallel` is unchanged at 80%/80%.
+**The sign flips with model scale**, so the 0.6B run alone would have concluded
+ToolTrie is quality-free or better. **However, see §4a: at n=1000 the 8B
+regression does not survive either.** The n=100 result above is retained because
+it is what the runbook specified, and because the contrast is the finding.
 
 Quality-run cached ratios (100 requests, `--max-tokens 128`): original 1.7%,
 alphabetical 27.2–29.6%, ToolTrie **84.6%** at both model sizes.
+
+## 4a. Follow-up at n=1000 — the 8B regression was sampling noise
+
+The §4 gate rests on 100 tasks, where one percentage point is one task. The
+evaluation was repeated at the **maximum balanced sample, 200 per domain
+(n=1000)**, a nested superset of the 100 above since the builder takes a
+deterministic per-domain prefix. Single pass per condition: generation runs at
+`temperature=0, seed=0`, so repeated identical replays add almost no power and
+the entire budget was spent on sample size instead.
+
+| Qwen3-8B | function-name | full | no-tool |
+| --- | --- | --- | --- |
+| original | 83.13% | 77.75% | 78.50% |
+| alphabetical | 81.50% | 75.62% | 87.50% |
+| ToolTrie-v0 | 82.25% | 77.12% | 83.50% |
+
+**ToolTrie minus alphabetical, n=100 → n=1000:**
+
+| Metric | n=100 | n=1000 | 95% CI on the n=1000 difference |
+| --- | --- | --- | --- |
+| function-name | −3.75pp | **+0.75pp** | −3.03 … +4.53pp |
+| full | −6.25pp | **+1.50pp** | −2.66 … +5.66pp |
+| no-tool | +0.00pp | −4.00pp | −10.89 … +2.89pp |
+
+Both headline metrics reverse sign and become slightly positive, and zero lies
+inside all three intervals. **There is no detectable quality cost at 8B.**
+
+Two things the larger sample also exposes:
+
+1. **The n=100 sample was optimistic as well as noisy.** Absolute accuracy fell
+   for every condition (alphabetical full 81.25%→75.62%, no-tool 95.0%→87.5%),
+   so the first 20 tasks per domain were easier than the remaining 180.
+2. **No-tool accuracy is the one metric where ToolTrie's point estimate is
+   negative** (−4.00pp), and it is the same direction alphabetical won at 0.6B.
+   It is not significant here (200 irrelevance tasks, CI ±6.9pp), but it has now
+   appeared twice, and correctly declining irrelevant requests is
+   safety-relevant. This deserves a targeted run rather than dismissal.
+
+By domain (n=200 each):
+
+| domain | metric | original | alphabetical | tooltrie |
+| --- | --- | --- | --- | --- |
+| simple_python | function name | 100.00% | 97.00% | 97.50% |
+| simple_python | full | 96.00% | 92.50% | 93.50% |
+| multiple | function name | 96.00% | 96.00% | 96.50% |
+| multiple | full | 88.00% | 86.50% | 88.50% |
+| parallel | function name | 75.00% | 73.00% | 74.50% |
+| parallel | full | 71.50% | 70.50% | 72.50% |
+| parallel_multiple | function name | 61.50% | 60.00% | 60.50% |
+| parallel_multiple | full | 55.50% | 53.00% | 54.00% |
+| irrelevance | no tool | 78.50% | 87.50% | 83.50% |
+
+Run on two identically configured 8B servers (GPU2 :8000, GPU3 :8100, both
+capacity 44,656) to halve wall time; each server served exactly one replay at a
+time. Because this run is scored for accuracy only, its timings are not used for
+any claim. `original` shows a 0.1% excess on `prefix_cache_queries`
+(8,192 tokens, 999/1000 per-request windows clean) which affects cache
+accounting only, not generated output; all 3000 requests returned valid
+completions with zero failures.
 
 ## 5. Failed requests and unrelated traffic
 
@@ -150,38 +203,45 @@ the alphabetical fallback, so the varying part of the menu stops breaking the
 common prefix. This is the same failure mode that made frequency ordering lose in
 Task E, exploited in the opposite direction.
 
-**Quality: the gate is not met at 8B.** The predeclared threshold was no more
-than a one-percentage-point BFCL regression. Against alphabetical, ToolTrie
-regresses **3.75pp on function-name and 6.25pp on full accuracy at Qwen3-8B**.
-That exceeds the gate by a wide margin, so on the runbook's own criterion
-**ToolTrie-v0 does not pass**, despite winning decisively on systems metrics.
+**Quality: no cost is detectable at 8B, but the gate as written is unfalsifiable.**
+At n=100 ToolTrie appeared to regress 3.75pp/6.25pp against alphabetical. At
+n=1000 (§4a) both metrics reverse to **+0.75pp and +1.50pp**, with zero inside
+every interval. The apparent regression was sampling noise.
 
-Three cautions against over-reading the quality verdict, in both directions:
+The predeclared ≤1pp threshold, however, **cannot be settled at any sample size
+this project can afford.** The 95% CI on the full-accuracy difference is ±4.2pp
+at n=1000; resolving 1pp would need roughly n=15,000, or about 12 GPU-hours per
+condition at 8B. The gate should be restated as an equivalence test with a
+declared margin, not a point threshold.
 
-1. **The gate is below its own resolution.** n=100 means 1pp is one task; the
-   observed 6.25pp is 6 tasks. A 1pp threshold was never measurable with this
-   sample, and this run is single-pass with no repeats. The regression is real
-   as measured but should be treated as directional.
-2. **It is not a small-model artefact, but it is scale-dependent** — and in the
-   direction that matters, since 8B is the more deployment-realistic model.
-3. **ToolTrie still beats `original` at 8B on no-tool accuracy** (95.0% vs
-   90.0%) and ties it on function-name (87.5%). The regression is specifically
-   against *alphabetical*, which is the strongest quality baseline at 8B.
+What the evidence supports:
 
-**Recommendation.** The systems result is strong enough to justify continuing,
-but the quality gate must be settled before ToolTrie-v0 is claimed as a win.
-The cheapest next step is repeated quality trials at 8B with a larger
-per-domain sample to establish whether the 4–6pp gap survives, since the current
-evidence is one run of 100 tasks. Until then the honest statement is: *ToolTrie-v0
-buys a 32–49pp increase in measured prefix-cache reuse and a 1.8–2.3× TTFT
-reduction, at a measured but not yet replicated 4–6pp function-call accuracy cost
-against alphabetical ordering on Qwen3-8B.*
+1. **No quality regression is detectable at n=1000**, and both headline point
+   estimates favour ToolTrie. This is weaker than "ToolTrie passes" and stronger
+   than "the cost is unknown."
+2. **The n=100 verdict was wrong in sign, not just in magnitude.** Any claim
+   from a 100-task BFCL sample should be treated as a pilot.
+3. **No-tool accuracy remains the open question** (−4.00pp point estimate, not
+   significant, but the same direction alphabetical won at 0.6B).
+
+**Recommendation.** The systems result is strong and the quality blocker is
+resolved to the resolution available. The honest summary is: *ToolTrie-v0 buys a
+32–49pp increase in measured prefix-cache reuse and a 1.8–2.3× TTFT reduction,
+with no detectable function-call accuracy cost against alphabetical ordering at
+Qwen3-8B and n=1000.* The next experiment should be an external comparison
+(CacheWeaver / SGLang RadixAttention) rather than further self-comparison, with
+a targeted irrelevance-only run to close the no-tool question.
 
 ## Scope limitations
 
 - Only the empirical benchmark request order was replayed. Brief §4.5's uniform,
   skewed, and session-bursty replays were not run here; Task D covers locality
   separately.
-- Quality is single-pass; only the systems replays have repeated trials.
+- Quality is single-pass at every sample size; only the systems replays have
+  repeated trials. Justified by `temperature=0, seed=0`, but batching
+  nondeterminism is not formally excluded.
+- One model family, one menu size (64), one GPU type. The 87% reuse depends on
+  menus drawn from a fixed shared catalog; that matches a connected MCP
+  deployment but is an assumption the benchmarks do not themselves supply.
 - ToolRet is used for APC/TTFT only. Its retrieval labels are not BFCL call
   correctness and were not scored.

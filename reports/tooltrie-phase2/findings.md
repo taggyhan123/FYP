@@ -19,7 +19,8 @@ than alphabetical ordering, −3.75pp with a 95% interval excluding zero.
 | CacheWeaver | faithful tool-ID transcription of paper Algorithm 1; no public implementation existed as of 2026-08-03 | **`CacheWeaver Algorithm-1 reimplementation`** |
 | FP-tree conditional | training-only tool-order adaptation of FP-tree traversal | **`FP-tree-derived adaptation`**, not an FP-Growth result |
 | Pair/triple conditional | training-only unordered co-occurrence statistics | **`pair/triple adaptation`** |
-| ContextPilot | actual upstream code, commit `1fa0a143fdeda344585666648ab2b30cb7fea77f`, v0.4.1 | `ContextPilot offline/transductive` |
+| ContextPilot (offline) | actual upstream code, commit `1fa0a143fdeda344585666648ab2b30cb7fea77f`, v0.4.1, `fit_transform` over the whole batch | `ContextPilot offline/transductive` |
+| ContextPilot (causal) | same upstream code and commit, driven request-by-request: ordering for request *n* comes from `fit_transform(contexts[0..n])` only. Harness is ours (`build_regime_arms.py`), the algorithm is not modified | **`ContextPilot causal (our online harness)`** |
 | SGLang | official `v0.5.15.post1`, commit `0b3bb0cbe31873994c9f989fddfe2f87ca839fdd` | `SGLang/RadixAttention engine` |
 
 FYP commit `38566fd`. Full environment in `environment.txt`; the 230 resolved
@@ -220,12 +221,21 @@ correct in every one and ContextPilot in none. So the reuse win reported in §2a
 and §5 is bought at a real and one-sided cost on the irrelevance domain, and that
 cost survives making ContextPilot causal.
 
-This sharpens the standing conclusion rather than softening it. On reuse,
-ContextPilot beats ToolTrie-v0 by ~9pp; on safe declining, ToolTrie-v0 beats
-ContextPilot by 5.62pp (87.50% vs 81.88%) and is the only high-reuse ordering
-whose no-tool interval does not exclude zero. The two systems sit at different
-points on the same trade-off curve, and which one is preferable depends on
-whether the deployment penalises missed reuse or spurious tool calls more.
+**Counting the axes honestly: ContextPilot wins three of four.** Causal
+ContextPilot beats ToolTrie-v0 on reuse (+8.97pp BFCL, +11.24pp ToolRet), on
+function-name accuracy (84.84% vs 83.75%) and on full-call accuracy (79.06% vs
+77.66%). ToolTrie-v0 wins exactly one axis, no-tool safety, by 5.62pp (87.50% vs
+81.88%), where it is also the only high-reuse ordering whose interval does not
+exclude zero.
+
+"Neither dominates" is therefore true only as a *multi-objective* statement, and
+should not be used as a shorthand that implies parity. **No combined utility or
+cost weighting has been defined**, so there is no basis in this report for
+declaring an overall winner. Stated plainly: on current evidence ContextPilot is
+the stronger method on reuse and on tool-call quality, and ToolTrie-v0 is the
+safer method on requests that should be declined. Which matters more is a
+deployment question this study does not answer — and answering it requires
+declaring the weighting *before* looking at these numbers, not after.
 
 Note on scope: each metric is only defined on its applicable subset —
 name/full on the 640 relevance cases, no-tool on the 160 irrelevance cases. The
@@ -340,9 +350,12 @@ pre-release — itself a reproducibility hazard, hence the frozen dep list);
 **Limitations.** One model family; one menu size (64); one GPU type. Quality runs
 are single-pass, justified by `temperature=0, seed=0` but batching
 nondeterminism is not formally excluded. ToolRet is used for cache/TTFT only —
-its retrieval labels are not call correctness. ContextPilot is offline and not a
-deployable causal policy. No equivalence margin was declared for any metric, so
-nothing here is an equivalence claim.
+its retrieval labels are not call correctness. No equivalence margin was declared
+for any metric, so nothing here is an equivalence claim.
+
+*(An earlier revision listed "ContextPilot is offline and not a deployable causal
+policy" as a limitation. That was tested in §2a and is false — restricting it to
+a causal regime costs 0.48pp on BFCL. The claim is withdrawn.)*
 
 ## Positive and negative regimes
 

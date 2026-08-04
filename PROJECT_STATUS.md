@@ -23,9 +23,16 @@ ToolTrie-v0 holds on a second engine with an independent cache implementation.
 
 The §4 quality table is also complete. `contextpilot_causal` scores +2.03pp on
 function-name accuracy but **−7.50pp on no-tool** (CI [−11.88, −3.75], discordant
-12:0 against it) — the largest decline penalty of any condition. ToolTrie-v0 beats
-it by 5.62pp on safe declining while losing ~9pp on reuse, so the two sit at
-different points on one trade-off curve rather than one dominating the other.
+12:0 against it) — the largest decline penalty of any condition.
+
+**Counted honestly, causal ContextPilot wins three of four axes**: reuse
+(+8.97pp BFCL, +11.24pp ToolRet), function-name accuracy (84.84% vs 83.75%) and
+full-call accuracy (79.06% vs 77.66%). ToolTrie-v0 wins one — no-tool safety, by
+5.62pp — and is the only high-reuse ordering whose no-tool interval does not
+exclude zero. "Neither dominates" holds only as a multi-objective statement and
+must not be read as parity: **no combined utility or cost weighting has been
+defined**, so this report declares no overall winner. Any such weighting has to
+be declared before looking at these numbers.
 
 **No arms remain in flight.** Every table in the Phase 2 report is measured, and
 each condition is labelled with its information regime.
@@ -195,8 +202,10 @@ triple) collapse to within 0.01pp of each other and of alphabetical.
 function-name accuracy reverses their ranking on no-tool accuracy. Alphabetical
 is worst at selection (82.81%) and best at declining (89.38%); ContextPilot the
 reverse. ToolTrie sits mid-curve with a smaller no-tool cost (-1.88pp) than
-CacheWeaver or ContextPilot (both -6.88pp, CIs excluding zero). The regression is
-a property of reuse-optimizing orderings, not a ToolTrie defect.
+CacheWeaver (-6.88pp), offline ContextPilot (-6.88pp) or **causal ContextPilot
+(-7.50pp, the largest penalty measured, discordant 12:0)** — all three CIs
+exclude zero. The regression is a property of reuse-optimizing orderings, not a
+ToolTrie defect.
 
 **SGLang/RadixAttention replicates the ordering effect** (87.11% vLLM vs 87.29%
 SGLang for ToolTrie on BFCL, identical ranking). Only cached *ratios* are

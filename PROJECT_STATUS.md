@@ -21,9 +21,14 @@ on all three systems arms and replicates to within 0.27pp (BFCL 96.16 / 96.18 /
 96.38% on unsanitized vLLM, sanitized vLLM, SGLang), so the ~9pp gap over
 ToolTrie-v0 holds on a second engine with an independent cache implementation.
 
-One arm remains outstanding: the `contextpilot_causal` n=800 quality replay. Until
-it lands, the §4 quality table contains only the *offline* ContextPilot variant and
-no causal claim about ContextPilot's accuracy cost should be read from it.
+The §4 quality table is also complete. `contextpilot_causal` scores +2.03pp on
+function-name accuracy but **−7.50pp on no-tool** (CI [−11.88, −3.75], discordant
+12:0 against it) — the largest decline penalty of any condition. ToolTrie-v0 beats
+it by 5.62pp on safe declining while losing ~9pp on reuse, so the two sit at
+different points on one trade-off curve rather than one dominating the other.
+
+**No arms remain in flight.** Every table in the Phase 2 report is measured, and
+each condition is labelled with its information regime.
 
 ## Notable findings
 

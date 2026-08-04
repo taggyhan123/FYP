@@ -162,10 +162,10 @@ implementation. All six SGLang runs passed the same independent counter check
 applied to the other 66 (index 0 the only omitted `cached_tokens`, totals
 reconciling, zero failed requests).
 
-**Still outstanding:** the n=800 quality replay for `contextpilot_causal` (§4).
-Until it lands, the §4 table shows only the offline ContextPilot variant, and no
-causal claim about ContextPilot's *accuracy* cost should be read from it. The §5
-systems tables are complete.
+**The regime standardisation is now complete on every table.** `contextpilot_causal`
+has been measured on all three systems arms (§5) and on the n=800 quality set
+(§4). No table in this report now compares a causal against an offline condition
+without labelling both.
 
 ## 3. ContextPilot scheduling table (kept separate)
 
@@ -187,7 +187,8 @@ be attributed to tool ordering, and none is claimed.
 | fp_tree_conditional | 83.91% | 77.97% | 88.12% |
 | conditional_pair_triple | 83.91% | 77.81% | 88.12% |
 | cacheweaver | 84.84% | 78.91% | 82.50% |
-| contextpilot_intra | **85.31%** | **78.91%** | 82.50% |
+| **contextpilot_causal** | 84.84% | 79.06% | **81.88%** |
+| contextpilot_intra *(offline)* | **85.31%** | **78.91%** | 82.50% |
 
 Paired differences versus alphabetical, task-clustered 95% CI, `*` = excludes zero:
 
@@ -197,17 +198,34 @@ Paired differences versus alphabetical, task-clustered 95% CI, `*` = excludes ze
 | cacheweaver | +2.03 [+0.47, +3.75]* | +2.50 [+0.47, +4.53]* | −6.88 [−11.25, −2.50]* |
 | fp_tree_conditional | +1.09 [+0.16, +2.19]* | +1.56 [+0.31, +2.97]* | −1.25 [−3.12, +0.00] |
 | conditional_pair_triple | +1.09 [+0.16, +2.19]* | +1.41 [+0.16, +2.66]* | −1.25 [−3.12, +0.00] |
-| contextpilot_intra | +2.50 [+0.94, +4.06]* | +2.50 [+0.62, +4.38]* | −6.88 [−11.25, −3.12]* |
+| **contextpilot_causal** | +2.03 [+0.62, +3.59]* | +2.66 [+0.94, +4.53]* | **−7.50 [−11.88, −3.75]*** |
+| contextpilot_intra *(offline)* | +2.50 [+0.94, +4.06]* | +2.50 [+0.62, +4.38]* | −6.88 [−11.25, −3.12]* |
 
 **A systematic trade-off appears across all six orderings.** Ranking by
 function-name accuracy produces almost exactly the reverse ranking on no-tool
 accuracy: alphabetical is worst at selection (82.81%) and best at declining
-(89.38%); ContextPilot is best at selection (85.31%) and tied-worst at declining
-(82.50%). An ordering that makes the right tool easier to find also makes the
-model likelier to call *something* when it should decline. This is the sharpest
-evidence yet on brief question 6 (quality and safety), and it is not specific to
-ToolTrie — ToolTrie sits in the middle of the trade-off, with a *smaller*
-no-tool cost than either CacheWeaver or ContextPilot.
+(89.38%); ContextPilot is best at selection and worst at declining. An ordering
+that makes the right tool easier to find also makes the model likelier to call
+*something* when it should decline. This is the sharpest evidence yet on brief
+question 6 (quality and safety), and it is not specific to ToolTrie — ToolTrie
+sits in the middle of the trade-off, with a *smaller* no-tool cost than either
+CacheWeaver or ContextPilot.
+
+**The trade-off is not an offline artifact either.** `contextpilot_causal`,
+restricted to already-served requests, lands in essentially the same place as the
+offline variant: +2.03pp on name accuracy but **−7.50pp on no-tool**, the largest
+decline penalty of any condition measured. Its no-tool discordant pairs are
+**12:0** — of the 12 cases where the two orderings disagreed, alphabetical was
+correct in every one and ContextPilot in none. So the reuse win reported in §2a
+and §5 is bought at a real and one-sided cost on the irrelevance domain, and that
+cost survives making ContextPilot causal.
+
+This sharpens the standing conclusion rather than softening it. On reuse,
+ContextPilot beats ToolTrie-v0 by ~9pp; on safe declining, ToolTrie-v0 beats
+ContextPilot by 5.62pp (87.50% vs 81.88%) and is the only high-reuse ordering
+whose no-tool interval does not exclude zero. The two systems sit at different
+points on the same trade-off curve, and which one is preferable depends on
+whether the deployment penalises missed reuse or spurious tool calls more.
 
 Note on scope: each metric is only defined on its applicable subset —
 name/full on the 640 relevance cases, no-tool on the 160 irrelevance cases. The

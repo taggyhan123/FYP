@@ -145,11 +145,27 @@ training tasks, **intersection empty**), ToolTrie and CacheWeaver are strictly
 plan-before-observe, and alphabetical/original do no learning. ContextPilot was
 the only non-causal condition in the study.
 
-**Still outstanding at the time of writing:** `contextpilot_causal` has been
-measured on the unsanitized vLLM arm only. Its replays on the sanitized vLLM and
-SGLang arms (§5) and on the n=800 quality set (§4) were in flight when this
-revision was committed, so those two tables still show only the offline
-ContextPilot variant and must not be read as causal comparisons yet.
+**Cross-arm replication.** The causal result is not specific to one engine or to
+the unsanitized schemas. `contextpilot_causal` was replayed 3× on each of the
+three systems arms:
+
+| arm | BFCL cached | ToolRet cached |
+| --- | --- | --- |
+| vLLM (unsanitized) | 96.16% | 94.82% |
+| vLLM (sanitized) | 96.18% | 94.86% |
+| SGLang | 96.38% | 95.09% |
+
+Maximum spread across arms is **0.22pp** (BFCL) and **0.27pp** (ToolRet), the
+same order as every other condition's cross-arm variation, so the ~9pp gap over
+ToolTrie-v0 replicates on a second engine with an independent cache
+implementation. All six SGLang runs passed the same independent counter check
+applied to the other 66 (index 0 the only omitted `cached_tokens`, totals
+reconciling, zero failed requests).
+
+**Still outstanding:** the n=800 quality replay for `contextpilot_causal` (§4).
+Until it lands, the §4 table shows only the offline ContextPilot variant, and no
+causal claim about ContextPilot's *accuracy* cost should be read from it. The §5
+systems tables are complete.
 
 ## 3. ContextPilot scheduling table (kept separate)
 
@@ -203,6 +219,9 @@ zero where this smaller 160-task arm's does not.
 ## 5. SGLang/RadixAttention — separate engine table
 
 Identical sanitized **input files** on both engines (see §6), Qwen3-0.6B, 3 trials.
+Both ContextPilot variants are listed; only **contextpilot_causal** shares an
+information regime with ToolTrie-v0 and the other conditions, so it is the row to
+compare against (§2a). `contextpilot_intra` is retained as the offline reference.
 
 **The rendered prompts are not identical, and this bounds what may be compared.**
 vLLM serves with `--tool-call-parser hermes`, SGLang with `--tool-call-parser
@@ -221,7 +240,8 @@ template.
 
 | BFCL | vLLM cached | vLLM TTFT | SGLang cached | SGLang TTFT |
 | --- | --- | --- | --- | --- |
-| contextpilot_intra | 96.67% | 12.55 | 96.86% | 37.74 |
+| contextpilot_intra *(offline)* | 96.67% | 12.55 | 96.86% | 37.74 |
+| **contextpilot_causal** | **96.18%** | **15.35** | **96.38%** | **44.25** |
 | tooltrie_v0 | 87.11% | 16.82 | 87.29% | 44.68 |
 | fitted policies | 39.69% | ~39 | 39.58% | ~72 |
 | alphabetical | 38.13% | 39.47 | 38.02% | 72.74 |
@@ -229,7 +249,8 @@ template.
 
 | ToolRet | vLLM cached | SGLang cached |
 | --- | --- | --- |
-| contextpilot_intra | 96.33% | 96.56% |
+| contextpilot_intra *(offline)* | 96.33% | 96.56% |
+| **contextpilot_causal** | **94.86%** | **95.09%** |
 | tooltrie_v0 | 83.55% | 83.74% |
 | alphabetical | 51.06% | 49.94% |
 | cacheweaver | 22.46% | 17.75% |

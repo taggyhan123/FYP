@@ -16,10 +16,14 @@ The external comparison from `NUS_GPU_PHASE2_INSTRUCTIONS.md` has now been
 FP-tree/co-occurrence baselines, pinned ContextPilot, and a separate stock
 SGLang/RadixAttention engine comparison. See "Phase 2" below.
 
-Two arms remain in flight and are **not yet in the tables**: `contextpilot_causal`
-on the sanitized-vLLM and SGLang engine arms, and on the n=800 quality set. Until
-those land, the §4 quality and §5 engine tables in the Phase 2 report contain only
-the *offline* ContextPilot variant and must not be read as causal comparisons.
+The §5 engine tables are now **complete**: `contextpilot_causal` was replayed 3×
+on all three systems arms and replicates to within 0.27pp (BFCL 96.16 / 96.18 /
+96.38% on unsanitized vLLM, sanitized vLLM, SGLang), so the ~9pp gap over
+ToolTrie-v0 holds on a second engine with an independent cache implementation.
+
+One arm remains outstanding: the `contextpilot_causal` n=800 quality replay. Until
+it lands, the §4 quality table contains only the *offline* ContextPilot variant and
+no causal claim about ContextPilot's accuracy cost should be read from it.
 
 ## Notable findings
 

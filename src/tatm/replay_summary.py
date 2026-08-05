@@ -63,6 +63,10 @@ def summarize_trial(payload: Mapping[str, Any]) -> dict[str, Any]:
         "prefill_seconds": prefill_seconds,
         "e2e_seconds": e2e_seconds,
         "wall_seconds": float(payload["wall_seconds"]),
+        "execution_condition": payload.get("execution_condition"),
+        "direct_reuse_buckets": payload.get(
+            "direct_measurements_by_reuse_bucket", {}
+        ),
     }
 
 
@@ -96,6 +100,11 @@ def summarize_labeled_replays(
             for trial in trials[1:]
         ):
             raise ValueError(f"Trials for {label} use different selected tool sets")
+        if any(
+            trial["execution_condition"] != trials[0]["execution_condition"]
+            for trial in trials[1:]
+        ):
+            raise ValueError(f"Trials for {label} use different condition metadata")
         case_set = set(first_sequence)
         if len(case_set) != len(first_sequence):
             raise ValueError(f"Replay {label} contains duplicate case IDs")
@@ -130,7 +139,9 @@ def summarize_labeled_replays(
             "trials": len(trials),
             "requests": trials[0]["request_count"],
             "prompt_tokens": trials[0]["prompt_tokens"],
+            "execution_condition": trials[0]["execution_condition"],
             "measurements": measurements,
+            "direct_reuse_buckets": _summarize_direct_reuse_buckets(trials),
         }
 
     return {
@@ -141,3 +152,41 @@ def summarize_labeled_replays(
         "all_conditions_have_same_request_sequence": same_request_sequence,
         "conditions": summary,
     }
+
+
+def _summarize_direct_reuse_buckets(
+    trials: list[dict[str, Any]],
+) -> dict[str, Any]:
+    bucket_names = sorted(
+        {
+            bucket
+            for trial in trials
+            for bucket in trial.get("direct_reuse_buckets", {})
+        }
+    )
+    output: dict[str, Any] = {}
+    for bucket in bucket_names:
+        rows = [
+            trial["direct_reuse_buckets"][bucket]
+            for trial in trials
+            if bucket in trial.get("direct_reuse_buckets", {})
+        ]
+        fields: dict[str, list[float]] = defaultdict(list)
+        for row in rows:
+            if row.get("requests") is not None:
+                fields["requests"].append(float(row["requests"]))
+            ratio = row.get("aggregate_cached_ratio", row.get("mean_cached_ratio"))
+            if ratio is not None:
+                fields["cached_ratio"].append(float(ratio))
+            for source, target in (
+                ("ttft_seconds", "mean_ttft_seconds"),
+                ("prefill_seconds", "mean_prefill_seconds"),
+                ("wall_seconds", "mean_wall_seconds"),
+            ):
+                statistic = row.get(source) or {}
+                if statistic.get("n", 0) and statistic.get("mean") is not None:
+                    fields[target].append(float(statistic["mean"]))
+        output[bucket] = {
+            field: describe(values) for field, values in sorted(fields.items())
+        }
+    return output

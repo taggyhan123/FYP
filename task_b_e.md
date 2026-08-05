@@ -354,21 +354,22 @@ is a strict permutation of the same task multiset (`uniform`/`skewed` resample
 with replacement and so differ in content, not just order).
 
 120 BFCL tasks, 64-tool menus, alphabetical intra-menu order (the ordering
-Task E measured as strongest for reuse), against `Qwen/Qwen3-0.6B`. Total token
-volume across the session (668,440 tokens) is 3.5x the server's real cache
-capacity (190,896 tokens = 11,806 blocks x 16), so eviction genuinely
-happens — `bounded_trie_metrics` predicted 2,918-2,927 evictions per condition,
-consistent with the 190,888/190,877 final retained tokens sitting right at
-capacity.
+Task E measured as strongest for reuse), against `Qwen/Qwen3-0.6B`. The old
+script recorded 668,440 **canonical tool tokens**, not full rendered prompt
+tokens. This exceeded the nominal 190,896-token capacity and the offline model
+predicted 2,918-2,927 evictions, but no live KV-occupancy or engine-eviction
+counter was sampled, so this run does not directly prove memory pressure.
 
-| Replay | Total prompt tokens | Measured cached tokens | Measured reuse | Predicted reuse (bounded trie) |
+| Replay | Canonical tool tokens | Measured cached tokens | Cached / canonical diagnostic | Predicted reuse (bounded trie) |
 | --- | ---: | ---: | ---: | ---: |
 | empirical | 668,440 | 287,200 | 42.97% | 35.00% |
 | session_bursty | 668,440 | 287,616 | 43.03% | 35.03% |
 
-**Answer: real eviction happens, but session order barely moves measured
-reuse here (42.97% vs 43.03%) — a much smaller gap than the offline-only
-result above (31.35% vs 27.10%) predicted for this regime.** The reason is not
+The 42.97%/43.03% values divide an engine-measured numerator by a canonical-tool
+denominator and are not standard rendered-prompt cache-hit ratios. The valid
+narrow result is that cached-token totals differ by only 416 tokens (0.14%), so
+session order barely moves cache behavior in this setup. This is a much smaller
+gap than the offline-only result above (31.35% vs 27.10%). The reason is not
 a failure of the offline model — it predicted the same near-parity
 (35.00% vs 35.03%) before the GPU run happened. The mechanism: the offline
 divergence was measured on raw, unordered, unpadded task tool sequences, where
@@ -381,39 +382,37 @@ clustering would otherwise contribute. Put plainly: **once you apply the
 ordering that already wins on reuse, request scheduling stops being a
 second lever worth pulling** — at least in this padded, globally-ordered
 regime; the original offline finding likely still holds for un-ordered or
-sparsely-shared catalogs.
+sparsely-shared catalogs. A corrected run with rendered-token denominators and
+sampled occupancy is still required before making an eviction-pressure claim.
 
-**This also re-confirms the trie model's calibration, independently.** Measured
-reuse exceeds prediction by 1.228x (empirical) and 1.228x (session_bursty) —
-matching the 1.23x under-prediction factor found for alphabetical ordering in
-the static Task E validation (a different experimental design: per-trial reset
-versus one continuous session). The same correction factor holding across two
-unrelated measurement setups is stronger evidence for it than either result
-alone.
+The old cached/canonical ratio must also **not** be used to calibrate the trie
+model against rendered-prompt reuse. The independent static Task E validation
+still supports its own 1.23x result; this locality run no longer counts as a
+second calibration measurement.
 
 ## Operational note: the reports are generated
 
-`reports/*.md` are produced by `src/tatm/reporting.py` and overwritten on every
-`scripts/run_pipeline.py` run. Measured GPU results are read back from
-`cluster/results/` by `load_probe_results` and rendered into the findings report,
-so they survive regeneration. Hand-editing a generated report silently loses the
-edit on the next pipeline run.
+Top-level `reports/*.md` are produced by `src/tatm/reporting.py`. Measured GPU
+results are normally read back from `cluster/results/` by `load_probe_results`.
+Those raw files may exist only on the cluster, so CPU-only regeneration now
+preserves an already committed measured GPU section; all other generated text
+is still overwritten. Durable corrections belong in `src/tatm/reporting.py`.
 
 ## What has not been measured
 
-- **Function-call quality at scale.** A first pass exists (100 tasks, above) and
-  shows the two orderings trade off differently on reuse versus quality — but it
-  is one run with no repeats, small per-category samples, and only two of six
-  orderings scored.
-- **Four of six orderings.** Only alphabetical and frequency were validated
-  against measured cache hits.
-- Rendered full-prompt token IDs and exact block boundaries.
-- TTFT on partial-reuse workloads (see the extrapolation above).
-- Live-cache eviction under other orderings and other replay pairs
-  (`uniform`/`skewed` were excluded from the locality replay above because
-  they resample with replacement; only `empirical` vs `session_bursty` was
-  checked). GPU/KV memory *usage* under eviction pressure -- as opposed to
-  eviction's effect on reuse, which is now measured -- is still unrecorded.
+Phase 2 has since closed the large-sample function-call and external-ordering
+comparisons. The remaining initial-brief evidence is narrower and is
+predeclared in `cluster/initial-brief-closure-manifest.json`:
+
+- replay independently retrieved ToolRet menus at sizes 4/16/64/128;
+- capture exact server-rendered prompt IDs and cache-block boundaries;
+- repeat direct partial-reuse prefill/TTFT measurements;
+- sample KV occupancy and reach the declared pressure threshold across all four
+  workload regimes; and
+- replay the explicit ordinary selected-tool text-prefill fallback.
+
+The harnesses exist locally, but these items remain GPU runs rather than
+findings. See `NUS_GPU_BRIEF_CLOSURE_INSTRUCTIONS.md`.
 
 ## Reproduction
 

@@ -15,11 +15,10 @@ not a fair pair for isolating locality).
 
 Padding each task to a real menu size is required for the same reason as
 Task E: unpadded benchmark menus (median 1 tool) sit below the measurement
-floor. At menu-size 64 the total token volume across ~100+ tasks (~650k-700k
-tokens) already exceeds this server's real cache capacity
-(block_size * num_gpu_blocks, ~189k tokens on the RTX 3090 used elsewhere in
-this project), so eviction happens on real hardware without needing to
-shrink --gpu-memory-utilization.
+floor. Total rendered token volume exceeding nominal cache capacity is not by
+itself proof of eviction because reuse and request lifetimes affect residency.
+This version therefore samples live KV occupancy and can require a predeclared
+pressure threshold before a run is accepted as memory-pressure evidence.
 """
 from __future__ import annotations
 
@@ -39,8 +38,13 @@ from tatm.analysis import (
     load_processed,
     replay_workloads,
 )
+from tatm.measurement import (
+    project_request_measurement,
+    summarize_request_measurements,
+)
 from tatm.prompting import build_menu, order_tool_ids, workload_record
 from tatm.vllm_client import (
+    KvUsageSampler,
     fetch_text,
     metric_delta,
     parse_prometheus,
@@ -66,17 +70,67 @@ def main() -> None:
         "--partition", choices=("toolret", "bfcl"), default="bfcl"
     )
     parser.add_argument("--limit", type=int, default=120)
+    parser.add_argument("--offset", type=int, default=0)
     parser.add_argument("--menu-size", type=int, default=64)
     parser.add_argument(
         "--ordering",
+        choices=(
+            "original",
+            "alphabetical",
+            "random",
+            "frequency",
+            "schema_cost_weighted",
+            "fp_tree_global",
+        ),
         default="alphabetical",
-        help="Fixed intra-menu tool order, held constant across both replay conditions.",
+        help="Fixed intra-menu tool order, held constant across replay conditions.",
     )
     parser.add_argument("--random-seed", type=int, default=42)
     parser.add_argument("--replay-seed", type=int, default=2026)
     parser.add_argument("--max-schema-tokens", type=int, default=300)
+    parser.add_argument(
+        "--support-mode",
+        choices=("disjoint", "all", "evaluation"),
+        default="disjoint",
+        help=(
+            "Gold-label split used to fit frequency-based ordering. Disjoint is "
+            "the fair default; it does not affect original/alphabetical/random."
+        ),
+    )
     parser.add_argument("--pause-seconds", type=float, default=0.0)
+    parser.add_argument(
+        "--condition",
+        dest="conditions",
+        action="append",
+        choices=("empirical", "uniform", "skewed", "session_bursty"),
+        help=(
+            "Replay condition to run; repeat the flag for several. Defaults to "
+            "empirical and session_bursty."
+        ),
+    )
+    parser.add_argument("--kv-sample-interval", type=float, default=0.01)
+    parser.add_argument(
+        "--require-peak-kv-usage",
+        type=float,
+        help="Require every condition to reach this 0-1 KV occupancy fraction.",
+    )
+    parser.add_argument(
+        "--allow-warm-start",
+        action="store_true",
+        help="Continue when /reset_prefix_cache is unavailable and mark the run.",
+    )
     args = parser.parse_args()
+
+    if args.kv_sample_interval <= 0:
+        parser.error("--kv-sample-interval must be > 0")
+    if args.offset < 0:
+        parser.error("--offset must be >= 0")
+    if args.limit < 1:
+        parser.error("--limit must be >= 1")
+    if args.require_peak_kv_usage is not None and not (
+        0 <= args.require_peak_kv_usage <= 1
+    ):
+        parser.error("--require-peak-kv-usage must be between 0 and 1")
 
     base_url = args.base_url.rstrip("/")
     model = served_model(base_url, args.model)
@@ -92,7 +146,22 @@ def main() -> None:
 
     tools, tasks = load_processed(args.processed_dir)
     evidence = "gold_relevance" if args.partition == "toolret" else "exposed_menu"
-    selected_tasks = [t for t in tasks if t.evidence_type == evidence][: args.limit]
+    partition_tasks = [t for t in tasks if t.evidence_type == evidence]
+    selected_tasks = partition_tasks[args.offset : args.offset + args.limit]
+    if not selected_tasks:
+        raise SystemExit("The requested benchmark slice is empty.")
+    selected_ids = {task.task_id for task in selected_tasks}
+    if args.support_mode == "disjoint":
+        support_tasks = [
+            task for task in partition_tasks if task.task_id not in selected_ids
+        ]
+        support_provenance = "disjoint_benchmark_gold_or_exposed_labels"
+    elif args.support_mode == "all":
+        support_tasks = partition_tasks
+        support_provenance = "all_benchmark_labels_including_evaluation"
+    else:
+        support_tasks = selected_tasks
+        support_provenance = "evaluation_labels"
 
     distractor_pool = sorted(
         tool_id
@@ -101,11 +170,13 @@ def main() -> None:
     )
 
     support: Counter[str] = Counter()
-    for task in selected_tasks:
+    for task in support_tasks:
         support.update(deduplicated_existing_ids(task, tools))
 
     replays = replay_workloads(selected_tasks, tools, seed=args.replay_seed)
-    conditions = {"empirical": replays["empirical"], "session_bursty": replays["session_bursty"]}
+    selected_conditions = args.conditions or ["empirical", "session_bursty"]
+    conditions = {name: replays[name] for name in selected_conditions}
+    empirical_multiset = Counter(task.task_id for task in replays["empirical"])
 
     def build_sequence(order: list) -> list[tuple[str, ...]]:
         sequences = []
@@ -128,44 +199,89 @@ def main() -> None:
             sequences, tools, block_size=block_size, capacity_tokens=capacity_tokens
         )
 
-        reset_prefix_cache(base_url)
+        reset_ok = reset_prefix_cache(base_url)
+        if not reset_ok and not args.allow_warm_start:
+            raise SystemExit(
+                "Prefix-cache reset failed. Start vLLM with "
+                "VLLM_SERVER_DEV_MODE=1 or pass --allow-warm-start."
+            )
         session_before = parse_prometheus(fetch_text(f"{base_url}/metrics"))
         started = time.perf_counter()
         per_request = []
-        for index, (task, tool_ids) in enumerate(zip(order, sequences)):
-            record = workload_record(task, tool_ids, tools, args.ordering)
-            payload = {
-                "model": model,
-                "messages": record["messages"],
-                "tools": record["tools"],
-                "tool_choice": "auto",
-                "temperature": 0,
-                "seed": 0,
-                "max_tokens": 1,
-                "chat_template_kwargs": {"enable_thinking": False},
-            }
-            before = parse_prometheus(fetch_text(f"{base_url}/metrics"))
-            request_json("POST", f"{base_url}/v1/chat/completions", payload)
-            after = parse_prometheus(fetch_text(f"{base_url}/metrics"))
-            delta = metric_delta(before, after)
-            per_request.append(
-                {
-                    "index": index,
-                    "task_id": task.task_id,
-                    "canonical_tool_tokens": record["canonical_tool_tokens"],
-                    "prompt_tokens_cached": delta.get("vllm:prompt_tokens_cached", 0.0),
+        with KvUsageSampler(
+            base_url, interval_seconds=args.kv_sample_interval
+        ) as sampler:
+            for index, (task, tool_ids) in enumerate(zip(order, sequences)):
+                record = workload_record(task, tool_ids, tools, args.ordering)
+                payload = {
+                    "model": model,
+                    "messages": record["messages"],
+                    "tools": record["tools"],
+                    "tool_choice": "auto",
+                    "temperature": 0,
+                    "seed": 0,
+                    "max_tokens": 1,
+                    "chat_template_kwargs": {"enable_thinking": False},
                 }
-            )
-            if args.pause_seconds:
-                time.sleep(args.pause_seconds)
+                before = parse_prometheus(fetch_text(f"{base_url}/metrics"))
+                request_started = time.perf_counter()
+                response = request_json(
+                    "POST", f"{base_url}/v1/chat/completions", payload
+                )
+                wall_seconds = time.perf_counter() - request_started
+                after = parse_prometheus(fetch_text(f"{base_url}/metrics"))
+                delta = metric_delta(before, after)
+                measurement = project_request_measurement(
+                    delta, response.get("usage", {})
+                )
+                measurement["wall_seconds"] = round(wall_seconds, 6)
+                per_request.append(
+                    {
+                        "index": index,
+                        "task_id": task.task_id,
+                        "canonical_tool_tokens": record["canonical_tool_tokens"],
+                        "measurement": measurement,
+                    }
+                )
+                if args.pause_seconds:
+                    time.sleep(args.pause_seconds)
 
         session_after = parse_prometheus(fetch_text(f"{base_url}/metrics"))
         session_delta = metric_delta(session_before, session_after)
 
-        total_prompt_tokens = sum(r["canonical_tool_tokens"] for r in per_request)
-        total_cached_tokens = sum(r["prompt_tokens_cached"] for r in per_request)
+        total_canonical_tool_tokens = sum(
+            r["canonical_tool_tokens"] for r in per_request
+        )
+        total_prompt_tokens = sum(
+            int(r["measurement"]["prompt_tokens"] or 0) for r in per_request
+        )
+        total_cached_tokens = sum(
+            float(r["measurement"]["cached_tokens"] or 0.0) for r in per_request
+        )
+        query_counter = session_delta.get("vllm:prefix_cache_queries")
+        computed_counter = session_delta.get(
+            "vllm:request_prefill_kv_computed_tokens_sum"
+        )
+        sampler_summary = sampler.summary()
+        peak_usage = sampler_summary["peak"].get(
+            "vllm:kv_cache_usage_perc",
+            sampler_summary["peak"].get("vllm:gpu_cache_usage_perc"),
+        )
+        pressure_met = (
+            (
+                peak_usage is not None
+                and peak_usage >= args.require_peak_kv_usage
+            )
+            if args.require_peak_kv_usage is not None
+            else None
+        )
         condition_results[name] = {
             "requests": len(sequences),
+            "cache_reset_before": reset_ok,
+            "same_task_multiset_as_empirical": (
+                Counter(task.task_id for task in order) == empirical_multiset
+            ),
+            "total_canonical_tool_tokens": total_canonical_tool_tokens,
             "total_prompt_tokens": total_prompt_tokens,
             "measured_cached_tokens": total_cached_tokens,
             "measured_reuse_ratio": round(
@@ -176,6 +292,35 @@ def main() -> None:
             "predicted": predicted,
             "wall_seconds": round(time.perf_counter() - started, 6),
             "session_metric_delta": session_delta,
+            "counter_validation": {
+                "query_counter_matches_response_prompt_tokens": (
+                    query_counter == total_prompt_tokens
+                ),
+                "cached_plus_computed_matches_queries": (
+                    query_counter is not None
+                    and computed_counter is not None
+                    and total_cached_tokens + computed_counter == query_counter
+                ),
+            },
+            "direct_measurements_by_reuse_bucket": summarize_request_measurements(
+                [row["measurement"] for row in per_request]
+            ),
+            "kv_usage_sampling": sampler_summary,
+            "memory_pressure": {
+                "capacity_tokens": capacity_tokens,
+                "prompt_token_volume": total_prompt_tokens,
+                "prompt_volume_over_capacity": round(
+                    total_prompt_tokens / capacity_tokens, 6
+                ),
+                "peak_kv_usage_fraction": peak_usage,
+                "estimated_peak_resident_tokens": round(
+                    peak_usage * capacity_tokens
+                )
+                if peak_usage is not None
+                else None,
+                "required_peak_fraction": args.require_peak_kv_usage,
+                "requirement_met": pressure_met,
+            },
             "per_request": per_request,
         }
         print(
@@ -186,7 +331,7 @@ def main() -> None:
         )
 
     output = {
-        "format_version": 1,
+        "format_version": 2,
         "run_label": args.run_label,
         "server": base_url,
         "model": model,
@@ -194,6 +339,15 @@ def main() -> None:
         "ordering": args.ordering,
         "menu_size": args.menu_size,
         "task_count": len(selected_tasks),
+        "task_offset": args.offset,
+        "ordering_support": {
+            "mode": args.support_mode,
+            "provenance": support_provenance,
+            "tasks": len(support_tasks),
+            "evaluation_overlap_tasks": len(
+                selected_ids & {task.task_id for task in support_tasks}
+            ),
+        },
         "cache_capacity_tokens": capacity_tokens,
         "cache_config": cache_config,
         "conditions": condition_results,
@@ -204,6 +358,16 @@ def main() -> None:
         encoding="utf-8",
     )
     print(f"Wrote {args.output}")
+    if args.require_peak_kv_usage is not None:
+        failed = [
+            name
+            for name, result in condition_results.items()
+            if not result["memory_pressure"]["requirement_met"]
+        ]
+        if failed:
+            raise SystemExit(
+                "KV-pressure requirement was not reached for: " + ", ".join(failed)
+            )
 
 
 if __name__ == "__main__":

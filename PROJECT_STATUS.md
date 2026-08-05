@@ -23,9 +23,16 @@ ToolTrie-v0 holds on a second engine with an independent cache implementation.
 
 The §4 quality table is also complete. `contextpilot_causal` scores +2.03pp on
 function-name accuracy but **−7.50pp on no-tool** (CI [−11.88, −3.75], discordant
-12:0 against it) — the largest decline penalty of any condition. ToolTrie-v0 beats
-it by 5.62pp on safe declining while losing ~9pp on reuse, so the two sit at
-different points on one trade-off curve rather than one dominating the other.
+12:0 against it) — the largest decline penalty of any condition.
+
+**Counted honestly, causal ContextPilot wins three of four axes**: reuse
+(+8.97pp BFCL, +11.24pp ToolRet), function-name accuracy (84.84% vs 83.75%) and
+full-call accuracy (79.06% vs 77.66%). ToolTrie-v0 wins one — no-tool safety, by
+5.62pp — and is the only high-reuse ordering whose no-tool interval does not
+exclude zero. "Neither dominates" holds only as a multi-objective statement and
+must not be read as parity: **no combined utility or cost weighting has been
+defined**, so this report declares no overall winner. Any such weighting has to
+be declared before looking at these numbers.
 
 **No arms remain in flight.** Every table in the Phase 2 report is measured, and
 each condition is labelled with its information regime.
@@ -56,13 +63,13 @@ The counterintuitive results, in order of how surprising they were:
    locality trie retained every request forever, so a "bursty" replay and a
    shuffled replay of the *same* requests always scored identically, by
    construction. `bounded_trie_metrics` with capacity eviction fixed that
-   offline and found a real gap (31.35% vs 27.10%). Checked on the live GPU
-   cache under genuine eviction (668k tokens vs 191k capacity, ~2,920
-   evictions): the gap nearly disappears (42.97% vs 43.03%), because applying
-   the winning ordering plus shared-catalog padding makes almost every
-   request's prefix identical regardless of task clustering, swamping the
-   locality signal the offline-only result found. Both offline predictions
-   were right for the setup they described; the setups just weren't the same.
+   offline and found a real gap (31.35% vs 27.10%). The follow-up GPU run found
+   almost identical measured cached-token totals (287,200 vs 287,616), but its
+   old 42.97%/43.03% display divided by canonical tool tokens rather than
+   rendered prompt tokens, and it did not sample occupancy. The ordering result
+   survives; the absolute reuse and "genuine eviction" wording does not. The
+   corrected harness now records the proper denominator and requires measured
+   pressure before making that claim.
    See "Task D — locality is now measurable" below.
 4. **The prediction model's error runs the "wrong" way.** A simplified
    tool-unit reuse estimate would be expected to overestimate, since it ignores
@@ -195,8 +202,10 @@ triple) collapse to within 0.01pp of each other and of alphabetical.
 function-name accuracy reverses their ranking on no-tool accuracy. Alphabetical
 is worst at selection (82.81%) and best at declining (89.38%); ContextPilot the
 reverse. ToolTrie sits mid-curve with a smaller no-tool cost (-1.88pp) than
-CacheWeaver or ContextPilot (both -6.88pp, CIs excluding zero). The regression is
-a property of reuse-optimizing orderings, not a ToolTrie defect.
+CacheWeaver (-6.88pp), offline ContextPilot (-6.88pp) or **causal ContextPilot
+(-7.50pp, the largest penalty measured, discordant 12:0)** — all three CIs
+exclude zero. The regression is a property of reuse-optimizing orderings, not a
+ToolTrie defect.
 
 **SGLang/RadixAttention replicates the ordering effect** (87.11% vLLM vs 87.29%
 SGLang for ToolTrie on BFCL, identical ranking). Only cached *ratios* are
@@ -345,18 +354,15 @@ natural file order turns out to be *more* local than the synthetic bursty replay
 99.86% same-domain adjacent.
 
 **Checked on the live GPU cache** (`scripts/locality_replay.py`, one continuous
-session per replay condition, no resets between requests, so real eviction can
-happen): 120 padded/alphabetically-ordered BFCL tasks, 668,440 total tokens vs
-190,896 real cache capacity — genuine eviction occurred (~2,920 evictions per
-condition). Measured reuse for `empirical` vs `session_bursty` was 42.97% vs
-43.03%, essentially no gap, matching the offline model's own prediction of
-35.00% vs 35.03% for this exact setup. The offline finding above still holds
-for raw, unordered task sequences; it does not survive once menus are padded
-from a shared catalog and forced into the ordering that already wins on
-reuse — that ordering dominates request-to-request similarity and swamps
-whatever weaker signal session clustering would otherwise contribute. Measured
-reuse also exceeded prediction by 1.228x in both conditions, independently
-matching the 1.23x calibration factor from the static Task E validation.
+session per replay condition): the old run measured 287,200 cached tokens for
+`empirical` and 287,616 for `session_bursty`, a 0.14% difference. That supports
+near-parity between these two request orders after shared-catalog padding and
+alphabetical ordering. However, its 668,440 denominator was canonical tool
+tokens, not rendered prompt tokens, and occupancy was not sampled. Therefore
+the previously reported 42.97%/43.03% values are diagnostic ratios, not vLLM
+cache-hit rates, and the claim of directly observed eviction is withdrawn. The
+new format-v2 harness fixes the denominator, validates it against vLLM's query
+counter, samples KV occupancy, and can enforce a predeclared pressure threshold.
 
 ## Verified locally
 
@@ -364,31 +370,68 @@ matching the 1.23x calibration factor from the static Task E validation.
 - 1,362 canonical BFCL functions and 1,240 BFCL tasks;
 - 45,815 total schemas tokenized with `Qwen/Qwen3-0.6B`;
 - all ToolRet label references resolve to the downloaded corpus;
-- 47 unit tests pass.
+- 94 unit tests pass.
 
 ## Reports are generated, not hand-written
 
-`reports/*.md` are produced by `src/tatm/reporting.py` and overwritten on every
-`scripts/run_pipeline.py` run. Anything typed directly into them is destroyed.
-Measured GPU results are read back from `cluster/results/` by
-`load_probe_results` and rendered into the findings report, so they survive
-regeneration. `PROJECT_STATUS.md` and `cluster/README.md` are the only
-hand-maintained documents.
+Top-level `reports/*.md` are produced by `src/tatm/reporting.py`. Measured GPU
+results are normally read from `cluster/results/` by `load_probe_results`.
+Because those raw files are intentionally git-ignored and may exist only on the
+cluster, CPU-only regeneration now preserves an already committed measured GPU
+section instead of replacing it with "not yet measured." Other generated
+sections are still overwritten. `PROJECT_STATUS.md` and `cluster/README.md` are
+hand-maintained.
 
-## Evidence still required
+## Initial-brief gap closure now implemented; GPU evidence still required
 
-- rendered full-prompt token IDs and exact vLLM block boundaries;
-- BFCL quality under the remaining four orderings. The three scored orderings
-  are now settled at n=1000 on 8B, so the ToolTrie-v0 quality blocker is closed
-  to the resolution available; what remains is an irrelevance-only run to
-  resolve the −4.00pp no-tool point estimate, and an external comparison
-  (CacheWeaver / SGLang RadixAttention) rather than further self-comparison;
-- ordering comparisons across all six orderings above the crossover, not just
-  the two validated so far;
-- live-cache eviction under other orderings and other replay pairs (`uniform`
-  and `skewed` were excluded above since they resample with replacement);
-  actual GPU/KV memory *usage* under eviction pressure, as opposed to
-  eviction's effect on reuse, which is now measured.
+The stale items in the previous version of this section are resolved: the
+targeted no-tool run and external ContextPilot/CacheWeaver/SGLang comparison
+are complete in Phase 2. The following new harnesses close the remaining audit
+gaps without starting a §9 retention extension:
+
+- `scripts/build_retrieved_tool_workload.py` selects ToolRet menus with a
+  deterministic BM25 baseline that never reads gold IDs during selection. Gold
+  labels are used only afterward for recall, precision, hit rate, and MRR;
+- `scripts/audit_rendered_prefix.py` uses the serving process's `/tokenize`
+  route to store exact chat-plus-tools token IDs and block boundaries, then can
+  replay the same sequence for measured cached tokens, prefill, and TTFT;
+- `scripts/replay_vllm_workload.py` now reports direct per-request measurements
+  grouped into cold/partial/full reuse buckets and can sample KV occupancy;
+- `scripts/locality_replay.py` now uses rendered prompt tokens as the measured
+  reuse denominator, supports all four brief workload regimes, samples KV
+  occupancy throughout the session, and can require a declared pressure
+  threshold.
+
+The code paths are locally verified.
+
+The CPU retrieval arm itself has been run on the first 200 ToolRet tasks against
+all 44,453 ToolRet tools. The generated artifact is
+`reports/retrieval-bm25-sweep.json`; this is a lexical baseline, not the
+official ToolRet retriever and not a production trace.
+
+| BM25 cutoff | Macro recall | Hit rate | MRR |
+| --- | --- | --- | --- |
+| 4 | 41.71% | 51.50% | 0.3858 |
+| 16 | 55.04% | 65.50% | 0.4022 |
+| 64 | 64.21% | 75.50% | 0.4061 |
+| 128 | 67.54% | 80.50% | 0.4066 |
+
+These values show why the gold/exposed and retrieved arms cannot be mixed: even
+at 128 tools, 19.5% of queries retrieve none of their gold tools and macro
+recall is only 67.5%. Ordering cannot repair a missing tool.
+
+The following remain **unmeasured GPU runs**, not findings:
+
+1. replay the retrieved menus at sizes 4/16/64/128, with the retrieval metrics
+   above kept separate from the six ordering comparisons;
+2. exact rendered-token/block audits with `--measure` on the matched workloads;
+3. direct partial-reuse TTFT/prefill repetitions and a demonstrated-pressure
+   run at the live declared cache capacity across
+   empirical/uniform/skewed/session-bursty regimes;
+4. replay the explicit `ordinary_text_prefill_fallback` condition. Its contract
+   is now machine-recorded and rejects reordered input, but its matched GPU
+   measurements remain pending. It is used whenever reuse does not repay
+   context/decode/safety cost.
 
 Analytical reuse estimates must still be labelled as estimates, but they are no
 longer unvalidated: they under-predict measured hits by 1.2-1.5x on the two

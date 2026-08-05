@@ -206,10 +206,118 @@ python scripts/locality_replay.py \
 Compares `empirical` against `session_bursty` from `replay_workloads` — the one
 pair that is a strict permutation of the same task multiset (`uniform` and
 `skewed` resample with replacement, so they differ in content, not just
-order). `--limit`/`--menu-size` should produce enough total token volume to
-exceed the server's real cache capacity (`block_size * num_gpu_blocks`, read
-back from `vllm:cache_config_info`) or no eviction happens and the comparison
-is trivial by construction, same as the unbounded offline trie.
+order). `--limit`/`--menu-size` should produce enough rendered token volume to
+challenge the server's real cache capacity (`block_size * num_gpu_blocks`, read
+back from `vllm:cache_config_info`). That is necessary but not sufficient
+evidence of pressure; only a run that samples and reaches the declared
+occupancy threshold supports an eviction-pressure claim.
+
+Before the generic gold/exposed-menu builder below, close the brief's required
+retrieval-vs-serving separation with the following three checks.
+
+### 6c. Build a true retrieved-tool workload (CPU; no GPU required)
+
+`build_cluster_workload.py --partition toolret` uses ToolRet gold relevance IDs
+as the selected set. That is the correct oracle/gold arm, but it is **not** a
+retrieval experiment. Build an independent BM25 top-k menu instead:
+
+```bash
+uv run python scripts/build_retrieved_tool_workload.py \
+  --menu-size 64 --offset 0 --limit 200 \
+  --ordering original \
+  --output data/processed/toolret-bm25-k64-original.jsonl
+```
+
+The retriever sees only the query and canonical tool corpus. The workload keeps
+gold IDs as evaluation metadata after selection, and the companion
+`*-retrieval-metrics.json` reports recall, precision, hit rate, MRR, retrieved
+frequency, zero-score fallback counts, and ordering-fit provenance. `original`
+preserves BM25 rank. The other five brief orderings permute exactly the same
+retrieved set; they do not change membership.
+
+Use a disjoint support split (the default) for frequency-based orderings. Never
+describe ToolRet benchmark frequency as production popularity.
+
+### 6d. Capture exact rendered tokens and block evidence (GPU server)
+
+```bash
+uv run python scripts/audit_rendered_prefix.py \
+  --input data/processed/toolret-bm25-k64-original.jsonl \
+  --run-label toolret-bm25-k64-rendered-audit \
+  --measure --disable-thinking \
+  --output cluster/results/toolret-bm25-k64-rendered-audit.json
+```
+
+This calls vLLM's server-side `/tokenize` route with the same `messages` and
+`tools` sent to chat completion. It stores the exact rendered token IDs,
+server-reported block size, every full/partial block boundary, immediate and
+best-prior common prefixes, measured cache hits, prefill, and TTFT. The
+completion prompt-token count must equal `/tokenize`'s count; a mismatch marks
+the run unclean. This is the evidence to use for block claims, not canonical
+schema-token estimates.
+
+### 6e. Measure partial reuse and memory under demonstrated pressure
+
+Every normal replay now emits direct cold/partial/full reuse buckets:
+
+```bash
+uv run python scripts/replay_vllm_workload.py \
+  --input data/processed/toolret-bm25-k64-original.jsonl \
+  --run-label toolret-bm25-k64-original \
+  --reset-before --disable-thinking \
+  --output cluster/results/toolret-bm25-k64-original.json
+```
+
+`direct_measurements_by_reuse_bucket` contains measured cached ratio, prefill,
+TTFT, and wall time for requests that actually achieved partial reuse; it does
+not interpolate between the cold/warm endpoints. Repeat each condition at least
+three times and pass all trial files to `summarize_ordering_replays.py`; its
+`direct_reuse_buckets` output reports trial-level intervals for the partial
+reuse strata as well as the aggregate condition.
+
+Run memory-pressure experiments separately so the background metrics scrape
+does not silently become part of the primary latency comparison:
+
+```bash
+uv run python scripts/locality_replay.py \
+  --run-label bfcl-alpha64-all-regimes-pressure \
+  --limit 200 --menu-size 64 --ordering alphabetical \
+  --condition empirical \
+  --condition uniform \
+  --condition skewed \
+  --condition session_bursty \
+  --require-peak-kv-usage 0.90 \
+  --output cluster/results/bfcl-alpha64-all-regimes-pressure.json
+```
+
+The output records cache capacity, rendered prompt-token volume, sampled peak/
+mean/final occupancy, estimated resident tokens, preemptions, and optional
+sampled eviction-residency counters. `--require-peak-kv-usage` fails only after
+preserving the output if the workload never reaches the predeclared pressure
+level. `empirical` and `session_bursty` are matched permutations;
+`uniform`/`skewed` are distribution stress tests that resample with replacement
+and are labelled accordingly.
+
+### 6f. Record the ordinary text-prefill fallback explicitly
+
+The predeclared fallback for the retrieved arm is the BM25-selected menu in its
+original retrieval-rank order, sent through the ordinary OpenAI `tools` field.
+It retains no inactive tools and performs no KV-tensor composition or mutation:
+
+```bash
+uv run python scripts/replay_vllm_workload.py \
+  --input data/processed/toolret-bm25-k64-original.jsonl \
+  --run-label toolret-bm25-k64-ordinary-text-prefill \
+  --condition-role ordinary_text_prefill_fallback \
+  --reset-before --disable-thinking --max-tokens 1 \
+  --output cluster/results/toolret-bm25-k64-ordinary-text-prefill.json
+```
+
+The replay output records this contract under `execution_condition` and rejects
+the fallback label if the input workload has been reordered. The full pinned
+matrix, stop conditions, and GPU handover procedure are in
+`../NUS_GPU_BRIEF_CLOSURE_INSTRUCTIONS.md` and
+`initial-brief-closure-manifest.json`.
 
 ## 7. Generate a benchmark workload
 

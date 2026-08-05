@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """Causally reorder an existing workload with the ToolTrie-v0 planner.
 
-The input must be produced by ``build_cluster_workload.py`` or
-``build_bfcl_quality_workload.py`` so each ``tool_id`` is aligned with one
-OpenAI-compatible tool object. Planning happens before observation for every
-record, preventing the current or future requests from influencing their own
-ordering.
+The input may be produced by ``build_cluster_workload.py``,
+``build_bfcl_quality_workload.py``, or
+``build_retrieved_tool_workload.py`` so long as each ``tool_id`` is aligned
+with one OpenAI-compatible tool object. Planning happens before observation for
+every record, preventing the current or future requests from influencing their
+own ordering.
 """
 from __future__ import annotations
 

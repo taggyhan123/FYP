@@ -101,14 +101,22 @@ The name/full-accuracy gap that looked real at 0.6B is not present at 8B — bot
 
 Every other GPU experiment above resets the prefix cache before each trial, which is repeatable but erases the cross-request dependency locality is actually about. This instead runs one continuous session per replay condition — a single reset, then every request in sequence — comparing `empirical` against `session_bursty`, the one replay pair that is a strict permutation of the same task multiset.
 
-| Replay | Total prompt tokens | Measured reuse | Predicted reuse (bounded trie) | Predicted evictions |
-| --- | --- | --- | --- | --- |
-| empirical | 668,440 | 42.97% | 35.00% | 2,927 |
-| session_bursty | 668,440 | 43.03% | 35.03% | 2,918 |
+| Replay | Canonical tool tokens | Measured cached tokens | Cached / canonical diagnostic | Predicted reuse (bounded trie) | Predicted evictions |
+| --- | --- | --- | --- | --- | --- |
+| empirical | 668,440 | 287,200 | 42.97% | 35.00% | 2,927 |
+| session_bursty | 668,440 | 287,616 | 43.03% | 35.03% | 2,918 |
 
-Total token volume (668,440) versus real cache capacity (190,896 tokens) for this run.
+The original script mislabeled canonical tool-token volume as full prompt
+tokens and used it as the denominator. Therefore 42.97%/43.03% are **not**
+standard rendered-prompt cache-hit ratios. The measured cached-token totals are
+valid and differ by only 416 tokens (0.14%), which still supports the narrow
+finding that these two request orders behaved almost identically.
 
-Real eviction happens here, but session order barely moves measured reuse — a much smaller gap than the offline-only analysis in `access-patterns.md` found for raw, unordered task sequences. Applying the ordering that already wins on reuse, plus shared-catalog padding, makes almost every request's prefix similar regardless of task clustering, which swamps whatever weaker signal session locality would otherwise contribute in this regime.
+The volume exceeded the nominal 190,896-token cache capacity and the offline
+model predicted eviction, but this run did not sample live KV occupancy or an
+engine eviction counter, so it must not be cited as direct memory-pressure
+evidence. The corrected `locality_replay.py` now uses rendered prompt tokens,
+validates counters, samples occupancy, and can require a pressure threshold.
 
 ## Recommendation
 
@@ -123,26 +131,37 @@ reporting the original order and fixed-random controls alongside it.
 
 The likely publishable refinement is not a generic "reorder context into a
 trie" claim, because closely related cache-aware context ordering already
-exists. The more defensible direction is tool-specific cache admission using
-schema cost plus workflow co-occurrence, while preserving an active/authorized
-tool manifest — the quality measurement this recommendation previously lacked
-now exists for the leading ordering, though not yet for the other five.
+exists. Before selecting an extension, the initial brief still requires the
+retrieval and systems measurements listed below. The later Phase 2 comparison
+in `reports/tooltrie-phase2/findings.md` supersedes this report's pilot-quality
+interpretation and must be cited for ToolTrie/ContextPilot quality claims.
 
 Do not pursue arbitrary independent KV concatenation yet. Native exact APC
 already converts the local token-reuse signal into a repeatable TTFT benefit
-(10.6x at 200 tools) without a measured BFCL quality regression for the
-strongest ordering. The open question is coverage, not whether the mechanism
-works at all.
+(10.6x at 200 tools). Phase 2 subsequently detected a no-tool regression for
+reuse-optimizing orders, so this report must not describe the optimization as
+quality-preserving without that qualification. The open questions are coverage
+and safe use, not whether the cache mechanism works at all.
 
 ## What remains before the extensions in the brief
 
-1. Function-call quality for the remaining four orderings, and repeated trials
-   with larger per-category samples for the two already scored.
-2. TTFT measured directly on partial-reuse workloads, rather than
-   extrapolated from the 0%/100%-reuse endpoints.
-3. Live-cache eviction checked under orderings other than alphabetical, and
-   replay pairs other than empirical/session_bursty.
-4. GPU/KV memory *usage* under eviction pressure — eviction's effect on
-   reuse is now measured; memory footprint during eviction is not.
-5. A text-prefill fallback path that preserves model semantics, which Task E
-   specifies but which has not been built.
+The missing harnesses are now implemented, but their GPU outputs are not folded
+into this generated report yet. A 200-query lexical retrieval curve is saved in
+`reports/retrieval-bm25-sweep.json`; it must remain separate from cache and call
+quality results.
+
+1. Replay `build_retrieved_tool_workload.py` outputs at the declared menu sizes,
+   reporting retrieval recall/MRR separately from ordering, cache, and call
+   quality.
+2. Run `audit_rendered_prefix.py --measure` to store the exact server-rendered
+   token IDs, block boundaries, actual cached tokens, prefill, and TTFT for the
+   same partial-reuse requests.
+3. Repeat live-cache measurements across the six brief orderings and all four
+   workload regimes. `replay_vllm_workload.py` and `locality_replay.py` now
+   report direct partial-reuse buckets and sampled KV occupancy; a pressure run
+   must declare and reach its occupancy threshold.
+4. Replay the now-predeclared `ordinary_text_prefill_fallback` condition. The
+   harness requires original retrieval-rank order and records that no inactive
+   tools are retained and no KV tensors are modified. GPU measurements remain
+   pending; this path is the default whenever expected prefill savings do not
+   exceed context, decode, or safety cost.

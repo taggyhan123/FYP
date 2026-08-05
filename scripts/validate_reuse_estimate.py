@@ -33,6 +33,10 @@ sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
 from tatm.analysis import load_processed, trie_metrics
 from tatm.io import read_jsonl
+from tatm.measurement import (
+    project_request_measurement,
+    summarize_request_measurements,
+)
 from tatm.vllm_client import (
     fetch_text,
     metric_delta,
@@ -76,7 +80,11 @@ def main() -> None:
     sequences = [tuple(record["tool_ids"]) for record in records]
     predicted = trie_metrics(sequences, tools)
 
-    reset_prefix_cache(base_url)
+    if not reset_prefix_cache(base_url):
+        raise SystemExit(
+            "vLLM prefix-cache reset failed; start the server with "
+            "VLLM_SERVER_DEV_MODE=1 before validating reuse attribution."
+        )
     measured_cached = 0.0
     measured_prompt = 0
     per_request: list[dict[str, Any]] = []
@@ -94,8 +102,9 @@ def main() -> None:
         response = request_json("POST", f"{base_url}/v1/chat/completions", payload)
         after = parse_prometheus(fetch_text(f"{base_url}/metrics"))
         delta = metric_delta(before, after)
-        cached = delta.get("vllm:prompt_tokens_cached", 0.0)
-        prompt_tokens = response.get("usage", {}).get("prompt_tokens", 0)
+        measurement = project_request_measurement(delta, response.get("usage", {}))
+        cached = float(measurement["cached_tokens"] or 0.0)
+        prompt_tokens = int(measurement["prompt_tokens"] or 0)
         measured_cached += cached
         measured_prompt += prompt_tokens
         per_request.append(
@@ -106,6 +115,8 @@ def main() -> None:
                 "canonical_tool_tokens": record["canonical_tool_tokens"],
                 "prompt_tokens": prompt_tokens,
                 "cached_tokens": cached,
+                "measurement": measurement,
+                "metric_delta": delta,
             }
         )
 
@@ -116,11 +127,12 @@ def main() -> None:
     template_overhead = measured_prompt - predicted["total_tool_tokens"]
 
     output = {
-        "format_version": 1,
+        "format_version": 2,
         "run_label": args.run_label,
         "server": base_url,
         "model": model,
         "server_cache_config": cache_config,
+        "cache_reset_before": True,
         "input": args.input.as_posix(),
         "requests": len(records),
         "predicted": predicted,
@@ -133,6 +145,9 @@ def main() -> None:
         },
         "measured_over_predicted_ratio": round(ratio, 4) if ratio else None,
         "rendered_overhead_tokens": template_overhead,
+        "direct_measurements_by_reuse_bucket": summarize_request_measurements(
+            [row["measurement"] for row in per_request]
+        ),
         "per_request": per_request,
     }
     args.output.parent.mkdir(parents=True, exist_ok=True)

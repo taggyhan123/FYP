@@ -1,0 +1,129 @@
+{
+  "format_version": 1,
+  "experiment": "initial-brief-gpu-gap-closure",
+  "scope": {
+    "brief_tasks": ["B", "D", "E", "F"],
+    "includes": [
+      "retrieved-menu serving arm",
+      "exact rendered-token and block audit",
+      "direct partial-reuse prefill and TTFT",
+      "live KV-cache pressure across four replay regimes",
+      "ordinary selected-tool text-prefill fallback"
+    ],
+    "excludes": [
+      "inactive-tool retention",
+      "active-tool manifest",
+      "constrained decoding",
+      "KV tensor composition",
+      "ContextPilot re-evaluation"
+    ]
+  },
+  "engine": {
+    "name": "vllm",
+    "expected_version": "0.26.0",
+    "model": "Qwen/Qwen3-0.6B",
+    "prefix_caching": true,
+    "temperature": 0,
+    "seed": 0,
+    "thinking": false
+  },
+  "retrieved_menu": {
+    "dataset": "ToolRet",
+    "retriever": "bm25_canonical_tools_v1",
+    "evaluation_offset": 0,
+    "evaluation_queries": 200,
+    "menu_sizes": [4, 16, 64, 128],
+    "ordering_support_mode": "disjoint"
+  },
+  "ordering_conditions": [
+    {
+      "id": "original",
+      "role": "ordinary_text_prefill_fallback",
+      "definition": "BM25-selected tools in retrieval-rank order"
+    },
+    {
+      "id": "alphabetical",
+      "role": "ordering_candidate"
+    },
+    {
+      "id": "random",
+      "role": "ordering_candidate",
+      "seed": 42
+    },
+    {
+      "id": "frequency",
+      "role": "ordering_candidate"
+    },
+    {
+      "id": "schema_cost_weighted",
+      "role": "ordering_candidate"
+    },
+    {
+      "id": "fp_tree_global",
+      "role": "ordering_candidate",
+      "provenance_label": "FP-tree-derived global ordering"
+    },
+    {
+      "id": "tooltrie_v0",
+      "role": "ordering_candidate",
+      "source_condition": "original",
+      "causal": true
+    }
+  ],
+  "primary_replay": {
+    "trials_per_condition": 3,
+    "requests_per_trial": 200,
+    "max_output_tokens": 1,
+    "reset_prefix_cache_before_each_trial": true,
+    "sample_kv_usage": false,
+    "required_direct_partial_conditions_at_k64": [
+      "alphabetical",
+      "tooltrie_v0"
+    ]
+  },
+  "rendered_prefix_audit": {
+    "menu_size": 64,
+    "conditions": [
+      "original",
+      "alphabetical",
+      "random",
+      "frequency",
+      "schema_cost_weighted",
+      "fp_tree_global",
+      "tooltrie_v0"
+    ],
+    "measure": true,
+    "require_cache_reset": true,
+    "require_tokenize_completion_count_match": true
+  },
+  "memory_pressure": {
+    "dataset": "BFCL",
+    "requests": 200,
+    "menu_size": 64,
+    "orderings": [
+      "original",
+      "alphabetical",
+      "random",
+      "frequency",
+      "schema_cost_weighted",
+      "fp_tree_global"
+    ],
+    "regimes": [
+      "empirical",
+      "uniform",
+      "skewed",
+      "session_bursty"
+    ],
+    "required_peak_kv_usage_fraction": 0.9,
+    "latency_comparison_allowed": false
+  },
+  "acceptance": {
+    "isolated_server": true,
+    "same_selected_tool_membership_across_orderings": true,
+    "clean_engine_counters": true,
+    "no_warm_start": true,
+    "all_declared_trials_present": true,
+    "pressure_threshold_met_by_every_declared_pressure_run": true,
+    "raw_results_preserved_outside_git": true
+  }
+}

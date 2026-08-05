@@ -20,10 +20,21 @@ COUNTER_METRICS = (
     "vllm:inter_token_latency_seconds_sum",
     "vllm:inter_token_latency_seconds_count",
     "vllm:request_decode_time_seconds_sum",
+    "vllm:num_preemptions",
+    # Optional KV-residency histograms. vLLM exposes these when the server is
+    # started with a non-zero --kv-cache-metrics-sample value.
+    "vllm:kv_block_lifetime_seconds_sum",
+    "vllm:kv_block_lifetime_seconds_count",
+    "vllm:kv_block_idle_before_evict_seconds_sum",
+    "vllm:kv_block_idle_before_evict_seconds_count",
+    "vllm:kv_block_reuse_gap_seconds_sum",
+    "vllm:kv_block_reuse_gap_seconds_count",
 )
 GAUGE_METRICS = (
     "vllm:kv_cache_usage_perc",
     "vllm:gpu_cache_usage_perc",
+    "vllm:num_requests_running",
+    "vllm:num_requests_waiting",
 )
 
 
@@ -162,20 +173,32 @@ class KvUsageSampler:
         self._stop = threading.Event()
         self._thread: threading.Thread | None = None
         self.peak: dict[str, float] = {}
+        self.minimum: dict[str, float] = {}
+        self.last: dict[str, float] = {}
+        self._totals: dict[str, float] = {}
         self.samples = 0
+        self.errors = 0
 
     def _run(self) -> None:
         while not self._stop.is_set():
             try:
                 values = parse_prometheus(fetch_text(self._url, timeout=5))
             except Exception:  # a dropped scrape must not fail the experiment
+                self.errors += 1
+                self._stop.wait(self._interval)
                 continue
             self.samples += 1
             for metric in GAUGE_METRICS:
                 if metric in values:
+                    value = values[metric]
                     self.peak[metric] = max(
-                        self.peak.get(metric, 0.0), values[metric]
+                        self.peak.get(metric, value), value
                     )
+                    self.minimum[metric] = min(
+                        self.minimum.get(metric, value), value
+                    )
+                    self.last[metric] = value
+                    self._totals[metric] = self._totals.get(metric, 0.0) + value
             self._stop.wait(self._interval)
 
     def __enter__(self) -> "KvUsageSampler":
@@ -188,12 +211,78 @@ class KvUsageSampler:
         if self._thread is not None:
             self._thread.join(timeout=5)
 
+    def summary(self) -> dict[str, Any]:
+        means = {
+            metric: round(total / self.samples, 8)
+            for metric, total in self._totals.items()
+            if self.samples
+        }
+        return {
+            "samples": self.samples,
+            "scrape_errors": self.errors,
+            "interval_seconds": self._interval,
+            "peak": {key: round(value, 8) for key, value in sorted(self.peak.items())},
+            "mean": means,
+            "minimum": {
+                key: round(value, 8) for key, value in sorted(self.minimum.items())
+            },
+            "last": {
+                key: round(value, 8) for key, value in sorted(self.last.items())
+            },
+        }
+
 
 def served_model(base_url: str, requested: str | None = None) -> str:
     if requested:
         return requested
     model_list = request_json("GET", f"{base_url.rstrip('/')}/v1/models")
     return str(model_list["data"][0]["id"])
+
+
+def tokenize_chat(
+    base_url: str,
+    model: str,
+    messages: list[dict[str, Any]],
+    tools: list[dict[str, Any]],
+    *,
+    chat_template_kwargs: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Ask the serving process to render and tokenize a chat-with-tools prompt.
+
+    This deliberately uses vLLM's ``/tokenize`` route rather than a local
+    tokenizer. The returned IDs therefore include the exact server-side chat
+    template and tool serialization used by the matching completion request.
+    """
+    payload: dict[str, Any] = {
+        "model": model,
+        "messages": messages,
+        "tools": tools,
+        "add_generation_prompt": True,
+        "return_token_strs": False,
+    }
+    if chat_template_kwargs:
+        payload["chat_template_kwargs"] = chat_template_kwargs
+    response = request_json(
+        "POST", f"{base_url.rstrip('/')}/tokenize", payload
+    )
+    raw_tokens = response.get("tokens")
+    if not isinstance(raw_tokens, list) or any(
+        not isinstance(token, int) or isinstance(token, bool) for token in raw_tokens
+    ):
+        raise RuntimeError(
+            "vLLM /tokenize did not return an integer 'tokens' list; "
+            f"response keys={sorted(response)}"
+        )
+    count = response.get("count", len(raw_tokens))
+    if count != len(raw_tokens):
+        raise RuntimeError(
+            f"vLLM /tokenize count mismatch: count={count}, tokens={len(raw_tokens)}"
+        )
+    return {
+        "tokens": raw_tokens,
+        "count": len(raw_tokens),
+        "max_model_len": response.get("max_model_len"),
+    }
 
 
 def response_projection(response: dict[str, Any]) -> dict[str, Any]:

@@ -4,6 +4,12 @@ Runbook: `NUS_GPU_AGENT_INSTRUCTIONS.md` §10. All cached-token and latency clai
 below come from the vLLM server's own Prometheus counters. The planner's
 analytical `hinted_schema_tokens` is **not** used to support any cache claim.
 
+> Historical scope note: this is the Phase 1 report. Its proposed next
+> experiments and "open no-tool question" were subsequently completed and
+> superseded by `reports/tooltrie-phase2/findings.md`, which confirmed the
+> no-tool regression and measured causal ContextPilot plus the external engine
+> comparison. The measurements below remain valid for their stated run.
+
 ## 1. Configuration
 
 | Item | Value |

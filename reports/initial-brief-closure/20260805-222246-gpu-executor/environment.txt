@@ -1,0 +1,12 @@
+2026-08-05T22:22:52+08:00
+65b86bacfbcc227c2b21223682018a7b29dd3e94
+## tooltrie-v0-workflow...origin/tooltrie-v0-workflow
+?? uv.lock
+Linux gpuserver 6.8.0-136-generic #136-Ubuntu SMP PREEMPT_DYNAMIC Wed Jul  1 21:53:05 UTC 2026 x86_64 x86_64 x86_64 GNU/Linux
+index, name, uuid, driver_version, memory.total [MiB]
+0, NVIDIA GeForce RTX 3090, GPU-87ff24b3-1ffa-2319-0737-a9fc422063fc, 580.173.02, 24576 MiB
+1, NVIDIA GeForce RTX 3090, GPU-645298dc-036e-b673-4f1a-e497a4256e8a, 580.173.02, 24576 MiB
+2, NVIDIA GeForce RTX 3090, GPU-4dde8858-0f0d-c4c9-60f5-49069140911d, 580.173.02, 24576 MiB
+3, NVIDIA GeForce RTX 3090, GPU-64052bd5-f22e-45b3-38a2-535a5424267e, 580.173.02, 24576 MiB
+torch 2.11.0+cu130
+vllm 0.26.0

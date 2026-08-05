@@ -1,0 +1,99 @@
+{
+  "all_clean": true,
+  "conditions": {
+    "alphabetical": {
+      "block_size": 16,
+      "requests": 200,
+      "run_label": "rendered-audit-k64-alphabetical",
+      "token_source": "vllm_server_tokenize_chat_with_tools",
+      "validation": {
+        "cache_reset_before": true,
+        "cached_plus_computed_matches_prompt_per_request": true,
+        "clean": true,
+        "measurement_consistent": true,
+        "tokenize_count_matches_completion_usage": true
+      }
+    },
+    "fp_tree_global": {
+      "block_size": 16,
+      "requests": 200,
+      "run_label": "rendered-audit-k64-fp_tree_global",
+      "token_source": "vllm_server_tokenize_chat_with_tools",
+      "validation": {
+        "cache_reset_before": true,
+        "cached_plus_computed_matches_prompt_per_request": true,
+        "clean": true,
+        "measurement_consistent": true,
+        "tokenize_count_matches_completion_usage": true
+      }
+    },
+    "frequency": {
+      "block_size": 16,
+      "requests": 200,
+      "run_label": "rendered-audit-k64-frequency",
+      "token_source": "vllm_server_tokenize_chat_with_tools",
+      "validation": {
+        "cache_reset_before": true,
+        "cached_plus_computed_matches_prompt_per_request": true,
+        "clean": true,
+        "measurement_consistent": true,
+        "tokenize_count_matches_completion_usage": true
+      }
+    },
+    "original": {
+      "block_size": 16,
+      "requests": 200,
+      "run_label": "rendered-audit-k64-original",
+      "token_source": "vllm_server_tokenize_chat_with_tools",
+      "validation": {
+        "cache_reset_before": true,
+        "cached_plus_computed_matches_prompt_per_request": true,
+        "clean": true,
+        "measurement_consistent": true,
+        "tokenize_count_matches_completion_usage": true
+      }
+    },
+    "random": {
+      "block_size": 16,
+      "requests": 200,
+      "run_label": "rendered-audit-k64-random",
+      "token_source": "vllm_server_tokenize_chat_with_tools",
+      "validation": {
+        "cache_reset_before": true,
+        "cached_plus_computed_matches_prompt_per_request": true,
+        "clean": true,
+        "measurement_consistent": true,
+        "tokenize_count_matches_completion_usage": true
+      }
+    },
+    "schema_cost_weighted": {
+      "block_size": 16,
+      "requests": 200,
+      "run_label": "rendered-audit-k64-schema_cost_weighted",
+      "token_source": "vllm_server_tokenize_chat_with_tools",
+      "validation": {
+        "cache_reset_before": true,
+        "cached_plus_computed_matches_prompt_per_request": true,
+        "clean": true,
+        "measurement_consistent": true,
+        "tokenize_count_matches_completion_usage": true
+      }
+    },
+    "tooltrie_v0": {
+      "block_size": 16,
+      "requests": 200,
+      "run_label": "rendered-audit-k64-tooltrie_v0",
+      "token_source": "vllm_server_tokenize_chat_with_tools",
+      "validation": {
+        "cache_reset_before": true,
+        "cached_plus_computed_matches_prompt_per_request": true,
+        "clean": true,
+        "measurement_consistent": true,
+        "tokenize_count_matches_completion_usage": true
+      }
+    }
+  },
+  "format_version": 1,
+  "measure": true,
+  "menu_size": 64
+}

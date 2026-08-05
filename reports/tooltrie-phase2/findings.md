@@ -228,15 +228,14 @@ function-name accuracy (84.84% vs 83.75%) and on full-call accuracy (79.06% vs
 81.88%), where it is also the only high-reuse ordering whose interval does not
 exclude zero.
 
-"Neither dominates" is therefore true only as a *multi-objective* statement,
-and should not be used as a shorthand that implies parity. **No combined
-utility or cost weighting has been defined**, so there is no basis in this
-report for declaring an overall winner. Stated plainly: on current evidence
-ContextPilot is the stronger method on reuse and on tool-call quality, and
-ToolTrie-v0 is the safer method on requests that should be declined. Which
-matters more is a deployment question this study does not answer — and
-answering it requires declaring the weighting *before* looking at these
-numbers, not after.
+"Neither dominates" is therefore true only as a *multi-objective* statement, and
+should not be used as a shorthand that implies parity. **No combined utility or
+cost weighting has been defined**, so there is no basis in this report for
+declaring an overall winner. Stated plainly: on current evidence ContextPilot is
+the stronger method on reuse and on tool-call quality, and ToolTrie-v0 is the
+safer method on requests that should be declined. Which matters more is a
+deployment question this study does not answer — and answering it requires
+declaring the weighting *before* looking at these numbers, not after.
 
 Note on scope: each metric is only defined on its applicable subset —
 name/full on the 640 relevance cases, no-tool on the 160 irrelevance cases. The

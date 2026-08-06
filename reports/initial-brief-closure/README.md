@@ -11,6 +11,11 @@ under the ignored `cluster/results/` directory and in a checksummed archive on
 the GPU server. No GPU result should be added here until the manifest's validity
 conditions have been checked.
 
+The validated scientific interpretation is in
+[`findings.md`](findings.md). The `20260805-222246-gpu-executor/` directory is
+the corrected execution record and compact evidence bundle; its handover is
+provenance, not a substitute for the findings report.
+
 The GPU handover must include:
 
 - the exact FYP commit and clean/dirty status at execution time;

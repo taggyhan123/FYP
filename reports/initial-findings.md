@@ -118,50 +118,97 @@ engine eviction counter, so it must not be cited as direct memory-pressure
 evidence. The corrected `locality_replay.py` now uses rendered prompt tokens,
 validates counters, samples occupancy, and can require a pressure threshold.
 
+## Retrieved-menu GPU arm
+
+A deterministic BM25 baseline selected each ToolRet menu without reading gold IDs; gold
+labels were used only for the separate retrieval evaluation. All ordering conditions
+used the same selected tool membership and request sequence. Each cache result below is
+three clean 200-request trials on Qwen3-0.6B/vLLM.
+
+| Menu k | Macro recall | Hit rate | MRR |
+| --- | --- | --- | --- |
+| 4 | 41.71% | 51.50% | 0.3858 |
+| 16 | 55.04% | 65.50% | 0.4022 |
+| 64 | 64.21% | 75.50% | 0.4061 |
+| 128 | 67.54% | 80.50% | 0.4066 |
+
+| k | Original fallback | Alphabetical | Random seed 42 | Frequency | Schema-cost weighted | FP-tree global | ToolTrie-v0 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 4 | 15.87% | 15.28% | 14.17% | 14.62% | 14.84% | 14.62% | 17.48% |
+| 16 | 6.12% | 6.27% | 5.39% | 5.59% | 6.24% | 5.59% | 7.77% |
+| 64 | 0.91% | 1.24% | 0.96% | 0.96% | 1.09% | 0.96% | 1.90% |
+| 128 | 0.37% | 0.58% | 0.59% | 0.54% | 0.57% | 0.54% | 1.13% |
+
+| k | Prompt tokens/query | Fallback reuse | Best static reuse | ToolTrie reuse | ToolTrie - fallback | Fallback TTFT/query (ms) | ToolTrie TTFT/query (ms) |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 4 | 640 | 15.87% | 15.87% | 17.48% | +1.61 pp | 32.3 | 31.2 |
+| 16 | 2,139 | 6.12% | 6.27% | 7.77% | +1.65 pp | 70.7 | 70.3 |
+| 64 | 8,361 | 0.91% | 1.24% | 1.90% | +0.99 pp | 349.7 | 350.0 |
+| 128 | 16,267 | 0.37% | 0.59% | 1.13% | +0.76 pp | 937.0 | 933.5 |
+
+ToolTrie-v0 has the highest reuse at every retrieved menu size, but the absolute
+advantage over ordinary retrieval-rank text prefill is only 0.76-1.65 percentage points.
+Reuse falls as menus grow because independently retrieved sets share little exact
+rendered prefix. The three-trial TTFT intervals overlap and no paired-difference
+interval was predeclared, so these data do not establish a TTFT improvement.
+
+At k=64, both predeclared direct partial-reuse strata contain 199 requests per trial
+(plus one cold request). Alphabetical measured 1.37% reuse and 351.7 ms TTFT; ToolTrie
+measured 2.12% and 350.5 ms. This is direct partial-reuse evidence, but the latency
+difference is too small to support a speed claim.
+
+## Exact rendered-token and memory audit
+
+All 7/7 k64 rendered-prefix audits are clean (`all_clean=true`). The server rendered and
+tokenized the same chat-plus-tools payload used for completion; token counts and
+cached-plus-computed identities match for every request. Exact token IDs and block
+boundaries remain in the checksummed raw archive rather than Git.
+
+The first pressure attempt produced 24 clean, reset regime-runs but accepted 0/24:
+sampled occupancy was only 3.64-3.69% in a 190,896-token cache. The sequential client
+held one approximately 7k-token request resident; cumulative prompt volume is not
+residency. These runs are preserved and quarantined from pressure claims. A separate
+predeclared controlled-cache rerun is the only remaining acceptance item.
+
+
 ## Recommendation
 
-Measured evidence now supports alphabetical ordering over the frequency
-ordering this analysis originally recommended: on padded, deployment-realistic
-menus, alphabetical measures 38.15% cache reuse versus frequency's 4.41%, and
-a follow-up quality check found this does not cost function-selection accuracy
-at deployment-grade model scale (identical on `Qwen3-8B`), with only a smaller
-no-tool-accuracy gap surviving at both model sizes checked. Continue the exact
-prompt-level ToolTrie baseline with alphabetical as the default ordering,
-reporting the original order and fixed-random controls alongside it.
+The retrieved-menu arm changes the recommendation. Alphabetical remains a
+strong simple baseline on the padded shared-catalog workload, but it is not a
+universal winner once menu membership comes from retrieval. ToolTrie-v0 gives
+the highest reuse at all four retrieved menu sizes, yet its gain is small in
+absolute terms and does not produce a resolved TTFT improvement. Retrieval
+coverage and selected-set overlap are now the dominant bottlenecks: increasing
+the BM25 menu from 4 to 128 raises macro recall from 41.71% to 67.54%, while
+prompt cost grows about 25x and exact reuse falls.
 
 The likely publishable refinement is not a generic "reorder context into a
 trie" claim, because closely related cache-aware context ordering already
-exists. Before selecting an extension, the initial brief still requires the
-retrieval and systems measurements listed below. The later Phase 2 comparison
-in `reports/tooltrie-phase2/findings.md` supersedes this report's pilot-quality
-interpretation and must be cited for ToolTrie/ContextPilot quality claims.
+exists. The later Phase 2 comparison in
+`reports/tooltrie-phase2/findings.md` is the authoritative gold-menu comparison:
+causal ContextPilot beats ToolTrie-v0 on reuse, while ToolTrie has the smaller
+no-tool penalty. ContextPilot was not rerun in this retrieved-menu closure arm,
+so the two information regimes must not be combined into one ranking.
 
 Do not pursue arbitrary independent KV concatenation yet. Native exact APC
 already converts the local token-reuse signal into a repeatable TTFT benefit
 (10.6x at 200 tools). Phase 2 subsequently detected a no-tool regression for
 reuse-optimizing orders, so this report must not describe the optimization as
-quality-preserving without that qualification. The open questions are coverage
-and safe use, not whether the cache mechanism works at all.
+quality-preserving without that qualification. Keep ordinary selected-tool text
+prefill as the explicit default fallback unless a predeclared cost model predicts
+that reuse repays retrieval, context, decode, and safety costs.
 
-## What remains before the extensions in the brief
+## Initial-brief closure status
 
-The missing harnesses are now implemented, but their GPU outputs are not folded
-into this generated report yet. A 200-query lexical retrieval curve is saved in
-`reports/retrieval-bm25-sweep.json`; it must remain separate from cache and call
-quality results.
+The explicit Tasks A-F and the eight initial experimental questions now have
+implemented, reported evidence, including the ordinary fallback, retrieved
+menus, direct partial reuse, and exact rendered-token/block validation. The
+retrieval results remain separate from function-call correctness as required.
 
-1. Replay `build_retrieved_tool_workload.py` outputs at the declared menu sizes,
-   reporting retrieval recall/MRR separately from ordering, cache, and call
-   quality.
-2. Run `audit_rendered_prefix.py --measure` to store the exact server-rendered
-   token IDs, block boundaries, actual cached tokens, prefill, and TTFT for the
-   same partial-reuse requests.
-3. Repeat live-cache measurements across the six brief orderings and all four
-   workload regimes. `replay_vllm_workload.py` and `locality_replay.py` now
-   report direct partial-reuse buckets and sampled KV occupancy; a pressure run
-   must declare and reach its occupancy threshold.
-4. Replay the now-predeclared `ordinary_text_prefill_fallback` condition. The
-   harness requires original retrieval-rank order and records that no inactive
-   tools are retained and no KV tensors are modified. GPU measurements remain
-   pending; this path is the default whenever expected prefill savings do not
-   exceed context, decode, or safety cost.
+One stricter systems acceptance item remains before declaring the project’s
+gap-closure manifest complete: rerun the six-ordering, four-regime pressure
+matrix under the separately predeclared 7,680-token controlled cache and obtain
+24/24 accepted runs with observed evictions. The original 0/24 runs remain
+valid low-occupancy evidence and are not rewritten. This controlled stress test
+is additional finite-cache evidence for Tasks D/E; it is not permission to begin
+the §9 retained-tool or KV-composition extensions.

@@ -298,6 +298,15 @@ level. `empirical` and `session_bursty` are matched permutations;
 `uniform`/`skewed` are distribution stress tests that resample with replacement
 and are labelled accordingly.
 
+The first initial-brief pressure matrix completed cleanly but reached only
+3.64-3.69% occupancy because one sequential approximately 7k-token request ran
+against a 190,896-token cache. Those 24 runs remain low-occupancy evidence and
+must not be relabelled as pressure. The replacement is separately predeclared in
+`initial-brief-pressure-rerun-manifest.json` and executed by
+`../NUS_GPU_PRESSURE_RERUN_INSTRUCTIONS.md`: it preserves sequential request
+order and the 0.90 threshold while fixing the controlled cache at 7,680 tokens.
+Cross-capacity latency comparison is forbidden.
+
 ### 6f. Record the ordinary text-prefill fallback explicitly
 
 The predeclared fallback for the retrieved arm is the BM25-selected menu in its

@@ -3,6 +3,7 @@ from __future__ import annotations
 import csv
 import json
 from pathlib import Path
+from textwrap import fill
 from typing import Any
 
 from tatm.io import write_json
@@ -904,6 +905,199 @@ def _probe_section(probe: dict[str, Any] | None) -> str:
     )
 
 
+def _initial_brief_closure_section(report_path: Path) -> str:
+    """Render the tracked retrieved-menu GPU evidence into the initial report."""
+    handover_dir = (
+        report_path.parent
+        / "initial-brief-closure"
+        / "20260805-222246-gpu-executor"
+    )
+    summary_paths = {
+        menu_size: handover_dir / f"retrieved-k{menu_size}-summary.json"
+        for menu_size in (4, 16, 64, 128)
+    }
+    audit_path = handover_dir / "audit-k64-validation-summary.json"
+    pressure_path = handover_dir / "pressure-bfcl-k64-summary.json"
+    retrieval_path = report_path.parent / "retrieval-bm25-sweep.json"
+    required_paths = [
+        *summary_paths.values(),
+        audit_path,
+        pressure_path,
+        retrieval_path,
+    ]
+    if not all(path.exists() for path in required_paths):
+        return ""
+
+    summaries = {
+        menu_size: json.loads(path.read_text(encoding="utf-8"))
+        for menu_size, path in summary_paths.items()
+    }
+    retrieval = json.loads(retrieval_path.read_text(encoding="utf-8"))
+    audit = json.loads(audit_path.read_text(encoding="utf-8"))
+    pressure = json.loads(pressure_path.read_text(encoding="utf-8"))
+
+    display_names = {
+        "original": "Original fallback",
+        "alphabetical": "Alphabetical",
+        "random": "Random seed 42",
+        "frequency": "Frequency",
+        "schema_cost_weighted": "Schema-cost weighted",
+        "fp_tree_global": "FP-tree global",
+        "tooltrie_v0": "ToolTrie-v0",
+    }
+    condition_ids = tuple(display_names)
+    reuse_rows = []
+    systems_rows = []
+    for menu_size, summary in summaries.items():
+        conditions = summary["conditions"]
+        reuse_rows.append(
+            [menu_size]
+            + [
+                _percent(
+                    conditions[condition]["measurements"]["cached_ratio"]["mean"]
+                )
+                for condition in condition_ids
+            ]
+        )
+        fallback = conditions["original"]
+        tooltrie = conditions["tooltrie_v0"]
+        fallback_reuse = fallback["measurements"]["cached_ratio"]["mean"]
+        tooltrie_reuse = tooltrie["measurements"]["cached_ratio"]["mean"]
+        best_static = max(
+            conditions[condition]["measurements"]["cached_ratio"]["mean"]
+            for condition in condition_ids[:-1]
+        )
+        requests = fallback["requests"]
+        systems_rows.append(
+            [
+                menu_size,
+                f'{fallback["prompt_tokens"] / requests:,.0f}',
+                _percent(fallback_reuse),
+                _percent(best_static),
+                _percent(tooltrie_reuse),
+                f"{100 * (tooltrie_reuse - fallback_reuse):+.2f} pp",
+                f'{1000 * fallback["measurements"]["ttft_seconds"]["mean"] / requests:.1f}',
+                f'{1000 * tooltrie["measurements"]["ttft_seconds"]["mean"] / requests:.1f}',
+            ]
+        )
+
+    retrieval_rows = [
+        [
+            row["k"],
+            _percent(row["mean_recall"]),
+            _percent(row["hit_rate"]),
+            f'{row["mean_reciprocal_rank"]:.4f}',
+        ]
+        for row in retrieval["retrieval_curve"]
+    ]
+    k64 = summaries[64]["conditions"]
+    alpha_partial = k64["alphabetical"]["direct_reuse_buckets"]["partial_all"]
+    trie_partial = k64["tooltrie_v0"]["direct_reuse_buckets"]["partial_all"]
+    pressure_runs = pressure["all_regime_runs"]
+    pressure_passes = sum(
+        result["requirement_met"]
+        for regimes in pressure["orderings"].values()
+        for result in regimes.values()
+    )
+    pressure_peaks = [
+        result["peak_kv_usage_fraction"]
+        for regimes in pressure["orderings"].values()
+        for result in regimes.values()
+    ]
+    def paragraph(value: str) -> str:
+        return fill(
+            value,
+            width=88,
+            break_long_words=False,
+            break_on_hyphens=False,
+        )
+
+    return "\n".join(
+        [
+            "## Retrieved-menu GPU arm",
+            "",
+            paragraph(
+                "A deterministic BM25 baseline selected each ToolRet menu "
+                "without reading gold IDs; gold labels were used only for the "
+                "separate retrieval evaluation. All ordering conditions used "
+                "the same selected tool membership and request sequence. Each "
+                "cache result below is three clean 200-request trials on "
+                "Qwen3-0.6B/vLLM."
+            ),
+            "",
+            _table(["Menu k", "Macro recall", "Hit rate", "MRR"], retrieval_rows),
+            "",
+            _table(
+                ["k", *display_names.values()],
+                reuse_rows,
+            ),
+            "",
+            _table(
+                [
+                    "k",
+                    "Prompt tokens/query",
+                    "Fallback reuse",
+                    "Best static reuse",
+                    "ToolTrie reuse",
+                    "ToolTrie - fallback",
+                    "Fallback TTFT/query (ms)",
+                    "ToolTrie TTFT/query (ms)",
+                ],
+                systems_rows,
+            ),
+            "",
+            paragraph(
+                "ToolTrie-v0 has the highest reuse at every retrieved menu "
+                "size, but the absolute advantage over ordinary retrieval-rank "
+                "text prefill is only 0.76-1.65 percentage points. Reuse falls "
+                "as menus grow because independently retrieved sets share "
+                "little exact rendered prefix. The three-trial TTFT intervals "
+                "overlap and no paired-difference interval was predeclared, so "
+                "these data do not establish a TTFT improvement."
+            ),
+            "",
+            paragraph(
+                "At k=64, both predeclared direct partial-reuse strata contain "
+                "199 requests per trial (plus one cold request). Alphabetical "
+                f'measured {100 * alpha_partial["cached_ratio"]["mean"]:.2f}% '
+                "reuse and "
+                f'{1000 * alpha_partial["mean_ttft_seconds"]["mean"]:.1f} ms '
+                "TTFT; ToolTrie measured "
+                f'{100 * trie_partial["cached_ratio"]["mean"]:.2f}% and '
+                f'{1000 * trie_partial["mean_ttft_seconds"]["mean"]:.1f} ms. '
+                "This is direct partial-reuse evidence, but the latency "
+                "difference is too small to support a speed claim."
+            ),
+            "",
+            "## Exact rendered-token and memory audit",
+            "",
+            paragraph(
+                f'All {len(audit["conditions"])}/7 k64 rendered-prefix audits '
+                f'are clean (`all_clean={str(audit["all_clean"]).lower()}`). '
+                "The server rendered and tokenized the same chat-plus-tools "
+                "payload used for completion; token counts and "
+                "cached-plus-computed identities match for every request. "
+                "Exact token IDs and block boundaries remain in the "
+                "checksummed raw archive rather than Git."
+            ),
+            "",
+            paragraph(
+                f"The first pressure attempt produced {pressure_runs} clean, "
+                f"reset regime-runs but accepted "
+                f"{pressure_passes}/{pressure_runs}: sampled occupancy was only "
+                f"{100 * min(pressure_peaks):.2f}-"
+                f"{100 * max(pressure_peaks):.2f}% in a 190,896-token cache. "
+                "The sequential client held one approximately 7k-token request "
+                "resident; cumulative prompt volume is not residency. These "
+                "runs are preserved and quarantined from pressure claims. A "
+                "separate predeclared controlled-cache rerun is the only "
+                "remaining acceptance item."
+            ),
+            "",
+        ]
+    )
+
+
 def write_initial_findings(
     path: Path,
     summary: dict[str, Any],
@@ -942,7 +1136,13 @@ def write_initial_findings(
         if path.exists():
             existing = path.read_text(encoding="utf-8")
             start = existing.find("## Prefix-cache sanity results")
-            end = existing.find("## Recommendation", start)
+            closure_start = existing.find("## Retrieved-menu GPU arm", start)
+            recommendation_start = existing.find("## Recommendation", start)
+            end = (
+                closure_start
+                if closure_start >= 0
+                else recommendation_start
+            )
             if start >= 0 and end > start:
                 prefix_section = existing[start:end].strip()
     if not prefix_section:
@@ -959,6 +1159,7 @@ def write_initial_findings(
         )
     flagged = summary["inventory"]["tools_with_any_issue"]
     total_tools = summary["inventory"]["tools"]
+    closure_section = _initial_brief_closure_section(path)
 
     text = f"""# Initial research findings and recommendation
 
@@ -997,53 +1198,49 @@ points). These are analytical estimates, not vLLM hit-rate or latency results.
 
 {prefix_section}
 
+{closure_section}
+
 ## Recommendation
 
-Measured evidence now supports alphabetical ordering over the frequency
-ordering this analysis originally recommended: on padded, deployment-realistic
-menus, alphabetical measures 38.15% cache reuse versus frequency's 4.41%, and
-a follow-up quality check found this does not cost function-selection accuracy
-at deployment-grade model scale (identical on `Qwen3-8B`), with only a smaller
-no-tool-accuracy gap surviving at both model sizes checked. Continue the exact
-prompt-level ToolTrie baseline with alphabetical as the default ordering,
-reporting the original order and fixed-random controls alongside it.
+The retrieved-menu arm changes the recommendation. Alphabetical remains a
+strong simple baseline on the padded shared-catalog workload, but it is not a
+universal winner once menu membership comes from retrieval. ToolTrie-v0 gives
+the highest reuse at all four retrieved menu sizes, yet its gain is small in
+absolute terms and does not produce a resolved TTFT improvement. Retrieval
+coverage and selected-set overlap are now the dominant bottlenecks: increasing
+the BM25 menu from 4 to 128 raises macro recall from 41.71% to 67.54%, while
+prompt cost grows about 25x and exact reuse falls.
 
 The likely publishable refinement is not a generic "reorder context into a
 trie" claim, because closely related cache-aware context ordering already
-exists. Before selecting an extension, the initial brief still requires the
-retrieval and systems measurements listed below. The later Phase 2 comparison
-in `reports/tooltrie-phase2/findings.md` supersedes this report's pilot-quality
-interpretation and must be cited for ToolTrie/ContextPilot quality claims.
+exists. The later Phase 2 comparison in
+`reports/tooltrie-phase2/findings.md` is the authoritative gold-menu comparison:
+causal ContextPilot beats ToolTrie-v0 on reuse, while ToolTrie has the smaller
+no-tool penalty. ContextPilot was not rerun in this retrieved-menu closure arm,
+so the two information regimes must not be combined into one ranking.
 
 Do not pursue arbitrary independent KV concatenation yet. Native exact APC
 already converts the local token-reuse signal into a repeatable TTFT benefit
 (10.6x at 200 tools). Phase 2 subsequently detected a no-tool regression for
 reuse-optimizing orders, so this report must not describe the optimization as
-quality-preserving without that qualification. The open questions are coverage
-and safe use, not whether the cache mechanism works at all.
+quality-preserving without that qualification. Keep ordinary selected-tool text
+prefill as the explicit default fallback unless a predeclared cost model predicts
+that reuse repays retrieval, context, decode, and safety costs.
 
-## What remains before the extensions in the brief
+## Initial-brief closure status
 
-The missing harnesses are now implemented, but their GPU outputs are not folded
-into this generated report yet. A 200-query lexical retrieval curve is saved in
-`reports/retrieval-bm25-sweep.json`; it must remain separate from cache and call
-quality results.
+The explicit Tasks A-F and the eight initial experimental questions now have
+implemented, reported evidence, including the ordinary fallback, retrieved
+menus, direct partial reuse, and exact rendered-token/block validation. The
+retrieval results remain separate from function-call correctness as required.
 
-1. Replay `build_retrieved_tool_workload.py` outputs at the declared menu sizes,
-   reporting retrieval recall/MRR separately from ordering, cache, and call
-   quality.
-2. Run `audit_rendered_prefix.py --measure` to store the exact server-rendered
-   token IDs, block boundaries, actual cached tokens, prefill, and TTFT for the
-   same partial-reuse requests.
-3. Repeat live-cache measurements across the six brief orderings and all four
-   workload regimes. `replay_vllm_workload.py` and `locality_replay.py` now
-   report direct partial-reuse buckets and sampled KV occupancy; a pressure run
-   must declare and reach its occupancy threshold.
-4. Replay the now-predeclared `ordinary_text_prefill_fallback` condition. The
-   harness requires original retrieval-rank order and records that no inactive
-   tools are retained and no KV tensors are modified. GPU measurements remain
-   pending; this path is the default whenever expected prefill savings do not
-   exceed context, decode, or safety cost.
+One stricter systems acceptance item remains before declaring the project’s
+gap-closure manifest complete: rerun the six-ordering, four-regime pressure
+matrix under the separately predeclared 7,680-token controlled cache and obtain
+24/24 accepted runs with observed evictions. The original 0/24 runs remain
+valid low-occupancy evidence and are not rewritten. This controlled stress test
+is additional finite-cache evidence for Tasks D/E; it is not permission to begin
+the §9 retained-tool or KV-composition extensions.
 """
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(text, encoding="utf-8")

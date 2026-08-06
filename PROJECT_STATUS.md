@@ -7,9 +7,9 @@ Status after the first local research pass:
 | A — reading note | Complete | `notes/reading-note.md` |
 | B — exact prefix caching | Complete; all five checks measured on GPU | See "Task B detail" below |
 | C — normalize datasets | Complete for ToolRet and five BFCL V4 static subsets | `scripts/download_datasets.py`, `scripts/run_pipeline.py`, `reports/dataset-inventory.md` |
-| D — access patterns | Complete for benchmark evidence and four controlled replays | `reports/access-patterns.md` and `reports/tables/` |
-| E — exact ToolTrie baseline | Measured on GPU: prefill sweep, crossover, and two orderings validated against real cache hits. Causal ToolTrie-v0 now measured end to end against both static orderings | `scripts/prefill_sweep.py`, `scripts/validate_reuse_estimate.py`, `src/tatm/tooltrie.py`, "Task E" and "ToolTrie-v0" below, `reports/tooltrie-v0/findings.md` |
-| F — initial report | Complete and regenerated from measured results | `reports/initial-findings.md` |
+| D — access patterns | Complete for benchmark evidence, four controlled replays, and the retrieved-menu ordering matrix | `reports/access-patterns.md`, `reports/tables/`, `reports/initial-brief-closure/findings.md` |
+| E — exact ToolTrie baseline | Measured on GPU on shared padded catalogs and true BM25-retrieved menus, with ordinary text prefill retained as the explicit fallback | `src/tatm/tooltrie.py`, "Task E" and "ToolTrie-v0" below, `reports/tooltrie-v0/findings.md`, `reports/initial-brief-closure/findings.md` |
+| F — initial report | Complete and regenerated from measured results; enhanced pressure acceptance remains separately pending | `reports/initial-findings.md`, `reports/initial-brief-closure/findings.md` |
 
 The external comparison from `NUS_GPU_PHASE2_INSTRUCTIONS.md` has now been
 **measured on GPU** — targeted no-tool evaluation, CacheWeaver, fitted
@@ -370,7 +370,7 @@ counter, samples KV occupancy, and can enforce a predeclared pressure threshold.
 - 1,362 canonical BFCL functions and 1,240 BFCL tasks;
 - 45,815 total schemas tokenized with `Qwen/Qwen3-0.6B`;
 - all ToolRet label references resolve to the downloaded corpus;
-- 94 unit tests pass.
+- 101 unit tests pass.
 
 ## Reports are generated, not hand-written
 
@@ -382,32 +382,31 @@ section instead of replacing it with "not yet measured." Other generated
 sections are still overwritten. `PROJECT_STATUS.md` and `cluster/README.md` are
 hand-maintained.
 
-## Initial-brief gap closure now implemented; GPU evidence still required
+## Initial-brief gap closure: retrieved and audit arms measured
 
-The stale items in the previous version of this section are resolved: the
-targeted no-tool run and external ContextPilot/CacheWeaver/SGLang comparison
-are complete in Phase 2. The following new harnesses close the remaining audit
-gaps without starting a §9 retention extension:
+The explicit Tasks A-F in `initial-research-brief.md` now have reported
+evidence. The later, stricter gap-closure manifest is **three systems arms
+complete and one acceptance item pending**: retrieved-menu replay, ordinary
+fallback, direct partial reuse, and exact rendered-prefix auditing are measured;
+the controlled pressure rerun remains outstanding. This work does not start a
+§9 retained-tool or KV-composition extension.
 
-- `scripts/build_retrieved_tool_workload.py` selects ToolRet menus with a
-  deterministic BM25 baseline that never reads gold IDs during selection. Gold
-  labels are used only afterward for recall, precision, hit rate, and MRR;
-- `scripts/audit_rendered_prefix.py` uses the serving process's `/tokenize`
-  route to store exact chat-plus-tools token IDs and block boundaries, then can
-  replay the same sequence for measured cached tokens, prefill, and TTFT;
-- `scripts/replay_vllm_workload.py` now reports direct per-request measurements
-  grouped into cold/partial/full reuse buckets and can sample KV occupancy;
-- `scripts/locality_replay.py` now uses rendered prompt tokens as the measured
-  reuse denominator, supports all four brief workload regimes, samples KV
-  occupancy throughout the session, and can require a declared pressure
-  threshold.
+The corrected GPU handover is commit `6378d78`, with measurements executed at
+the pinned `65b86ba`. The only mid-run worktree change was the documentation-only
+addition of `AGENTS.md`; the measured code, data, scripts, model, and server
+configuration did not change. Validation found:
 
-The code paths are locally verified.
+- 84/84 primary retrieved-menu replays clean (4 menu sizes x 7 conditions x 3
+  trials, 200 requests each);
+- identical selected membership and request sequence across all orderings;
+- 7/7 exact k64 rendered-token/block audits clean;
+- direct partial-reuse strata present for both predeclared k64 conditions;
+- a readable, checksummed 221-entry raw archive, with invalid and contended
+  attempts retained separately in quarantine.
 
-The CPU retrieval arm itself has been run on the first 200 ToolRet tasks against
-all 44,453 ToolRet tools. The generated artifact is
-`reports/retrieval-bm25-sweep.json`; this is a lexical baseline, not the
-official ToolRet retriever and not a production trace.
+The BM25 retrieval artifact is `reports/retrieval-bm25-sweep.json`. Selection
+never reads evaluation gold IDs; this remains a lexical baseline, not the
+official ToolRet retriever or a production trace.
 
 | BM25 cutoff | Macro recall | Hit rate | MRR |
 | --- | --- | --- | --- |
@@ -420,18 +419,34 @@ These values show why the gold/exposed and retrieved arms cannot be mixed: even
 at 128 tools, 19.5% of queries retrieve none of their gold tools and macro
 recall is only 67.5%. Ordering cannot repair a missing tool.
 
-The following remain **unmeasured GPU runs**, not findings:
+Measured rendered-prompt cache reuse on the same menus is:
 
-1. replay the retrieved menus at sizes 4/16/64/128, with the retrieval metrics
-   above kept separate from the six ordering comparisons;
-2. exact rendered-token/block audits with `--measure` on the matched workloads;
-3. direct partial-reuse TTFT/prefill repetitions and a demonstrated-pressure
-   run at the live declared cache capacity across
-   empirical/uniform/skewed/session-bursty regimes;
-4. replay the explicit `ordinary_text_prefill_fallback` condition. Its contract
-   is now machine-recorded and rejects reordered input, but its matched GPU
-   measurements remain pending. It is used whenever reuse does not repay
-   context/decode/safety cost.
+| k | Original fallback | Alphabetical | Random 42 | Frequency | Schema-cost | FP-tree global | ToolTrie-v0 |
+| ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 4 | 15.87% | 15.28% | 14.17% | 14.62% | 14.84% | 14.62% | **17.48%** |
+| 16 | 6.12% | 6.27% | 5.39% | 5.59% | 6.24% | 5.59% | **7.77%** |
+| 64 | 0.91% | 1.24% | 0.96% | 0.96% | 1.09% | 0.96% | **1.90%** |
+| 128 | 0.37% | 0.58% | 0.59% | 0.54% | 0.57% | 0.54% | **1.13%** |
+
+ToolTrie is best at every retrieved menu size, but only by 0.76-1.65 percentage
+points over ordinary text prefill. No resolved TTFT improvement follows: the
+three-trial intervals overlap and no paired-difference interval was declared.
+The true retrieved-set overlap, rather than the padded shared-catalog result,
+is therefore the limiting regime for deployment claims.
+
+The first pressure matrix also completed cleanly, but 0/24 regime-runs met the
+predeclared 90% occupancy threshold. Peak occupancy was only 3.6379-3.6882%:
+one sequential approximately 7k-token request in a 190,896-token cache. Those
+runs are valid low-occupancy evidence but cannot support eviction or
+memory-under-pressure claims.
+
+The only remaining enhanced-closure item is the separately predeclared
+controlled-cache rerun in
+`cluster/initial-brief-pressure-rerun-manifest.json`: the same six orderings,
+four regimes, sequential request order, and 90% threshold, with capacity fixed
+before execution at 480 blocks/7,680 tokens. Acceptance requires 24/24 runs and
+positive sampled eviction counts. Cross-capacity latency comparison is
+forbidden. See `NUS_GPU_PRESSURE_RERUN_INSTRUCTIONS.md`.
 
 Analytical reuse estimates must still be labelled as estimates, but they are no
 longer unvalidated: they under-predict measured hits by 1.2-1.5x on the two

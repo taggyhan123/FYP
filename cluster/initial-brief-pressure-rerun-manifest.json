@@ -1,0 +1,83 @@
+{
+  "format_version": 1,
+  "experiment": "initial-brief-controlled-cache-pressure-rerun",
+  "relationship_to_original": {
+    "original_manifest": "cluster/initial-brief-closure-manifest.json",
+    "failed_evidence": "reports/initial-brief-closure/20260805-222246-gpu-executor/pressure-bfcl-k64-summary.json",
+    "quarantine_record": "reports/initial-brief-closure/20260805-222246-gpu-executor/PRESSURE-QUARANTINE.md",
+    "scope": "replacement for the failed memory-pressure acceptance criterion only",
+    "original_results_remain_preserved": true,
+    "threshold_changed_after_inspection": false,
+    "request_concurrency_changed": false
+  },
+  "rationale": {
+    "original_capacity_tokens": 190896,
+    "observed_peak_resident_tokens_range": [6945, 7041],
+    "cause_of_original_failure": "The sequential client held at most one approximately 7k-token request resident in a 190896-token cache.",
+    "controlled_variable": "KV-cache capacity",
+    "interpretation": "controlled stress test only; latency is not comparable with the original-capacity runs"
+  },
+  "engine": {
+    "name": "vllm",
+    "expected_version": "0.26.0",
+    "model": "Qwen/Qwen3-0.6B",
+    "prefix_caching": true,
+    "temperature": 0,
+    "seed": 0,
+    "thinking": false,
+    "block_size": 16,
+    "num_gpu_blocks_override": 480,
+    "expected_capacity_tokens": 7680,
+    "max_model_len": 7168,
+    "kv_cache_metrics": true,
+    "kv_cache_metrics_sample": 1.0
+  },
+  "workload": {
+    "dataset": "BFCL",
+    "offset": 0,
+    "requests": 200,
+    "menu_size": 64,
+    "max_output_tokens": 1,
+    "support_mode": "disjoint",
+    "random_seed": 42,
+    "replay_seed": 2026,
+    "request_concurrency": 1,
+    "kv_sample_interval_seconds": 0.01
+  },
+  "orderings": [
+    "original",
+    "alphabetical",
+    "random",
+    "frequency",
+    "schema_cost_weighted",
+    "fp_tree_global"
+  ],
+  "regimes": [
+    "empirical",
+    "uniform",
+    "skewed",
+    "session_bursty"
+  ],
+  "acceptance": {
+    "isolated_server": true,
+    "live_cache_capacity_tokens_equals": 7680,
+    "cache_reset_before_every_ordering_run": true,
+    "clean_engine_counters": true,
+    "all_24_regime_runs_present": true,
+    "required_peak_kv_usage_fraction": 0.9,
+    "pressure_threshold_met_by_every_regime_run": true,
+    "kv_metric_scrape_errors_per_regime": 0,
+    "eviction_metric_present_in_every_regime_run": true,
+    "sampled_eviction_count_positive_in_every_regime_run": true,
+    "preemptions_in_every_regime_run": 0,
+    "peak_running_requests_at_most": 1,
+    "peak_waiting_requests": 0,
+    "raw_results_preserved_outside_git": true
+  },
+  "reporting_constraints": {
+    "compare_latency_across_cache_capacities": false,
+    "claim_natural_production_pressure": false,
+    "compare_empirical_to_session_bursty_as_matched_permutations": true,
+    "compare_uniform_or_skewed_as_matched_permutations": false
+  }
+}

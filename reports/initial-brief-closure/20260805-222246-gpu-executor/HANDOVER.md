@@ -24,10 +24,26 @@ session.
 The historical capacity figure of 188,912 was **not** reused; capacity was read
 back from the running server, as §3 requires.
 
-`AGENTS.md` was requested in the handover instruction but **does not exist** at
-this commit, anywhere in the repo or in `$HOME`. `NUS_GPU_BRIEF_CLOSURE_INSTRUCTIONS.md`
-and `cluster/initial-brief-closure-manifest.json` were both read in full before
-any command was run.
+`NUS_GPU_BRIEF_CLOSURE_INSTRUCTIONS.md` and
+`cluster/initial-brief-closure-manifest.json` were both read in full before any
+command was run.
+
+`AGENTS.md` did **not** exist at the pinned commit `65b86ba`. It was added
+afterwards by `917d560` on `tooltrie-v0-workflow` and pulled into this worktree
+at 22:34, roughly eleven minutes into the run, then read in full and followed
+for the remainder. Recorded so provenance is exact:
+
+| item | value |
+|---|---|
+| measurements executed at | `65b86bacfbcc227c2b21223682018a7b29dd3e94` (pin matched at §1) |
+| worktree advanced mid-run to | `917d560d675986b64fd70e6d0b438c76775f121c` |
+| `git diff --name-only 65b86ba 917d560` | `AGENTS.md` — documentation only |
+| parent of this handover commit | `917d560` |
+
+No code, script, dataset, or configuration path differs between the two commits,
+so no measurement in this run is affected by the drift. The earlier revision of
+this file stated that `AGENTS.md` did not exist anywhere in the repo; that was
+written before the pull and is corrected here.
 
 ## GPU occupancy discipline
 
@@ -161,9 +177,19 @@ every §5 and §6 run carries clean counters, so those stages are unaffected.
 | entries | 221 |
 | SHA-256 | `568dedaea859056a4c3d2cb4773a810364b40b03858efc83092c5d0804d4a7d5` |
 
+Post-write verification: the SHA-256 was recomputed from the file on disk and
+matches, and `tar -tzf` read the whole archive successfully, listing 221 entries
+— so the file is a valid archive, not merely an unchanged one. Contents
+reconcile with the declared counts: 84 replay JSONs across four menu-size
+subdirectories, 7 k64 audits, 6 pressure files each carrying all four regimes
+under a `conditions` key (6 x 4 = 24 regime-runs), and 21 quarantine entries.
+
 Raw token IDs and per-request records are intentionally not committed. The
-archive sits on the same disk as the originals and still needs an off-machine
-copy.
+archive still sits on the same physical disk (`/dev/sda2`) as the originals and
+needs a copy elsewhere. Two large local filesystems exist (`/mnt/ssd0`,
+`/mnt/ssd1`) but both are world-writable shared scratch holding other users'
+data, so this executor did not copy research data there unasked; that placement
+decision belongs to the project owner.
 
 ## Files in this directory
 

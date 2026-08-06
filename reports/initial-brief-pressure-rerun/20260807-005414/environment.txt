@@ -1,0 +1,19 @@
+2026-08-07T00:54:57+08:00
+caf8ab576eb15d95265a53ec76c772c8af6c7929
+## HEAD (no branch)
+Linux gpuserver 6.8.0-136-generic #136-Ubuntu SMP PREEMPT_DYNAMIC Wed Jul  1 21:53:05 UTC 2026 x86_64 x86_64 x86_64 GNU/Linux
+index, name, uuid, driver_version, memory.total [MiB]
+0, NVIDIA GeForce RTX 3090, GPU-87ff24b3-1ffa-2319-0737-a9fc422063fc, 580.173.02, 24576 MiB
+1, NVIDIA GeForce RTX 3090, GPU-645298dc-036e-b673-4f1a-e497a4256e8a, 580.173.02, 24576 MiB
+2, NVIDIA GeForce RTX 3090, GPU-4dde8858-0f0d-c4c9-60f5-49069140911d, 580.173.02, 24576 MiB
+3, NVIDIA GeForce RTX 3090, GPU-64052bd5-f22e-45b3-38a2-535a5424267e, 580.173.02, 24576 MiB
+vllm 0.26.0
+--- corrected two-venv record ---
+client venv: /home/taghan/FYP/.venv/bin/python
+Python 3.12.3
+server venv: /home/taghan/tatm/.venv/bin/python
+torch 2.11.0+cu130
+vllm 0.26.0
+NOTE: runbook §2 records torch+vllm from FYP_PYTHON, but this host splits
+      server (tatm/.venv: vllm+torch) from clients (FYP/.venv: tatm+pytest).
+      The ModuleNotFoundError above is that split, not a broken environment.

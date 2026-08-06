@@ -1,0 +1,29 @@
+ordering              regime             peakKV  resident  evictions    reuse preempt  run/wait  ok
+original              empirical         0.91858      7055      84885   0.0118       0       1/0  PASS
+original              uniform           0.91858      7055      85340   0.0069       0       1/0  PASS
+original              skewed            0.91441      7023      84810   0.0124       0       1/0  PASS
+original              session_bursty    0.91858      7055      85309   0.0069       0       1/0  PASS
+alphabetical          empirical         0.91441      7023      60699   0.2921       0       1/0  PASS
+alphabetical          uniform           0.91858      7055      60600   0.2935       0       1/0  PASS
+alphabetical          skewed            0.91441      7023      61677   0.2806       0       1/0  PASS
+alphabetical          session_bursty    0.91858      7055      61948   0.2776       0       1/0  PASS
+random                empirical         0.91441      7023      58158   0.3216       0       1/0  PASS
+random                uniform           0.91858      7055      58948   0.3127       0       1/0  PASS
+random                skewed            0.91441      7023      57696   0.3267       0       1/0  PASS
+random                session_bursty    0.91441      7023      59854   0.3019       0       1/0  PASS
+frequency             empirical         0.91858      7055      77757   0.0944       0       1/0  PASS
+frequency             uniform           0.91858      7055      78176   0.0899       0       1/0  PASS
+frequency             skewed            0.91441      7023      77682   0.0951       0       1/0  PASS
+frequency             session_bursty    0.91858      7055      78144   0.0900       0       1/0  PASS
+schema_cost_weighted  empirical         0.91858      7055      77757   0.0944       0       1/0  PASS
+schema_cost_weighted  uniform           0.91858      7055      78176   0.0899       0       1/0  PASS
+schema_cost_weighted  skewed            0.91023      6991      77682   0.0951       0       1/0  PASS
+schema_cost_weighted  session_bursty    0.91858      7055      78144   0.0900       0       1/0  PASS
+fp_tree_global        empirical         0.91858      7055      77757   0.0944       0       1/0  PASS
+fp_tree_global        uniform           0.91858      7055      78176   0.0899       0       1/0  PASS
+fp_tree_global        skewed            0.91441      7023      77682   0.0951       0       1/0  PASS
+fp_tree_global        session_bursty    0.91858      7055      78144   0.0900       0       1/0  PASS
+
+peak KV usage range: 0.91023 - 0.91858   (threshold 0.90, capacity 7680 tokens)
+sampled evictions range: 57,696 - 85,340   (all strictly positive)
+accepted: 24/24   checks: 384/384

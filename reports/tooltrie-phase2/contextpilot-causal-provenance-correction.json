@@ -1,0 +1,28 @@
+{
+  "affected_artifact_key": "contextpilot_causal",
+  "annotations_enabled": false,
+  "cache_measurements_remain_valid_for_emitted_ordering": true,
+  "causal_information_boundary": true,
+  "contextpilot_commit": "1fa0a143fdeda344585666648ab2b30cb7fea77f",
+  "corrected_label": "ContextPilot static-refit causal adaptation (alpha=0.5; ordering only)",
+  "correction_date": "2026-08-07",
+  "engine_eviction_feedback_enabled": false,
+  "format_version": 1,
+  "full_contextpilot_system": false,
+  "historical_alpha": 0.5,
+  "historical_api": "ContextIndex.fit_transform(contexts[0..n]) for each request n",
+  "official_online_api_used": false,
+  "paper_alpha": 0.001,
+  "paper_alpha_range": [
+    0.001,
+    0.01
+  ],
+  "planner_time_included_in_serving_latency": false,
+  "required_confirmation_runbook": "NUS_GPU_CONTEXTPILOT_CONFIRMATION_INSTRUCTIONS.md",
+  "source_builder": "reports/tooltrie-phase2/build_regime_arms.py",
+  "withdrawn_claims": [
+    "the historical arm is official online ContextPilot",
+    "the historical arm is the full ContextPilot system",
+    "the 95-96% cached ratio generalizes beyond the shared padded-catalog trace"
+  ]
+}

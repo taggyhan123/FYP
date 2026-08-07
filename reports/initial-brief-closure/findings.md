@@ -213,16 +213,18 @@ changes the engine versions, emitted sequence equivalence, or 24/24 acceptance.
 5. **Simple pair/triple statistics add little on the measured fitted arm.** The
    Phase 2 pair, triple, frequency, schema-cost, and FP-tree fitted policies
    collapse to within 0.01 percentage points of one another and alphabetical.
-   ContextPilot’s stronger clustering is the important competitor, not evidence
-   that the current pair/triple adaptation is sufficient.
+   The ContextPilot-derived static-refit ordering is the important measured
+   competitor, not evidence that the current pair/triple adaptation is
+   sufficient. It must not be relabelled as official online ContextPilot.
 6. **Request order and causality matter.** ToolTrie-v0’s causal
    self-reinforcement is load-bearing; its tested offline fixpoint variant
    collapses. Under controlled pressure, empirical and session-bursty also
    produce different reuse despite being permutations of one task multiset.
 7. **Ordering changes quality and safety.** The n=800 Qwen3-8B Phase 2 run finds
-   a reuse/selection/no-tool frontier: causal ContextPilot leads reuse and call
-   accuracy but has a larger no-tool penalty; ToolTrie is safer on no-tool
-   requests but does not lead reuse.
+   a reuse/selection/no-tool frontier: the causal static-refit ContextPilot
+   adaptation leads reuse and call accuracy but has a larger no-tool penalty;
+   ToolTrie is safer on no-tool requests but does not lead reuse. This is an
+   ordering-only result (`alpha=0.5`, no annotations), not full-system quality.
 8. **Trie ordering provides little benefit when menus share little exact
    prefix, prompts are below the latency floor, or retrieval misses the needed
    tool.** The true retrieved-menu arm demonstrates all three limits.
@@ -238,8 +240,9 @@ text prefill whenever expected savings do not exceed context, decode, retrieval,
 or safety costs. No inactive tools are retained and no KV tensors are composed
 in that fallback. The controlled-pressure gate is now complete, so the next
 publication-oriented experiment may study safe retention. It must still be
-evaluated against causal ContextPilot and this fallback, and should include a
-random-seed sensitivity sweep rather than promoting seed 42 as an algorithm.
+   evaluated against this fallback, the historical static-refit adapter, and an
+   official persistent ContextPilot arm at `alpha=0.001`. It should include a
+   random-seed sensitivity sweep rather than promoting seed 42 as an algorithm.
 
 ## Traceable artifacts
 
@@ -249,6 +252,10 @@ random-seed sensitivity sweep rather than promoting seed 42 as an algorithm.
 - Pressure failure record: [`PRESSURE-QUARANTINE.md`](20260805-222246-gpu-executor/PRESSURE-QUARANTINE.md)
 - Phase 2 causal/quality comparison:
   [`tooltrie-phase2/findings.md`](../tooltrie-phase2/findings.md)
+- ContextPilot historical-arm provenance correction:
+  [`contextpilot-causal-provenance-correction.json`](../tooltrie-phase2/contextpilot-causal-provenance-correction.json)
+- Corrected ContextPilot confirmation runbook:
+  [`NUS_GPU_CONTEXTPILOT_CONFIRMATION_INSTRUCTIONS.md`](../../NUS_GPU_CONTEXTPILOT_CONFIRMATION_INSTRUCTIONS.md)
 - Controlled pressure rerun instructions:
   [`NUS_GPU_PRESSURE_RERUN_INSTRUCTIONS.md`](../../NUS_GPU_PRESSURE_RERUN_INSTRUCTIONS.md)
 - Accepted pressure handover:

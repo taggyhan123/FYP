@@ -5,11 +5,25 @@ each engine's own counters. The planner's analytical `hinted_schema_tokens` is
 never used to support a cache claim.
 
 **Headline.** ToolTrie-v0 raises measured prefix-cache reuse from 38.13% to
-87.19% on BFCL and cuts aggregate TTFT 2.3×, beating every baseline **except
-ContextPilot, which beats it by ~9pp under an equally causal regime** (§2a —
-this corrects an earlier draft that dismissed ContextPilot as offline-only). Its
-one measured quality cost is real: it declines irrelevant requests less reliably
-than alphabetical ordering, −3.75pp with a 95% interval excluding zero.
+87.19% on BFCL and cuts aggregate TTFT 2.3×. A ContextPilot-derived
+**static-refit causal adaptation** reaches 96.16% on this padded workload, but
+the experiment did not use ContextPilot's persistent online API and therefore
+does not establish an official online ContextPilot result. ToolTrie's measured
+quality cost is real: it declines irrelevant requests less reliably than
+alphabetical ordering, −3.75pp with a 95% interval excluding zero.
+
+**Post-run implementation correction (2026-08-07).** The historical condition
+stored as `contextpilot_causal` repeatedly calls
+`ContextIndex.fit_transform(contexts[0..n])`, uses `alpha=0.5`, and adds neither
+ContextPilot relevance annotations nor engine-eviction feedback. The paper and
+upstream default use `alpha=0.001` (declared range `[0.001, 0.01]`), while the
+official online path is the persistent `ContextPilot.reorder` API. The measured
+cache counters below remain valid for the exact emitted ordering, and the
+no-future-information comparison remains valid; attribution to official online
+ContextPilot and generalization beyond the shared padded catalog are withdrawn.
+Future work must label this historical arm **`ContextPilot static-refit causal
+adaptation (alpha=0.5; ordering only)`**. The machine-readable correction is
+`contextpilot-causal-provenance-correction.json`.
 
 ## 7. Provenance (stated first, because three conditions are not upstream code)
 
@@ -20,7 +34,7 @@ than alphabetical ordering, −3.75pp with a 95% interval excluding zero.
 | FP-tree conditional | training-only tool-order adaptation of FP-tree traversal | **`FP-tree-derived adaptation`**, not an FP-Growth result |
 | Pair/triple conditional | training-only unordered co-occurrence statistics | **`pair/triple adaptation`** |
 | ContextPilot (offline) | actual upstream code, commit `1fa0a143fdeda344585666648ab2b30cb7fea77f`, v0.4.1, `fit_transform` over the whole batch | `ContextPilot offline/transductive` |
-| ContextPilot (causal) | same upstream code and commit, driven request-by-request: ordering for request *n* comes from `fit_transform(contexts[0..n])` only. Harness is ours (`build_regime_arms.py`), the algorithm is not modified | **`ContextPilot causal (our online harness)`** |
+| ContextPilot static-refit causal adaptation | upstream clustering code at the same commit, but our harness repeatedly calls `fit_transform(contexts[0..n])`; historical `alpha=0.5`; no annotations or eviction feedback | **`ContextPilot static-refit causal adaptation (alpha=0.5; ordering only)`**, not official online ContextPilot |
 | SGLang | official `v0.5.15.post1`, commit `0b3bb0cbe31873994c9f989fddfe2f87ca839fdd` | `SGLang/RadixAttention engine` |
 
 FYP commit `38566fd`. Full environment in `environment.txt`; the 230 resolved
@@ -93,15 +107,14 @@ Three findings:
    (39.69% on BFCL). Five different statistical policies, trained on disjoint
    data, rediscover essentially one stable global order — consistent with Task
    E's finding that the cache rewards *identical*, not *important*.
-3. **ContextPilot leads — and §2a shows this is NOT an artifact of its offline
-   regime.** An earlier draft of this report claimed ContextPilot was "not a
-   competitor" because it sees the whole evaluation batch. That claim was tested
-   and is **wrong**; see §2a.
+3. **The ContextPilot-derived order leads, and §2a shows future-batch visibility
+   is not the explanation.** This result applies to the static-refit adaptation;
+   official persistent online ContextPilot still requires confirmation.
 
 **Reproducibility.** `tooltrie_v0` measured 87.19% and `original` 1.19%, matching
 Phase 1's independent run to the digit on a different day and GPU.
 
-## 2a. Information regime — the comparison is now standardised
+## 2a. Information regime — standardized, but not API-equivalent
 
 The §2 table mixed two information regimes. ToolTrie-v0 is **causal**: it may use
 only already-served requests, because a deployed server cannot see the future.
@@ -109,8 +122,11 @@ ContextPilot is **offline**: `fit_transform` is fitted over the entire evaluatio
 batch. Comparing 87.19% against 96.64% therefore conflated *which algorithm* with
 *how much it was allowed to see*.
 
-Both missing cells were built and measured. `contextpilot_causal` recomputes the
-ordering for request *n* from `fit_transform(contexts[0..n])` only.
+Both missing information-regime cells were built and measured. The historical
+`contextpilot_causal` arm recomputes the ordering for request *n* from
+`fit_transform(contexts[0..n])` only. It is causal with respect to requests, but
+it is a static-refit adaptation rather than ContextPilot's official persistent
+online algorithm.
 `tooltrie_offline` grants ToolTrie the batch: a trie observes every request's
 ordering, all requests are re-planned against it, iterated to a fixpoint
 (converged in 2 iterations on both datasets) with the recency window disabled.
@@ -118,18 +134,18 @@ ordering, all requests are re-planned against it, iterated to a fixpoint
 | condition | regime | BFCL cached | ToolRet cached |
 | --- | --- | --- | --- |
 | contextpilot_intra | offline | 96.64% | 96.30% |
-| **contextpilot_causal** | **causal** | **96.16%** | **94.82%** |
+| **contextpilot_causal** *(static-refit, alpha=0.5)* | **causal** | **96.16%** | **94.82%** |
 | **tooltrie_v0** | **causal** | **87.19%** | **83.58%** |
 | alphabetical | causal | 38.13% | 51.05% |
 | tooltrie_offline | offline | 29.96% | 43.20% |
 
 **Two corrections follow, both against the earlier draft.**
 
-1. **ContextPilot's advantage is not the regime.** Restricting it to causal costs
-   only **0.48pp** on BFCL and 1.48pp on ToolRet. It still beats ToolTrie-v0 by
-   ~9pp as a legitimate causal policy. The previous framing — that 96.6% was an
-   artifact of batch visibility — does not survive the test, and it was the most
-   load-bearing caveat in this report.
+1. **The static-refit adaptation's advantage is not future-batch visibility.**
+   Restricting that adapter to observed requests costs only **0.48pp** on BFCL
+   and 1.48pp on ToolRet. It still beats ToolTrie-v0 by ~9pp as a valid causal
+   *ordering adaptation*. This does not establish the result for official
+   persistent ContextPilot, whose eviction-aware index was not tested here.
 2. **ToolTrie's causality is load-bearing, not a handicap.** Given the batch it
    *collapses*, 87.19% → **29.96%**, below plain alphabetical. The mechanism is
    self-reinforcement: early requests establish a path, later ones follow it, and
@@ -143,12 +159,12 @@ formulations. It shows *this* formulation fails, not that none could work.
 **Every other condition is already causal**, verified rather than assumed: the
 five fitted policies train on disjoint data (200 evaluation tasks vs 1,040
 training tasks, **intersection empty**), ToolTrie and CacheWeaver are strictly
-plan-before-observe, and alphabetical/original do no learning. ContextPilot was
-the only non-causal condition in the study.
+plan-before-observe, and alphabetical/original do no learning. The original
+offline ContextPilot arm was the only non-causal condition in the study.
 
-**Cross-arm replication.** The causal result is not specific to one engine or to
-the unsanitized schemas. `contextpilot_causal` was replayed 3× on each of the
-three systems arms:
+**Cross-arm replication.** The emitted static-refit ordering is not specific to
+one engine or to the unsanitized schemas. `contextpilot_causal` was replayed 3×
+on each of the three systems arms:
 
 | arm | BFCL cached | ToolRet cached |
 | --- | --- | --- |
@@ -157,16 +173,18 @@ three systems arms:
 | SGLang | 96.38% | 95.09% |
 
 Maximum spread across arms is **0.22pp** (BFCL) and **0.27pp** (ToolRet), the
-same order as every other condition's cross-arm variation, so the ~9pp gap over
-ToolTrie-v0 replicates on a second engine with an independent cache
-implementation. All six SGLang runs passed the same independent counter check
+same order as every other condition's cross-arm variation, so the ~9pp gap for
+the **same precomputed ordering** replicates on a second engine with an
+independent cache implementation. This validates engine cache accounting, not
+the ordering-generation API. All six SGLang runs passed the independent counter
+check
 applied to the other 66 (index 0 the only omitted `cached_tokens`, totals
 reconciling, zero failed requests).
 
-**The regime standardisation is now complete on every table.** `contextpilot_causal`
-has been measured on all three systems arms (§5) and on the n=800 quality set
-(§4). No table in this report now compares a causal against an offline condition
-without labelling both.
+**The information-regime standardization is complete on every historical
+table.** `contextpilot_causal` has been measured on all three systems arms (§5)
+and on the n=800 quality set (§4). Algorithm/API parity with official online
+ContextPilot remains a separate confirmation experiment.
 
 ## 3. ContextPilot scheduling table (kept separate)
 
@@ -188,7 +206,7 @@ be attributed to tool ordering, and none is claimed.
 | fp_tree_conditional | 83.91% | 77.97% | 88.12% |
 | conditional_pair_triple | 83.91% | 77.81% | 88.12% |
 | cacheweaver | 84.84% | 78.91% | 82.50% |
-| **contextpilot_causal** | 84.84% | 79.06% | **81.88%** |
+| **contextpilot_causal** *(static-refit, alpha=0.5)* | 84.84% | 79.06% | **81.88%** |
 | contextpilot_intra *(offline)* | **85.31%** | **78.91%** | 82.50% |
 
 Paired differences versus alphabetical, task-clustered 95% CI, `*` = excludes zero:
@@ -199,30 +217,33 @@ Paired differences versus alphabetical, task-clustered 95% CI, `*` = excludes ze
 | cacheweaver | +2.03 [+0.47, +3.75]* | +2.50 [+0.47, +4.53]* | −6.88 [−11.25, −2.50]* |
 | fp_tree_conditional | +1.09 [+0.16, +2.19]* | +1.56 [+0.31, +2.97]* | −1.25 [−3.12, +0.00] |
 | conditional_pair_triple | +1.09 [+0.16, +2.19]* | +1.41 [+0.16, +2.66]* | −1.25 [−3.12, +0.00] |
-| **contextpilot_causal** | +2.03 [+0.62, +3.59]* | +2.66 [+0.94, +4.53]* | **−7.50 [−11.88, −3.75]*** |
+| **contextpilot_causal** *(static-refit, alpha=0.5)* | +2.03 [+0.62, +3.59]* | +2.66 [+0.94, +4.53]* | **−7.50 [−11.88, −3.75]*** |
 | contextpilot_intra *(offline)* | +2.50 [+0.94, +4.06]* | +2.50 [+0.62, +4.38]* | −6.88 [−11.25, −3.12]* |
 
 **A systematic trade-off appears across all six orderings.** Ranking by
 function-name accuracy produces almost exactly the reverse ranking on no-tool
 accuracy: alphabetical is worst at selection (82.81%) and best at declining
-(89.38%); ContextPilot is best at selection and worst at declining. An ordering
+(89.38%); the ContextPilot-derived adapters show the reverse. An ordering
 that makes the right tool easier to find also makes the model likelier to call
 *something* when it should decline. This is the sharpest evidence yet on brief
 question 6 (quality and safety), and it is not specific to ToolTrie — ToolTrie
 sits in the middle of the trade-off, with a *smaller* no-tool cost than either
-CacheWeaver or ContextPilot.
+CacheWeaver or the ContextPilot-derived adapters.
 
-**The trade-off is not an offline artifact either.** `contextpilot_causal`,
-restricted to already-served requests, lands in essentially the same place as the
-offline variant: +2.03pp on name accuracy but **−7.50pp on no-tool**, the largest
-decline penalty of any condition measured. Its no-tool discordant pairs are
+**The trade-off is not future-batch leakage in this adapter.** The static-refit
+`contextpilot_causal` arm, restricted to already-served requests, lands in
+essentially the same place as the offline variant: +2.03pp on name accuracy but
+**−7.50pp on no-tool**, the largest decline penalty of any condition measured.
+Its no-tool discordant pairs are
 **12:0** — of the 12 cases where the two orderings disagreed, alphabetical was
 correct in every one and ContextPilot in none. So the reuse win reported in §2a
 and §5 is bought at a real and one-sided cost on the irrelevance domain, and that
-cost survives making ContextPilot causal.
+cost survives making the static-refit adaptation causal. It is not a quality
+measurement of full ContextPilot because annotations are absent, and the
+nonstandard alpha can change the non-prefix tail ordering.
 
-**Counting the axes honestly: ContextPilot wins three of four.** Causal
-ContextPilot beats ToolTrie-v0 on reuse (+8.97pp BFCL, +11.24pp ToolRet), on
+**Counting the historical axes honestly: the static-refit adaptation wins three
+of four.** It beats ToolTrie-v0 on reuse (+8.97pp BFCL, +11.24pp ToolRet), on
 function-name accuracy (84.84% vs 83.75%) and on full-call accuracy (79.06% vs
 77.66%). ToolTrie-v0 wins exactly one axis, no-tool safety, by 5.62pp (87.50% vs
 81.88%), where it is also the only high-reuse ordering whose interval does not
@@ -231,9 +252,9 @@ exclude zero.
 "Neither dominates" is therefore true only as a *multi-objective* statement, and
 should not be used as a shorthand that implies parity. **No combined utility or
 cost weighting has been defined**, so there is no basis in this report for
-declaring an overall winner. Stated plainly: on current evidence ContextPilot is
-the stronger method on reuse and on tool-call quality, and ToolTrie-v0 is the
-safer method on requests that should be declined. Which matters more is a
+declaring an overall winner. Stated plainly: on this padded trace the
+static-refit adaptation is stronger on reuse and tool-call quality, and
+ToolTrie-v0 is safer on requests that should be declined. Which matters more is a
 deployment question this study does not answer — and answering it requires
 declaring the weighting *before* looking at these numbers, not after.
 
@@ -247,9 +268,10 @@ zero where this smaller 160-task arm's does not.
 ## 5. SGLang/RadixAttention — separate engine table
 
 Identical sanitized **input files** on both engines (see §6), Qwen3-0.6B, 3 trials.
-Both ContextPilot variants are listed; only **contextpilot_causal** shares an
-information regime with ToolTrie-v0 and the other conditions, so it is the row to
-compare against (§2a). `contextpilot_intra` is retained as the offline reference.
+Both historical ContextPilot variants are listed; only **contextpilot_causal**
+shares the causal information boundary of ToolTrie-v0 and the other conditions.
+It remains a static-refit adaptation, not an official online-system row.
+`contextpilot_intra` is retained as the offline reference.
 
 **The rendered prompts are not identical, and this bounds what may be compared.**
 vLLM serves with `--tool-call-parser hermes`, SGLang with `--tool-call-parser
@@ -269,7 +291,7 @@ template.
 | BFCL | vLLM cached | vLLM TTFT | SGLang cached | SGLang TTFT |
 | --- | --- | --- | --- | --- |
 | contextpilot_intra *(offline)* | 96.67% | 12.55 | 96.86% | 37.74 |
-| **contextpilot_causal** | **96.18%** | **15.35** | **96.38%** | **44.25** |
+| **contextpilot_causal** *(static-refit)* | **96.18%** | **15.35** | **96.38%** | **44.25** |
 | tooltrie_v0 | 87.11% | 16.82 | 87.29% | 44.68 |
 | fitted policies | 39.69% | ~39 | 39.58% | ~72 |
 | alphabetical | 38.13% | 39.47 | 38.02% | 72.74 |
@@ -278,7 +300,7 @@ template.
 | ToolRet | vLLM cached | SGLang cached |
 | --- | --- | --- |
 | contextpilot_intra *(offline)* | 96.33% | 96.56% |
-| **contextpilot_causal** | **94.86%** | **95.09%** |
+| **contextpilot_causal** *(static-refit)* | **94.86%** | **95.09%** |
 | tooltrie_v0 | 83.55% | 83.74% |
 | alphabetical | 51.06% | 49.94% |
 | cacheweaver | 22.46% | 17.75% |
@@ -350,17 +372,21 @@ pre-release — itself a reproducibility hazard, hence the frozen dep list);
 **Limitations.** One model family; one menu size (64); one GPU type. Quality runs
 are single-pass, justified by `temperature=0, seed=0` but batching
 nondeterminism is not formally excluded. ToolRet is used for cache/TTFT only —
-its retrieval labels are not call correctness. Both ContextPilot information
-regimes are measured and labelled; only `contextpilot_causal` is a deployable
-comparison. No equivalence margin was declared for any metric, so nothing here
+its retrieval labels are not call correctness. Both historical ContextPilot
+information regimes are measured and labelled. `contextpilot_causal` is a
+causally valid static-refit comparison, not a deployable/full ContextPilot
+comparison: it uses `alpha=0.5`, excludes planner time, annotations,
+de-duplication, and eviction feedback, and was precomputed before serving. No
+equivalence margin was declared for any metric, so nothing here
 is an equivalence claim. These runs use gold/exposed menus padded from a shared
 catalog, not menus selected by a retriever, so retrieval error is outside this
 table.
 
-*(An earlier revision listed "ContextPilot is offline and not a deployable
-causal policy" as a limitation. That was tested in §2a and is false —
-restricting it to a causal regime costs 0.48pp on BFCL. The claim is
-withdrawn.)*
+*(An earlier revision correctly identified that the offline arm was not
+deployable, then over-corrected by calling the static-refit follow-up an online
+ContextPilot policy. Section 2a establishes that future-batch visibility is not
+the source of the adapter's score; it does not establish official online API
+parity.)*
 
 ## Positive and negative regimes
 
@@ -378,5 +404,6 @@ before starting §9 extensions: run a true retrieved-menu arm, capture exact
 server-rendered token/block boundaries, report direct partial-reuse prefill and
 TTFT, and measure KV occupancy under demonstrated cache pressure. After those
 controls are complete, the first extension should test a bounded active-tool
-manifest / safe-retention design against both ToolTrie and causal ContextPilot,
-with ordinary selected-tool text prefill kept as the predeclared fallback.
+manifest / safe-retention design against ToolTrie, the historical static-refit
+adapter, and a corrected persistent-API ContextPilot arm, with ordinary
+selected-tool text prefill kept as the predeclared fallback.

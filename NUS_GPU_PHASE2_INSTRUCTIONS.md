@@ -1,5 +1,14 @@
 # NUS GPU instructions — ToolTrie external-comparison phase
 
+> **2026-08-07 correction.** The later follow-up condition stored as
+> `contextpilot_causal` was not produced by the official online API. It was a
+> repeated `fit_transform(contexts[0..n])` adaptation with nonstandard
+> `alpha=0.5`, no annotations, and no eviction feedback. Its measured counters
+> remain historical evidence for that exact ordering only. Do not rerun or cite
+> it as “ContextPilot online.” Use
+> `NUS_GPU_CONTEXTPILOT_CONFIRMATION_INSTRUCTIONS.md` for corrected
+> static-refit and persistent-online confirmation arms at `alpha=0.001`.
+
 Read this file completely before running commands. Execute it section by
 section; do not paste the whole document into one shell. This phase has four
 ordered objectives:
@@ -45,6 +54,7 @@ prepared this file. A successful local test run is not an experimental result.
 | FP-tree conditional | This repository's training-only tool-order adaptation of FP-tree traversal | `FP-tree-derived adaptation`, not “FP-Growth implementation result” |
 | Pair/triple conditional | Training-only unordered co-occurrence statistics | `pair/triple adaptation` |
 | ContextPilot | Actual upstream code at commit `1fa0a143fdeda344585666648ab2b30cb7fea77f` | `ContextPilot offline/transductive` |
+| ContextPilot causal follow-up | Our repeated-prefix `fit_transform` harness; historical `alpha=0.5`; no annotation/eviction integration | `ContextPilot static-refit causal adaptation (alpha=0.5; ordering only)`, never “official online” |
 | SGLang | Official `v0.5.15.post1` package/tag, commit `0b3bb0cbe31873994c9f989fddfe2f87ca839fdd` | `SGLang/RadixAttention engine` |
 
 ContextPilot has two outputs. `contextpilot_intra` preserves the empirical

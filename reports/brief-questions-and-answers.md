@@ -198,7 +198,7 @@ BFCL correctness, n=800, Qwen3-8B:
 | --- | ---: | ---: | ---: |
 | Alphabetical | 82.81% | 76.41% | **89.38%** |
 | ToolTrie-v0 | 83.75% | 77.66% | 87.50% |
-| ContextPilot, causal | **84.84%** | **79.06%** | 81.88% |
+| ContextPilot static-refit causal adaptation (alpha=0.5) | **84.84%** | **79.06%** | 81.88% |
 
 The targeted no-tool analysis is better powered and more damaging. Across all
 240 BFCL irrelevance tasks under 5 fixed menu seeds, task-clustered bootstrap:
@@ -272,8 +272,9 @@ onto the same order as frequency and FP-tree under measurement.
 The pair, triple, frequency, schema-cost, and FP-tree fitted policies collapse
 to within **0.01 percentage points** of one another and of alphabetical. Five
 statistical policies trained on disjoint data rediscover one stable global order.
-ContextPilot's stronger clustering is the important competitor here, not evidence
-that the current pair/triple adaptation is sufficient.
+The ContextPilot-derived static-refit ordering is the important measured
+competitor here, not evidence that the current pair/triple adaptation is
+sufficient. It is not official persistent online ContextPilot.
 
 ### Q6. How sensitive are results to request ordering and session locality? — **Answered: highly**
 
@@ -288,9 +289,11 @@ reuse despite being permutations of one task multiset.
 
 ### Q7. Does tool reordering change function-call accuracy? — **Answered: yes**
 
-See Part 1, Q6. A reuse/selection/no-tool frontier exists: causal ContextPilot
-leads reuse and call accuracy but carries the larger no-tool penalty (-7.50
-points); ToolTrie is safer on no-tool but does not lead reuse. ToolTrie's own
+See Part 1, Q6. A reuse/selection/no-tool frontier exists: the causal
+ContextPilot-derived static-refit adaptation leads reuse and call accuracy but carries
+the larger no-tool penalty (-7.50 points); ToolTrie is safer on no-tool but does
+not lead reuse. These are ordering-only results, not full-system ContextPilot
+quality. ToolTrie's own
 no-tool regression against alphabetical is confirmed at -3.75 points with an
 interval excluding zero.
 
@@ -361,17 +364,19 @@ advised against for now.
    semantically clustered menus, which could mean *more* exact prefix overlap.
    Since the central negative result rests on retrieved menus sharing little
    prefix, this is the highest-value robustness check available.
-2. **No external system has been run on retrieved menus.** ContextPilot,
-   CacheWeaver, and the fitted policies were measured only on padded menus.
-   Whether ContextPilot's ~9-point lead survives the move that cost ToolTrie
-   48 points is unknown, and it decides how general the negative result is.
-3. **The no-tool comparison against ContextPilot is under-powered.** Its -7.50
+2. **No external system has been run on retrieved menus.** The
+   ContextPilot-derived adapters, CacheWeaver, and the fitted policies were
+   measured only on padded menus. Whether the static-refit adapter's ~9-point
+   lead survives the move that cost ToolTrie 48 points is unknown; official
+   persistent ContextPilot is also unmeasured.
+3. **The no-tool comparison against the static-refit adapter is under-powered.** Its -7.50
    point penalty comes from a 160-case arm; the well-powered 240-task protocol
    was run only for ToolTrie against alphabetical. This is the single axis
    ToolTrie wins, so it decides the multi-objective comparison.
 4. **No combined utility weighting has been declared,** so no overall winner is
-   claimed between ToolTrie and ContextPilot. Any weighting must be declared
-   before looking at the measured numbers.
+   claimed between ToolTrie and the historical adapter. Official ContextPilot
+   cannot enter that ranking until measured. Any weighting must be declared
+   before looking at the numbers.
 5. **The predeclared 1-point quality gate is unfalsifiable.** The 95% CI on the
    full-accuracy difference is about +/-4.2 points at n=1,000; resolving 1 point
    needs roughly n=15,000, about 12 GPU-hours per condition at 8B. It should be

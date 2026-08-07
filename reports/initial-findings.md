@@ -210,9 +210,11 @@ The likely publishable refinement is not a generic "reorder context into a
 trie" claim, because closely related cache-aware context ordering already
 exists. The later Phase 2 comparison in
 `reports/tooltrie-phase2/findings.md` is the authoritative gold-menu comparison:
-causal ContextPilot beats ToolTrie-v0 on reuse, while ToolTrie has the smaller
-no-tool penalty. ContextPilot was not rerun in this retrieved-menu closure arm,
-so the two information regimes must not be combined into one ranking.
+the causal **ContextPilot-derived static-refit adaptation** beats ToolTrie-v0 on reuse,
+while ToolTrie has the smaller no-tool penalty. A post-run audit found that this
+historical arm used `alpha=0.5` and was not the persistent online API.
+ContextPilot was not rerun in this retrieved-menu closure arm, so these workloads
+must not be combined into one ranking or presented as an official online result.
 
 Do not pursue arbitrary independent KV concatenation yet. Native exact APC
 already converts the local token-reuse signal into a repeatable TTFT benefit

@@ -7,8 +7,10 @@ analytical `hinted_schema_tokens` is **not** used to support any cache claim.
 > Historical scope note: this is the Phase 1 report. Its proposed next
 > experiments and "open no-tool question" were subsequently completed and
 > superseded by `reports/tooltrie-phase2/findings.md`, which confirmed the
-> no-tool regression and measured causal ContextPilot plus the external engine
-> comparison. The measurements below remain valid for their stated run.
+> no-tool regression and measured a ContextPilot-derived static-refit causal
+> ordering plus the external engine comparison. That historical adapter is not
+> official persistent online ContextPilot. The measurements below remain valid
+> for their stated run.
 
 ## 1. Configuration
 

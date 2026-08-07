@@ -5,7 +5,11 @@ SGLang tag commit:   0b3bb0cbe31873994c9f989fddfe2f87ca839fdd
 client python:       Python 3.12.3
 vLLM server venv:    /home/taghan/tatm/.venv (vllm 0.26.0, torch 2.11.0+cu130)
 SGLang venv:         /home/taghan/venvs/sglang-0.5.15.post1 (see sglang-resolved-deps.txt, 230 pins)
-ContextPilot venv:   /home/taghan/venvs/contextpilot-1fa0a143 (v0.4.1)
+ContextPilot venv:   /home/taghan/venvs/contextpilot-1fa0a143 (upstream
+                     __version__ 0.4.1; pyproject metadata 0.4.2; commit above
+                     is the authoritative pin)
+Historical causal:  repeated fit_transform, alpha=0.5, ordering only; not the
+                     persistent ContextPilot.reorder API
 GPUs used:           2 (8B quality/no-tool), 3 (SGLang), 0 (sanitized vLLM)
 8B cache capacity:   44656 tokens (block_size 16 x 2791)
 0.6B cache capacity: 190896 tokens (block_size 16 x 11931)

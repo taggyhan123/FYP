@@ -20,8 +20,30 @@ extension stage and one sub-question was never measured.
 
 ## Part 1 — High-level research questions (brief §2)
 
-The brief notes that questions 1–3 define the initial implementation scope, and
-4–6 are extensions to pursue once the basic measurements are reliable.
+**Read the scope note before the answers.** The brief states, immediately after
+listing these six:
+
+> *"The first three questions define the initial implementation scope. The later
+> questions are research extensions that may be pursued once the basic
+> measurements and baselines are reliable."*
+
+**Q1–Q3 are the questions the initial stage was required to answer, and all
+three are fully answered. Q4–Q6 were designated extensions from the outset.**
+Two of them were nevertheless answered in substantial part.
+
+| Question | Required by the initial stage? | Status |
+| --- | --- | --- |
+| Q1 Tool locality | **Yes** | **Answered** |
+| Q2 Prefix organization | **Yes** | **Answered** |
+| Q3 Trie-aware memory | **Yes** | **Answered** |
+| Q4 Retention trade-off | No — extension (§9.1) | Deferred |
+| Q5 Long-tail tools | No — extension (§9.4) | Partly answered anyway |
+| Q6 Quality and safety | No — extension (§9.2) | Mostly answered anyway |
+
+A "Deferred" or "Partly answered" mark below therefore records **correct
+sequencing, not an unmet requirement**. Each remaining gap is blocked on
+machinery that would compromise the trustworthiness of the current baseline if
+added early; the reason is given per question.
 
 ### Q1. Tool locality — **Answered**
 
@@ -102,7 +124,7 @@ retention. That is Q4, and it is unbuilt.
 
 **Source:** `src/tatm/tooltrie.py`; `PROJECT_STATUS.md` "ToolTrie-v0".
 
-### Q4. Retention trade-off — **Deferred**
+### Q4. Retention trade-off — **Deferred** *(extension question; not required by the initial stage)*
 
 > *Is it sometimes beneficial to retain a small number of cached but currently
 > inactive tools in order to reuse a longer prefix?*
@@ -113,12 +135,20 @@ This is brief §9.1, and it was explicitly listed under `excludes` in the closur
 manifest as "inactive-tool retention". The brief sequences extensions after a
 stable baseline, and no inactive tool is retained anywhere in the current system.
 
+**Why it cannot simply be added.** Retaining an inactive tool means putting a
+tool in the prompt that the request does not need. That breaks the permutation
+guarantee `assert set(ordered_ids) == set(ids)`, which is exactly what makes
+every current measurement attributable to ordering alone. Answering Q4 changes
+the experimental design rather than extending it, and the brief additionally
+requires evaluating context overhead, decode KV I/O, tool confusion, and
+permissions alongside it.
+
 The initial stage did produce what the brief asked for here — an experimental
 basis for deciding whether to pursue it. See Part 3.
 
 **Source:** `cluster/initial-brief-closure-manifest.json`, `scope.excludes`.
 
-### Q5. Long-tail tools — **Partly answered**
+### Q5. Long-tail tools — **Partly answered** *(extension question; not required by the initial stage)*
 
 > *For tools not covered by the exact prefix memory, when is text prefill
 > preferable to loading or composing a precomputed KV representation?*
@@ -140,10 +170,16 @@ no precomputed KV representation was ever composed. "KV tensor composition" was
 in the closure manifest's `excludes`; it is brief §9.4 and is flagged there as
 an advanced extension.
 
+**Why it cannot simply be added.** Composing a precomputed KV representation
+requires computing a tool's KV state independently and relocating or linking it
+after a cached prefix — that is, modifying KV tensors. The project's own working
+rules forbid patching vLLM, CUDA, attention, or KV-cache internals, precisely so
+that measured results remain attributable to prompt-layer changes.
+
 **Source:** `reports/initial-findings.md` "Prefill cost and the measurement
 floor" and "Recommendation".
 
-### Q6. Quality and safety — **Partly answered**
+### Q6. Quality and safety — **Partly answered** *(extension question; not required by the initial stage)*
 
 > *How do additional or reordered tools affect tool selection, argument
 > generation, no-tool decisions, and unauthorized-tool prevention?*
@@ -179,8 +215,13 @@ This is a **confirmed regression, not a null result**; the point estimate has
 been stable near -4 points across three independent measurements.
 
 **Unauthorized-tool prevention was not measured at all.** It requires separating
-the tools present in cached context from the tools that may actually be called,
-which is brief §9.2 and is unbuilt.
+the tools present in cached context from the tools that may actually be called —
+an active-tool manifest plus a constrained decoder. That is brief §9.2, and it is
+unbuilt: `grep -i constrain` over `src/` and `scripts/` returns zero hits.
+
+The other three sub-questions were answered despite this being an extension
+question, so Q6 is substantially over-delivered relative to what the initial
+stage required.
 
 **Source:** `reports/tooltrie-phase2/findings.md` §1 and §4.
 

@@ -9,7 +9,7 @@ Status after the first local research pass:
 | C — normalize datasets | Complete for ToolRet and five BFCL V4 static subsets | `scripts/download_datasets.py`, `scripts/run_pipeline.py`, `reports/dataset-inventory.md` |
 | D — access patterns | Complete for benchmark evidence, four controlled replays, and the retrieved-menu ordering matrix | `reports/access-patterns.md`, `reports/tables/`, `reports/initial-brief-closure/findings.md` |
 | E — exact ToolTrie baseline | Measured on GPU on shared padded catalogs and true BM25-retrieved menus, with ordinary text prefill retained as the explicit fallback | `src/tatm/tooltrie.py`, "Task E" and "ToolTrie-v0" below, `reports/tooltrie-v0/findings.md`, `reports/initial-brief-closure/findings.md` |
-| F — initial report | Complete and regenerated from measured results; enhanced pressure acceptance remains separately pending | `reports/initial-findings.md`, `reports/initial-brief-closure/findings.md` |
+| F — initial report | Complete and regenerated from measured results; enhanced pressure acceptance passes 24/24 | `reports/initial-findings.md`, `reports/initial-brief-closure/findings.md` |
 
 The external comparison from `NUS_GPU_PHASE2_INSTRUCTIONS.md` has now been
 **measured on GPU** — targeted no-tool evaluation, CacheWeaver, fitted
@@ -382,14 +382,14 @@ section instead of replacing it with "not yet measured." Other generated
 sections are still overwritten. `PROJECT_STATUS.md` and `cluster/README.md` are
 hand-maintained.
 
-## Initial-brief gap closure: retrieved and audit arms measured
+## Initial brief formally closed
 
 The explicit Tasks A-F in `initial-research-brief.md` now have reported
-evidence. The later, stricter gap-closure manifest is **three systems arms
-complete and one acceptance item pending**: retrieved-menu replay, ordinary
-fallback, direct partial reuse, and exact rendered-prefix auditing are measured;
-the controlled pressure rerun remains outstanding. This work does not start a
-§9 retained-tool or KV-composition extension.
+evidence, and the later stricter gap-closure manifest is fully accepted:
+retrieved-menu replay, ordinary fallback, direct partial reuse, exact
+rendered-prefix auditing, and controlled memory pressure are all measured. This
+closes the initial stage; it does not retroactively make a §9 retained-tool or
+KV-composition extension part of the result.
 
 The corrected GPU handover is commit `6378d78`, with measurements executed at
 the pinned `65b86ba`. The only mid-run worktree change was the documentation-only
@@ -402,7 +402,9 @@ configuration did not change. Validation found:
 - 7/7 exact k64 rendered-token/block audits clean;
 - direct partial-reuse strata present for both predeclared k64 conditions;
 - a readable, checksummed 221-entry raw archive, with invalid and contended
-  attempts retained separately in quarantine.
+  attempts retained separately in quarantine;
+- 24/24 controlled-pressure regime-runs accepted with 384/384 checks passing,
+  positive sampled evictions, zero preemptions, and sequential execution.
 
 The BM25 retrieval artifact is `reports/retrieval-bm25-sweep.json`. Selection
 never reads evaluation gold IDs; this remains a lexical baseline, not the
@@ -434,19 +436,33 @@ three-trial intervals overlap and no paired-difference interval was declared.
 The true retrieved-set overlap, rather than the padded shared-catalog result,
 is therefore the limiting regime for deployment claims.
 
-The first pressure matrix also completed cleanly, but 0/24 regime-runs met the
+The first pressure matrix completed cleanly, but 0/24 regime-runs met the
 predeclared 90% occupancy threshold. Peak occupancy was only 3.6379-3.6882%:
 one sequential approximately 7k-token request in a 190,896-token cache. Those
 runs are valid low-occupancy evidence but cannot support eviction or
 memory-under-pressure claims.
 
-The only remaining enhanced-closure item is the separately predeclared
-controlled-cache rerun in
-`cluster/initial-brief-pressure-rerun-manifest.json`: the same six orderings,
-four regimes, sequential request order, and 90% threshold, with capacity fixed
-before execution at 480 blocks/7,680 tokens. Acceptance requires 24/24 runs and
-positive sampled eviction counts. Cross-capacity latency comparison is
-forbidden. See `NUS_GPU_PRESSURE_RERUN_INSTRUCTIONS.md`.
+The separately predeclared controlled-cache rerun fixes capacity at 480
+blocks/7,680 tokens while preserving the six labels, four regimes, sequential
+request order, and 90% threshold. It passes 24/24 regime-runs and 384/384
+checks. Peak occupancy is 91.02-91.86%, sampled evictions are
+57,696-85,340, preemptions are zero, and peak running/waiting requests are 1/0.
+Cross-capacity latency comparison remains forbidden.
+
+Within that controlled stress condition, fixed random seed 42 ranks above
+alphabetical on reuse in all four regimes, while original retrieval order is
+worst. This is a single-run, single-seed sensitivity finding without an
+uncertainty interval, not a recommendation to use random ordering. A
+deterministic reconstruction also confirms that frequency,
+schema-cost weighted, and FP-tree global emit identical 200-request sequences
+in every regime, so the 24 executions represent four distinct orderings rather
+than six independent policies. See
+`reports/initial-brief-pressure-rerun/ordering-equivalence.json`.
+
+The initial brief is now formally closed. The next extension may evaluate safe
+inactive-tool retention, but it must retain ordinary selected-tool text prefill
+as fallback and compare against causal ContextPilot, the no-retention baselines,
+and multiple random seeds.
 
 Analytical reuse estimates must still be labelled as estimates, but they are no
 longer unvalidated: they under-predict measured hits by 1.2-1.5x on the two

@@ -1,0 +1,214 @@
+{
+  "audit": "deterministic-ordering-sequence-equivalence",
+  "distinct_orderings_per_regime": 4,
+  "experiment": "initial-brief-controlled-cache-pressure-rerun",
+  "format_version": 1,
+  "generated_by": "scripts/audit_pressure_ordering_equivalence.py",
+  "inputs": {
+    "canonical_tools": 45815,
+    "tasks": 9201,
+    "tasks_jsonl_sha256": "a33f22e0d707e33956921554269612b48583c17943f21f60ed63e10edb06db7c",
+    "tools_jsonl_sha256": "9752e94501a6388b6ef8267951b41deb680ef8d8674f72e945cf2b8dbf1d79b9"
+  },
+  "parameters": {
+    "evaluation_overlap_tasks": 0,
+    "max_schema_tokens": 300,
+    "menu_size": 64,
+    "offset": 0,
+    "partition": "bfcl",
+    "random_seed": 42,
+    "replay_seed": 2026,
+    "requests": 200,
+    "support_mode": "disjoint",
+    "support_tasks": 1040
+  },
+  "regimes": {
+    "empirical": {
+      "equivalence_classes": [
+        [
+          "original"
+        ],
+        [
+          "alphabetical"
+        ],
+        [
+          "random"
+        ],
+        [
+          "frequency",
+          "schema_cost_weighted",
+          "fp_tree_global"
+        ]
+      ],
+      "orderings": {
+        "alphabetical": {
+          "requests_different_from_frequency": 200,
+          "sequence_sha256": "d42164aab1a05badd6877ef0e6a0c746a8c27ca81bff658b54c04b19fa53c66a"
+        },
+        "fp_tree_global": {
+          "requests_different_from_frequency": 0,
+          "sequence_sha256": "53ab7061ec4b1bd710899bca1d2bfc560669ff0fa66e819b7dbd291dc4778ee2"
+        },
+        "frequency": {
+          "requests_different_from_frequency": 0,
+          "sequence_sha256": "53ab7061ec4b1bd710899bca1d2bfc560669ff0fa66e819b7dbd291dc4778ee2"
+        },
+        "original": {
+          "requests_different_from_frequency": 200,
+          "sequence_sha256": "5bc94c4936440f6629ef553dd734f730cadd366c0adcae3fcec456db54a0b1fa"
+        },
+        "random": {
+          "requests_different_from_frequency": 200,
+          "sequence_sha256": "ac538f9a14f285f8d8ab3a0429f1347e8ff227a8a1cea62babb27db271d7d7e1"
+        },
+        "schema_cost_weighted": {
+          "requests_different_from_frequency": 0,
+          "sequence_sha256": "53ab7061ec4b1bd710899bca1d2bfc560669ff0fa66e819b7dbd291dc4778ee2"
+        }
+      },
+      "requests": 200,
+      "task_sequence_sha256": "e32e2aee38f5aaf175513fd35f47eac63c03ab23cb8d486b2dd7a04c7e968adc"
+    },
+    "session_bursty": {
+      "equivalence_classes": [
+        [
+          "original"
+        ],
+        [
+          "alphabetical"
+        ],
+        [
+          "random"
+        ],
+        [
+          "frequency",
+          "schema_cost_weighted",
+          "fp_tree_global"
+        ]
+      ],
+      "orderings": {
+        "alphabetical": {
+          "requests_different_from_frequency": 200,
+          "sequence_sha256": "180d61df275a752fc92a26412f54dac541127ca1813cecd4a5712373957507ed"
+        },
+        "fp_tree_global": {
+          "requests_different_from_frequency": 0,
+          "sequence_sha256": "53109031afc093c36fa52765b99449c101242801751ed6a9fc7826b3687ed350"
+        },
+        "frequency": {
+          "requests_different_from_frequency": 0,
+          "sequence_sha256": "53109031afc093c36fa52765b99449c101242801751ed6a9fc7826b3687ed350"
+        },
+        "original": {
+          "requests_different_from_frequency": 200,
+          "sequence_sha256": "754339a42bfe2ae32db51a49e42d92f0819991ca1097fe72974181e96531a942"
+        },
+        "random": {
+          "requests_different_from_frequency": 200,
+          "sequence_sha256": "c0f1668e248e96f1a749b828795538a3832e9acef689631b0064c5841a424f91"
+        },
+        "schema_cost_weighted": {
+          "requests_different_from_frequency": 0,
+          "sequence_sha256": "53109031afc093c36fa52765b99449c101242801751ed6a9fc7826b3687ed350"
+        }
+      },
+      "requests": 200,
+      "task_sequence_sha256": "8fbeaf87e0f21400a3e2826991c63405e0826d2e54ac4839286c221482a109c8"
+    },
+    "skewed": {
+      "equivalence_classes": [
+        [
+          "original"
+        ],
+        [
+          "alphabetical"
+        ],
+        [
+          "random"
+        ],
+        [
+          "frequency",
+          "schema_cost_weighted",
+          "fp_tree_global"
+        ]
+      ],
+      "orderings": {
+        "alphabetical": {
+          "requests_different_from_frequency": 200,
+          "sequence_sha256": "8e0fe48bd2baade2e85a06d30e70f313bb60dcc5714b41cd12c08c0469fa2f48"
+        },
+        "fp_tree_global": {
+          "requests_different_from_frequency": 0,
+          "sequence_sha256": "46b50b005b784e7fabfc8f5fddbccb0848f4efd958f17fcd70dfee05d13a7a78"
+        },
+        "frequency": {
+          "requests_different_from_frequency": 0,
+          "sequence_sha256": "46b50b005b784e7fabfc8f5fddbccb0848f4efd958f17fcd70dfee05d13a7a78"
+        },
+        "original": {
+          "requests_different_from_frequency": 200,
+          "sequence_sha256": "2e448bb911c88480e480ed7d23c72ab9e44c8d159430e35fbc7ca9e802b96185"
+        },
+        "random": {
+          "requests_different_from_frequency": 200,
+          "sequence_sha256": "cb55ba10e3adb9d94931fbdba3f7343082a0e849c98cd9ea65a83dc4e926ddfb"
+        },
+        "schema_cost_weighted": {
+          "requests_different_from_frequency": 0,
+          "sequence_sha256": "46b50b005b784e7fabfc8f5fddbccb0848f4efd958f17fcd70dfee05d13a7a78"
+        }
+      },
+      "requests": 200,
+      "task_sequence_sha256": "c2cf206956b361116ecd13f6bf8fc38ec83b97f942934e43767aebe1b8a23ad0"
+    },
+    "uniform": {
+      "equivalence_classes": [
+        [
+          "original"
+        ],
+        [
+          "alphabetical"
+        ],
+        [
+          "random"
+        ],
+        [
+          "frequency",
+          "schema_cost_weighted",
+          "fp_tree_global"
+        ]
+      ],
+      "orderings": {
+        "alphabetical": {
+          "requests_different_from_frequency": 200,
+          "sequence_sha256": "893fb6083391afdba9849df9e86bc1c8fd60a659a9610db34e69b3d88cfd203e"
+        },
+        "fp_tree_global": {
+          "requests_different_from_frequency": 0,
+          "sequence_sha256": "8376d9ab97c665d3252339242fcb9bfe6f023ce3d771d6f32660ceb719becc6d"
+        },
+        "frequency": {
+          "requests_different_from_frequency": 0,
+          "sequence_sha256": "8376d9ab97c665d3252339242fcb9bfe6f023ce3d771d6f32660ceb719becc6d"
+        },
+        "original": {
+          "requests_different_from_frequency": 200,
+          "sequence_sha256": "5d9f5564147323902ca0c211f7d7c5cb57592a307a06cfcc923c15346f4f9da4"
+        },
+        "random": {
+          "requests_different_from_frequency": 200,
+          "sequence_sha256": "3135dcc0e4e9f4b930d6377826cdfec0bf454307efa72831116aa49815559c01"
+        },
+        "schema_cost_weighted": {
+          "requests_different_from_frequency": 0,
+          "sequence_sha256": "8376d9ab97c665d3252339242fcb9bfe6f023ce3d771d6f32660ceb719becc6d"
+        }
+      },
+      "requests": 200,
+      "task_sequence_sha256": "75256b18b602ff45ab111892596b13129551b0687fd718785ab2c00d6dde06b1"
+    }
+  },
+  "same_equivalence_classes_in_every_regime": true,
+  "sequence_hash": "sha256 over compact JSON array of ordered tool-ID arrays",
+  "source_commit": "caf8ab576eb15d95265a53ec76c772c8af6c7929"
+}

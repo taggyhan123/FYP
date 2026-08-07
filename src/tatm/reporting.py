@@ -918,11 +918,24 @@ def _initial_brief_closure_section(report_path: Path) -> str:
     }
     audit_path = handover_dir / "audit-k64-validation-summary.json"
     pressure_path = handover_dir / "pressure-bfcl-k64-summary.json"
+    accepted_pressure_path = (
+        report_path.parent
+        / "initial-brief-pressure-rerun"
+        / "20260807-005414"
+        / "pressure-summary.json"
+    )
+    equivalence_path = (
+        report_path.parent
+        / "initial-brief-pressure-rerun"
+        / "ordering-equivalence.json"
+    )
     retrieval_path = report_path.parent / "retrieval-bm25-sweep.json"
     required_paths = [
         *summary_paths.values(),
         audit_path,
         pressure_path,
+        accepted_pressure_path,
+        equivalence_path,
         retrieval_path,
     ]
     if not all(path.exists() for path in required_paths):
@@ -935,6 +948,10 @@ def _initial_brief_closure_section(report_path: Path) -> str:
     retrieval = json.loads(retrieval_path.read_text(encoding="utf-8"))
     audit = json.loads(audit_path.read_text(encoding="utf-8"))
     pressure = json.loads(pressure_path.read_text(encoding="utf-8"))
+    accepted_pressure = json.loads(
+        accepted_pressure_path.read_text(encoding="utf-8")
+    )
+    equivalence = json.loads(equivalence_path.read_text(encoding="utf-8"))
 
     display_names = {
         "original": "Original fallback",
@@ -1004,6 +1021,37 @@ def _initial_brief_closure_section(report_path: Path) -> str:
         for regimes in pressure["orderings"].values()
         for result in regimes.values()
     ]
+    accepted_peaks = [
+        result["peak_kv_usage_fraction"]
+        for regimes in accepted_pressure["orderings"].values()
+        for result in regimes.values()
+    ]
+    accepted_evictions = [
+        result["eviction_events_sampled"]
+        for regimes in accepted_pressure["orderings"].values()
+        for result in regimes.values()
+    ]
+    pressure_groups = (
+        ("Original", "original"),
+        ("Alphabetical", "alphabetical"),
+        ("Random seed 42", "random"),
+        ("Frequency = schema-cost = FP-tree", "frequency"),
+    )
+    pressure_rows = []
+    for label, ordering in pressure_groups:
+        regimes = accepted_pressure["orderings"][ordering]
+        evictions = [row["eviction_events_sampled"] for row in regimes.values()]
+        pressure_rows.append(
+            [
+                label,
+                _percent(regimes["empirical"]["measured_reuse_ratio"]),
+                _percent(regimes["uniform"]["measured_reuse_ratio"]),
+                _percent(regimes["skewed"]["measured_reuse_ratio"]),
+                _percent(regimes["session_bursty"]["measured_reuse_ratio"]),
+                f"{min(evictions):,.0f}-{max(evictions):,.0f}",
+            ]
+        )
+
     def paragraph(value: str) -> str:
         return fill(
             value,
@@ -1089,9 +1137,45 @@ def _initial_brief_closure_section(report_path: Path) -> str:
                 f"{100 * max(pressure_peaks):.2f}% in a 190,896-token cache. "
                 "The sequential client held one approximately 7k-token request "
                 "resident; cumulative prompt volume is not residency. These "
-                "runs are preserved and quarantined from pressure claims. A "
-                "separate predeclared controlled-cache rerun is the only "
-                "remaining acceptance item."
+                "runs are preserved and quarantined from pressure claims."
+            ),
+            "",
+            paragraph(
+                "The separately predeclared controlled-cache rerun is fully "
+                f"accepted: {accepted_pressure['accepted_regime_runs']}/"
+                f"{accepted_pressure['all_regime_runs']} regime-runs and "
+                f"{accepted_pressure['checks_passed']}/"
+                f"{accepted_pressure['checks_total']} checks passed at exactly "
+                f"{accepted_pressure['expected_capacity_tokens']:,} tokens. "
+                f"Peak occupancy was {100 * min(accepted_peaks):.2f}-"
+                f"{100 * max(accepted_peaks):.2f}% against the unchanged 90% "
+                f"threshold, with {min(accepted_evictions):,.0f}-"
+                f"{max(accepted_evictions):,.0f} sampled evictions, zero "
+                "preemptions, and one running/zero waiting requests throughout."
+            ),
+            "",
+            _table(
+                [
+                    "Controlled-pressure ordering",
+                    "Empirical reuse",
+                    "Uniform reuse",
+                    "Skewed reuse",
+                    "Session-bursty reuse",
+                    "Evictions",
+                ],
+                pressure_rows,
+            ),
+            "",
+            paragraph(
+                "This is a within-capacity stress comparison, not a latency or "
+                "production-pressure result. Random seed 42 ranks first in all "
+                "four regimes, but there is only one run per cell and one fixed "
+                "random seed, with no uncertainty interval. That is insufficient "
+                "to recommend random ordering. A deterministic reconstruction "
+                f"finds {equivalence['distinct_orderings_per_regime']} distinct "
+                "orders: frequency, schema-cost weighted, and FP-tree global "
+                "emit exactly the same 200 sequences in every regime. They are "
+                "one equivalence class here, not three independent policies."
             ),
             "",
         ]
@@ -1211,6 +1295,12 @@ coverage and selected-set overlap are now the dominant bottlenecks: increasing
 the BM25 menu from 4 to 128 raises macro recall from 41.71% to 67.54%, while
 prompt cost grows about 25x and exact reuse falls.
 
+Under the separately controlled 7,680-token pressure condition, fixed random
+seed 42 measures the most reuse and the fewest evictions in all four regimes,
+ahead of alphabetical. This ranking is capacity- and workload-specific, and a
+single run per cell and random seed is not a policy result; run repeated seed
+sweeps before treating it as more than a useful sensitivity finding.
+
 The likely publishable refinement is not a generic "reorder context into a
 trie" claim, because closely related cache-aware context ordering already
 exists. The later Phase 2 comparison in
@@ -1229,18 +1319,16 @@ that reuse repays retrieval, context, decode, and safety costs.
 
 ## Initial-brief closure status
 
-The explicit Tasks A-F and the eight initial experimental questions now have
-implemented, reported evidence, including the ordinary fallback, retrieved
-menus, direct partial reuse, and exact rendered-token/block validation. The
-retrieval results remain separate from function-call correctness as required.
+The explicit Tasks A-F, the eight initial experimental questions, and the
+stricter gap-closure manifest are complete. This includes the ordinary fallback,
+retrieved menus, direct partial reuse, exact rendered-token/block validation,
+and 24/24 accepted controlled-pressure regime-runs with observed evictions. The
+original 0/24 runs remain preserved as valid low-occupancy evidence rather than
+being rewritten.
 
-One stricter systems acceptance item remains before declaring the project’s
-gap-closure manifest complete: rerun the six-ordering, four-regime pressure
-matrix under the separately predeclared 7,680-token controlled cache and obtain
-24/24 accepted runs with observed evictions. The original 0/24 runs remain
-valid low-occupancy evidence and are not rewritten. This controlled stress test
-is additional finite-cache evidence for Tasks D/E; it is not permission to begin
-the §9 retained-tool or KV-composition extensions.
+The initial brief is therefore formally closed. Later §9 retained-tool or
+KV-composition experiments remain extensions and must preserve the ordinary
+selected-tool text fallback and the measured quality/safety frontier.
 """
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(text, encoding="utf-8")

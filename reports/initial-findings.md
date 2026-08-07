@@ -167,8 +167,26 @@ boundaries remain in the checksummed raw archive rather than Git.
 The first pressure attempt produced 24 clean, reset regime-runs but accepted 0/24:
 sampled occupancy was only 3.64-3.69% in a 190,896-token cache. The sequential client
 held one approximately 7k-token request resident; cumulative prompt volume is not
-residency. These runs are preserved and quarantined from pressure claims. A separate
-predeclared controlled-cache rerun is the only remaining acceptance item.
+residency. These runs are preserved and quarantined from pressure claims.
+
+The separately predeclared controlled-cache rerun is fully accepted: 24/24 regime-runs
+and 384/384 checks passed at exactly 7,680 tokens. Peak occupancy was 91.02-91.86%
+against the unchanged 90% threshold, with 57,696-85,340 sampled evictions, zero
+preemptions, and one running/zero waiting requests throughout.
+
+| Controlled-pressure ordering | Empirical reuse | Uniform reuse | Skewed reuse | Session-bursty reuse | Evictions |
+| --- | --- | --- | --- | --- | --- |
+| Original | 1.18% | 0.69% | 1.24% | 0.69% | 84,810-85,340 |
+| Alphabetical | 29.21% | 29.35% | 28.06% | 27.76% | 60,600-61,948 |
+| Random seed 42 | 32.16% | 31.27% | 32.67% | 30.19% | 57,696-59,854 |
+| Frequency = schema-cost = FP-tree | 9.44% | 8.99% | 9.51% | 9.00% | 77,682-78,176 |
+
+This is a within-capacity stress comparison, not a latency or production-pressure
+result. Random seed 42 ranks first in all four regimes, but there is only one run per
+cell and one fixed random seed, with no uncertainty interval. That is insufficient to
+recommend random ordering. A deterministic reconstruction finds 4 distinct orders:
+frequency, schema-cost weighted, and FP-tree global emit exactly the same 200 sequences
+in every regime. They are one equivalence class here, not three independent policies.
 
 
 ## Recommendation
@@ -181,6 +199,12 @@ absolute terms and does not produce a resolved TTFT improvement. Retrieval
 coverage and selected-set overlap are now the dominant bottlenecks: increasing
 the BM25 menu from 4 to 128 raises macro recall from 41.71% to 67.54%, while
 prompt cost grows about 25x and exact reuse falls.
+
+Under the separately controlled 7,680-token pressure condition, fixed random
+seed 42 measures the most reuse and the fewest evictions in all four regimes,
+ahead of alphabetical. This ranking is capacity- and workload-specific, and a
+single run per cell and random seed is not a policy result; run repeated seed
+sweeps before treating it as more than a useful sensitivity finding.
 
 The likely publishable refinement is not a generic "reorder context into a
 trie" claim, because closely related cache-aware context ordering already
@@ -200,15 +224,13 @@ that reuse repays retrieval, context, decode, and safety costs.
 
 ## Initial-brief closure status
 
-The explicit Tasks A-F and the eight initial experimental questions now have
-implemented, reported evidence, including the ordinary fallback, retrieved
-menus, direct partial reuse, and exact rendered-token/block validation. The
-retrieval results remain separate from function-call correctness as required.
+The explicit Tasks A-F, the eight initial experimental questions, and the
+stricter gap-closure manifest are complete. This includes the ordinary fallback,
+retrieved menus, direct partial reuse, exact rendered-token/block validation,
+and 24/24 accepted controlled-pressure regime-runs with observed evictions. The
+original 0/24 runs remain preserved as valid low-occupancy evidence rather than
+being rewritten.
 
-One stricter systems acceptance item remains before declaring the project’s
-gap-closure manifest complete: rerun the six-ordering, four-regime pressure
-matrix under the separately predeclared 7,680-token controlled cache and obtain
-24/24 accepted runs with observed evictions. The original 0/24 runs remain
-valid low-occupancy evidence and are not rewritten. This controlled stress test
-is additional finite-cache evidence for Tasks D/E; it is not permission to begin
-the §9 retained-tool or KV-composition extensions.
+The initial brief is therefore formally closed. Later §9 retained-tool or
+KV-composition experiments remain extensions and must preserve the ordinary
+selected-tool text fallback and the measured quality/safety frontier.

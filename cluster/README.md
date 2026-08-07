@@ -305,7 +305,10 @@ must not be relabelled as pressure. The replacement is separately predeclared in
 `initial-brief-pressure-rerun-manifest.json` and executed by
 `../NUS_GPU_PRESSURE_RERUN_INSTRUCTIONS.md`: it preserves sequential request
 order and the 0.90 threshold while fixing the controlled cache at 7,680 tokens.
-Cross-capacity latency comparison is forbidden.
+The rerun is now accepted 24/24, with 384/384 checks, 91.02-91.86% occupancy,
+positive sampled evictions, and zero preemptions. Cross-capacity latency
+comparison remains forbidden. See
+`../reports/initial-brief-pressure-rerun/20260807-005414/HANDOVER.md`.
 
 ### 6f. Record the ordinary text-prefill fallback explicitly
 

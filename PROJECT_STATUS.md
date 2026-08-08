@@ -72,6 +72,20 @@ persistent trials must not be rerun. See
 `reports/contextpilot-confirmation/findings.md` and
 `NUS_GPU_CONTEXTPILOT_CONFIRMATION_INSTRUCTIONS.md`.
 
+**Supervisor-requested model update (predeclared; results pending):** Qwen3-4B
+will now be the primary ContextPilot/ToolTrie comparison, with Qwen3-0.6B kept
+as the brief-aligned small-model replication. The new experiment is a
+self-contained 190-replay matrix: five conditions, six systems workloads ×
+three trials, and five n=800 quality conditions on each model. It uses pinned
+model revisions, requires identical tokenizer/chat-template evidence, uses
+native per-model cache capacities, rebuilds ToolTrie for each live capacity,
+and forbids pooled or absolute cross-model latency claims.
+See `cluster/contextpilot-dual-model-manifest.json` and
+`NUS_GPU_CONTEXTPILOT_DUAL_MODEL_INSTRUCTIONS.md`. Existing 0.6B/4B/8B results
+remain preserved and are not silently folded into the new primary tables. The
+new protocol does not retroactively fill the historical runbook's one missing
+Qwen3-8B static-refit quality cell.
+
 ## Notable findings
 
 The counterintuitive results, in order of how surprising they were:
@@ -434,7 +448,7 @@ counter, samples KV occupancy, and can enforce a predeclared pressure threshold.
 - 1,362 canonical BFCL functions and 1,240 BFCL tasks;
 - 45,815 total schemas tokenized with `Qwen/Qwen3-0.6B`;
 - all ToolRet label references resolve to the downloaded corpus;
-- 114 unit tests pass.
+- 118 unit tests pass.
 
 ## Reports are generated, not hand-written
 

@@ -4,6 +4,10 @@ This run closes the implementation-attribution gap found after Phase 2. Read the
 whole file before executing it. Use one idle physical GPU, one vLLM server, and
 one sequential replay driver. Never reuse a result directory.
 
+**Do not use this full historical runbook for the supervisor-requested 4B
+rerun.** The predeclared Qwen3-4B-primary/Qwen3-0.6B-replication protocol is in
+`NUS_GPU_CONTEXTPILOT_DUAL_MODEL_INSTRUCTIONS.md`.
+
 ## What this run can and cannot establish
 
 It compares two explicitly different causal order generators from the pinned

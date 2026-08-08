@@ -7,6 +7,12 @@ Tasks B/E and ToolTrie-v0 have now been measured. For the next targeted
 no-tool, CacheWeaver, FP-tree/ContextPilot, and SGLang comparison sequence, use
 [`../NUS_GPU_PHASE2_INSTRUCTIONS.md`](../NUS_GPU_PHASE2_INSTRUCTIONS.md).
 
+For the supervisor-requested model update, use
+[`../NUS_GPU_CONTEXTPILOT_DUAL_MODEL_INSTRUCTIONS.md`](../NUS_GPU_CONTEXTPILOT_DUAL_MODEL_INSTRUCTIONS.md)
+with [`contextpilot-dual-model-manifest.json`](contextpilot-dual-model-manifest.json).
+That protocol makes Qwen3-4B primary and Qwen3-0.6B a separately reported
+replication; it must not be folded into the older Phase 2 procedure.
+
 ## 1. Environment
 
 The workstation itself has four RTX 3090s and a vLLM 0.26.0 environment at

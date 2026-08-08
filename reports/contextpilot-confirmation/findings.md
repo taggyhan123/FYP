@@ -122,6 +122,14 @@ Three limitations remain material:
    field and has a real-upstream integration test, but its 18 systems trials and
    one Qwen3-8B quality replay still require GPU execution.
 
+A supervisor-requested follow-up has now been predeclared, but has no results
+yet. It makes Qwen3-4B the primary model and runs a fresh, complete matrix on
+both Qwen3-4B and Qwen3-0.6B. The two models will be reported separately because
+their native KV capacities differ and ToolTrie is rebuilt from each capacity.
+This follow-up does not alter or retroactively replace the accepted evidence
+above. Its protocol is
+[`NUS_GPU_CONTEXTPILOT_DUAL_MODEL_INSTRUCTIONS.md`](../../NUS_GPU_CONTEXTPILOT_DUAL_MODEL_INSTRUCTIONS.md).
+
 ## Research conclusion
 
 ToolTrie-v0 is a legitimate exact-prefix baseline, but it is **not the best
@@ -151,3 +159,5 @@ selected-tool text prefill as the predeclared fallback.
   [`QUALITY_COMPARISON_SCOPING.md`](20260807-222212/QUALITY_COMPARISON_SCOPING.md)
 - Static-refit resume protocol:
   [`NUS_GPU_CONTEXTPILOT_CONFIRMATION_INSTRUCTIONS.md`](../../NUS_GPU_CONTEXTPILOT_CONFIRMATION_INSTRUCTIONS.md)
+- Supervisor-requested dual-model protocol:
+  [`NUS_GPU_CONTEXTPILOT_DUAL_MODEL_INSTRUCTIONS.md`](../../NUS_GPU_CONTEXTPILOT_DUAL_MODEL_INSTRUCTIONS.md)

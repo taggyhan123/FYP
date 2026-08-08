@@ -3,6 +3,13 @@
 This protocol completes only the cells quarantined in the accepted
 `20260807-222212` ContextPilot run. Read the whole file before running it.
 
+**Supervisor-requested dual-model rerun:** if the objective is now to make
+Qwen3-4B primary and rerun a complete 0.6B comparison, do not execute this
+minimal resume protocol as well. Use
+`NUS_GPU_CONTEXTPILOT_DUAL_MODEL_INSTRUCTIONS.md` and its predeclared manifest.
+This file remains only the cheaper path for closing the original 0.6B/8B
+acceptance matrix without replacing its accepted arms.
+
 Do **not** rerun:
 
 - the 72 accepted Qwen3-0.6B systems replays;

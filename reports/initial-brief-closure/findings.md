@@ -222,18 +222,22 @@ changes the engine versions, emitted sequence equivalence, or 24/24 acceptance.
    policies collapse to within 0.01 percentage points of one another at 39.69%,
    while alphabetical is 38.13%. On ToolRet, alphabetical is substantially
    higher than that fitted group.
-   The ContextPilot-derived static-refit ordering is the important measured
+   The ContextPilot-derived static-refit ordering is the important historical
    competitor, not evidence that the current pair/triple adaptation is
-   sufficient. It must not be relabelled as official online ContextPilot.
+   sufficient. A later persistent-API adaptation also leads ToolTrie on every
+   retrieved menu size; neither ordering-only arm is the full ContextPilot
+   system.
 6. **Request order and causality matter.** ToolTrie-v0’s causal
    self-reinforcement is load-bearing; its tested offline fixpoint variant
    collapses. Under controlled pressure, empirical and session-bursty also
    produce different reuse despite being permutations of one task multiset.
-7. **Ordering changes quality and safety.** The n=800 Qwen3-8B Phase 2 run finds
-   a reuse/selection/no-tool frontier: the causal static-refit ContextPilot
-   adaptation leads reuse and call accuracy but has a larger no-tool penalty;
-   ToolTrie is safer on no-tool requests but does not lead reuse. This is an
-   ordering-only result (`alpha=0.5`, no annotations), not full-system quality.
+7. **Ordering changes quality and can change safety.** The n=800 Qwen3-8B runs
+   find a fixed-sequence reuse/selection/no-tool frontier: both
+   ContextPilot-derived adaptations lead ToolTrie on reuse and relevance-side
+   point estimates, while ToolTrie has higher no-tool accuracy. The persistent
+   arm's −5.00-point no-tool difference against alphabetical does not reproduce
+   at Qwen3-4B (0.00 points), so a universal safety penalty is not supported.
+   These are ordering-only results, not full-system quality.
 8. **Trie ordering provides little benefit when menus share little exact
    prefix, prompts are below the latency floor, or retrieval misses the needed
    tool.** The BM25-retrieved-menu arm demonstrates all three limits.
@@ -249,9 +253,10 @@ text prefill whenever expected savings do not exceed context, decode, retrieval,
 or safety costs. No inactive tools are retained and no KV tensors are composed
 in that fallback. The controlled-pressure gate is now complete, so the next
 publication-oriented experiment may study safe retention. It must still be
-   evaluated against this fallback, the historical static-refit adapter, and an
-   official persistent ContextPilot arm at `alpha=0.001`. It should include a
-   random-seed sensitivity sweep rather than promoting seed 42 as an algorithm.
+   evaluated against this fallback, the historical static-refit adapter, and
+   the now-measured persistent-API adaptation at `alpha=0.001`. It should include
+   a random-seed sensitivity sweep rather than promoting seed 42 as an
+   algorithm.
 
 ## Traceable artifacts
 
@@ -265,6 +270,8 @@ publication-oriented experiment may study safe retention. It must still be
   [`contextpilot-causal-provenance-correction.json`](../tooltrie-phase2/contextpilot-causal-provenance-correction.json)
 - Corrected ContextPilot confirmation runbook:
   [`NUS_GPU_CONTEXTPILOT_CONFIRMATION_INSTRUCTIONS.md`](../../NUS_GPU_CONTEXTPILOT_CONFIRMATION_INSTRUCTIONS.md)
+- Reconciled ContextPilot confirmation findings:
+  [`contextpilot-confirmation/findings.md`](../contextpilot-confirmation/findings.md)
 - Controlled pressure rerun instructions:
   [`NUS_GPU_PRESSURE_RERUN_INSTRUCTIONS.md`](../../NUS_GPU_PRESSURE_RERUN_INSTRUCTIONS.md)
 - Accepted pressure handover:

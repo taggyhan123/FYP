@@ -70,7 +70,7 @@ INITIAL_FINDINGS_COVER = {
         "figures, prefix-cache sanity results, ordering comparisons, and the "
         "recommendation for the next research stage."
     ),
-    "status": "Initial experiments measured · Analysis audit pending",
+    "status": "Initial experiments measured · Local audit complete",
     "metrics": [
         ("45,815", "Canonical tools"),
         ("9,201", "Benchmark tasks"),
@@ -86,9 +86,10 @@ INITIAL_FINDINGS_COVER = {
         "benefit at 303-token prompts but up to a 10.6x reduction on padded "
         "shared-catalog menus. On deterministic BM25-retrieved menus, ToolTrie "
         "adds only 0.76-1.65 percentage points of reuse without a resolved TTFT "
-        "gain. The recommendation is to keep ordinary text prefill as fallback "
-        "and audit quality, retrieval, and cache-pressure trade-offs before any "
-        "retention extension."
+        "gain. A corrected ContextPilot persistent-API adaptation leads "
+        "ToolTrie on every retrieved menu size, while both lose most reuse as "
+        "menu overlap falls. The recommendation is to keep ordinary text "
+        "prefill as fallback and treat safe retention as a separate extension."
     ),
 }
 

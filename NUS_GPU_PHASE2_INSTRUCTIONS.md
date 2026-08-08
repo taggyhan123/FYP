@@ -484,6 +484,11 @@ accepts that case only when index 0 is the sole omission and the independent
 aggregate `sglang:cached_tokens_total` exactly equals the sum of all reported
 response values. Do not use `--allow-counter-mismatch` for an accepted run.
 
+For the already-recorded 72-run historical matrix, do not rerun this section
+just to repair metadata. Use the all-or-nothing CPU audit in
+`NUS_GPU_SGLANG_COUNTER_AUDIT_INSTRUCTIONS.md`; it validates every raw run
+against its recorded aggregate counter without starting a model server.
+
 Summarize SGLang separately:
 
 ```bash

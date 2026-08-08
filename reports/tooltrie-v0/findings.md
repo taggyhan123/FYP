@@ -9,8 +9,10 @@ analytical `hinted_schema_tokens` is **not** used to support any cache claim.
 > superseded by `reports/tooltrie-phase2/findings.md`, which confirmed the
 > no-tool regression and measured a ContextPilot-derived static-refit causal
 > ordering plus the external engine comparison. That historical adapter is not
-> official persistent online ContextPilot. The measurements below remain valid
-> for their stated run.
+> official persistent online ContextPilot. A later persistent-API adaptation is
+> reported in `reports/contextpilot-confirmation/findings.md`; it leads
+> ToolTrie-v0 on every measured retrieved menu size. The measurements below
+> remain valid for their stated run.
 
 ## 1. Configuration
 

@@ -1287,6 +1287,29 @@ points). These are analytical estimates, not vLLM hit-rate or latency results.
 
 {closure_section}
 
+## ContextPilot persistent-API confirmation
+
+A pinned confirmation run used upstream commit
+`1fa0a143fdeda344585666648ab2b30cb7fea77f`, the paper/default
+`alpha=0.001`, one persistent `ContextPilot.reorder` index, stock vLLM, and the
+same selected tool sets and request sequence. This is an **ordering-only
+persistent-API adaptation**: workloads were planned before serving and no
+eviction feedback, relevance annotations, or de-duplication were enabled. It is
+not the full ContextPilot system.
+
+On padded 64-tool menus it reaches 96.16% BFCL and 95.27% ToolRet reuse versus
+87.19% and 83.58% for ToolTrie-v0. On BM25-retrieved ToolRet menus it also leads
+ToolTrie at every measured size, but absolute reuse falls to 18.72%, 9.93%,
+4.78%, and 1.99% at k=4/16/64/128. The 95–96% headline is therefore a
+shared-menu positive-control result rather than a realistic retrieval result.
+
+The Qwen3-8B quality replay gives the persistent arm +2.03 points on function
+name, +2.03 on full call, and −5.00 on no-tool accuracy against alphabetical
+on one fixed request sequence. A Qwen3-4B addendum reproduces the relevance
+gain but gives exactly 0.00 points on no-tool. The current evidence supports a
+model-sensitive quality frontier, not a universal safety penalty. See
+`reports/contextpilot-confirmation/findings.md`.
+
 ## Recommendation
 
 The retrieved-menu arm changes the recommendation. Alphabetical remains a
@@ -1306,15 +1329,13 @@ sweeps before treating it as more than a useful sensitivity finding.
 
 The likely publishable refinement is not a generic "reorder context into a
 trie" claim, because closely related cache-aware context ordering already
-exists. The later Phase 2 comparison in
-`reports/tooltrie-phase2/findings.md` is the authoritative gold-menu comparison:
-the causal **ContextPilot-derived static-refit adaptation** beats ToolTrie-v0 on
-reuse, while ToolTrie has the smaller no-tool penalty. A post-run audit found
-that this historical arm used `alpha=0.5` and was not the persistent online API.
-ContextPilot was not rerun in this retrieved-menu closure arm, so the two
-information regimes must not be combined into one ranking or presented as an
-official online result. The historical SGLang arm also awaits revalidation
-against its independent aggregate cached-token counter.
+exists and the corrected ContextPilot persistent-API adaptation beats
+ToolTrie-v0 on every padded and retrieved reuse cell measured. Both lose most
+reuse on independently retrieved large menus, so retrieval overlap is the
+stronger systems bottleneck. The historical static-refit arm and the persistent
+arm must retain their exact labels; neither is full ContextPilot. The corrected
+`alpha=0.001` static-refit confirmation and independent raw SGLang counter audit
+remain GPU work.
 
 Do not pursue arbitrary independent KV concatenation yet. Native exact APC
 already converts the local token-reuse signal into a repeatable TTFT benefit
@@ -1335,10 +1356,11 @@ token/block validation, and 24/24 accepted controlled-pressure regime-runs with
 observed evictions. The original 0/24 runs remain preserved as valid low-
 occupancy evidence rather than being rewritten.
 
-This completes the planned initial experiment stage, but it is not yet a formal
-publication-grade closure: sequence-dependent quality uncertainty, exact
-artifact-to-report traceability, and independent reproduction of corrected
-analysis paths still require audit. Later §9 retained-tool or KV-composition
+This completes the planned initial experiment stage. The local analysis and
+artifact-to-report audit are complete, but formal publication-grade closure
+still needs the corrected `alpha=0.001` static-refit GPU cells, regeneration of
+the GPU-side quality comparisons with sequence-state metadata, and independent
+raw SGLang counter revalidation. Later §9 retained-tool or KV-composition
 experiments remain extensions and must preserve the ordinary selected-tool text
 fallback and the measured quality/safety frontier.
 """

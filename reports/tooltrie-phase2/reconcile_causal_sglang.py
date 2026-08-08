@@ -1,17 +1,19 @@
 #!/usr/bin/env python3
-"""Reconcile the contextpilot_causal SGLang runs, using the same independent
-check applied to the other 66 runs.
+"""Fail-closed aggregate-counter audit for every historical SGLang run.
 
-SGLang omits usage.prompt_tokens_details.cached_tokens when it is zero, so the
-first request after every flush reports None and `cached_counter_matches` fails
-by exactly one, every run. A run is reconciled ONLY if all four hold:
-  1. request_counter_matches and prompt_counter_matches are true
-  2. the server's cached_tokens_total equals the sum of reported values
-  3. index 0 is the ONLY request missing a cached value
-  4. no request failed
-That is strictly tighter than blanket-trusting the flag.
+SGLang omitted ``usage.prompt_tokens_details.cached_tokens`` when it was zero,
+so the first request after each flush reports ``None``. The old reconciliation
+mistakenly compared the response sum with another response-derived field. This
+script validates all 72 raw Phase 2 runs against the independent aggregate
+``sglang:cached_tokens_total`` counter and writes reconciled copies only if the
+entire declared matrix passes.
 """
-import json, sys
+
+from __future__ import annotations
+
+import argparse
+import json
+import sys
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -19,31 +21,120 @@ sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
 from tatm.sglang_client import initial_missing_cached_reconciliation
 
-P2 = Path("/home/taghan/FYP/cluster/results/tooltrie-phase2-20260803-181133")
-OUT = P2 / "sglang-reconciled"
-NOTE = json.loads((OUT / "bfcl-alphabetical-sglang-trial-1.json").read_text())[
-    "counter_validation"]["reconciliation_note"]
+DEFAULT_INPUT = Path(
+    "/home/taghan/FYP/cluster/results/tooltrie-phase2-20260803-181133"
+)
+CONDITIONS = (
+    "original",
+    "alphabetical",
+    "tooltrie_v0",
+    "cacheweaver",
+    "frequency_fitted",
+    "schema_cost_fitted",
+    "fp_tree_conditional",
+    "conditional_pair",
+    "conditional_pair_triple",
+    "contextpilot_intra",
+    "contextpilot_intra_schedule",
+    "contextpilot_causal",
+)
+RECONCILIATION_NOTE = (
+    "Accepted by aggregate-counter audit: request and prompt counters match; "
+    "index 0 is the only response missing zero-valued cached_tokens; the sum "
+    "of reported response cached tokens equals the independent aggregate "
+    "sglang:cached_tokens_total delta; no request failed."
+)
 
-ok = fail = 0
-for ds in ("bfcl", "toolret"):
-    for t in (1, 2, 3):
-        src = P2 / f"{ds}-contextpilot_causal-sglang-trial-{t}.json"
-        d = json.loads(src.read_text())
-        cv = d["counter_validation"]
-        reconciliation = initial_missing_cached_reconciliation(d)
-        checks = reconciliation["checks"]
-        if not reconciliation["clean"]:
-            print(f"REFUSE {src.name}: {[k for k,v in checks.items() if not v]}")
-            fail += 1
+
+def expected_paths(input_dir: Path) -> list[Path]:
+    return [
+        input_dir / f"{dataset}-{condition}-sglang-trial-{trial}.json"
+        for dataset in ("bfcl", "toolret")
+        for condition in CONDITIONS
+        for trial in (1, 2, 3)
+    ]
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(
+        description="Audit all 72 Phase 2 SGLang runs against aggregate counters."
+    )
+    parser.add_argument("--input-dir", type=Path, default=DEFAULT_INPUT)
+    parser.add_argument("--output-dir", type=Path, required=True)
+    args = parser.parse_args()
+
+    if args.output_dir.exists():
+        raise SystemExit(f"Refusing to overwrite existing output: {args.output_dir}")
+
+    accepted: list[tuple[Path, dict[str, object], dict[str, object]]] = []
+    failures: list[dict[str, object]] = []
+    for source in expected_paths(args.input_dir):
+        if not source.is_file():
+            failures.append({"file": source.as_posix(), "failed_checks": ["exists"]})
+            print(f"REFUSE {source.name}: missing")
             continue
-        cv["clean"] = True
-        cv["reconciliation_note"] = NOTE
-        (OUT / src.name).write_text(json.dumps(d))
+        payload = json.loads(source.read_text(encoding="utf-8"))
+        reconciliation = initial_missing_cached_reconciliation(payload)
+        checks = reconciliation["checks"]
+        failed_checks = [name for name, passed in checks.items() if not passed]
+        if failed_checks:
+            failures.append(
+                {"file": source.as_posix(), "failed_checks": failed_checks}
+            )
+            print(f"REFUSE {source.name}: {failed_checks}")
+            continue
+        accepted.append((source, payload, reconciliation))
         print(
-            f"OK {src.name}  "
+            f"OK {source.name}  "
             f"cached={reconciliation['reported_cached_tokens']}  "
-            f"missing={reconciliation['missing_cached_indices']}"
+            f"aggregate={reconciliation['aggregate_cached_tokens']}"
         )
-        ok += 1
-print(f"\nreconciled {ok}, refused {fail}")
-sys.exit(1 if fail else 0)
+
+    if failures:
+        print(
+            f"\nAudit failed closed: accepted={len(accepted)}, "
+            f"refused={len(failures)}. No reconciled copies were written."
+        )
+        raise SystemExit(1)
+
+    args.output_dir.mkdir(parents=True)
+    audit_rows: list[dict[str, object]] = []
+    for source, payload, reconciliation in accepted:
+        validation = payload["counter_validation"]
+        validation["clean"] = True
+        validation["reconciliation_note"] = RECONCILIATION_NOTE
+        validation["aggregate_counter_reconciliation"] = reconciliation
+        output_path = args.output_dir / source.name
+        output_path.write_text(
+            json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+        audit_rows.append(
+            {
+                "file": source.name,
+                "reported_cached_tokens": reconciliation["reported_cached_tokens"],
+                "aggregate_cached_tokens": reconciliation["aggregate_cached_tokens"],
+                "checks": reconciliation["checks"],
+            }
+        )
+
+    summary = {
+        "format_version": 1,
+        "input_dir": args.input_dir.as_posix(),
+        "output_dir": args.output_dir.as_posix(),
+        "declared_runs": len(expected_paths(args.input_dir)),
+        "accepted_runs": len(accepted),
+        "refused_runs": 0,
+        "all_clean": True,
+        "conditions": list(CONDITIONS),
+        "runs": audit_rows,
+    }
+    (args.output_dir / "aggregate-counter-audit-summary.json").write_text(
+        json.dumps(summary, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    print(f"\nAggregate-counter audit accepted {len(accepted)}/72 runs.")
+
+
+if __name__ == "__main__":
+    main()

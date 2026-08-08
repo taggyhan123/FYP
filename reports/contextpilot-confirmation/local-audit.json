@@ -1,0 +1,828 @@
+{
+  "accepted_persistent_gpu_replays_declared": 75,
+  "analysis_metadata_checks": [
+    {
+      "details": null,
+      "name": "quality_8b:quality-contextpilot-online_incremental-vs-alphabetical-full_correct.json:sequence_state_metadata",
+      "passed": false
+    },
+    {
+      "details": null,
+      "name": "quality_8b:quality-contextpilot-online_incremental-vs-alphabetical-name_correct.json:sequence_state_metadata",
+      "passed": false
+    },
+    {
+      "details": null,
+      "name": "quality_8b:quality-contextpilot-online_incremental-vs-alphabetical-no_tool_correct.json:sequence_state_metadata",
+      "passed": false
+    },
+    {
+      "details": null,
+      "name": "quality_8b:quality-contextpilot-online_incremental-vs-tooltrie_v0-full_correct.json:sequence_state_metadata",
+      "passed": false
+    },
+    {
+      "details": null,
+      "name": "quality_8b:quality-contextpilot-online_incremental-vs-tooltrie_v0-name_correct.json:sequence_state_metadata",
+      "passed": false
+    },
+    {
+      "details": null,
+      "name": "quality_8b:quality-contextpilot-online_incremental-vs-tooltrie_v0-no_tool_correct.json:sequence_state_metadata",
+      "passed": false
+    },
+    {
+      "details": null,
+      "name": "quality_8b:quality-tooltrie_v0-vs-alphabetical-full_correct.json:sequence_state_metadata",
+      "passed": false
+    },
+    {
+      "details": null,
+      "name": "quality_8b:quality-tooltrie_v0-vs-alphabetical-name_correct.json:sequence_state_metadata",
+      "passed": false
+    },
+    {
+      "details": null,
+      "name": "quality_8b:quality-tooltrie_v0-vs-alphabetical-no_tool_correct.json:sequence_state_metadata",
+      "passed": false
+    },
+    {
+      "details": null,
+      "name": "quality_4b:quality-contextpilot-online_incremental-vs-alphabetical-full_correct.json:sequence_state_metadata",
+      "passed": false
+    },
+    {
+      "details": null,
+      "name": "quality_4b:quality-contextpilot-online_incremental-vs-alphabetical-name_correct.json:sequence_state_metadata",
+      "passed": false
+    },
+    {
+      "details": null,
+      "name": "quality_4b:quality-contextpilot-online_incremental-vs-alphabetical-no_tool_correct.json:sequence_state_metadata",
+      "passed": false
+    },
+    {
+      "details": null,
+      "name": "quality_4b:quality-contextpilot-online_incremental-vs-tooltrie_v0-full_correct.json:sequence_state_metadata",
+      "passed": false
+    },
+    {
+      "details": null,
+      "name": "quality_4b:quality-contextpilot-online_incremental-vs-tooltrie_v0-name_correct.json:sequence_state_metadata",
+      "passed": false
+    },
+    {
+      "details": null,
+      "name": "quality_4b:quality-contextpilot-online_incremental-vs-tooltrie_v0-no_tool_correct.json:sequence_state_metadata",
+      "passed": false
+    },
+    {
+      "details": null,
+      "name": "quality_4b:quality-tooltrie_v0-vs-alphabetical-full_correct.json:sequence_state_metadata",
+      "passed": false
+    },
+    {
+      "details": null,
+      "name": "quality_4b:quality-tooltrie_v0-vs-alphabetical-name_correct.json:sequence_state_metadata",
+      "passed": false
+    },
+    {
+      "details": null,
+      "name": "quality_4b:quality-tooltrie_v0-vs-alphabetical-no_tool_correct.json:sequence_state_metadata",
+      "passed": false
+    }
+  ],
+  "audit_scope_note": "Compact tracked artifacts only. Raw replay rows and archives remain on the NUS server and require the resume protocol.",
+  "files_needing_sequence_state_regeneration": [
+    "reports/contextpilot-confirmation/20260807-222212/quality-contextpilot-online_incremental-vs-alphabetical-full_correct.json",
+    "reports/contextpilot-confirmation/20260807-222212/quality-contextpilot-online_incremental-vs-alphabetical-name_correct.json",
+    "reports/contextpilot-confirmation/20260807-222212/quality-contextpilot-online_incremental-vs-alphabetical-no_tool_correct.json",
+    "reports/contextpilot-confirmation/20260807-222212/quality-contextpilot-online_incremental-vs-tooltrie_v0-full_correct.json",
+    "reports/contextpilot-confirmation/20260807-222212/quality-contextpilot-online_incremental-vs-tooltrie_v0-name_correct.json",
+    "reports/contextpilot-confirmation/20260807-222212/quality-contextpilot-online_incremental-vs-tooltrie_v0-no_tool_correct.json",
+    "reports/contextpilot-confirmation/20260807-222212/quality-tooltrie_v0-vs-alphabetical-full_correct.json",
+    "reports/contextpilot-confirmation/20260807-222212/quality-tooltrie_v0-vs-alphabetical-name_correct.json",
+    "reports/contextpilot-confirmation/20260807-222212/quality-tooltrie_v0-vs-alphabetical-no_tool_correct.json",
+    "reports/contextpilot-quality-4b/20260808-105833/quality-contextpilot-online_incremental-vs-alphabetical-full_correct.json",
+    "reports/contextpilot-quality-4b/20260808-105833/quality-contextpilot-online_incremental-vs-alphabetical-name_correct.json",
+    "reports/contextpilot-quality-4b/20260808-105833/quality-contextpilot-online_incremental-vs-alphabetical-no_tool_correct.json",
+    "reports/contextpilot-quality-4b/20260808-105833/quality-contextpilot-online_incremental-vs-tooltrie_v0-full_correct.json",
+    "reports/contextpilot-quality-4b/20260808-105833/quality-contextpilot-online_incremental-vs-tooltrie_v0-name_correct.json",
+    "reports/contextpilot-quality-4b/20260808-105833/quality-contextpilot-online_incremental-vs-tooltrie_v0-no_tool_correct.json",
+    "reports/contextpilot-quality-4b/20260808-105833/quality-tooltrie_v0-vs-alphabetical-full_correct.json",
+    "reports/contextpilot-quality-4b/20260808-105833/quality-tooltrie_v0-vs-alphabetical-name_correct.json",
+    "reports/contextpilot-quality-4b/20260808-105833/quality-tooltrie_v0-vs-alphabetical-no_tool_correct.json"
+  ],
+  "format_version": 1,
+  "measurement_checks": [
+    {
+      "details": "1fa0a143fdeda344585666648ab2b30cb7fea77f",
+      "name": "pinned_contextpilot_commit",
+      "passed": true
+    },
+    {
+      "details": null,
+      "name": "vllm-cache-config.json:prefix_cache_enabled",
+      "passed": true
+    },
+    {
+      "details": "16",
+      "name": "vllm-cache-config.json:live_block_size",
+      "passed": true
+    },
+    {
+      "details": 190896,
+      "name": "vllm-cache-config.json:positive_capacity",
+      "passed": true
+    },
+    {
+      "details": null,
+      "name": "vllm-cache-config-8b.json:prefix_cache_enabled",
+      "passed": true
+    },
+    {
+      "details": "16",
+      "name": "vllm-cache-config-8b.json:live_block_size",
+      "passed": true
+    },
+    {
+      "details": 44656,
+      "name": "vllm-cache-config-8b.json:positive_capacity",
+      "passed": true
+    },
+    {
+      "details": 7,
+      "name": "persistent_builder_summary_count",
+      "passed": true
+    },
+    {
+      "details": null,
+      "name": "bfcl-padded64-contextpilot-online_incremental-summary.json:provenance",
+      "passed": true
+    },
+    {
+      "details": [
+        "0145ed5a228e4aa414c9b8d101d612213ba6ab17c8428ccc6ba994632e6cb3c2",
+        "8da0512242ca138dc0f3b8f8b3f0dc302fcf3883fa665b7e8a174334762d1f3f"
+      ],
+      "name": "bfcl-padded64-contextpilot-online_incremental-summary.json:sha256_fields",
+      "passed": true
+    },
+    {
+      "details": null,
+      "name": "quality-contextpilot-online_incremental-summary.json:provenance",
+      "passed": true
+    },
+    {
+      "details": [
+        "dfdf3fe8bc18f8a498d37258cade08cc8db870b7ef90e21cab1c7a2fc6a7cdc5",
+        "5b1c4c94b8049d63891c2bf82b8ce8a92df793d7a8fc57460c34e8022e30cdac"
+      ],
+      "name": "quality-contextpilot-online_incremental-summary.json:sha256_fields",
+      "passed": true
+    },
+    {
+      "details": null,
+      "name": "toolret-bm25-k128-contextpilot-online_incremental-summary.json:provenance",
+      "passed": true
+    },
+    {
+      "details": [
+        "19a5814f380869189094767bb2ab340f93dd7b5887420793db6bd377aa4f41b7",
+        "89e3cac614a743cff7a57f3875234a632a5af7029eabd150de080d61f25bd6f7"
+      ],
+      "name": "toolret-bm25-k128-contextpilot-online_incremental-summary.json:sha256_fields",
+      "passed": true
+    },
+    {
+      "details": null,
+      "name": "toolret-bm25-k16-contextpilot-online_incremental-summary.json:provenance",
+      "passed": true
+    },
+    {
+      "details": [
+        "c89c3a68e4cfbc212639a023ccb882d2825d4a676760590849ca8c95cae8abec",
+        "b7e515c3a721e60fd1a64f3d67e13b9af3347b379a09b38d1e9c5f3312baa601"
+      ],
+      "name": "toolret-bm25-k16-contextpilot-online_incremental-summary.json:sha256_fields",
+      "passed": true
+    },
+    {
+      "details": null,
+      "name": "toolret-bm25-k4-contextpilot-online_incremental-summary.json:provenance",
+      "passed": true
+    },
+    {
+      "details": [
+        "b228588eee43fcdaf8fda4f2f6e90e113201b898f46c676305221e1157507ae8",
+        "eee6cfe8ed620e349cedbd6921ec56d4bde5e273f13e1ee5de9032bba24d5372"
+      ],
+      "name": "toolret-bm25-k4-contextpilot-online_incremental-summary.json:sha256_fields",
+      "passed": true
+    },
+    {
+      "details": null,
+      "name": "toolret-bm25-k64-contextpilot-online_incremental-summary.json:provenance",
+      "passed": true
+    },
+    {
+      "details": [
+        "905eaca6fe6578d462c772bf519328050efb0498c78146d8a1d068b0026e4eed",
+        "e9c4c87dec7f524fb115a6b0fd855c13b876c301ac739fe2cee789a95b20f41a"
+      ],
+      "name": "toolret-bm25-k64-contextpilot-online_incremental-summary.json:sha256_fields",
+      "passed": true
+    },
+    {
+      "details": null,
+      "name": "toolret-padded64-contextpilot-online_incremental-summary.json:provenance",
+      "passed": true
+    },
+    {
+      "details": [
+        "182c20f567f16a91d16df35e7b9a204793a76044add5069ad53a5ee23118bb96",
+        "ad89d7d0ba57c662a1638de7c84ff992c3cff2acfc5e8cec56c4ee7f4dcf797f"
+      ],
+      "name": "toolret-padded64-contextpilot-online_incremental-summary.json:sha256_fields",
+      "passed": true
+    },
+    {
+      "details": null,
+      "name": "bfcl-padded64:equivalence_guards",
+      "passed": true
+    },
+    {
+      "details": [
+        "alphabetical",
+        "contextpilot-online_incremental",
+        "original",
+        "tooltrie_v0"
+      ],
+      "name": "bfcl-padded64:condition_set",
+      "passed": true
+    },
+    {
+      "details": null,
+      "name": "bfcl-padded64:alphabetical:trial_shape",
+      "passed": true
+    },
+    {
+      "details": {
+        "cached": 526432.0,
+        "computed": 854262.0,
+        "prompt_tokens": 1380694,
+        "ratio": 0.381281
+      },
+      "name": "bfcl-padded64:alphabetical:counter_identity",
+      "passed": true
+    },
+    {
+      "details": null,
+      "name": "bfcl-padded64:contextpilot-online_incremental:trial_shape",
+      "passed": true
+    },
+    {
+      "details": {
+        "cached": 1327632.0,
+        "computed": 53062.0,
+        "prompt_tokens": 1380694,
+        "ratio": 0.961569
+      },
+      "name": "bfcl-padded64:contextpilot-online_incremental:counter_identity",
+      "passed": true
+    },
+    {
+      "details": null,
+      "name": "bfcl-padded64:original:trial_shape",
+      "passed": true
+    },
+    {
+      "details": {
+        "cached": 16384.0,
+        "computed": 1364310.0,
+        "prompt_tokens": 1380694,
+        "ratio": 0.011866
+      },
+      "name": "bfcl-padded64:original:counter_identity",
+      "passed": true
+    },
+    {
+      "details": null,
+      "name": "bfcl-padded64:tooltrie_v0:trial_shape",
+      "passed": true
+    },
+    {
+      "details": {
+        "cached": 1203760.0,
+        "computed": 176934.0,
+        "prompt_tokens": 1380694,
+        "ratio": 0.871851
+      },
+      "name": "bfcl-padded64:tooltrie_v0:counter_identity",
+      "passed": true
+    },
+    {
+      "details": null,
+      "name": "toolret-padded64:equivalence_guards",
+      "passed": true
+    },
+    {
+      "details": [
+        "alphabetical",
+        "contextpilot-online_incremental",
+        "original",
+        "tooltrie_v0"
+      ],
+      "name": "toolret-padded64:condition_set",
+      "passed": true
+    },
+    {
+      "details": null,
+      "name": "toolret-padded64:alphabetical:trial_shape",
+      "passed": true
+    },
+    {
+      "details": {
+        "cached": 710576.0,
+        "computed": 681326.0,
+        "prompt_tokens": 1391902,
+        "ratio": 0.510507
+      },
+      "name": "toolret-padded64:alphabetical:counter_identity",
+      "passed": true
+    },
+    {
+      "details": null,
+      "name": "toolret-padded64:contextpilot-online_incremental:trial_shape",
+      "passed": true
+    },
+    {
+      "details": {
+        "cached": 1326112.0,
+        "computed": 65790.0,
+        "prompt_tokens": 1391902,
+        "ratio": 0.952734
+      },
+      "name": "toolret-padded64:contextpilot-online_incremental:counter_identity",
+      "passed": true
+    },
+    {
+      "details": null,
+      "name": "toolret-padded64:original:trial_shape",
+      "passed": true
+    },
+    {
+      "details": {
+        "cached": 193040.0,
+        "computed": 1198862.0,
+        "prompt_tokens": 1391902,
+        "ratio": 0.138688
+      },
+      "name": "toolret-padded64:original:counter_identity",
+      "passed": true
+    },
+    {
+      "details": null,
+      "name": "toolret-padded64:tooltrie_v0:trial_shape",
+      "passed": true
+    },
+    {
+      "details": {
+        "cached": 1163408.0,
+        "computed": 228494.0,
+        "prompt_tokens": 1391902,
+        "ratio": 0.83584
+      },
+      "name": "toolret-padded64:tooltrie_v0:counter_identity",
+      "passed": true
+    },
+    {
+      "details": null,
+      "name": "toolret-bm25-k4:equivalence_guards",
+      "passed": true
+    },
+    {
+      "details": [
+        "alphabetical",
+        "contextpilot-online_incremental",
+        "original",
+        "tooltrie_v0"
+      ],
+      "name": "toolret-bm25-k4:condition_set",
+      "passed": true
+    },
+    {
+      "details": null,
+      "name": "toolret-bm25-k4:alphabetical:trial_shape",
+      "passed": true
+    },
+    {
+      "details": {
+        "cached": 19552.0,
+        "computed": 108409.0,
+        "prompt_tokens": 127961,
+        "ratio": 0.152797
+      },
+      "name": "toolret-bm25-k4:alphabetical:counter_identity",
+      "passed": true
+    },
+    {
+      "details": null,
+      "name": "toolret-bm25-k4:contextpilot-online_incremental:trial_shape",
+      "passed": true
+    },
+    {
+      "details": {
+        "cached": 23952.0,
+        "computed": 104009.0,
+        "prompt_tokens": 127961,
+        "ratio": 0.187182
+      },
+      "name": "toolret-bm25-k4:contextpilot-online_incremental:counter_identity",
+      "passed": true
+    },
+    {
+      "details": null,
+      "name": "toolret-bm25-k4:original:trial_shape",
+      "passed": true
+    },
+    {
+      "details": {
+        "cached": 20304.0,
+        "computed": 107657.0,
+        "prompt_tokens": 127961,
+        "ratio": 0.158673
+      },
+      "name": "toolret-bm25-k4:original:counter_identity",
+      "passed": true
+    },
+    {
+      "details": null,
+      "name": "toolret-bm25-k4:tooltrie_v0:trial_shape",
+      "passed": true
+    },
+    {
+      "details": {
+        "cached": 22368.0,
+        "computed": 105593.0,
+        "prompt_tokens": 127961,
+        "ratio": 0.174803
+      },
+      "name": "toolret-bm25-k4:tooltrie_v0:counter_identity",
+      "passed": true
+    },
+    {
+      "details": null,
+      "name": "toolret-bm25-k16:equivalence_guards",
+      "passed": true
+    },
+    {
+      "details": [
+        "alphabetical",
+        "contextpilot-online_incremental",
+        "original",
+        "tooltrie_v0"
+      ],
+      "name": "toolret-bm25-k16:condition_set",
+      "passed": true
+    },
+    {
+      "details": null,
+      "name": "toolret-bm25-k16:alphabetical:trial_shape",
+      "passed": true
+    },
+    {
+      "details": {
+        "cached": 26800.0,
+        "computed": 400905.0,
+        "prompt_tokens": 427705,
+        "ratio": 0.06266
+      },
+      "name": "toolret-bm25-k16:alphabetical:counter_identity",
+      "passed": true
+    },
+    {
+      "details": null,
+      "name": "toolret-bm25-k16:contextpilot-online_incremental:trial_shape",
+      "passed": true
+    },
+    {
+      "details": {
+        "cached": 42480.0,
+        "computed": 385225.0,
+        "prompt_tokens": 427705,
+        "ratio": 0.099321
+      },
+      "name": "toolret-bm25-k16:contextpilot-online_incremental:counter_identity",
+      "passed": true
+    },
+    {
+      "details": null,
+      "name": "toolret-bm25-k16:original:trial_shape",
+      "passed": true
+    },
+    {
+      "details": {
+        "cached": 26176.0,
+        "computed": 401529.0,
+        "prompt_tokens": 427705,
+        "ratio": 0.061201
+      },
+      "name": "toolret-bm25-k16:original:counter_identity",
+      "passed": true
+    },
+    {
+      "details": null,
+      "name": "toolret-bm25-k16:tooltrie_v0:trial_shape",
+      "passed": true
+    },
+    {
+      "details": {
+        "cached": 33248.0,
+        "computed": 394457.0,
+        "prompt_tokens": 427705,
+        "ratio": 0.077736
+      },
+      "name": "toolret-bm25-k16:tooltrie_v0:counter_identity",
+      "passed": true
+    },
+    {
+      "details": null,
+      "name": "toolret-bm25-k64:equivalence_guards",
+      "passed": true
+    },
+    {
+      "details": [
+        "alphabetical",
+        "contextpilot-online_incremental",
+        "original",
+        "tooltrie_v0"
+      ],
+      "name": "toolret-bm25-k64:condition_set",
+      "passed": true
+    },
+    {
+      "details": null,
+      "name": "toolret-bm25-k64:alphabetical:trial_shape",
+      "passed": true
+    },
+    {
+      "details": {
+        "cached": 20672.0,
+        "computed": 1651482.0,
+        "prompt_tokens": 1672154,
+        "ratio": 0.012362
+      },
+      "name": "toolret-bm25-k64:alphabetical:counter_identity",
+      "passed": true
+    },
+    {
+      "details": null,
+      "name": "toolret-bm25-k64:contextpilot-online_incremental:trial_shape",
+      "passed": true
+    },
+    {
+      "details": {
+        "cached": 79872.0,
+        "computed": 1592282.0,
+        "prompt_tokens": 1672154,
+        "ratio": 0.047766
+      },
+      "name": "toolret-bm25-k64:contextpilot-online_incremental:counter_identity",
+      "passed": true
+    },
+    {
+      "details": null,
+      "name": "toolret-bm25-k64:original:trial_shape",
+      "passed": true
+    },
+    {
+      "details": {
+        "cached": 15264.0,
+        "computed": 1656890.0,
+        "prompt_tokens": 1672154,
+        "ratio": 0.009128
+      },
+      "name": "toolret-bm25-k64:original:counter_identity",
+      "passed": true
+    },
+    {
+      "details": null,
+      "name": "toolret-bm25-k64:tooltrie_v0:trial_shape",
+      "passed": true
+    },
+    {
+      "details": {
+        "cached": 31840.0,
+        "computed": 1640314.0,
+        "prompt_tokens": 1672154,
+        "ratio": 0.019041
+      },
+      "name": "toolret-bm25-k64:tooltrie_v0:counter_identity",
+      "passed": true
+    },
+    {
+      "details": null,
+      "name": "toolret-bm25-k128:equivalence_guards",
+      "passed": true
+    },
+    {
+      "details": [
+        "alphabetical",
+        "contextpilot-online_incremental",
+        "original",
+        "tooltrie_v0"
+      ],
+      "name": "toolret-bm25-k128:condition_set",
+      "passed": true
+    },
+    {
+      "details": null,
+      "name": "toolret-bm25-k128:alphabetical:trial_shape",
+      "passed": true
+    },
+    {
+      "details": {
+        "cached": 18992.0,
+        "computed": 3234438.0,
+        "prompt_tokens": 3253430,
+        "ratio": 0.005838
+      },
+      "name": "toolret-bm25-k128:alphabetical:counter_identity",
+      "passed": true
+    },
+    {
+      "details": null,
+      "name": "toolret-bm25-k128:contextpilot-online_incremental:trial_shape",
+      "passed": true
+    },
+    {
+      "details": {
+        "cached": 64688.0,
+        "computed": 3188742.0,
+        "prompt_tokens": 3253430,
+        "ratio": 0.019883
+      },
+      "name": "toolret-bm25-k128:contextpilot-online_incremental:counter_identity",
+      "passed": true
+    },
+    {
+      "details": null,
+      "name": "toolret-bm25-k128:original:trial_shape",
+      "passed": true
+    },
+    {
+      "details": {
+        "cached": 11984.0,
+        "computed": 3241446.0,
+        "prompt_tokens": 3253430,
+        "ratio": 0.003683
+      },
+      "name": "toolret-bm25-k128:original:counter_identity",
+      "passed": true
+    },
+    {
+      "details": null,
+      "name": "toolret-bm25-k128:tooltrie_v0:trial_shape",
+      "passed": true
+    },
+    {
+      "details": {
+        "cached": 36848.0,
+        "computed": 3216582.0,
+        "prompt_tokens": 3253430,
+        "ratio": 0.011326
+      },
+      "name": "toolret-bm25-k128:tooltrie_v0:counter_identity",
+      "passed": true
+    },
+    {
+      "details": null,
+      "name": "quality_8b:shape",
+      "passed": true
+    },
+    {
+      "details": null,
+      "name": "quality_4b:shape",
+      "passed": true
+    },
+    {
+      "details": 9,
+      "name": "quality_8b:comparison_count",
+      "passed": true
+    },
+    {
+      "details": null,
+      "name": "quality_8b:quality-contextpilot-online_incremental-vs-alphabetical-full_correct.json:score_agreement",
+      "passed": true
+    },
+    {
+      "details": null,
+      "name": "quality_8b:quality-contextpilot-online_incremental-vs-alphabetical-name_correct.json:score_agreement",
+      "passed": true
+    },
+    {
+      "details": null,
+      "name": "quality_8b:quality-contextpilot-online_incremental-vs-alphabetical-no_tool_correct.json:score_agreement",
+      "passed": true
+    },
+    {
+      "details": null,
+      "name": "quality_8b:quality-contextpilot-online_incremental-vs-tooltrie_v0-full_correct.json:score_agreement",
+      "passed": true
+    },
+    {
+      "details": null,
+      "name": "quality_8b:quality-contextpilot-online_incremental-vs-tooltrie_v0-name_correct.json:score_agreement",
+      "passed": true
+    },
+    {
+      "details": null,
+      "name": "quality_8b:quality-contextpilot-online_incremental-vs-tooltrie_v0-no_tool_correct.json:score_agreement",
+      "passed": true
+    },
+    {
+      "details": null,
+      "name": "quality_8b:quality-tooltrie_v0-vs-alphabetical-full_correct.json:score_agreement",
+      "passed": true
+    },
+    {
+      "details": null,
+      "name": "quality_8b:quality-tooltrie_v0-vs-alphabetical-name_correct.json:score_agreement",
+      "passed": true
+    },
+    {
+      "details": null,
+      "name": "quality_8b:quality-tooltrie_v0-vs-alphabetical-no_tool_correct.json:score_agreement",
+      "passed": true
+    },
+    {
+      "details": 9,
+      "name": "quality_4b:comparison_count",
+      "passed": true
+    },
+    {
+      "details": null,
+      "name": "quality_4b:quality-contextpilot-online_incremental-vs-alphabetical-full_correct.json:score_agreement",
+      "passed": true
+    },
+    {
+      "details": null,
+      "name": "quality_4b:quality-contextpilot-online_incremental-vs-alphabetical-name_correct.json:score_agreement",
+      "passed": true
+    },
+    {
+      "details": null,
+      "name": "quality_4b:quality-contextpilot-online_incremental-vs-alphabetical-no_tool_correct.json:score_agreement",
+      "passed": true
+    },
+    {
+      "details": null,
+      "name": "quality_4b:quality-contextpilot-online_incremental-vs-tooltrie_v0-full_correct.json:score_agreement",
+      "passed": true
+    },
+    {
+      "details": null,
+      "name": "quality_4b:quality-contextpilot-online_incremental-vs-tooltrie_v0-name_correct.json:score_agreement",
+      "passed": true
+    },
+    {
+      "details": null,
+      "name": "quality_4b:quality-contextpilot-online_incremental-vs-tooltrie_v0-no_tool_correct.json:score_agreement",
+      "passed": true
+    },
+    {
+      "details": null,
+      "name": "quality_4b:quality-tooltrie_v0-vs-alphabetical-full_correct.json:score_agreement",
+      "passed": true
+    },
+    {
+      "details": null,
+      "name": "quality_4b:quality-tooltrie_v0-vs-alphabetical-name_correct.json:score_agreement",
+      "passed": true
+    },
+    {
+      "details": null,
+      "name": "quality_4b:quality-tooltrie_v0-vs-alphabetical-no_tool_correct.json:score_agreement",
+      "passed": true
+    },
+    {
+      "details": {
+        "4b_addendum": "c8883e5a268765e0d00904b1936417094979999294a5f1e4af14a0e579c3dbc5  /home/taghan/contextpilot-quality-4b-20260808-105833.tar.gz",
+        "8b_confirmation": "aa4e196d140dc8d478ea8fd8b9da069e460779b4c888647ba228a7a60ec4a6bd  /home/taghan/contextpilot-confirmation-20260807-222212.tar.gz"
+      },
+      "name": "raw_archive_hashes_recorded",
+      "passed": true
+    }
+  ],
+  "missing_static_refit_gpu_replays": 19,
+  "raw_archive_hashes_recorded": {
+    "4b_addendum": "c8883e5a268765e0d00904b1936417094979999294a5f1e4af14a0e579c3dbc5  /home/taghan/contextpilot-quality-4b-20260808-105833.tar.gz",
+    "8b_confirmation": "aa4e196d140dc8d478ea8fd8b9da069e460779b4c888647ba228a7a60ec4a6bd  /home/taghan/contextpilot-confirmation-20260807-222212.tar.gz"
+  },
+  "raw_archives_verified_from_this_machine": false,
+  "static_refit_causal_gpu_arm_present": false,
+  "status": "partial_requires_cluster_followup",
+  "tracked_analysis_metadata_checks_passed": false,
+  "tracked_measurement_artifact_checks_passed": true
+}

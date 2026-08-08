@@ -186,13 +186,10 @@ floor" and "Recommendation".
 > *How do additional or reordered tools affect tool selection, argument
 > generation, no-tool decisions, and unauthorized-tool prevention?*
 
-**Three of the four sub-questions have fixed-workload evidence, including a
-resolved fixed-sequence regression. The fourth was never measured.**
-
-There is an empirical frontier in these measured orderings: ranking by function-name accuracy
-produces almost exactly the reverse ranking on no-tool accuracy. **An ordering
-that makes the right tool easier to find also makes the model likelier to call
-something when it should decline.**
+**Three of the four sub-questions have fixed-workload evidence. The fourth was
+never measured.** The Qwen3-8B runs show a relevance/no-tool frontier on their
+fixed sequence, but a Qwen3-4B confirmation does not reproduce the no-tool
+penalty. The evidence therefore does not support a universal causal trade-off.
 
 BFCL correctness, n=800, Qwen3-8B:
 
@@ -201,6 +198,12 @@ BFCL correctness, n=800, Qwen3-8B:
 | Alphabetical | 82.81% | 76.41% | **89.38%** |
 | ToolTrie-v0 | 83.75% | 77.66% | 87.50% |
 | ContextPilot static-refit causal adaptation (alpha=0.5) | **84.84%** | **79.06%** | 81.88% |
+
+The later ContextPilot persistent-API adaptation (`alpha=0.001`, ordering only)
+scores 84.84% / 78.44% / 84.38% at 8B. Against alphabetical that is +2.03
+points on function name, +2.03 on full call, and −5.00 on no-tool accuracy. At
+4B, its relevance gain reproduces (84.53% / 77.19%), while the no-tool
+difference against alphabetical is exactly 0.00 points (85.62% each).
 
 The targeted no-tool analysis is better powered and more damaging. Across all
 240 BFCL irrelevance tasks under 5 fixed menu seeds, task-clustered bootstrap:
@@ -228,7 +231,8 @@ The other three sub-questions were answered despite this being an extension
 question, so Q6 is substantially over-delivered relative to what the initial
 stage required.
 
-**Source:** `reports/tooltrie-phase2/findings.md` §1 and §4.
+**Source:** `reports/tooltrie-phase2/findings.md` §1 and §4;
+`reports/contextpilot-confirmation/findings.md`.
 
 ---
 
@@ -284,7 +288,9 @@ statistical policies trained on disjoint data rediscover one stable fitted order
 within each workload.
 The ContextPilot-derived static-refit ordering is the important measured
 competitor here, not evidence that the current pair/triple adaptation is
-sufficient. It is not official persistent online ContextPilot.
+sufficient. A later persistent-API adaptation also leads ToolTrie on every
+retrieved menu size; neither adaptation is the full annotated/eviction-aware
+ContextPilot system.
 
 ### Q6. How sensitive are results to request ordering and session locality? — **Answered: highly**
 
@@ -299,13 +305,14 @@ reuse despite being permutations of one task multiset.
 
 ### Q7. Does tool reordering change function-call accuracy? — **Answered: yes**
 
-See Part 1, Q6. A reuse/selection/no-tool frontier exists: the causal
-ContextPilot-derived static-refit adaptation leads reuse and call accuracy but carries
-the larger no-tool penalty (-7.50 points); ToolTrie is safer on no-tool but does
-not lead reuse. These are ordering-only results, not full-system ContextPilot
-quality. ToolTrie's own
-no-tool regression against alphabetical is confirmed at -3.75 points with an
-interval excluding zero.
+See Part 1, Q6. On the fixed Qwen3-8B sequence, a reuse/selection/no-tool
+frontier exists: both ContextPilot-derived policies lead ToolTrie on reuse and
+relevance-side point estimates while ToolTrie has higher no-tool accuracy.
+These are ordering-only results, not full-system ContextPilot quality.
+ToolTrie's own no-tool regression against alphabetical is confirmed at −3.75
+points with an interval excluding zero for its targeted fixed sequence. The
+persistent arm's no-tool loss does not reproduce at Qwen3-4B, so the broader
+trade-off is model-sensitive.
 
 ### Q8. Under which workloads does trie-aware ordering provide little or no benefit? — **Answered**
 
@@ -318,9 +325,10 @@ Three regimes, all demonstrated by the retrieved-menu arm:
 3. **Retrieval missing the needed tool.** At k=128, **19.5% of queries retrieve
    none of their gold tools**. No ordering can recover a tool never retrieved.
 
-A fourth, from the external comparison: on padded menus a stronger causal
-competitor already exists, so trie ordering is not the best available policy
-there either.
+A fourth, from the external comparison: the ContextPilot persistent-API
+adaptation leads ToolTrie even on retrieved menus, but its own reuse falls to
+1.99–18.72%. ToolTrie is not the best measured policy, and no ordering solves
+the low-overlap regime.
 
 ---
 
@@ -374,19 +382,19 @@ advised against for now.
    semantically clustered menus, which could mean *more* exact prefix overlap.
    Since the central negative result rests on retrieved menus sharing little
    prefix, this is the highest-value robustness check available.
-2. **No external system has been run on retrieved menus.** The
-   ContextPilot-derived adapters, CacheWeaver, and the fitted policies were
-   measured only on padded menus. Whether the static-refit adapter's ~9-point
-   lead survives the move that cost ToolTrie 48 points is unknown; official
-   persistent ContextPilot is also unmeasured.
-3. **The no-tool comparison against the static-refit adapter is under-powered.** Its -7.50
-   point penalty comes from a 160-case arm; the larger targeted 240-task protocol
-   was run only for ToolTrie against alphabetical. This is the single axis
-   ToolTrie wins, so it decides the multi-objective comparison.
+2. **The external retrieved-menu comparison is ordering-only.** The
+   ContextPilot persistent-API adaptation is now measured and leads ToolTrie at
+   k=4/16/64/128, but it omits annotations, de-duplication, eviction feedback,
+   and interleaved serving. The corrected `alpha=0.001` static-refit cells are
+   still pending.
+3. **The no-tool comparisons are model- and sequence-limited.** The historical
+   static-refit penalty (−7.50 points) and persistent 8B penalty (−5.00) each
+   use 160 irrelevance cases on one planner sequence; the persistent difference
+   is 0.00 at 4B. The larger targeted 240-task protocol was run only for
+   ToolTrie against alphabetical.
 4. **No combined utility weighting has been declared,** so no overall winner is
-   claimed between ToolTrie and the historical adapter. Official ContextPilot
-   cannot enter that ranking until measured. Any weighting must be declared
-   before looking at the numbers.
+   claimed between ToolTrie and either ContextPilot-derived adaptation. Any
+   weighting must be declared before looking at the numbers.
 5. **The predeclared 1-point quality gate is not practically resolved by the
    current design and budget.** The 95% CI on the full-accuracy difference is
    about +/-4.2 points at n=1,000. A defensible power calculation must account
@@ -399,12 +407,16 @@ advised against for now.
 7. **Seed 42's pressure win is one run per cell with one seed.** It leads reuse
    in all four regimes under the 7,680-token cache, but with no repeated-trial
    interval it is a sensitivity result motivating a seed sweep, not a policy.
-8. **Both raw archives exist as a single copy** on the GPU server's physical
-   disk and need an off-machine backup.
+8. **All four recorded raw archives have only one known copy** on the GPU
+   server's physical disk and need an off-machine backup.
 9. **The historical SGLang cleanliness check was not independent.** Its
    reconciliation compared two values derived from the same responses. The raw
    runs must be revalidated against aggregate `sglang:cached_tokens_total`
    before the second-engine arm is called contamination-validated.
+10. **The accepted ContextPilot quality JSON predates the inference-metadata
+    fix.** Its point estimates remain valid, but GPU-side raw score files must
+    be re-analysed with `--sequence-state-dependent` before those files are
+    used as inferential artifacts.
 
 ---
 

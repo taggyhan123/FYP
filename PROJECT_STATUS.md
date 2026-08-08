@@ -9,7 +9,7 @@ Status after the first local research pass:
 | C — normalize datasets | Complete for ToolRet and five BFCL V4 static subsets | `scripts/download_datasets.py`, `scripts/run_pipeline.py`, `reports/dataset-inventory.md` |
 | D — access patterns | Complete for benchmark evidence, four controlled replays, and the retrieved-menu ordering matrix | `reports/access-patterns.md`, `reports/tables/`, `reports/initial-brief-closure/findings.md` |
 | E — exact ToolTrie baseline | Measured on GPU on shared padded catalogs and true BM25-retrieved menus, with ordinary text prefill retained as the explicit fallback | `src/tatm/tooltrie.py`, "Task E" and "ToolTrie-v0" below, `reports/tooltrie-v0/findings.md`, `reports/initial-brief-closure/findings.md` |
-| F — initial report | Substantively complete; scientific-language and artifact-traceability audit remains open | `reports/initial-findings.md`, `reports/initial-brief-closure/findings.md` |
+| F — initial report | Substantively complete; local scientific-language and traceability audit complete, two cluster-side validations remain | `reports/initial-findings.md`, `reports/initial-brief-closure/findings.md`, `reports/contextpilot-confirmation/findings.md` |
 
 The external comparison from `NUS_GPU_PHASE2_INSTRUCTIONS.md` has now been
 **measured on GPU** — targeted no-tool evaluation, CacheWeaver, fitted
@@ -47,9 +47,30 @@ must not be read as parity: **no combined utility or cost weighting has been
 defined**, so this report declares no overall winner. Any such weighting has to
 be declared before looking at these numbers.
 
-**No historical Phase 2 arms remain in flight.** Every existing table is
-measured. A new confirmation arm is required before making claims about official
-online ContextPilot or realistic retrieved-menu head-to-head performance.
+**No historical Phase 2 arms remain in flight.** A later confirmation has now
+measured a causal **ContextPilot persistent-API adaptation** at the pinned
+upstream commit and paper/default `alpha=0.001`. It is ordering-only: no
+eviction feedback, relevance annotations, or de-duplication, so it is not the
+full ContextPilot system.
+
+That persistent arm leads ToolTrie-v0 on all four BM25-retrieved menu sizes:
+18.72 vs 17.48% at k=4, 9.93 vs 7.77% at k=16, 4.78 vs 1.90% at k=64, and
+1.99 vs 1.13% at k=128. It also reproduces the 96.16% BFCL padded-menu result.
+This resolves the earlier attribution and retrieved-menu gaps, but changes the
+interpretation: the 95–96% headline is a property of highly overlapping padded
+menus, while realistic retrieved-menu reuse remains small.
+
+The confirmation's Qwen3-8B quality replay finds +2.03pp function-name,
++2.03pp full-call, and −5.00pp no-tool accuracy against alphabetical on the
+fixed sequence. A separately recorded Qwen3-4B run reproduces the relevance
+gain but not the no-tool loss: 0.00pp versus alphabetical. The decline penalty
+is therefore model-sensitive on current evidence, not a universal effect.
+
+The corrected `alpha=0.001` static-refit arm is the one remaining confirmation
+cell: 18 Qwen3-0.6B systems trials and one Qwen3-8B quality replay. The accepted
+persistent trials must not be rerun. See
+`reports/contextpilot-confirmation/findings.md` and
+`NUS_GPU_CONTEXTPILOT_CONFIRMATION_INSTRUCTIONS.md`.
 
 ## Notable findings
 
@@ -191,8 +212,10 @@ request sequences; full planner replays over predeclared sequence replicates are
 needed for population-level uncertainty. The n=100 no-tool difference was
 0.00pp; the n=1000 point estimate was -4.00pp on a nested sample.
 
-**ToolTrie beats every measured causal baseline except the ContextPilot
-static-refit adaptation.** vLLM Qwen3-0.6B, 200 requests, 3 trials:
+**ToolTrie beats the simple and fitted causal baselines, but not either
+measured ContextPilot-derived policy.** The historical padded-menu comparison
+used the static-refit adaptation at `alpha=0.5`; vLLM Qwen3-0.6B, 200 requests,
+3 trials:
 
 | condition | regime | BFCL cached | ToolRet cached |
 | --- | --- | --- | --- |
@@ -212,6 +235,20 @@ Two results that overturned earlier drafts:
    it collapses to 29.96%, below alphabetical. Early requests establish a path
    that later ones follow; treating the batch atemporally destroys that
    self-reinforcement.
+
+The later confirmation used the official persistent ordering API at
+`alpha=0.001` and measured the same selected sets under realistic BM25 menus:
+
+| k | original | alphabetical | ToolTrie-v0 | ContextPilot persistent API |
+| ---: | ---: | ---: | ---: | ---: |
+| 4 | 15.87% | 15.28% | 17.48% | **18.72%** |
+| 16 | 6.12% | 6.27% | 7.77% | **9.93%** |
+| 64 | 0.91% | 1.24% | 1.90% | **4.78%** |
+| 128 | 0.37% | 0.58% | 1.13% | **1.99%** |
+
+This persistent arm is still an ordering-only adaptation, not full ContextPilot.
+It leads ToolTrie in every retrieved cell, but the absolute ratios show that
+ordering cannot manufacture overlap among independently retrieved menus.
 
 **CacheWeaver is a no-op on BFCL, but not on ToolRet.** The Algorithm-1
 reimplementation returned the unmodified input order on 200/200 BFCL requests
@@ -397,7 +434,7 @@ counter, samples KV occupancy, and can enforce a predeclared pressure threshold.
 - 1,362 canonical BFCL functions and 1,240 BFCL tasks;
 - 45,815 total schemas tokenized with `Qwen/Qwen3-0.6B`;
 - all ToolRet label references resolve to the downloaded corpus;
-- 110 unit tests pass.
+- 114 unit tests pass.
 
 ## Reports are generated, not hand-written
 
@@ -490,14 +527,18 @@ in every regime, so the 24 executions represent four distinct orderings rather
 than six independent policies. See
 `reports/initial-brief-pressure-rerun/ordering-equivalence.json`.
 
-Before a formal closure claim, regenerate affected comparisons with metric-
-specific scoping, treat sequence-dependent intervals as fixed-sequence
-descriptions, and revalidate the raw SGLang runs against the independent
-aggregate cached-token counter. The next extension may evaluate safe inactive-
-tool retention, but it must retain ordinary selected-tool text prefill as
-fallback and compare against both the clearly labelled static-refit adapter and
-official persistent ContextPilot, the no-retention baselines, and multiple
-random seeds.
+The local audit has repaired metric-specific quality scoping, explicit
+sequence-state metadata, fail-closed cache reset checks, and independent SGLang
+counter validation. Formal publication-grade closure still needs the GPU-side
+raw ContextPilot scores regenerated with the corrected metadata, the 19 missing
+static-refit replays, and the historical raw SGLang runs checked against the
+independent aggregate counter. None of those requires rerunning the 75 accepted
+persistent-API replays.
+
+The next extension may evaluate safe inactive-tool retention, but it must retain
+ordinary selected-tool text prefill as fallback and compare against both
+clearly labelled ContextPilot adaptations, the no-retention baselines, and
+multiple random seeds.
 
 Analytical reuse estimates must still be labelled as estimates, but they are no
 longer unvalidated: they under-predict measured hits by 1.2-1.5x on the two

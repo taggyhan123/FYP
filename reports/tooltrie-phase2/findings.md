@@ -40,6 +40,17 @@ integer IDs through `original_contexts`; the historical Phase 2 builder already
 performed the equivalent `inv[int(x)]` mapping, so this code correction does not
 change the committed 96.16% workload.
 
+**Persistent-API confirmation (2026-08-08).** A separate accepted run now uses
+the official persistent `ContextPilot.reorder` API at upstream commit
+`1fa0a143` and `alpha=0.001`, while still omitting annotations and eviction
+feedback. It reproduces 96.16% on BFCL padded-64 and leads ToolTrie-v0 on BM25
+retrieved menus at k=4/16/64/128, but only at 18.72/9.93/4.78/1.99% reuse. This
+confirms that the historical padded result is not a realistic retrieved-menu
+rate. Its Qwen3-8B no-tool difference against alphabetical is −5.00pp on the
+fixed sequence, while a Qwen3-4B addendum gives 0.00pp. See
+`reports/contextpilot-confirmation/findings.md`; the historical tables below
+remain an account of the Phase 2 execution and are not silently relabelled.
+
 ## 7. Provenance (stated first, because three conditions are not upstream code)
 
 | Condition | Implementation | Label required in any write-up |
@@ -50,6 +61,7 @@ change the committed 96.16% workload.
 | Pair/triple conditional | training-only unordered co-occurrence statistics | **`pair/triple adaptation`** |
 | ContextPilot (offline) | actual upstream code, commit `1fa0a143fdeda344585666648ab2b30cb7fea77f`, v0.4.1, `fit_transform` over the whole batch | `ContextPilot offline/transductive` |
 | ContextPilot static-refit causal adaptation | upstream clustering code at the same commit, but our harness repeatedly calls `fit_transform(contexts[0..n])`; historical `alpha=0.5`; no annotations or eviction feedback | **`ContextPilot static-refit causal adaptation (alpha=0.5; ordering only)`**, not official online ContextPilot |
+| ContextPilot persistent confirmation | persistent upstream `ContextPilot.reorder` API at the same commit, `alpha=0.001`; no annotations or eviction feedback | **`ContextPilot persistent-API adaptation (alpha=0.001; no eviction feedback or annotations)`**, not the full system |
 | SGLang | official `v0.5.15.post1`, commit `0b3bb0cbe31873994c9f989fddfe2f87ca839fdd` | `SGLang/RadixAttention engine` |
 
 FYP commit `38566fd`. Full environment in `environment.txt`; the 230 resolved
@@ -128,7 +140,8 @@ Three findings:
    order within each workload, but that order is not generally alphabetical.
 3. **The ContextPilot-derived order leads, and §2a shows future-batch visibility
    is not the explanation.** This result applies to the static-refit adaptation;
-   official persistent online ContextPilot still requires confirmation.
+   the later persistent-API confirmation is reported in the dated addendum
+   above and in `reports/contextpilot-confirmation/findings.md`.
 
 **Reproducibility.** `tooltrie_v0` measured 87.19% and `original` 1.19%, matching
 Phase 1's independent run to the digit on a different day and GPU.
@@ -202,8 +215,8 @@ field. The raw runs must be rechecked against aggregate
 
 **The information-regime standardization is complete on every historical
 table.** `contextpilot_causal` has been measured on all three systems arms (§5)
-and on the n=800 quality set (§4). Algorithm/API parity with official online
-ContextPilot remains a separate confirmation experiment.
+and on the n=800 quality set (§4). The later persistent-API adaptation is a
+separate confirmation experiment and is summarized in the dated addendum.
 
 ## 3. ContextPilot scheduling table (kept separate)
 
@@ -424,7 +437,8 @@ it is measurably worse than plain alphabetical ordering.
 BM25-retrieved menus, rendered-token/block audit, direct partial-reuse replay,
 and controlled cache-pressure conditions. Before §9 extensions, revalidate the
 raw SGLang counter windows and add complete request-sequence replay replicates
-for state-dependent quality inference. Then test a bounded active-tool manifest
-/ safe-retention design against ToolTrie, the historical static-refit adapter,
-and a corrected persistent-API ContextPilot arm, with ordinary selected-tool
-text prefill kept as the predeclared fallback.
+for state-dependent quality inference, and finish the corrected `alpha=0.001`
+static-refit cells. Then test a bounded active-tool manifest / safe-retention
+design against ToolTrie, the historical static-refit adapter, and the measured
+persistent-API adaptation, with ordinary selected-tool text prefill kept as the
+predeclared fallback.

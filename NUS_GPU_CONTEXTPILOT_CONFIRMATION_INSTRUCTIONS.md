@@ -26,6 +26,12 @@ The historical `contextpilot_causal` result (96.16% BFCL / 94.82% ToolRet) used
 
 ## Resume note for the 20260807-222212 execution
 
+**For this resume, do not execute the full-matrix loops later in this file.**
+Use the static-only companion protocol
+`NUS_GPU_CONTEXTPILOT_STATIC_REFIT_RESUME_INSTRUCTIONS.md`. It reuses the exact
+accepted workloads and raw scores, runs only the 19 missing GPU replays, and
+regenerates sequence-state comparison metadata on CPU.
+
 The accepted persistent-API work is already complete on branch
 `gpu/contextpilot-confirmation-20260807-222212` (latest handover commit
 `65298d3`). Do **not** rerun its 72 Qwen3-0.6B systems replays, three Qwen3-8B

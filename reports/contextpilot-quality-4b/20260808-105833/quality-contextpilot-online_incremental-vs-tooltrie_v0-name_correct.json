@@ -1,0 +1,27 @@
+{
+  "baseline_accuracy": 0.8375,
+  "baseline_files": [
+    "/home/taghan/contextpilot-quality-4b-20260808-105833/quality-tooltrie_v0-score-relevance.json"
+  ],
+  "bootstrap_samples": 50000,
+  "bootstrap_seed": 42,
+  "candidate_accuracy": 0.845313,
+  "candidate_files": [
+    "/home/taghan/contextpilot-quality-4b-20260808-105833/quality-contextpilot-online_incremental-score-relevance.json"
+  ],
+  "cluster_bootstrap_95_ci_percentage_points": [
+    -0.1562,
+    1.875
+  ],
+  "difference_percentage_points": 0.7812,
+  "discordant_pairs": {
+    "baseline_only_correct": 3,
+    "candidate_only_correct": 8
+  },
+  "mcnemar_exact_two_sided_p": 0.2265625,
+  "mcnemar_independence_assumption_met": true,
+  "mcnemar_note": "Exact McNemar is secondary/descriptive when several menu cases share a task; the task-clustered bootstrap interval is primary.",
+  "metric": "name_correct",
+  "paired_cases": 640,
+  "task_clusters": 640
+}

@@ -1,0 +1,18 @@
+Deviation from runbook section 1, recorded before execution.
+
+Runbook line:  python3.12 -m venv "$CONTEXTPILOT_VENV"
+Actual:        uv venv --python 3.12 "$CONTEXTPILOT_VENV"
+               uv pip install --python "$CONTEXTPILOT_VENV/bin/python" -e "$CONTEXTPILOT_REPO"
+
+Reason: this machine's system python3.12 has no ensurepip module. The documented
+fix is "apt install python3.12-venv", which needs sudo. Project working rules
+forbid sudo on this server, so the venv was created with uv instead.
+
+Equivalence: same interpreter (CPython 3.12.3, /usr/bin/python3.12), same pinned
+upstream commit 1fa0a143fdeda344585666648ab2b30cb7fea77f, same editable install
+target. Only the venv bootstrapper differs. Full resolved dependency set is
+recorded in contextpilot-pip-freeze.txt.
+
+Second note: data/processed, data/raw and data/tokenizers in the confirmation
+worktree are symlinks to /home/taghan/FYP/data/*. Datasets are git-ignored and
+are read-only inputs here; no dataset was modified or committed.

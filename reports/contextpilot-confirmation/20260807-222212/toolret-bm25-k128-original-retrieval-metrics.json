@@ -1,0 +1,577 @@
+{
+  "evaluation": {
+    "hit_rate": 0.805,
+    "mean_precision": 0.00722656,
+    "mean_recall": 0.67541667,
+    "mean_reciprocal_rank": 0.40663761,
+    "menu_size": 128,
+    "offset": 0,
+    "ordering": "original",
+    "queries": 200,
+    "queries_requiring_deterministic_zero_score_fallback": 0,
+    "random_seed": 42
+  },
+  "format_version": 1,
+  "gold_labels_used_for_selection": false,
+  "ordering_fit": {
+    "evaluation_overlap_tasks": 0,
+    "support_mode": "disjoint",
+    "support_provenance": "disjoint_toolret_gold_labels",
+    "support_tasks": 7761
+  },
+  "retrieval_curve": [
+    {
+      "hit_rate": 0.515,
+      "k": 4,
+      "mean_precision": 0.135,
+      "mean_recall": 0.41708333,
+      "mean_reciprocal_rank": 0.38583333,
+      "queries": 200,
+      "queries_requiring_deterministic_zero_score_fallback": 0
+    },
+    {
+      "hit_rate": 0.655,
+      "k": 16,
+      "mean_precision": 0.045,
+      "mean_recall": 0.55041667,
+      "mean_reciprocal_rank": 0.40221367,
+      "queries": 200,
+      "queries_requiring_deterministic_zero_score_fallback": 0
+    },
+    {
+      "hit_rate": 0.755,
+      "k": 64,
+      "mean_precision": 0.01351562,
+      "mean_recall": 0.64208333,
+      "mean_reciprocal_rank": 0.40607927,
+      "queries": 200,
+      "queries_requiring_deterministic_zero_score_fallback": 0
+    },
+    {
+      "hit_rate": 0.805,
+      "k": 128,
+      "mean_precision": 0.00722656,
+      "mean_recall": 0.67541667,
+      "mean_reciprocal_rank": 0.40663761,
+      "queries": 200,
+      "queries_requiring_deterministic_zero_score_fallback": 0
+    }
+  ],
+  "retrieved_frequency_top_100": [
+    {
+      "name": "scrape_for_me_is_it_up",
+      "retrieved_frequency": 74,
+      "tool_id": "toolbench_tool_8962"
+    },
+    {
+      "name": "get_23andMe_names",
+      "retrieved_frequency": 72,
+      "tool_id": "toolbench_tool_13554"
+    },
+    {
+      "name": "get_23andMe_relatives",
+      "retrieved_frequency": 67,
+      "tool_id": "toolbench_tool_4887"
+    },
+    {
+      "name": "get_23andMe_user",
+      "retrieved_frequency": 67,
+      "tool_id": "toolbench_tool_4879"
+    },
+    {
+      "name": "EveryEarthquake_Latest_Earthquake_Near_Me",
+      "retrieved_frequency": 63,
+      "tool_id": "toolbench_tool_11483"
+    },
+    {
+      "name": "Validate domain or email address",
+      "retrieved_frequency": 57,
+      "tool_id": "toolLens_tool_55"
+    },
+    {
+      "name": "Get 23andMe Risks",
+      "retrieved_frequency": 55,
+      "tool_id": "toolACE_tool_8391"
+    },
+    {
+      "name": "AION_List_my_Bots",
+      "retrieved_frequency": 53,
+      "tool_id": "toolbench_tool_10293"
+    },
+    {
+      "name": "Amazon_Turkey_Data_Scrapeer_Get_Product_Offers_in_Turkey",
+      "retrieved_frequency": 53,
+      "tool_id": "toolbench_tool_1091"
+    },
+    {
+      "name": "Amazon_Turkey_Data_Scrapeer_Get_Product_Reviews_in_Turkey",
+      "retrieved_frequency": 53,
+      "tool_id": "toolbench_tool_1092"
+    },
+    {
+      "name": "Demo_Project_Me",
+      "retrieved_frequency": 52,
+      "tool_id": "toolbench_tool_1706"
+    },
+    {
+      "name": "Onboarding_Project_Me",
+      "retrieved_frequency": 52,
+      "tool_id": "toolbench_tool_2592"
+    },
+    {
+      "name": "Disposable_Email_Validation_Validate_domain_or_email_address",
+      "retrieved_frequency": 52,
+      "tool_id": "toolbench_tool_9137"
+    },
+    {
+      "name": "MyMemory_Translation_Memory_set_contribution",
+      "retrieved_frequency": 52,
+      "tool_id": "toolbench_tool_8418"
+    },
+    {
+      "name": "Ticketbud_Me",
+      "retrieved_frequency": 51,
+      "tool_id": "toolbench_tool_5146"
+    },
+    {
+      "name": "Ocoya_me",
+      "retrieved_frequency": 51,
+      "tool_id": "toolbench_tool_4064"
+    },
+    {
+      "name": "ARImageSynthesizer_My_Images",
+      "retrieved_frequency": 50,
+      "tool_id": "toolbench_tool_8750"
+    },
+    {
+      "name": "GetMyTasks",
+      "retrieved_frequency": 49,
+      "tool_id": "toolACE_tool_6186"
+    },
+    {
+      "name": "Demo_Project_v3_Me",
+      "retrieved_frequency": 46,
+      "tool_id": "toolbench_tool_1910"
+    },
+    {
+      "name": "Demo_Project_v13_Me",
+      "retrieved_frequency": 46,
+      "tool_id": "toolbench_tool_2851"
+    },
+    {
+      "name": "Onboarding_Project_v3_Me",
+      "retrieved_frequency": 46,
+      "tool_id": "toolbench_tool_2861"
+    },
+    {
+      "name": "Demo_Project_v12_Me",
+      "retrieved_frequency": 46,
+      "tool_id": "toolbench_tool_6518"
+    },
+    {
+      "name": "Demo_Project_v2_Me",
+      "retrieved_frequency": 46,
+      "tool_id": "toolbench_tool_824"
+    },
+    {
+      "name": "oDesk_APIs_Get_My_Jobs",
+      "retrieved_frequency": 46,
+      "tool_id": "toolbench_tool_2975"
+    },
+    {
+      "name": "HelpSystem",
+      "retrieved_frequency": 45,
+      "tool_id": "tool_be_honest_tool_381"
+    },
+    {
+      "name": "PUT_me_player_pause",
+      "retrieved_frequency": 43,
+      "tool_id": "webtools_spotify_tool_18"
+    },
+    {
+      "name": "MyPersonal_MyEndpoint",
+      "retrieved_frequency": 43,
+      "tool_id": "toolbench_tool_11791"
+    },
+    {
+      "name": "Self_help_Quotes_Get_all_available_tags_for_self_help_quotes",
+      "retrieved_frequency": 41,
+      "tool_id": "toolbench_tool_5082"
+    },
+    {
+      "name": "get_23andMe_publish_get",
+      "retrieved_frequency": 40,
+      "tool_id": "toolbench_tool_11889"
+    },
+    {
+      "name": "Instagram_Bulk_Profile_Scrapper_Music_Search_by_Keyword",
+      "retrieved_frequency": 40,
+      "tool_id": "toolbench_tool_11735"
+    },
+    {
+      "name": "Get Help",
+      "retrieved_frequency": 40,
+      "tool_id": "toolACE_tool_1813"
+    },
+    {
+      "name": "Self_help_Quotes_Get_a_random_self_help_quote",
+      "retrieved_frequency": 40,
+      "tool_id": "toolbench_tool_5084"
+    },
+    {
+      "name": "get_23andMe_profile_picture",
+      "retrieved_frequency": 39,
+      "tool_id": "toolbench_tool_13553"
+    },
+    {
+      "name": "pe_demo_Get_help",
+      "retrieved_frequency": 38,
+      "tool_id": "toolbench_tool_6547"
+    },
+    {
+      "name": "Email_Existence_Validator_Help_Page",
+      "retrieved_frequency": 38,
+      "tool_id": "toolbench_tool_6074"
+    },
+    {
+      "name": "Get Self-Help Quote Tags",
+      "retrieved_frequency": 38,
+      "tool_id": "toolACE_tool_7942"
+    },
+    {
+      "name": "MyNewTestApi_MyTestEndpoint",
+      "retrieved_frequency": 38,
+      "tool_id": "toolbench_tool_10094"
+    },
+    {
+      "name": "Self_help_Quotes_Get_all_available_self_help_books",
+      "retrieved_frequency": 37,
+      "tool_id": "toolbench_tool_5083"
+    },
+    {
+      "name": "Get a random self-help quote",
+      "retrieved_frequency": 37,
+      "tool_id": "toolLens_tool_288"
+    },
+    {
+      "name": "Email_Checkup_email_exist",
+      "retrieved_frequency": 37,
+      "tool_id": "toolbench_tool_2868"
+    },
+    {
+      "name": "GET_me_player_devices",
+      "retrieved_frequency": 36,
+      "tool_id": "webtools_spotify_tool_16"
+    },
+    {
+      "name": "get_23andMe_carriers",
+      "retrieved_frequency": 36,
+      "tool_id": "toolbench_tool_13552"
+    },
+    {
+      "name": "Yandex_SERP_GetMyTasks_free_of_use",
+      "retrieved_frequency": 36,
+      "tool_id": "toolbench_tool_8263"
+    },
+    {
+      "name": "talkfpl",
+      "retrieved_frequency": 35,
+      "tool_id": "metatool_which_tool_67"
+    },
+    {
+      "name": "Email_Checkup_email_format",
+      "retrieved_frequency": 34,
+      "tool_id": "toolbench_tool_2869"
+    },
+    {
+      "name": "My_Bot_Bots_Telegram",
+      "retrieved_frequency": 34,
+      "tool_id": "toolbench_tool_10265"
+    },
+    {
+      "name": "Omniinfer_Progress",
+      "retrieved_frequency": 33,
+      "tool_id": "toolbench_tool_7364"
+    },
+    {
+      "name": "AbleStyle",
+      "retrieved_frequency": 33,
+      "tool_id": "metatool_which_tool_129"
+    },
+    {
+      "name": "Testing_for_My_Use_metrics",
+      "retrieved_frequency": 33,
+      "tool_id": "toolbench_tool_3074"
+    },
+    {
+      "name": "Get Random Self-Help Quote",
+      "retrieved_frequency": 32,
+      "tool_id": "toolACE_tool_12019"
+    },
+    {
+      "name": "GET_me",
+      "retrieved_frequency": 31,
+      "tool_id": "webtools_spotify_tool_7"
+    },
+    {
+      "name": "PUT_me_player_play",
+      "retrieved_frequency": 31,
+      "tool_id": "webtools_spotify_tool_19"
+    },
+    {
+      "name": "Ishan_MyOrganizationsdefaultsitecollection",
+      "retrieved_frequency": 31,
+      "tool_id": "toolbench_tool_6087"
+    },
+    {
+      "name": "ProxyPage_Tier2",
+      "retrieved_frequency": 30,
+      "tool_id": "toolbench_tool_8499"
+    },
+    {
+      "name": "MyAPI_apitest",
+      "retrieved_frequency": 30,
+      "tool_id": "toolbench_tool_10154"
+    },
+    {
+      "name": "myPlayvv_myplayvv",
+      "retrieved_frequency": 30,
+      "tool_id": "toolbench_tool_11944"
+    },
+    {
+      "name": "My_Store_Get_Categories",
+      "retrieved_frequency": 30,
+      "tool_id": "toolbench_tool_4856"
+    },
+    {
+      "name": "My_Store_Get_Product",
+      "retrieved_frequency": 30,
+      "tool_id": "toolbench_tool_4857"
+    },
+    {
+      "name": "My_Store_Get_Order",
+      "retrieved_frequency": 30,
+      "tool_id": "toolbench_tool_4859"
+    },
+    {
+      "name": "Ishan_GetMyNotebooks",
+      "retrieved_frequency": 30,
+      "tool_id": "toolbench_tool_6086"
+    },
+    {
+      "name": "My_API1_endpoint_1",
+      "retrieved_frequency": 30,
+      "tool_id": "toolbench_tool_9603"
+    },
+    {
+      "name": "ColorMe_RandomColorSet",
+      "retrieved_frequency": 29,
+      "tool_id": "toolbench_tool_6495"
+    },
+    {
+      "name": "Self_help_Quotes_Get_a_random_quote_from_a_specific_book",
+      "retrieved_frequency": 29,
+      "tool_id": "toolbench_tool_5080"
+    },
+    {
+      "name": "Playphrase_me_Get_Video",
+      "retrieved_frequency": 28,
+      "tool_id": "toolbench_tool_10480"
+    },
+    {
+      "name": "The23andMe",
+      "retrieved_frequency": 27,
+      "tool_id": "toolemu_tool_14"
+    },
+    {
+      "name": "MySQL",
+      "retrieved_frequency": 27,
+      "tool_id": "tool_be_honest_tool_595"
+    },
+    {
+      "name": "Appointment_System_API_Login",
+      "retrieved_frequency": 27,
+      "tool_id": "toolbench_tool_2340"
+    },
+    {
+      "name": "ProxyPage_Tier1",
+      "retrieved_frequency": 26,
+      "tool_id": "toolbench_tool_8500"
+    },
+    {
+      "name": "POST_me_player_next",
+      "retrieved_frequency": 26,
+      "tool_id": "webtools_spotify_tool_17"
+    },
+    {
+      "name": "SuperchargeMyEV",
+      "retrieved_frequency": 26,
+      "tool_id": "metatool_which_tool_95"
+    },
+    {
+      "name": "Todo_Lsit_get_my_todo_list",
+      "retrieved_frequency": 26,
+      "tool_id": "toolbench_tool_449"
+    },
+    {
+      "name": "Ishan_GetMyDirectReports",
+      "retrieved_frequency": 26,
+      "tool_id": "toolbench_tool_11043"
+    },
+    {
+      "name": "myBooky_DEMO_getSlots",
+      "retrieved_frequency": 26,
+      "tool_id": "toolbench_tool_3382"
+    },
+    {
+      "name": "myBooky_DEMO_getToken",
+      "retrieved_frequency": 26,
+      "tool_id": "toolbench_tool_3384"
+    },
+    {
+      "name": "myBooky_DEMO_getUsers",
+      "retrieved_frequency": 26,
+      "tool_id": "toolbench_tool_3385"
+    },
+    {
+      "name": "My_API_12345_loginUser",
+      "retrieved_frequency": 26,
+      "tool_id": "toolbench_tool_3423"
+    },
+    {
+      "name": "My_API_12345_logoutUser",
+      "retrieved_frequency": 26,
+      "tool_id": "toolbench_tool_3426"
+    },
+    {
+      "name": "WhatsMyIP",
+      "retrieved_frequency": 26,
+      "tool_id": "toolACE_tool_9959"
+    },
+    {
+      "name": "ColorMe_SpecificColorSet",
+      "retrieved_frequency": 25,
+      "tool_id": "toolbench_tool_6494"
+    },
+    {
+      "name": "Omniinfer_Get_Models",
+      "retrieved_frequency": 25,
+      "tool_id": "toolbench_tool_7365"
+    },
+    {
+      "name": "myBooky_DEMO_resetPassword",
+      "retrieved_frequency": 25,
+      "tool_id": "toolbench_tool_3386"
+    },
+    {
+      "name": "POST_me_player_previous",
+      "retrieved_frequency": 24,
+      "tool_id": "webtools_spotify_tool_20"
+    },
+    {
+      "name": "Fortune_Cookie_My_fortune",
+      "retrieved_frequency": 24,
+      "tool_id": "toolbench_tool_3869"
+    },
+    {
+      "name": "About_My_IP_GetIPInfo",
+      "retrieved_frequency": 24,
+      "tool_id": "toolbench_tool_9382"
+    },
+    {
+      "name": "Tank01_Fantasy_Stats_Get_Player_Information",
+      "retrieved_frequency": 24,
+      "tool_id": "toolbench_tool_1271"
+    },
+    {
+      "name": "getMyIP",
+      "retrieved_frequency": 23,
+      "tool_id": "toolalpaca_tool_1069"
+    },
+    {
+      "name": "getCSSProperty",
+      "retrieved_frequency": 23,
+      "tool_id": "toolACE_tool_6501"
+    },
+    {
+      "name": "My_public_interface_Root_endpoint",
+      "retrieved_frequency": 23,
+      "tool_id": "toolbench_tool_11986"
+    },
+    {
+      "name": "set_appointment_reminder",
+      "retrieved_frequency": 23,
+      "tool_id": "ultraTool_tool_831"
+    },
+    {
+      "name": "GetServiceStationNearMe",
+      "retrieved_frequency": 21,
+      "tool_id": "reversechain_tool_443"
+    },
+    {
+      "name": "get_23andMe_traits",
+      "retrieved_frequency": 21,
+      "tool_id": "toolbench_tool_4880"
+    },
+    {
+      "name": "MyPolicyAPI_Get_Policy",
+      "retrieved_frequency": 21,
+      "tool_id": "toolbench_tool_9964"
+    },
+    {
+      "name": "medicine.internal_medicine.appointment_scheduler",
+      "retrieved_frequency": 21,
+      "tool_id": "toolACE_tool_1900"
+    },
+    {
+      "name": "caregiver.schedule_appointment",
+      "retrieved_frequency": 21,
+      "tool_id": "toolACE_tool_12610"
+    },
+    {
+      "name": "GET_me_player_queue",
+      "retrieved_frequency": 20,
+      "tool_id": "webtools_spotify_tool_21"
+    },
+    {
+      "name": "Segment the given object",
+      "retrieved_frequency": 20,
+      "tool_id": "gpt4tools_tool_28"
+    },
+    {
+      "name": "get_23andMe_publish_get_by_link",
+      "retrieved_frequency": 20,
+      "tool_id": "toolbench_tool_11888"
+    },
+    {
+      "name": "myBooky_DEMO_getReservationForUser",
+      "retrieved_frequency": 20,
+      "tool_id": "toolbench_tool_3381"
+    },
+    {
+      "name": "myBooky_DEMO_getUsersForSlot",
+      "retrieved_frequency": 20,
+      "tool_id": "toolbench_tool_3383"
+    },
+    {
+      "name": "myBooky_DEMO_getUsersReservation",
+      "retrieved_frequency": 20,
+      "tool_id": "toolbench_tool_3387"
+    }
+  ],
+  "retriever": {
+    "average_document_terms": 47.6313,
+    "b": 0.75,
+    "corpus_tools": 44453,
+    "document_fields": [
+      "function_name_x3",
+      "description",
+      "parameter_names_and_descriptions"
+    ],
+    "k1": 1.5,
+    "name": "bm25_canonical_tools_v1",
+    "vocabulary_terms": 29516
+  },
+  "selection_mode": "retrieved_menu",
+  "workload": "/home/taghan/contextpilot-confirmation-20260807-222212/toolret-bm25-k128-original.jsonl"
+}

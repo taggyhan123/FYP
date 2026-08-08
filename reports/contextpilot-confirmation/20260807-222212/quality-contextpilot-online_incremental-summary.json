@@ -1,0 +1,56 @@
+{
+  "annotations_enabled": false,
+  "eviction_feedback_enabled": false,
+  "format_version": 2,
+  "full_contextpilot_system": false,
+  "group_count": null,
+  "index_stats": {
+    "total_evictions": 0,
+    "total_insertions": 660,
+    "total_search_time_us": 5673101.400374435,
+    "total_searches": 799,
+    "total_traversal_time_us": 623.7261695787311
+  },
+  "information_regime": "causal",
+  "input": "/home/taghan/contextpilot-confirmation-20260807-222212/quality-original.jsonl",
+  "input_records": 800,
+  "input_sha256": "dfdf3fe8bc18f8a498d37258cade08cc8db870b7ef90e21cab1c7a2fc6a7cdc5",
+  "limit": null,
+  "mode": "online_incremental",
+  "official_online_api_used": true,
+  "offline_transductive": false,
+  "ordering": "contextpilot_online_incremental",
+  "output": "/home/taghan/contextpilot-confirmation-20260807-222212/quality-contextpilot-online_incremental.jsonl",
+  "output_sha256": "5b1c4c94b8049d63891c2bf82b8ce8a92df793d7a8fc57460c34e8022e30cdac",
+  "planning": {
+    "max_operation_seconds": 0.014444972,
+    "mean_seconds_per_request": 0.007178003,
+    "planning_operations": 800,
+    "requests": 800,
+    "total_seconds": 5.742402333
+  },
+  "reference": {
+    "alpha": 0.001,
+    "alpha_within_paper_range": true,
+    "annotations_enabled": false,
+    "api": "contextpilot.server.live_index.ContextPilot.reorder",
+    "commit": "1fa0a143fdeda344585666648ab2b30cb7fea77f",
+    "context_unit": "tool_schema",
+    "deduplication_enabled": false,
+    "eviction_feedback_enabled": false,
+    "linkage_method": "average",
+    "official_online_api_used": true,
+    "package_versions": {
+      "contextpilot": "0.4.2",
+      "numpy": "2.5.1",
+      "scipy": "1.18.0"
+    },
+    "persistent_index": true,
+    "repository": "https://github.com/EfficientContext/ContextPilot",
+    "use_gpu_for_planning": false
+  },
+  "request_order_changed": false,
+  "requests": 800,
+  "scheduler_enabled": false,
+  "unique_tools": 1078
+}

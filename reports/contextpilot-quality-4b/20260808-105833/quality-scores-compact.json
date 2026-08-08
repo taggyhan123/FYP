@@ -1,0 +1,174 @@
+{
+  "capacity_tokens": 96832,
+  "conditions": {
+    "alphabetical": {
+      "by_domain": {
+        "irrelevance": {
+          "full_accuracy": null,
+          "function_name_accuracy": null,
+          "irrelevance_tasks": 160,
+          "no_tool_accuracy": 0.8562,
+          "relevance_tasks": 0,
+          "tasks_scored": 160
+        },
+        "multiple": {
+          "full_accuracy": 0.8187,
+          "function_name_accuracy": 0.925,
+          "irrelevance_tasks": 0,
+          "no_tool_accuracy": null,
+          "relevance_tasks": 160,
+          "tasks_scored": 160
+        },
+        "parallel": {
+          "full_accuracy": 0.6937,
+          "function_name_accuracy": 0.7562,
+          "irrelevance_tasks": 0,
+          "no_tool_accuracy": null,
+          "relevance_tasks": 160,
+          "tasks_scored": 160
+        },
+        "parallel_multiple": {
+          "full_accuracy": 0.5375,
+          "function_name_accuracy": 0.6312,
+          "irrelevance_tasks": 0,
+          "no_tool_accuracy": null,
+          "relevance_tasks": 160,
+          "tasks_scored": 160
+        },
+        "simple_python": {
+          "full_accuracy": 0.8812,
+          "function_name_accuracy": 0.9688,
+          "irrelevance_tasks": 0,
+          "no_tool_accuracy": null,
+          "relevance_tasks": 160,
+          "tasks_scored": 160
+        }
+      },
+      "ordering": "alphabetical",
+      "overall": {
+        "full_accuracy": 0.7328,
+        "function_name_accuracy": 0.8203,
+        "irrelevance_tasks": 160,
+        "no_tool_accuracy": 0.8562,
+        "relevance_tasks": 640,
+        "tasks_scored": 800
+      },
+      "run_label": "quality-alphabetical-qwen3-4b",
+      "skipped_no_ground_truth": 0
+    },
+    "contextpilot-online_incremental": {
+      "by_domain": {
+        "irrelevance": {
+          "full_accuracy": null,
+          "function_name_accuracy": null,
+          "irrelevance_tasks": 160,
+          "no_tool_accuracy": 0.8562,
+          "relevance_tasks": 0,
+          "tasks_scored": 160
+        },
+        "multiple": {
+          "full_accuracy": 0.8625,
+          "function_name_accuracy": 0.9625,
+          "irrelevance_tasks": 0,
+          "no_tool_accuracy": null,
+          "relevance_tasks": 160,
+          "tasks_scored": 160
+        },
+        "parallel": {
+          "full_accuracy": 0.7125,
+          "function_name_accuracy": 0.775,
+          "irrelevance_tasks": 0,
+          "no_tool_accuracy": null,
+          "relevance_tasks": 160,
+          "tasks_scored": 160
+        },
+        "parallel_multiple": {
+          "full_accuracy": 0.5813,
+          "function_name_accuracy": 0.65,
+          "irrelevance_tasks": 0,
+          "no_tool_accuracy": null,
+          "relevance_tasks": 160,
+          "tasks_scored": 160
+        },
+        "simple_python": {
+          "full_accuracy": 0.9313,
+          "function_name_accuracy": 0.9938,
+          "irrelevance_tasks": 0,
+          "no_tool_accuracy": null,
+          "relevance_tasks": 160,
+          "tasks_scored": 160
+        }
+      },
+      "ordering": "contextpilot_online_incremental",
+      "overall": {
+        "full_accuracy": 0.7719,
+        "function_name_accuracy": 0.8453,
+        "irrelevance_tasks": 160,
+        "no_tool_accuracy": 0.8562,
+        "relevance_tasks": 640,
+        "tasks_scored": 800
+      },
+      "run_label": "quality-contextpilot-online_incremental-qwen3-4b",
+      "skipped_no_ground_truth": 0
+    },
+    "tooltrie_v0": {
+      "by_domain": {
+        "irrelevance": {
+          "full_accuracy": null,
+          "function_name_accuracy": null,
+          "irrelevance_tasks": 160,
+          "no_tool_accuracy": 0.8688,
+          "relevance_tasks": 0,
+          "tasks_scored": 160
+        },
+        "multiple": {
+          "full_accuracy": 0.85,
+          "function_name_accuracy": 0.9563,
+          "irrelevance_tasks": 0,
+          "no_tool_accuracy": null,
+          "relevance_tasks": 160,
+          "tasks_scored": 160
+        },
+        "parallel": {
+          "full_accuracy": 0.7063,
+          "function_name_accuracy": 0.775,
+          "irrelevance_tasks": 0,
+          "no_tool_accuracy": null,
+          "relevance_tasks": 160,
+          "tasks_scored": 160
+        },
+        "parallel_multiple": {
+          "full_accuracy": 0.55,
+          "function_name_accuracy": 0.6375,
+          "irrelevance_tasks": 0,
+          "no_tool_accuracy": null,
+          "relevance_tasks": 160,
+          "tasks_scored": 160
+        },
+        "simple_python": {
+          "full_accuracy": 0.9062,
+          "function_name_accuracy": 0.9812,
+          "irrelevance_tasks": 0,
+          "no_tool_accuracy": null,
+          "relevance_tasks": 160,
+          "tasks_scored": 160
+        }
+      },
+      "ordering": "tooltrie_v0",
+      "overall": {
+        "full_accuracy": 0.7531,
+        "function_name_accuracy": 0.8375,
+        "irrelevance_tasks": 160,
+        "no_tool_accuracy": 0.8688,
+        "relevance_tasks": 640,
+        "tasks_scored": 800
+      },
+      "run_label": "quality-tooltrie_v0-qwen3-4b",
+      "skipped_no_ground_truth": 0
+    }
+  },
+  "format_version": 1,
+  "model": "Qwen/Qwen3-4B",
+  "n_per_condition": 800,
+  "note": "Compact view of quality-<condition>-score.json; per-case rows stay in the raw archive."
+}

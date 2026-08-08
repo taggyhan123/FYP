@@ -1,6 +1,6 @@
 import pytest
 
-from tatm.paired_quality import compare_paired_binary
+from tatm.paired_quality import compare_paired_binary, metric_scoped_scores
 
 
 def row(case: str, task: str, correct: bool) -> dict:
@@ -75,3 +75,28 @@ def test_equivalence_requires_entire_interval_inside_margin() -> None:
         equivalence_margin_pp=1.0,
     )
     assert result["equivalent_within_margin"] is True
+
+
+def test_metric_scope_filters_undefined_mixed_domain_rows() -> None:
+    rows = [
+        {"case_id": "relevance", "name_correct": True},
+        {"case_id": "irrelevance", "name_correct": None, "no_tool_correct": True},
+    ]
+    assert metric_scoped_scores(rows, "name_correct") == [rows[0]]
+    assert metric_scoped_scores(rows, "no_tool_correct") == [rows[1]]
+
+
+def test_stateful_sequence_is_marked_descriptive() -> None:
+    rows = [row(str(index), str(index), True) for index in range(4)]
+    result = compare_paired_binary(
+        rows,
+        rows,
+        metric="no_tool_correct",
+        bootstrap_samples=20,
+        sequence_state_dependent=True,
+    )
+    assert result["cluster_bootstrap_generalizes_across_request_sequences"] is False
+    assert result["mcnemar_independence_assumption_met"] is False
+    assert result["inference_scope"] == (
+        "descriptive for the fixed emitted planner sequence"
+    )

@@ -24,6 +24,40 @@ limitations and its CPU planning time in every summary.
 The historical `contextpilot_causal` result (96.16% BFCL / 94.82% ToolRet) used
 `alpha=0.5`; it is not an input to this run and must not be overwritten.
 
+## Resume note for the 20260807-222212 execution
+
+The accepted persistent-API work is already complete on branch
+`gpu/contextpilot-confirmation-20260807-222212` (latest handover commit
+`65298d3`). Do **not** rerun its 72 Qwen3-0.6B systems replays, three Qwen3-8B
+quality replays, or the separate Qwen3-4B quality addendum. They all completed
+with clean counters and successful pre-run cache resets.
+
+That execution correctly quarantined `contextpilot_static_refit_causal` before
+serving because the old adapter did not map `ContextIndex.fit_transform`'s
+internal integer IDs back to caller tool IDs. The corrected adapter now restores
+IDs through the public, positionally aligned `IndexResult.original_contexts`
+field and has been tested directly against pinned ContextPilot commit `1fa0a143`.
+
+To finish the original acceptance matrix, create a **new result directory** and
+run only the missing static-refit cells:
+
+- build static-refit workloads for BM25 k=4/16/64/128, BFCL padded-64, ToolRet
+  padded-64, and BFCL n=800 quality;
+- replay the 18 missing Qwen3-0.6B systems trials (six workloads × three trials);
+- replay and score the one missing Qwen3-8B quality condition;
+- combine those outputs with the existing accepted arms only at summarization;
+- run the six static-refit quality comparisons with
+  `--sequence-state-dependent`;
+- preserve a new archive and handover without modifying the original result
+  directory or archive.
+
+The old metric-scoped quality views and their numeric estimates remain valid.
+The patched comparison script can now read the mixed 800-row score files
+directly. Existing online/ToolTrie comparison JSON may be regenerated on CPU
+with `--sequence-state-dependent`; this changes inference metadata, not model
+outputs or point estimates. These intervals must be described as fixed-sequence
+descriptions, not uncertainty over alternative request sequences.
+
 ## Acceptance conditions
 
 - exact ContextPilot commit `1fa0a143fdeda344585666648ab2b30cb7fea77f`;
@@ -85,7 +119,7 @@ If any directory already contains unrelated changes, stop and use a new path.
 
 ## 2. Build the corrected CPU workloads
 
-Build one true BM25-selected menu per k. Gold labels are scored only after
+Build one BM25-selected menu per k. Gold labels are scored only after
 selection and never determine membership.
 
 ```bash
@@ -298,11 +332,13 @@ for CONDITION in contextpilot-static_refit_causal contextpilot-online_incrementa
       --baseline "$CONFIRM_RESULTS/quality-alphabetical-score.json" \
       --candidate "$CONFIRM_RESULTS/quality-$CONDITION-score.json" \
       --metric "$METRIC" --bootstrap-samples 50000 --bootstrap-seed 42 \
+      --sequence-state-dependent \
       --output "$CONFIRM_RESULTS/quality-$CONDITION-vs-alphabetical-$METRIC.json"
     python scripts/compare_bfcl_quality.py \
       --baseline "$CONFIRM_RESULTS/quality-tooltrie_v0-score.json" \
       --candidate "$CONFIRM_RESULTS/quality-$CONDITION-score.json" \
       --metric "$METRIC" --bootstrap-samples 50000 --bootstrap-seed 42 \
+      --sequence-state-dependent \
       --output "$CONFIRM_RESULTS/quality-$CONDITION-vs-tooltrie_v0-$METRIC.json"
   done
 done

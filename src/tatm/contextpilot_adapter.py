@@ -36,6 +36,53 @@ def _validate_ordering(
         )
 
 
+def _restore_static_refit_tool_ids(
+    result: Any,
+    selected: Sequence[str],
+    record_index: int,
+) -> list[str]:
+    """Map ContextPilot's internal IDs back to the newest request's tool IDs.
+
+    Pinned ContextPilot accepts string contexts but converts them to integer IDs
+    internally. ``fit_transform`` returns those integers in both
+    ``original_contexts`` and ``reordered_contexts``. Mapping the newest pair
+    positionally avoids depending on ContextPilot's private string vocabulary
+    and keeps the adaptation causal: only the current request's selected IDs
+    are needed.
+    """
+
+    original_contexts = getattr(result, "original_contexts", None)
+    reordered_contexts = getattr(result, "reordered_contexts", None)
+    if not isinstance(original_contexts, Sequence) or not isinstance(
+        reordered_contexts, Sequence
+    ):
+        raise ValueError(
+            "ContextPilot static-refit output must expose original_contexts "
+            "and reordered_contexts"
+        )
+    if not original_contexts or not reordered_contexts:
+        raise ValueError("ContextPilot static-refit output is empty")
+
+    original_internal = list(original_contexts[-1])
+    reordered_internal = list(reordered_contexts[-1])
+    if len(original_internal) != len(selected):
+        raise ValueError(
+            "ContextPilot original context length does not match the selected "
+            f"tool set for input record {record_index}"
+        )
+    try:
+        internal_to_tool = dict(zip(original_internal, selected, strict=True))
+        same_internal_set = set(reordered_internal) == set(original_internal)
+    except TypeError as error:
+        raise ValueError("ContextPilot returned unhashable context IDs") from error
+    if len(internal_to_tool) != len(original_internal) or not same_internal_set:
+        raise ValueError(
+            "ContextPilot changed or duplicated its internal context IDs for "
+            f"input record {record_index}"
+        )
+    return [internal_to_tool[internal_id] for internal_id in reordered_internal]
+
+
 def build_static_refit_causal_orderings(
     records: Sequence[Mapping[str, Any]],
     index_factory: Callable[[], Any],
@@ -67,7 +114,7 @@ def build_static_refit_causal_orderings(
             raise ValueError(
                 "ContextPilot refit output length does not match causal history"
             )
-        ordered = [str(tool_id) for tool_id in result.reordered_contexts[-1]]
+        ordered = _restore_static_refit_tool_ids(result, selected, index)
         _validate_ordering(selected, ordered, index)
         search_paths = getattr(result, "search_paths", None)
         search_path = (

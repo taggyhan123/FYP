@@ -16,6 +16,23 @@ from collections.abc import Iterable, Mapping
 from typing import Any
 
 
+def metric_scoped_scores(
+    rows: Iterable[Mapping[str, Any]], metric: str
+) -> list[Mapping[str, Any]]:
+    """Keep rows on which a mixed-domain BFCL metric is defined.
+
+    Relevance rows define function-name/full-call correctness, while
+    irrelevance rows define no-tool correctness. Score files intentionally
+    contain both domains, so callers scope each arm before pairing instead of
+    treating an undefined metric as an error or a failed prediction.
+    """
+
+    scoped = [row for row in rows if metric in row and row[metric] is not None]
+    if not scoped:
+        raise ValueError(f"No score rows define binary metric {metric}")
+    return scoped
+
+
 def _quantile(values: list[float], probability: float) -> float:
     if not values:
         raise ValueError("Cannot take a quantile of an empty sample")
@@ -49,12 +66,15 @@ def compare_paired_binary(
     bootstrap_samples: int = 20_000,
     bootstrap_seed: int = 42,
     equivalence_margin_pp: float | None = None,
+    sequence_state_dependent: bool = False,
 ) -> dict[str, Any]:
     """Compare paired binary outcomes with a task-clustered bootstrap.
 
     Rows are paired by ``case_id``. Multiple case IDs may share ``task_id``
     when the same query is tested with several fixed menu seeds; those rows are
-    kept in one bootstrap cluster.
+    kept in one bootstrap cluster. If treatment construction depends on earlier
+    requests, this interval is descriptive for the fixed emitted sequence and
+    does not represent uncertainty over alternative request sequences.
     """
 
     if bootstrap_samples < 1:
@@ -138,10 +158,29 @@ def compare_paired_binary(
         "mcnemar_exact_two_sided_p": round(
             _exact_mcnemar_p(baseline_only, candidate_only), 8
         ),
-        "mcnemar_independence_assumption_met": pair_count == len(cluster_ids),
+        "sequence_state_dependent": sequence_state_dependent,
+        "cluster_bootstrap_generalizes_across_request_sequences": (
+            not sequence_state_dependent
+        ),
+        "inference_scope": (
+            "descriptive for the fixed emitted planner sequence"
+            if sequence_state_dependent
+            else "task-clustered benchmark sample"
+        ),
+        "mcnemar_independence_assumption_met": (
+            pair_count == len(cluster_ids) and not sequence_state_dependent
+        ),
         "mcnemar_note": (
-            "Exact McNemar is secondary/descriptive when several menu cases "
-            "share a task; the task-clustered bootstrap interval is primary."
+            "Exact McNemar and the task-clustered bootstrap are descriptive "
+            "for this fixed sequence because planner treatment depends on "
+            "earlier requests. Population inference requires complete replay "
+            "replicates with planner state rebuilt."
+            if sequence_state_dependent
+            else (
+                "Exact McNemar is secondary/descriptive when several menu "
+                "cases share a task; the task-clustered bootstrap interval is "
+                "primary."
+            )
         ),
     }
     if equivalence_margin_pp is not None:

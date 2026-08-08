@@ -10,8 +10,8 @@ The two quantities are not expected to match exactly, and not only because the
 model is optimistic:
 
 - the model over-counts, because it credits reuse at tool boundaries while real
-  blocks are 16-token aligned over the rendered prompt, so a shared run of tools
-  usually loses a partial block at each end;
+  blocks are aligned to the live server's block size over the rendered prompt,
+  so a shared run of tools usually loses a partial block at each end;
 - the model under-counts, because it ignores the chat template and system
   preamble wrapping every request, which is identical across requests and is
   itself cached.
@@ -69,6 +69,12 @@ def main() -> None:
         raise SystemExit(
             "Server is not serving enable_prefix_caching=True; nothing to validate."
         )
+    try:
+        block_size = int(cache_config.get("block_size") or 0)
+    except (TypeError, ValueError) as error:
+        raise SystemExit("vLLM did not expose a valid cache block size") from error
+    if block_size < 1:
+        raise SystemExit("vLLM did not expose a valid cache block size")
 
     tools, _tasks = load_processed(args.processed_dir)
     records = list(read_jsonl(args.input))
@@ -78,7 +84,7 @@ def main() -> None:
         raise SystemExit("Empty workload.")
 
     sequences = [tuple(record["tool_ids"]) for record in records]
-    predicted = trie_metrics(sequences, tools)
+    predicted = trie_metrics(sequences, tools, block_size=block_size)
 
     if not reset_prefix_cache(base_url):
         raise SystemExit(

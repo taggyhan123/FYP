@@ -26,7 +26,7 @@ from tatm.vllm_client import (
     metric_delta,
     parse_prometheus,
     request_json,
-    reset_prefix_cache,
+    require_prefix_cache_reset,
     response_projection,
     served_model,
     server_cache_config,
@@ -206,16 +206,17 @@ def main() -> None:
     cache_config = server_cache_config(base_url)
 
     trials: list[list[dict[str, Any]]] = []
-    resets: list[bool] = []
     for _ in range(args.repeats):
-        resets.append(reset_prefix_cache(base_url))
+        try:
+            require_prefix_cache_reset(base_url)
+        except RuntimeError as error:
+            raise SystemExit(str(error)) from error
         rows = []
         for scenario, tools in scenarios():
             rows.append(run_scenario(base_url, model, scenario, tools))
             time.sleep(args.pause_seconds)
         trials.append(rows)
 
-    reset_ok = all(resets)
     output = {
         "format_version": 2,
         "run_label": args.run_label,
@@ -223,7 +224,7 @@ def main() -> None:
         "model": model,
         "server_cache_config": cache_config,
         "repeats": args.repeats,
-        "prefix_cache_reset_between_trials": reset_ok,
+        "prefix_cache_reset_between_trials": True,
         "summary": summarize(trials),
         "trials": [
             {"trial": index, "results": rows} for index, rows in enumerate(trials)
@@ -238,13 +239,6 @@ def main() -> None:
     enabled = cache_config.get("enable_prefix_caching")
     print(f"Wrote {args.output}")
     print(f"server enable_prefix_caching={enabled}")
-    if not reset_ok:
-        print(
-            "WARNING: /reset_prefix_cache unavailable "
-            "(start the server with VLLM_SERVER_DEV_MODE=1); "
-            "'original_cold' is only cold in the first trial.",
-            file=sys.stderr,
-        )
     for scenario, row in output["summary"].items():
         print(
             f"  {scenario:<22} cached={row['cached_prompt_tokens']['mean']:>7.1f} "

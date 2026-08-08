@@ -95,6 +95,57 @@ def cached_token_projection(response: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def initial_missing_cached_reconciliation(run: dict[str, Any]) -> dict[str, Any]:
+    """Validate the historical SGLang missing-zero response anomaly.
+
+    Some SGLang responses omit ``cached_tokens`` when the value is zero on the
+    first request after a flush. Reconciliation is safe only when the sum of
+    all reported response values equals the *independent aggregate server
+    counter*. Comparing against ``response_cached_tokens`` would merely compare
+    the response sum with itself and cannot validate the metric window.
+    """
+
+    results = run.get("results")
+    if not isinstance(results, list):
+        raise ValueError("SGLang run has no results list")
+    validation = run.get("counter_validation")
+    if not isinstance(validation, dict):
+        raise ValueError("SGLang run has no counter_validation object")
+    aggregate = run.get("aggregate_metric_delta")
+    if not isinstance(aggregate, dict):
+        raise ValueError("SGLang run has no aggregate_metric_delta object")
+
+    cached = [
+        ((row.get("usage") or {}).get("prompt_tokens_details") or {}).get(
+            "cached_tokens"
+        )
+        for row in results
+    ]
+    missing = [index for index, value in enumerate(cached) if value is None]
+    reported = sum(value for value in cached if value is not None)
+    failed = [
+        row.get("index", index)
+        for index, row in enumerate(results)
+        if row.get("finish_reason") is None
+    ]
+    aggregate_cached = aggregate.get("sglang:cached_tokens_total")
+    checks = {
+        "request_counter_matches": validation.get("request_counter_matches") is True,
+        "prompt_counter_matches": validation.get("prompt_counter_matches") is True,
+        "cached_total_equals_sum": aggregate_cached == reported,
+        "only_index_0_missing": missing == [0],
+        "no_failed_requests": not failed,
+    }
+    return {
+        "reported_cached_tokens": reported,
+        "aggregate_cached_tokens": aggregate_cached,
+        "missing_cached_indices": missing,
+        "failed_request_indices": failed,
+        "checks": checks,
+        "clean": all(checks.values()),
+    }
+
+
 def flush_cache(base_url: str, timeout: int = 60) -> str:
     """Flush SGLang's RadixAttention cache and return the server message."""
 

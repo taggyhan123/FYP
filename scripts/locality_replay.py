@@ -135,12 +135,19 @@ def main() -> None:
     base_url = args.base_url.rstrip("/")
     model = served_model(base_url, args.model)
     cache_config = server_cache_config(base_url)
-    block_size = int(cache_config["block_size"] or 16)
-    num_gpu_blocks = int(cache_config["num_gpu_blocks"] or 0)
-    capacity_tokens = block_size * num_gpu_blocks
-    if not capacity_tokens:
+    try:
+        block_size = int(cache_config.get("block_size") or 0)
+        num_gpu_blocks = int(cache_config.get("num_gpu_blocks") or 0)
+    except (TypeError, ValueError) as error:
         raise SystemExit(
-            "Could not read num_gpu_blocks from vllm:cache_config_info; "
+            "Could not read a valid block_size and num_gpu_blocks from "
+            "vllm:cache_config_info."
+        ) from error
+    capacity_tokens = block_size * num_gpu_blocks
+    if block_size < 1 or num_gpu_blocks < 1 or capacity_tokens < 1:
+        raise SystemExit(
+            "Could not read block_size and num_gpu_blocks from "
+            "vllm:cache_config_info; "
             "is the server running with the expected vLLM version?"
         )
 

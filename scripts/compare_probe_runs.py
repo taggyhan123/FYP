@@ -50,6 +50,12 @@ def verify_configurations(
     enabled: dict[str, Any], disabled: dict[str, Any]
 ) -> list[str]:
     problems: list[str] = []
+    for label, run in (("Cache-enabled", enabled), ("Cache-disabled", disabled)):
+        if run.get("prefix_cache_reset_between_trials") is not True:
+            problems.append(
+                f"{label} run does not prove a successful prefix-cache reset "
+                "between trials; re-run the fail-closed probe."
+            )
     enabled_flag = enabled.get("server_cache_config", {}).get(
         "enable_prefix_caching"
     )

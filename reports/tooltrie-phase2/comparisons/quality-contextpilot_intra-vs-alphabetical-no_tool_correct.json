@@ -13,15 +13,18 @@
     -11.25,
     -3.125
   ],
+  "cluster_bootstrap_generalizes_across_request_sequences": false,
   "difference_percentage_points": -6.875,
   "discordant_pairs": {
     "baseline_only_correct": 11,
     "candidate_only_correct": 0
   },
+  "inference_scope": "descriptive for the fixed emitted planner sequence",
   "mcnemar_exact_two_sided_p": 0.00097656,
-  "mcnemar_independence_assumption_met": true,
-  "mcnemar_note": "Exact McNemar is secondary/descriptive when several menu cases share a task; the task-clustered bootstrap interval is primary.",
+  "mcnemar_independence_assumption_met": false,
+  "mcnemar_note": "Exact McNemar and the task-clustered bootstrap are descriptive for this fixed sequence because planner treatment depends on earlier requests or evaluation-batch construction. Population inference requires complete replay replicates with planner state rebuilt.",
   "metric": "no_tool_correct",
   "paired_cases": 160,
+  "sequence_state_dependent": true,
   "task_clusters": 160
 }

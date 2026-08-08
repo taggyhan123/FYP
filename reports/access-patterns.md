@@ -260,6 +260,6 @@ Pair/triple calculations skipped 0 tasks with more than 25 exposed tools to avoi
 
 ## Interpretation boundary
 
-The cache result is an analytical tool-unit trie estimate. It rounds shared canonical tool tokens down to 16-token blocks. It excludes constant system/user prefixes, chat-template separators, GPU pressure, and scheduler effects, and it counts reuse at tool boundaries while real block boundaries fall wherever the rendered prompt puts them — so it is an upper bound, not a prediction. The finite-cache tables model eviction; the unbounded tables do not. Measured vLLM cache hits are required before any latency claim.
+The cache result is an analytical tool-unit trie estimate. It rounds shared canonical tool tokens down to 16-token blocks. It excludes constant system/user prefixes, chat-template separators, GPU pressure, and scheduler effects, and it counts reuse at tool boundaries while real block boundaries fall wherever the rendered prompt puts them. It is therefore a partial proxy, not a guaranteed upper bound or a latency prediction: omitted shared prefixes can raise measured reuse, while block misalignment and eviction can lower it. The finite-cache tables model eviction; the unbounded tables do not. Measured engine cache hits are required before any latency claim.
 
 A useful positive signal is ordering-dependent block reuse on multi-tool workloads, especially under bursty replay. A negative or flat ToolRet result is also expected when most relevance sets contain one tool; reordering cannot improve a one-item sequence.

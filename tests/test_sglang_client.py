@@ -1,5 +1,6 @@
 from tatm.sglang_client import (
     cached_token_projection,
+    initial_missing_cached_reconciliation,
     metric_delta,
     parse_prometheus,
 )
@@ -52,3 +53,35 @@ def test_cached_token_projection_reads_standard_and_extension_fields() -> None:
         "cached_prompt_tokens": 96,
         "cached_tokens_details": {"device": 80, "host": 16},
     }
+
+
+def test_missing_initial_cached_value_uses_independent_aggregate_counter() -> None:
+    run = {
+        "aggregate_metric_delta": {"sglang:cached_tokens_total": 64},
+        "counter_validation": {
+            "request_counter_matches": True,
+            "prompt_counter_matches": True,
+            # This field is also derived from responses and must not be used as
+            # the independent reconciliation target.
+            "response_cached_tokens": 64,
+        },
+        "results": [
+            {
+                "index": 0,
+                "usage": {"prompt_tokens_details": {}},
+                "finish_reason": "stop",
+            },
+            {
+                "index": 1,
+                "usage": {"prompt_tokens_details": {"cached_tokens": 64}},
+                "finish_reason": "stop",
+            },
+        ],
+    }
+    accepted = initial_missing_cached_reconciliation(run)
+    assert accepted["clean"] is True
+
+    run["aggregate_metric_delta"]["sglang:cached_tokens_total"] = 32
+    rejected = initial_missing_cached_reconciliation(run)
+    assert rejected["clean"] is False
+    assert rejected["checks"]["cached_total_equals_sum"] is False

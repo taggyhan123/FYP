@@ -444,9 +444,12 @@ def write_access_patterns(path: Path, summary: dict[str, Any]) -> None:
             "constant system/user prefixes, chat-template separators, GPU "
             "pressure, and scheduler effects, and it counts reuse at tool "
             "boundaries while real block boundaries fall wherever the rendered "
-            "prompt puts them — so it is an upper bound, not a prediction. The "
-            "finite-cache tables model eviction; the unbounded tables do not. "
-            "Measured vLLM cache hits are required before any latency claim.",
+            "prompt puts them. It is therefore a partial proxy, not a guaranteed "
+            "upper bound or a latency prediction: omitted shared prefixes can "
+            "raise measured reuse, while block misalignment and eviction can "
+            "lower it. The finite-cache tables model eviction; the unbounded "
+            "tables do not. Measured engine cache hits are required before any "
+            "latency claim.",
             "",
             "A useful positive signal is ordering-dependent block reuse on "
             "multi-tool workloads, especially under bursty replay. A negative or "
@@ -1305,30 +1308,39 @@ The likely publishable refinement is not a generic "reorder context into a
 trie" claim, because closely related cache-aware context ordering already
 exists. The later Phase 2 comparison in
 `reports/tooltrie-phase2/findings.md` is the authoritative gold-menu comparison:
-causal ContextPilot beats ToolTrie-v0 on reuse, while ToolTrie has the smaller
-no-tool penalty. ContextPilot was not rerun in this retrieved-menu closure arm,
-so the two information regimes must not be combined into one ranking.
+the causal **ContextPilot-derived static-refit adaptation** beats ToolTrie-v0 on
+reuse, while ToolTrie has the smaller no-tool penalty. A post-run audit found
+that this historical arm used `alpha=0.5` and was not the persistent online API.
+ContextPilot was not rerun in this retrieved-menu closure arm, so the two
+information regimes must not be combined into one ranking or presented as an
+official online result. The historical SGLang arm also awaits revalidation
+against its independent aggregate cached-token counter.
 
 Do not pursue arbitrary independent KV concatenation yet. Native exact APC
 already converts the local token-reuse signal into a repeatable TTFT benefit
-(10.6x at 200 tools). Phase 2 subsequently detected a no-tool regression for
-reuse-optimizing orders, so this report must not describe the optimization as
+(10.6x at 200 tools). Phase 2 subsequently detected a fixed-sequence no-tool
+regression among the measured high-reuse orders, so this report must not describe the optimization as
 quality-preserving without that qualification. Keep ordinary selected-tool text
 prefill as the explicit default fallback unless a predeclared cost model predicts
 that reuse repays retrieval, context, decode, and safety costs.
 
-## Initial-brief closure status
+## Initial-brief execution status
 
-The explicit Tasks A-F, the eight initial experimental questions, and the
-stricter gap-closure manifest are complete. This includes the ordinary fallback,
-retrieved menus, direct partial reuse, exact rendered-token/block validation,
-and 24/24 accepted controlled-pressure regime-runs with observed evictions. The
-original 0/24 runs remain preserved as valid low-occupancy evidence rather than
-being rewritten.
+The explicit Tasks A-F and the stricter gap-closure manifest have been
+substantively executed. Seven initial experimental questions are answered and
+question 4 is partial: schema-token cost weighting was measured, but a policy
+weighted by separately measured per-schema prefill time was not. The evidence includes
+the ordinary fallback, BM25-retrieved menus, direct partial reuse, rendered-
+token/block validation, and 24/24 accepted controlled-pressure regime-runs with
+observed evictions. The original 0/24 runs remain preserved as valid low-
+occupancy evidence rather than being rewritten.
 
-The initial brief is therefore formally closed. Later §9 retained-tool or
-KV-composition experiments remain extensions and must preserve the ordinary
-selected-tool text fallback and the measured quality/safety frontier.
+This completes the planned initial experiment stage, but it is not yet a formal
+publication-grade closure: sequence-dependent quality uncertainty, exact
+artifact-to-report traceability, and independent reproduction of corrected
+analysis paths still require audit. Later §9 retained-tool or KV-composition
+experiments remain extensions and must preserve the ordinary selected-tool text
+fallback and the measured quality/safety frontier.
 """
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(text, encoding="utf-8")

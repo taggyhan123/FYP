@@ -16,6 +16,7 @@ from tatm.io import read_jsonl
 from tatm.sglang_client import (
     cached_token_projection,
     flush_cache,
+    initial_missing_cached_reconciliation,
     metric_delta,
     parse_prometheus,
 )
@@ -139,6 +140,16 @@ def main() -> None:
         if result.get("cached_prompt_tokens") is not None
     ]
     cached_tokens_from_responses = sum(response_cached_values)
+    strict_cached_counter_matches = (
+        len(response_cached_values) == len(results)
+        and aggregate_delta.get("sglang:cached_tokens_total")
+        == cached_tokens_from_responses
+    )
+    failed_request_indices = [
+        result["index"]
+        for result in results
+        if result.get("finish_reason") is None
+    ]
     validations = {
         "request_counter_matches": (
             aggregate_delta.get("sglang:num_requests_total") == len(results)
@@ -147,13 +158,9 @@ def main() -> None:
             aggregate_delta.get("sglang:prompt_tokens_total")
             == prompt_tokens_from_responses
         ),
-        "cached_counter_matches": (
-            len(response_cached_values) == len(results)
-            and aggregate_delta.get("sglang:cached_tokens_total")
-            == cached_tokens_from_responses
-        ),
+        "cached_counter_matches": strict_cached_counter_matches,
+        "no_failed_requests": not failed_request_indices,
     }
-    counters_clean = all(validations.values())
     output = {
         "format_version": 1,
         "engine": "sglang",
@@ -168,12 +175,38 @@ def main() -> None:
         "aggregate_metric_delta": aggregate_delta,
         "counter_validation": {
             **validations,
-            "clean": counters_clean,
+            "clean": False,
             "response_prompt_tokens": prompt_tokens_from_responses,
             "response_cached_tokens": cached_tokens_from_responses,
         },
         "results": results,
     }
+    reconciliation = initial_missing_cached_reconciliation(output)
+    initial_missing_zero_reconciled = reconciliation["clean"]
+    validations["strict_cached_response_coverage"] = (
+        len(response_cached_values) == len(results)
+    )
+    validations["initial_missing_zero_reconciled"] = (
+        initial_missing_zero_reconciled
+    )
+    validations["cached_counter_matches"] = (
+        strict_cached_counter_matches or initial_missing_zero_reconciled
+    )
+    counters_clean = (
+        validations["request_counter_matches"]
+        and validations["prompt_counter_matches"]
+        and validations["cached_counter_matches"]
+        and validations["no_failed_requests"]
+    )
+    output["counter_validation"].update(
+        {
+            **validations,
+            "clean": counters_clean,
+            "failed_request_indices": failed_request_indices,
+            "missing_cached_indices": reconciliation["missing_cached_indices"],
+            "aggregate_cached_tokens": reconciliation["aggregate_cached_tokens"],
+        }
+    )
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(
         json.dumps(output, ensure_ascii=False, indent=2, sort_keys=True) + "\n",

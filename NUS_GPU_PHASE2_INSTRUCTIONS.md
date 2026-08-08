@@ -201,12 +201,14 @@ for SEED in "${NO_TOOL_SEEDS[@]}"; do
   ALPHA_NO_TOOL_SCORES+=("$PHASE2_RESULTS/no-tool-alphabetical-seed-$SEED-score.json")
   TOOLTRIE_NO_TOOL_SCORES+=("$PHASE2_RESULTS/no-tool-tooltrie-seed-$SEED-score.json")
 done
-python scripts/compare_bfcl_quality.py --baseline "${ALPHA_NO_TOOL_SCORES[@]}" --candidate "${TOOLTRIE_NO_TOOL_SCORES[@]}" --metric no_tool_correct --bootstrap-samples 50000 --bootstrap-seed 42 --output "$PHASE2_RESULTS/no-tool-tooltrie-vs-alphabetical.json"
+python scripts/compare_bfcl_quality.py --baseline "${ALPHA_NO_TOOL_SCORES[@]}" --candidate "${TOOLTRIE_NO_TOOL_SCORES[@]}" --metric no_tool_correct --bootstrap-samples 50000 --bootstrap-seed 42 --sequence-state-dependent --output "$PHASE2_RESULTS/no-tool-tooltrie-vs-alphabetical.json"
 ```
 
 Required wording: report the point difference, task-clustered 95% CI, 240
-unique tasks, 1,200 paired menu cases, and discordant counts. Do not multiply
-the effective sample size by five and do not add a post-hoc margin.
+unique tasks, 1,200 paired menu cases, and discordant counts. Label the interval
+descriptive for the fixed emitted planner sequence; it does not include
+uncertainty over alternative request orders. Do not multiply the effective
+sample size by five and do not add a post-hoc margin.
 
 Stop the 8B server cleanly after these files are complete.
 
@@ -396,8 +398,14 @@ Compute candidate-minus-alphabetical paired intervals for all three metrics:
 
 ```bash
 for CONDITION in tooltrie_v0 cacheweaver fp_tree_conditional conditional_pair_triple contextpilot_intra; do
+  STATEFUL_ARGS=()
+  case "$CONDITION" in
+    tooltrie_v0|cacheweaver|contextpilot_intra)
+      STATEFUL_ARGS+=(--sequence-state-dependent)
+      ;;
+  esac
   for METRIC in name_correct full_correct no_tool_correct; do
-    python scripts/compare_bfcl_quality.py --baseline "$PHASE2_RESULTS/quality-alphabetical-score.json" --candidate "$PHASE2_RESULTS/quality-$CONDITION-score.json" --metric "$METRIC" --bootstrap-samples 50000 --bootstrap-seed 42 --output "$PHASE2_RESULTS/quality-$CONDITION-vs-alphabetical-$METRIC.json"
+    python scripts/compare_bfcl_quality.py --baseline "$PHASE2_RESULTS/quality-alphabetical-score.json" --candidate "$PHASE2_RESULTS/quality-$CONDITION-score.json" --metric "$METRIC" --bootstrap-samples 50000 --bootstrap-seed 42 "${STATEFUL_ARGS[@]}" --output "$PHASE2_RESULTS/quality-$CONDITION-vs-alphabetical-$METRIC.json"
   done
 done
 ```
@@ -469,6 +477,12 @@ for DATASET in bfcl toolret; do
   done
 done
 ```
+
+Every accepted SGLang replay must report `counter_validation.clean: true`.
+SGLang may omit the first response's zero-valued `cached_tokens`; the harness
+accepts that case only when index 0 is the sole omission and the independent
+aggregate `sglang:cached_tokens_total` exactly equals the sum of all reported
+response values. Do not use `--allow-counter-mismatch` for an accepted run.
 
 Summarize SGLang separately:
 

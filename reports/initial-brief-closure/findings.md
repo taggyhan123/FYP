@@ -3,14 +3,21 @@
 ## Verdict
 
 The explicit Tasks A–F in `initial-research-brief.md` and the project’s stricter
-gap-closure manifest are now **complete**. Retrieved-menu serving, the ordinary
+gap-closure execution manifest are now **substantively complete**. BM25-retrieved
+menu serving, the ordinary
 fallback, direct partial reuse, exact rendered-token/block auditing, and
 controlled memory pressure all have accepted GPU evidence.
 
 The pressure criterion that initially failed 0/24 now passes 24/24 under the
-separately predeclared controlled-cache protocol. The initial brief is therefore
-formally closed; §9 retained-tool and KV-composition work remains a later
-extension rather than part of this result.
+separately predeclared controlled-cache protocol. This completes the planned
+initial experiment stage, but formal publication-grade closure still requires
+the corrected analysis paths, artifact-to-report audit, and a second durable
+copy of the raw archives. Section 9 retained-tool and KV-composition work remains
+a later extension rather than part of this result.
+
+One initial experimental sub-question remains partial: schema-token-weighted
+frequency was tested, but a policy weighted by separately measured per-schema
+prefill time was not.
 
 ## Evidence and provenance
 
@@ -60,7 +67,7 @@ Increasing the menu improves coverage, but even k=128 misses every gold tool
 on 19.5% of queries. No ordering or cache method can recover a tool absent from
 the retrieved set.
 
-## 2. Exact cache reuse on true retrieved menus
+## 2. Exact cache reuse on BM25-retrieved menus
 
 Every condition received the same selected tool set for each query; only its
 order changed. `original` is the explicit ordinary selected-tool text-prefill
@@ -211,8 +218,10 @@ changes the engine versions, emitted sequence equivalence, or 24/24 acceptance.
 4. **Schema-cost weighting is not reliably better either.** It narrowly beats
    several static controls in some rows but never beats ToolTrie here.
 5. **Simple pair/triple statistics add little on the measured fitted arm.** The
-   Phase 2 pair, triple, frequency, schema-cost, and FP-tree fitted policies
-   collapse to within 0.01 percentage points of one another and alphabetical.
+   On BFCL, the Phase 2 pair, triple, frequency, schema-cost, and FP-tree fitted
+   policies collapse to within 0.01 percentage points of one another at 39.69%,
+   while alphabetical is 38.13%. On ToolRet, alphabetical is substantially
+   higher than that fitted group.
    The ContextPilot-derived static-refit ordering is the important measured
    competitor, not evidence that the current pair/triple adaptation is
    sufficient. It must not be relabelled as official online ContextPilot.
@@ -227,7 +236,7 @@ changes the engine versions, emitted sequence equivalence, or 24/24 acceptance.
    ordering-only result (`alpha=0.5`, no annotations), not full-system quality.
 8. **Trie ordering provides little benefit when menus share little exact
    prefix, prompts are below the latency floor, or retrieval misses the needed
-   tool.** The true retrieved-menu arm demonstrates all three limits.
+   tool.** The BM25-retrieved-menu arm demonstrates all three limits.
 
 ## 7. Decision and fallback
 

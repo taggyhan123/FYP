@@ -88,12 +88,14 @@ non-overlapping 95% intervals and a 2.3x aggregate TTFT reduction.
 
 Crucially, the *cost-aware* orderings the question anticipates do **not** win.
 Frequency ordering, schema-cost weighting, FP-tree-derived ordering, and pair and
-triple co-occurrence policies all land within 0.01 points of each other and of
-alphabetical (39.69% on BFCL). Three of them were later shown to emit
+triple co-occurrence policies all land within 0.01 points of each other at
+39.69% on BFCL; alphabetical is 38.13%. On ToolRet, alphabetical is
+substantially higher than the fitted group. Three fitted labels were later shown to emit
 **byte-identical tool sequences** on all 200 requests.
 
-The lesson is that the cache rewards **identical**, not **important**. Modelling
-which tools matter adds nothing if the resulting order still varies per request.
+The lesson in these measured workloads is that the cache rewards **identical**
+prefixes, not importance scores by themselves. Modelling which tools matter
+adds little unless it makes requests emit the same prefix.
 
 The magnitude is workload-dependent — see Part 2, Q2.
 
@@ -162,7 +164,7 @@ repeatable TTFT benefit — **10.6x at 200 tools**, 4.5x at 64.
 
 The measured recommendation is therefore: **do not pursue arbitrary independent
 KV concatenation yet**, because native APC already captures the available
-signal, and text prefill remains the quality-preserving default whenever
+signal, and text prefill remains the conservative default whenever
 expected savings do not exceed context, decode, retrieval, and safety costs.
 
 What is *not* answered is the comparison the question literally poses, because
@@ -184,10 +186,10 @@ floor" and "Recommendation".
 > *How do additional or reordered tools affect tool selection, argument
 > generation, no-tool decisions, and unauthorized-tool prevention?*
 
-**Three of the four sub-questions are answered, and the answer is a confirmed
-regression. The fourth was never measured.**
+**Three of the four sub-questions have fixed-workload evidence, including a
+resolved fixed-sequence regression. The fourth was never measured.**
 
-There is a systematic frontier: ranking orderings by function-name accuracy
+There is an empirical frontier in these measured orderings: ranking by function-name accuracy
 produces almost exactly the reverse ranking on no-tool accuracy. **An ordering
 that makes the right tool easier to find also makes the model likelier to call
 something when it should decline.**
@@ -211,8 +213,11 @@ The targeted no-tool analysis is better powered and more damaging. Across all
 | 95% CI | **[-5.67, -2.00]**, excludes zero |
 | Discordant pairs | alphabetical-only correct **54**, ToolTrie-only correct **9** |
 
-This is a **confirmed regression, not a null result**; the point estimate has
-been stable near -4 points across three independent measurements.
+This is a **resolved difference for the fixed emitted sequence, not a null
+result**. The n=100 no-tool difference was 0.00 points and the nested n=1000
+estimate was -4.00 points, so these are not three independent replications.
+Because ToolTrie ordering depends on prior requests, uncertainty over alternative
+request sequences requires complete planner replay replicates.
 
 **Unauthorized-tool prevention was not measured at all.** It requires separating
 the tools present in cached context from the tools that may actually be called —
@@ -239,7 +244,7 @@ and **10.6x** at 200 tools. On the retrieved arm, prompt cost per query runs fro
 ### Q2. How much exact prefix reuse is available without changing the tool set? — **Answered**
 
 Reuse exists without altering membership, but it depends on set overlap and is
-small on realistic menus. Ordinary retrieved-order reuse falls from **15.87% at
+small on the deterministic BM25 menus. Ordinary retrieved-order reuse falls from **15.87% at
 k=4 to 0.37% at k=128**. Deterministic reordering improves it without adding or
 removing any tool:
 
@@ -261,17 +266,22 @@ shared prefix by placing request-specific tools first, and it is not the winner
 on the retrieved arm. An early analytical model recommended it; the measured
 result inverted that recommendation.
 
-### Q4. Does weighting frequency by schema length or measured prefill time perform better? — **Answered: no**
+### Q4. Does weighting frequency by schema length or measured prefill time perform better? — **Partly answered**
 
 Schema-cost weighting is **not reliably better either**. It narrowly beats
 several static controls in some rows but never beats ToolTrie, and it collapses
-onto the same order as frequency and FP-tree under measurement.
+onto the same order as frequency and FP-tree under measurement. This tests
+tokenized schema length as a cost proxy; it does **not** test a policy weighted
+by separately measured per-schema prefill time, so that half of the question
+remains open.
 
 ### Q5. How much additional benefit comes from pair/triple workflow structure? — **Answered: essentially none**
 
-The pair, triple, frequency, schema-cost, and FP-tree fitted policies collapse
-to within **0.01 percentage points** of one another and of alphabetical. Five
-statistical policies trained on disjoint data rediscover one stable global order.
+On BFCL, the pair, triple, frequency, schema-cost, and FP-tree fitted policies
+collapse to within **0.01 percentage points** of one another at 39.69%, while
+alphabetical is 38.13%. On ToolRet, alphabetical is substantially higher. Five
+statistical policies trained on disjoint data rediscover one stable fitted order
+within each workload.
 The ContextPilot-derived static-refit ordering is the important measured
 competitor here, not evidence that the current pair/triple adaptation is
 sufficient. It is not official persistent online ContextPilot.
@@ -322,7 +332,7 @@ there either.
 | A reliable vLLM prefix-cache benchmark | **Delivered** — 84 replays with clean counters; the `cached + computed == prompt_tokens` identity doubles as a contamination detector |
 | An evidence-based characterization of tool locality and cacheability | **Delivered** — Part 1 Q1; includes a withdrawn earlier claim |
 | A set of exact, quality-preserving ordering baselines | **Delivered with a qualification** — the orderings are exact permutations, but "quality-preserving" does not hold unconditionally given the no-tool regression |
-| A first ToolTrie prototype using native prefix caching | **Delivered** — causal, bounded, measured on two engines |
+| A first ToolTrie prototype using native prefix caching | **Delivered** — causal, bounded, measured on vLLM; the SGLang arm awaits corrected raw-counter revalidation |
 | An experimental basis for deciding whether to pursue retention, long-tail KV memory, or another direction | **Delivered** — see below |
 
 The brief states the primary success criterion is *"obtaining a trustworthy
@@ -330,12 +340,12 @@ answer to whether public tool workloads contain exploitable prefix locality and
 identifying the conditions under which the optimization is beneficial."*
 
 **That criterion is met, and the answer is qualified rather than affirmative.**
-Exploitable locality exists but is small on realistically retrieved menus, the
+Exploitable locality exists but is small on deterministic BM25-retrieved menus, the
 optimization is beneficial mainly on padded shared-catalog workloads above the
 latency floor, and it carries a measured safety cost.
 
 **The direction the evidence supports** is brief §9.2 — an active-tool manifest
-with constrained generation — because it targets the one confirmed regression:
+with constrained generation — because it targets the fixed-sequence decline regression:
 separating the tools present in cached context from the tools that may actually
 be called would allow reuse without the decline penalty. §9.3 admission by
 measured reuse value is well motivated by the "identical, not important" result
@@ -359,7 +369,7 @@ advised against for now.
 
 ## Part 5 — Unresolved questions and risks
 
-1. **The retriever is a lexical floor.** BM25 is deterministic and leak-free but
+1. **The retriever is a lexical baseline.** BM25 is deterministic and leak-free but
    is not the official ToolRet retriever. A dense retriever returns more
    semantically clustered menus, which could mean *more* exact prefix overlap.
    Since the central negative result rests on retrieved menus sharing little
@@ -370,17 +380,19 @@ advised against for now.
    lead survives the move that cost ToolTrie 48 points is unknown; official
    persistent ContextPilot is also unmeasured.
 3. **The no-tool comparison against the static-refit adapter is under-powered.** Its -7.50
-   point penalty comes from a 160-case arm; the well-powered 240-task protocol
+   point penalty comes from a 160-case arm; the larger targeted 240-task protocol
    was run only for ToolTrie against alphabetical. This is the single axis
    ToolTrie wins, so it decides the multi-objective comparison.
 4. **No combined utility weighting has been declared,** so no overall winner is
    claimed between ToolTrie and the historical adapter. Official ContextPilot
    cannot enter that ranking until measured. Any weighting must be declared
    before looking at the numbers.
-5. **The predeclared 1-point quality gate is unfalsifiable.** The 95% CI on the
-   full-accuracy difference is about +/-4.2 points at n=1,000; resolving 1 point
-   needs roughly n=15,000, about 12 GPU-hours per condition at 8B. It should be
-   restated as an equivalence test with a declared margin.
+5. **The predeclared 1-point quality gate is not practically resolved by the
+   current design and budget.** The 95% CI on the full-accuracy difference is
+   about +/-4.2 points at n=1,000. A defensible power calculation must account
+   for paired discordance and sequence-dependent treatment, rather than simply
+   scaling an independent-sample estimate. It should be restated as an
+   equivalence test with a declared margin and predeclared sequence replicates.
 6. **A 100-task BFCL sample got the *sign* wrong.** At n=100 the 8B quality gap
    read -3.75 points; at n=1,000 it read +0.75 with zero inside every interval.
    Small BFCL samples are pilots, not evidence.
@@ -389,6 +401,10 @@ advised against for now.
    interval it is a sensitivity result motivating a seed sweep, not a policy.
 8. **Both raw archives exist as a single copy** on the GPU server's physical
    disk and need an off-machine backup.
+9. **The historical SGLang cleanliness check was not independent.** Its
+   reconciliation compared two values derived from the same responses. The raw
+   runs must be revalidated against aggregate `sglang:cached_tokens_total`
+   before the second-engine arm is called contamination-validated.
 
 ---
 

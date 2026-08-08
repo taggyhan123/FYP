@@ -159,6 +159,16 @@ def reset_prefix_cache(base_url: str) -> bool:
         return False
 
 
+def require_prefix_cache_reset(base_url: str) -> None:
+    """Reset the prefix cache or abort before a run can be called cold."""
+
+    if not reset_prefix_cache(base_url):
+        raise RuntimeError(
+            "vLLM prefix-cache reset failed; start the server with "
+            "VLLM_SERVER_DEV_MODE=1 before collecting cold-cache evidence"
+        )
+
+
 class KvUsageSampler:
     """Poll the KV-cache gauge while a request is in flight.
 

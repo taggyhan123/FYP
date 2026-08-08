@@ -64,14 +64,26 @@ def test_contextpilot_intra_mode_rejects_request_rescheduling() -> None:
         )
 
 
-def test_static_refit_is_causal_and_passes_string_ids_directly() -> None:
+def test_static_refit_is_causal_and_restores_upstream_integer_ids() -> None:
     observed_histories: list[list[list[str]]] = []
 
     class FakeIndex:
         def fit_transform(self, contexts: list[list[str]]) -> SimpleNamespace:
             observed_histories.append([list(context) for context in contexts])
+            vocabulary = {
+                tool_id: index
+                for index, tool_id in enumerate(
+                    dict.fromkeys(tool for context in contexts for tool in context)
+                )
+            }
+            converted = [
+                [vocabulary[tool_id] for tool_id in context] for context in contexts
+            ]
             return SimpleNamespace(
-                reordered_contexts=[list(reversed(context)) for context in contexts],
+                # This is the pinned ContextPilot contract: string inputs are
+                # converted internally and fit_transform returns integer IDs.
+                original_contexts=converted,
+                reordered_contexts=[list(reversed(context)) for context in converted],
                 search_paths=[[index] for index in range(len(contexts))],
             )
 

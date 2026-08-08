@@ -32,7 +32,7 @@ from tatm.vllm_client import (
     metric_delta,
     parse_prometheus,
     request_json,
-    reset_prefix_cache,
+    require_prefix_cache_reset,
     served_model,
     server_cache_config,
 )
@@ -140,7 +140,10 @@ def main() -> None:
         warm_cached: list[float] = []
         prompt_tokens = 0
         for _ in range(args.repeats):
-            reset_prefix_cache(base_url)
+            try:
+                require_prefix_cache_reset(base_url)
+            except RuntimeError as error:
+                raise SystemExit(str(error)) from error
             first = timed_request(base_url, payload)
             second = timed_request(base_url, payload)
             cold.append(first["ttft"])

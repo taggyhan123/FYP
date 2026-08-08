@@ -35,3 +35,13 @@ def test_tokenize_chat_sends_tools_to_server_renderer(monkeypatch) -> None:
     assert captured["url"] == "http://localhost:8000/tokenize"
     assert captured["body"]["tools"][0]["function"]["name"] == "x"
     assert captured["body"]["chat_template_kwargs"] == {"enable_thinking": False}
+
+
+def test_require_prefix_cache_reset_fails_closed(monkeypatch) -> None:
+    monkeypatch.setattr(vllm_client, "reset_prefix_cache", lambda _base_url: False)
+    try:
+        vllm_client.require_prefix_cache_reset("http://localhost:8000")
+    except RuntimeError as error:
+        assert "reset failed" in str(error)
+    else:
+        raise AssertionError("failed reset was accepted")

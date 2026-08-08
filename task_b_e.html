@@ -579,7 +579,7 @@
       <p class="hero-subtitle">
         Exact prefix-cache verification, the prefill measurement floor, tool-ordering effects on real cache hits, and trie-model calibration.
       </p>
-      <span class="status-pill">Measured on GPU · Function-call quality not yet evaluated</span>
+      <span class="status-pill">Historical GPU snapshot · See consolidated report</span>
     </header>
 
     <section class="metrics" aria-label="Key findings">
@@ -638,6 +638,15 @@
 methodology corrections that changed earlier Task D conclusions. Every latency
 and cache figure here is a measured vLLM result, not an analytical estimate;
 where a number is extrapolated it is labelled as such.</p>
+<blockquote>
+<p><strong>Historical snapshot.</strong> This report records the first Task B/E pass. Later
+quality, retrieved-menu, pressure, and external-baseline experiments supersede
+its recommendations; use <code>reports/consolidated-report.md</code> and
+<code>reports/tooltrie-phase2/findings.md</code> for current conclusions. In particular,
+sequence-dependent quality intervals are descriptive for a fixed request
+order, and the historical SGLang arm awaits corrected aggregate-counter
+revalidation.</p>
+</blockquote>
 <h2 id="measurement-environment">Measurement environment<a class="headerlink" href="#measurement-environment" title="Link to this section">&para;</a></h2>
 <table>
 <thead>
@@ -1138,19 +1147,18 @@ start, then every request in sequence with no resets in between — comparing
 is a strict permutation of the same task multiset (<code>uniform</code>/<code>skewed</code> resample
 with replacement and so differ in content, not just order).</p>
 <p>120 BFCL tasks, 64-tool menus, alphabetical intra-menu order (the ordering
-Task E measured as strongest for reuse), against <code>Qwen/Qwen3-0.6B</code>. Total token
-volume across the session (668,440 tokens) is 3.5x the server's real cache
-capacity (190,896 tokens = 11,806 blocks x 16), so eviction genuinely
-happens — <code>bounded_trie_metrics</code> predicted 2,918-2,927 evictions per condition,
-consistent with the 190,888/190,877 final retained tokens sitting right at
-capacity.</p>
+Task E measured as strongest for reuse), against <code>Qwen/Qwen3-0.6B</code>. The old
+script recorded 668,440 <strong>canonical tool tokens</strong>, not full rendered prompt
+tokens. This exceeded the nominal 190,896-token capacity and the offline model
+predicted 2,918-2,927 evictions, but no live KV-occupancy or engine-eviction
+counter was sampled, so this run does not directly prove memory pressure.</p>
 <table>
 <thead>
 <tr>
 <th>Replay</th>
-<th style="text-align: right;">Total prompt tokens</th>
+<th style="text-align: right;">Canonical tool tokens</th>
 <th style="text-align: right;">Measured cached tokens</th>
-<th style="text-align: right;">Measured reuse</th>
+<th style="text-align: right;">Cached / canonical diagnostic</th>
 <th style="text-align: right;">Predicted reuse (bounded trie)</th>
 </tr>
 </thead>
@@ -1171,9 +1179,11 @@ capacity.</p>
 </tr>
 </tbody>
 </table>
-<p><strong>Answer: real eviction happens, but session order barely moves measured
-reuse here (42.97% vs 43.03%) — a much smaller gap than the offline-only
-result above (31.35% vs 27.10%) predicted for this regime.</strong> The reason is not
+<p>The 42.97%/43.03% values divide an engine-measured numerator by a canonical-tool
+denominator and are not standard rendered-prompt cache-hit ratios. The valid
+narrow result is that cached-token totals differ by only 416 tokens (0.14%), so
+session order barely moves cache behavior in this setup. This is a much smaller
+gap than the offline-only result above (31.35% vs 27.10%). The reason is not
 a failure of the offline model — it predicted the same near-parity
 (35.00% vs 35.03%) before the GPU run happened. The mechanism: the offline
 divergence was measured on raw, unordered, unpadded task tool sequences, where
@@ -1186,36 +1196,32 @@ clustering would otherwise contribute. Put plainly: <strong>once you apply the
 ordering that already wins on reuse, request scheduling stops being a
 second lever worth pulling</strong> — at least in this padded, globally-ordered
 regime; the original offline finding likely still holds for un-ordered or
-sparsely-shared catalogs.</p>
-<p><strong>This also re-confirms the trie model's calibration, independently.</strong> Measured
-reuse exceeds prediction by 1.228x (empirical) and 1.228x (session_bursty) —
-matching the 1.23x under-prediction factor found for alphabetical ordering in
-the static Task E validation (a different experimental design: per-trial reset
-versus one continuous session). The same correction factor holding across two
-unrelated measurement setups is stronger evidence for it than either result
-alone.</p>
+sparsely-shared catalogs. A corrected run with rendered-token denominators and
+sampled occupancy is still required before making an eviction-pressure claim.</p>
+<p>The old cached/canonical ratio must also <strong>not</strong> be used to calibrate the trie
+model against rendered-prompt reuse. The independent static Task E validation
+still supports its own 1.23x result; this locality run no longer counts as a
+second calibration measurement.</p>
 <h2 id="operational-note-the-reports-are-generated">Operational note: the reports are generated<a class="headerlink" href="#operational-note-the-reports-are-generated" title="Link to this section">&para;</a></h2>
-<p><code>reports/*.md</code> are produced by <code>src/tatm/reporting.py</code> and overwritten on every
-<code>scripts/run_pipeline.py</code> run. Measured GPU results are read back from
-<code>cluster/results/</code> by <code>load_probe_results</code> and rendered into the findings report,
-so they survive regeneration. Hand-editing a generated report silently loses the
-edit on the next pipeline run.</p>
+<p>Top-level <code>reports/*.md</code> are produced by <code>src/tatm/reporting.py</code>. Measured GPU
+results are normally read back from <code>cluster/results/</code> by <code>load_probe_results</code>.
+Those raw files may exist only on the cluster, so CPU-only regeneration now
+preserves an already committed measured GPU section; all other generated text
+is still overwritten. Durable corrections belong in <code>src/tatm/reporting.py</code>.</p>
 <h2 id="what-has-not-been-measured">What has not been measured<a class="headerlink" href="#what-has-not-been-measured" title="Link to this section">&para;</a></h2>
+<p>Phase 2 has since closed the large-sample function-call and external-ordering
+comparisons. The remaining initial-brief evidence is narrower and is
+predeclared in <code>cluster/initial-brief-closure-manifest.json</code>:</p>
 <ul>
-<li><strong>Function-call quality at scale.</strong> A first pass exists (100 tasks, above) and
-  shows the two orderings trade off differently on reuse versus quality — but it
-  is one run with no repeats, small per-category samples, and only two of six
-  orderings scored.</li>
-<li><strong>Four of six orderings.</strong> Only alphabetical and frequency were validated
-  against measured cache hits.</li>
-<li>Rendered full-prompt token IDs and exact block boundaries.</li>
-<li>TTFT on partial-reuse workloads (see the extrapolation above).</li>
-<li>Live-cache eviction under other orderings and other replay pairs
-  (<code>uniform</code>/<code>skewed</code> were excluded from the locality replay above because
-  they resample with replacement; only <code>empirical</code> vs <code>session_bursty</code> was
-  checked). GPU/KV memory <em>usage</em> under eviction pressure -- as opposed to
-  eviction's effect on reuse, which is now measured -- is still unrecorded.</li>
+<li>replay independently retrieved ToolRet menus at sizes 4/16/64/128;</li>
+<li>capture exact server-rendered prompt IDs and cache-block boundaries;</li>
+<li>repeat direct partial-reuse prefill/TTFT measurements;</li>
+<li>sample KV occupancy and reach the declared pressure threshold across all four
+  workload regimes; and</li>
+<li>replay the explicit ordinary selected-tool text-prefill fallback.</li>
 </ul>
+<p>The harnesses exist locally, but these items remain GPU runs rather than
+findings. See <code>NUS_GPU_BRIEF_CLOSURE_INSTRUCTIONS.md</code>.</p>
 <h2 id="reproduction">Reproduction<a class="headerlink" href="#reproduction" title="Link to this section">&para;</a></h2>
 <pre><code class="language-bash"># Data and local analysis
 python scripts/download_datasets.py

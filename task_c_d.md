@@ -6,6 +6,12 @@ reproducible methodology and reasoning used to reach the conclusions. It does
 not claim that the local analytical cache estimates are measured vLLM or GPU
 results.
 
+> **Historical analytical snapshot.** Later GPU measurements overturned the
+> ordering recommendation in this report and validated that the analytical
+> model is only a partial proxy, not a guaranteed upper bound. Use
+> `reports/consolidated-report.md` for the current measured conclusions; retain
+> this document for Task C/D methodology and provenance.
+
 ## Dataset provenance
 
 All inputs are public research datasets. No SoC, PayPal, private MCP, or

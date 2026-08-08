@@ -115,7 +115,7 @@ it is what the runbook specified, and because the contrast is the finding.
 Quality-run cached ratios (100 requests, `--max-tokens 128`): original 1.7%,
 alphabetical 27.2–29.6%, ToolTrie **84.6%** at both model sizes.
 
-## 4a. Follow-up at n=1000 — the 8B regression was sampling noise
+## 4a. Follow-up at n=1000 — the larger nested sample reverses the point estimates
 
 The §4 gate rests on 100 tasks, where one percentage point is one task. The
 evaluation was repeated at the **maximum balanced sample, 200 per domain
@@ -139,18 +139,20 @@ the entire budget was spent on sample size instead.
 | no-tool | +0.00pp | −4.00pp | −10.89 … +2.89pp |
 
 Both headline metrics reverse sign and become slightly positive, and zero lies
-inside all three intervals. **There is no detectable quality cost at 8B.**
+inside all three intervals. **No quality cost is resolved in this fixed n=1000
+replay.**
 
 Two things the larger sample also exposes:
 
-1. **The n=100 sample was optimistic as well as noisy.** Absolute accuracy fell
+1. **The n=100 sample was optimistic and not representative of the larger
+   nested sample.** Absolute accuracy fell
    for every condition (alphabetical full 81.25%→75.62%, no-tool 95.0%→87.5%),
    so the first 20 tasks per domain were easier than the remaining 180.
 2. **No-tool accuracy is the one metric where ToolTrie's point estimate is
    negative** (−4.00pp), and it is the same direction alphabetical won at 0.6B.
-   It is not significant here (200 irrelevance tasks, CI ±6.9pp), but it has now
-   appeared twice, and correctly declining irrelevant requests is
-   safety-relevant. This deserves a targeted run rather than dismissal.
+   It is not resolved here (200 irrelevance tasks, CI ±6.9pp), but correctly
+   declining irrelevant requests is safety-relevant. This deserves a targeted
+   run rather than dismissal.
 
 By domain (n=200 each):
 
@@ -211,20 +213,26 @@ the alphabetical fallback, so the varying part of the menu stops breaking the
 common prefix. This is the same failure mode that made frequency ordering lose in
 Task E, exploited in the opposite direction.
 
-**Quality: no cost is detectable at 8B, but the gate as written is unfalsifiable.**
+**Quality: no cost is resolved in the fixed n=1000 replay, but the gate is
+underpowered under the present design and budget.**
 At n=100 ToolTrie appeared to regress 3.75pp/6.25pp against alphabetical. At
 n=1000 (§4a) both metrics reverse to **+0.75pp and +1.50pp**, with zero inside
-every interval. The apparent regression was sampling noise.
+every interval. The larger nested sample therefore does not reproduce the
+n=100 function-name/full-call point estimates; it does not identify sampling
+noise as the unique cause.
 
 The predeclared ≤1pp threshold, however, **cannot be settled at any sample size
 this project can afford.** The 95% CI on the full-accuracy difference is ±4.2pp
-at n=1000; resolving 1pp would need roughly n=15,000, or about 12 GPU-hours per
-condition at 8B. The gate should be restated as an equivalence test with a
-declared margin, not a point threshold.
+at n=1000. A crude independent-proportions calculation suggests a much larger
+sample, but paired precision depends on discordance and ToolTrie treatment also
+depends on request history. A defensible power calculation therefore requires
+predeclared full-sequence replay replicates, not simply scaling this interval.
+The gate should be restated as an equivalence test with a declared margin, not a
+point threshold.
 
 What the evidence supports:
 
-1. **No quality regression is detectable at n=1000**, and both headline point
+1. **No quality regression is resolved in the fixed n=1000 replay**, and both headline point
    estimates favour ToolTrie. This is weaker than "ToolTrie passes" and stronger
    than "the cost is unknown."
 2. **The n=100 verdict was wrong in sign, not just in magnitude.** Any claim

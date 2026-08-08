@@ -215,7 +215,7 @@ occupancy threshold supports an eviction-pressure claim.
 Before the generic gold/exposed-menu builder below, close the brief's required
 retrieval-vs-serving separation with the following three checks.
 
-### 6c. Build a true retrieved-tool workload (CPU; no GPU required)
+### 6c. Build a BM25-retrieved-tool workload (CPU; no GPU required)
 
 `build_cluster_workload.py --partition toolret` uses ToolRet gold relevance IDs
 as the selected set. That is the correct oracle/gold arm, but it is **not** a

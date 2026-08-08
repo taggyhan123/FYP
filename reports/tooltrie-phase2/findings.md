@@ -9,8 +9,10 @@ never used to support a cache claim.
 **static-refit causal adaptation** reaches 96.16% on this padded workload, but
 the experiment did not use ContextPilot's persistent online API and therefore
 does not establish an official online ContextPilot result. ToolTrie's measured
-quality cost is real: it declines irrelevant requests less reliably than
-alphabetical ordering, −3.75pp with a 95% interval excluding zero.
+fixed-sequence quality comparison shows that it declines irrelevant requests
+less reliably than alphabetical ordering, −3.75pp with a task-clustered 95%
+interval excluding zero. Because ToolTrie treatment depends on earlier
+requests, that interval does not cover alternative request sequences.
 
 **Post-run implementation correction (2026-08-07).** The historical condition
 stored as `contextpilot_causal` repeatedly calls
@@ -24,6 +26,19 @@ ContextPilot and generalization beyond the shared padded catalog are withdrawn.
 Future work must label this historical arm **`ContextPilot static-refit causal
 adaptation (alpha=0.5; ordering only)`**. The machine-readable correction is
 `contextpilot-causal-provenance-correction.json`.
+
+**Analysis-audit correction (2026-08-08).** Metric-specific BFCL rows must be
+selected before pairing mixed-domain score files, and sequence-dependent
+planners require complete replay replicates for uncertainty over request
+sequences. The committed point estimates remain descriptive for the exact
+emitted orderings. Also, the historical SGLang reconciliation compared the
+per-response cached-token sum with another response-derived field; it must be
+rerun against the independent aggregate server counter before the cross-engine
+arm is treated as contamination-validated.
+The generalized static-refit adapter also now restores ContextPilot's internal
+integer IDs through `original_contexts`; the historical Phase 2 builder already
+performed the equivalent `inv[int(x)]` mapping, so this code correction does not
+change the committed 96.16% workload.
 
 ## 7. Provenance (stated first, because three conditions are not upstream code)
 
@@ -55,16 +70,19 @@ menu realizations.
 | discordant pairs | alphabetical-only correct **54**, ToolTrie-only correct **9** |
 | scope | 240 task clusters, 1,200 paired menu cases |
 
-**This is a regression, not a null result.** The same effect appeared twice
-before without enough power to resolve it (0.6B n=100; 8B n=1000, −4.00pp with
-CI [−10.89, +2.89]). The point estimate has been stable at roughly −4pp across
-three independent measurements; only the interval changed. The 54:9 discordant
-split is the clearest single piece of evidence.
+**This is a resolved difference for the fixed emitted sequence, not a null
+result.** The earlier n=100 no-tool difference was 0.00pp at both model sizes;
+the nested n=1000 run produced −4.00pp with CI [−10.89, +2.89]. These are not
+three independent measurements. The 54:9 discordant split is the clearest
+descriptive evidence in the targeted run.
 
 Exact McNemar returns p=1e-08 but its independence assumption is **not** met
-here (five menu cases share each task), so it is descriptive only; the clustered
-bootstrap above is primary. No equivalence margin was declared, so no
-equivalence claim is made.
+here (five menu cases share each task). The task-clustered bootstrap handles
+within-task menu dependence but not the fact that ToolTrie orderings depend on
+earlier requests. Both are therefore descriptive for this fixed sequence;
+population inference requires complete planner replays over predeclared request-
+sequence replicates. No equivalence margin was declared, so no equivalence
+claim is made.
 
 ## 2. vLLM fixed-request-order comparison (3 trials, 95% intervals)
 
@@ -102,11 +120,12 @@ Three findings:
    so this is a property of the algorithm on this workload, not a measurement
    artifact. It is designed for overlapping retrieved text evidence; tool menus
    drawn from a shared catalog do not present the overlap structure it seeks.
-2. **All five fitted baselines collapse onto alphabetical.** Frequency,
-   schema-cost, FP-tree, pair and triple land within 0.01pp of each other
-   (39.69% on BFCL). Five different statistical policies, trained on disjoint
-   data, rediscover essentially one stable global order — consistent with Task
-   E's finding that the cache rewards *identical*, not *important*.
+2. **All five fitted baselines collapse onto one another on BFCL, not onto
+   alphabetical on both datasets.** Frequency, schema-cost, FP-tree, pair and
+   triple land within 0.01pp of each other (39.69% on BFCL), while alphabetical
+   is 38.13%. On ToolRet, alphabetical is 51.05% and the fitted group is around
+   41.6–41.9%. The fitted policies rediscover essentially one stable global
+   order within each workload, but that order is not generally alphabetical.
 3. **The ContextPilot-derived order leads, and §2a shows future-batch visibility
    is not the explanation.** This result applies to the static-refit adaptation;
    official persistent online ContextPilot still requires confirmation.
@@ -162,9 +181,10 @@ training tasks, **intersection empty**), ToolTrie and CacheWeaver are strictly
 plan-before-observe, and alphabetical/original do no learning. The original
 offline ContextPilot arm was the only non-causal condition in the study.
 
-**Cross-arm replication.** The emitted static-refit ordering is not specific to
-one engine or to the unsanitized schemas. `contextpilot_causal` was replayed 3×
-on each of the three systems arms:
+**Historical cross-arm observation, pending corrected counter revalidation.**
+The emitted static-refit ordering is not specific to one engine or to the
+unsanitized schemas. `contextpilot_causal` was replayed 3× on each of the three
+systems arms:
 
 | arm | BFCL cached | ToolRet cached |
 | --- | --- | --- |
@@ -174,12 +194,11 @@ on each of the three systems arms:
 
 Maximum spread across arms is **0.22pp** (BFCL) and **0.27pp** (ToolRet), the
 same order as every other condition's cross-arm variation, so the ~9pp gap for
-the **same precomputed ordering** replicates on a second engine with an
-independent cache implementation. This validates engine cache accounting, not
-the ordering-generation API. All six SGLang runs passed the independent counter
-check
-applied to the other 66 (index 0 the only omitted `cached_tokens`, totals
-reconciling, zero failed requests).
+the **same precomputed ordering** appears on a second engine with an independent
+cache implementation. The historical reconciliation, however, was not an
+independent counter check: it compared the response sum with a response-derived
+field. The raw runs must be rechecked against aggregate
+`sglang:cached_tokens_total` before this is accepted as contamination-validated.
 
 **The information-regime standardization is complete on every historical
 table.** `contextpilot_causal` has been measured on all three systems arms (§5)
@@ -220,15 +239,16 @@ Paired differences versus alphabetical, task-clustered 95% CI, `*` = excludes ze
 | **contextpilot_causal** *(static-refit, alpha=0.5)* | +2.03 [+0.62, +3.59]* | +2.66 [+0.94, +4.53]* | **−7.50 [−11.88, −3.75]*** |
 | contextpilot_intra *(offline)* | +2.50 [+0.94, +4.06]* | +2.50 [+0.62, +4.38]* | −6.88 [−11.25, −3.12]* |
 
-**A systematic trade-off appears across all six orderings.** Ranking by
+**An empirical trade-off appears across these measured orderings.** Ranking by
 function-name accuracy produces almost exactly the reverse ranking on no-tool
 accuracy: alphabetical is worst at selection (82.81%) and best at declining
 (89.38%); the ContextPilot-derived adapters show the reverse. An ordering
-that makes the right tool easier to find also makes the model likelier to call
-*something* when it should decline. This is the sharpest evidence yet on brief
-question 6 (quality and safety), and it is not specific to ToolTrie — ToolTrie
-sits in the middle of the trade-off, with a *smaller* no-tool cost than either
-CacheWeaver or the ContextPilot-derived adapters.
+that made the right tool easier to find in this fixed workload also made the
+model likelier to call *something* when it should decline. This is evidence on
+brief question 6 (quality and safety), but it does not prove a universal law of
+reuse optimization. ToolTrie sits in the middle of the observed trade-off, with
+a *smaller* no-tool cost than either CacheWeaver or the ContextPilot-derived
+adapters.
 
 **The trade-off is not future-batch leakage in this adapter.** The static-refit
 `contextpilot_causal` arm, restricted to already-served requests, lands in
@@ -281,12 +301,12 @@ chat template. SGLang's rendering costs **exactly +640 tokens on every request**
 fixed template overhead, not content drift). Totals therefore differ by ~9%
 (1,380,294 vs 1,508,294 on BFCL).
 
-Consequently **only cached *ratios* are cross-engine comparable** — each is
-normalized by its own engine's prompt tokens. Absolute token counts, prefill
-tokens, and TTFT are not. That the ratios still agree to ~0.2pp *despite* a
-different prompt rendering strengthens rather than weakens the conclusion: the
-ordering effect survives both a different cache architecture and a different
-template.
+Consequently cached *ratios* are the closest cross-engine summary because each
+is normalized by its own engine's prompt tokens, but even they are not a strict
+apples-to-apples comparison when the denominators contain different templates.
+Absolute token counts, prefill tokens, and TTFT are not comparable. Agreement to
+~0.2pp is encouraging descriptive evidence, subject to corrected raw-counter
+validation.
 
 | BFCL | vLLM cached | vLLM TTFT | SGLang cached | SGLang TTFT |
 | --- | --- | --- | --- | --- |
@@ -306,12 +326,11 @@ template.
 | cacheweaver | 22.46% | 17.75% |
 | original | 13.88% | 11.29% |
 
-**The ordering effect replicates on a different engine with a different cache
-architecture.** Cached ratios agree to within ~0.2pp on BFCL (87.11% vs 87.29%
-for ToolTrie) and the condition ranking is identical on both engines. That the
-same prompt-layer reordering yields the same reuse under vLLM's paged APC and
-SGLang's radix tree is strong evidence the mechanism is a property of the
-ordering, not of one implementation.
+**The historical second-engine arm shows the same ranking, pending raw counter
+revalidation.** Cached ratios agree to within ~0.2pp on BFCL (87.11% vs 87.29%
+for ToolTrie) and the condition ranking is identical on both engines. This is
+consistent with an ordering-level mechanism, but the corrected independent
+counter check must pass before treating it as a clean replication.
 
 **SGLang's absolute TTFT is 2–3× vLLM's here, and that must not be attributed to
 RadixAttention.** The entire engine differs — scheduler, attention backend
@@ -353,15 +372,17 @@ so their inputs differ from what SGLang could accept. Superseded, not
 contaminated. BFCL was unaffected (the relocation never fires there), so 66 BFCL
 replays were preserved rather than redone.
 
-**SGLang counter validation.** SGLang omits
+**SGLang counter-validation defect.** SGLang omits
 `usage.prompt_tokens_details.cached_tokens` when it is zero, so the first request
 after every flush reports `None` and the replay script's "every response reported
 a value" clause fails on every otherwise-clean run. Runs used
-`--allow-counter-mismatch` plus a **stricter** independent check: request and
-prompt counters must match, aggregate `sglang:cached_tokens_total` must equal the
-sum of reported per-request values, and index 0 must be the only omission.
-**66/66 runs passed.** Reconciled copies (flag corrected, justification recorded)
-are in `sglang-reconciled/`; originals are untouched.
+`--allow-counter-mismatch`. The historical reconciliation intended to require
+the aggregate `sglang:cached_tokens_total` to equal the per-response sum, but it
+actually compared that sum with `response_cached_tokens`, which is derived from
+the same responses. The corrected validator now checks the aggregate server
+counter, request/prompt counters, the single index-0 omission, and failed
+requests. Until it is run against the raw artifacts, the previous **66/66 clean**
+statement is withdrawn; originals and reconciled copies remain untouched.
 
 **Deviations from the runbook**, all forced and recorded in `environment.txt`:
 `uv` instead of `python3.12 -m venv` (no `ensurepip`, no sudo);
@@ -392,18 +413,18 @@ parity.)*
 
 **Where ToolTrie-v0 helps:** padded menus drawn from a stable shared catalog,
 above the ~4-tool/433-token crossover, where requests repeat catalog structure.
-+49pp cache reuse over alphabetical on BFCL, 2.3× TTFT, replicated on two
-engines.
++49pp cache reuse over alphabetical on BFCL and 2.3× TTFT on vLLM; the same
+ranking appears in the provisional SGLang arm.
 
 **Where it does not:** raw benchmark menus below the crossover (median 1 tool per
 task) — nothing to reorder. And on correctly declining irrelevant requests, where
 it is measurably worse than plain alphabetical ordering.
 
-**Recommended next step.** Close the remaining *initial-brief* evidence gaps
-before starting §9 extensions: run a true retrieved-menu arm, capture exact
-server-rendered token/block boundaries, report direct partial-reuse prefill and
-TTFT, and measure KV occupancy under demonstrated cache pressure. After those
-controls are complete, the first extension should test a bounded active-tool
-manifest / safe-retention design against ToolTrie, the historical static-refit
-adapter, and a corrected persistent-API ContextPilot arm, with ordinary
-selected-tool text prefill kept as the predeclared fallback.
+**Recommended next step.** The later initial-brief closure arm has now run the
+BM25-retrieved menus, rendered-token/block audit, direct partial-reuse replay,
+and controlled cache-pressure conditions. Before §9 extensions, revalidate the
+raw SGLang counter windows and add complete request-sequence replay replicates
+for state-dependent quality inference. Then test a bounded active-tool manifest
+/ safe-retention design against ToolTrie, the historical static-refit adapter,
+and a corrected persistent-API ContextPilot arm, with ordinary selected-tool
+text prefill kept as the predeclared fallback.

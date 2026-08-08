@@ -17,7 +17,8 @@ from tatm.models import CanonicalTool, TaskRecord
 
 
 # Cache capacities to sweep, as fractions of a partition's distinct-tool token
-# working set. 1.0 means the whole working set fits and nothing is ever evicted.
+# inventory. A trie may contain the same tool below several prefixes, so 1.0
+# does not guarantee that every trie node fits or that eviction is impossible.
 CAPACITY_FRACTIONS = (1.0, 0.5, 0.25, 0.1, 0.05)
 
 

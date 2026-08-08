@@ -41,7 +41,7 @@ TASK_B_E_COVER = {
         "Exact prefix-cache verification, the prefill measurement floor, "
         "tool-ordering effects on real cache hits, and trie-model calibration."
     ),
-    "status": "Measured on GPU · Function-call quality not yet evaluated",
+    "status": "Historical GPU snapshot · See consolidated report",
     "metrics": [
         ("10.6×", "TTFT gain at 200 tools"),
         ("4", "Crossover menu size"),
@@ -70,7 +70,7 @@ INITIAL_FINDINGS_COVER = {
         "figures, prefix-cache sanity results, ordering comparisons, and the "
         "recommendation for the next research stage."
     ),
-    "status": "Local analysis and measured GPU results",
+    "status": "Initial experiments measured · Analysis audit pending",
     "metrics": [
         ("45,815", "Canonical tools"),
         ("9,201", "Benchmark tasks"),
@@ -83,12 +83,12 @@ INITIAL_FINDINGS_COVER = {
         "signal, but it is workload- and evidence-dependent. Deterministic "
         "ordering raises estimated block reuse over empirical order for both "
         "ToolRet and BFCL. Measured on vLLM, prefix caching yields no TTFT "
-        "benefit at 303-token prompts but up to a 10.6x reduction once tool "
-        "menus reach realistic, deployment-scale sizes, with an analytical "
-        "reuse estimate that under-predicts measured cache hits by 1.2-1.5x. "
-        "The recommendation is to proceed with the exact prompt-level ToolTrie "
-        "baseline, focused on tool-specific cache admission rather than a "
-        "generic reordering claim."
+        "benefit at 303-token prompts but up to a 10.6x reduction on padded "
+        "shared-catalog menus. On deterministic BM25-retrieved menus, ToolTrie "
+        "adds only 0.76-1.65 percentage points of reuse without a resolved TTFT "
+        "gain. The recommendation is to keep ordinary text prefill as fallback "
+        "and audit quality, retrieval, and cache-pressure trade-offs before any "
+        "retention extension."
     ),
 }
 

@@ -9,7 +9,7 @@ Status after the first local research pass:
 | C — normalize datasets | Complete for ToolRet and five BFCL V4 static subsets | `scripts/download_datasets.py`, `scripts/run_pipeline.py`, `reports/dataset-inventory.md` |
 | D — access patterns | Complete for benchmark evidence, four controlled replays, and the retrieved-menu ordering matrix | `reports/access-patterns.md`, `reports/tables/`, `reports/initial-brief-closure/findings.md` |
 | E — exact ToolTrie baseline | Measured on GPU on shared padded catalogs and true BM25-retrieved menus, with ordinary text prefill retained as the explicit fallback | `src/tatm/tooltrie.py`, "Task E" and "ToolTrie-v0" below, `reports/tooltrie-v0/findings.md`, `reports/initial-brief-closure/findings.md` |
-| F — initial report | Complete and regenerated from measured results; enhanced pressure acceptance passes 24/24 | `reports/initial-findings.md`, `reports/initial-brief-closure/findings.md` |
+| F — initial report | Substantively complete; scientific-language and artifact-traceability audit remains open | `reports/initial-findings.md`, `reports/initial-brief-closure/findings.md` |
 
 The external comparison from `NUS_GPU_PHASE2_INSTRUCTIONS.md` has now been
 **measured on GPU** — targeted no-tool evaluation, CacheWeaver, fitted
@@ -17,14 +17,19 @@ FP-tree/co-occurrence baselines, ContextPilot-derived offline/static-refit
 orderings, and a separate stock
 SGLang/RadixAttention engine comparison. See "Phase 2" below.
 
-The historical §5 engine tables are **complete**: `contextpilot_causal` was
-replayed 3×
+The historical §5 engine tables contain all planned replays:
+`contextpilot_causal` was replayed 3×
 on all three systems arms and replicates to within 0.27pp (BFCL 96.16 / 96.18 /
 96.38% on unsanitized vLLM, sanitized vLLM, SGLang). A post-run audit found that
 this row is a **static-refit causal adaptation** (`alpha=0.5`, ordering only),
 not official persistent online ContextPilot. The second engine validates the
-same precomputed ordering and cache counters; it does not validate planner/API
-parity.
+same precomputed ordering but does not validate planner/API parity. A later
+audit found that the SGLang reconciliation was not independent;
+the raw runs must be checked against the aggregate cached-token counter before
+the cross-engine arm is called contamination-validated.
+The generalized static-refit adapter's integer-ID restoration was also fixed;
+the historical Phase 2 builder already performed the equivalent inverse
+mapping, so that correction does not invalidate its emitted workload.
 
 The historical §4 quality table is also complete. The static-refit arm scores
 +2.03pp on function-name accuracy but **−7.50pp on no-tool** (CI
@@ -131,7 +136,7 @@ versus 190,896 at 0.6B and evicted 424 nodes, yet produced byte-identical
 orderings on all 100 records, so this is a clean model-size comparison with no
 capacity confound.
 
-### …and the 8B regression was itself sampling noise
+### …and the larger nested sample reversed the 8B point estimates
 
 Repeated at the maximum balanced sample, **200 per domain (n=1000)**, a nested
 superset of the 100 above:
@@ -143,13 +148,14 @@ superset of the 100 above:
 | no-tool | +0.00pp | −4.00pp | −10.89 … +2.89pp |
 
 Both headline metrics reverse sign and zero sits inside every interval: **no
-quality cost is detectable at 8B**. Two further lessons. The n=100 sample was
+quality cost is resolved in this fixed n=1000 replay**. Two further lessons. The n=100 sample was
 optimistic as well as noisy — absolute accuracy fell for every condition on the
 larger set (alphabetical full 81.25%→75.62%), so the first 20 tasks per domain
 were easier than the remaining 180. And a 100-task BFCL sample got the *sign*
 wrong, not merely the magnitude, so results at that size are pilots.
 
-**The predeclared ≤1pp gate is unfalsifiable at any affordable sample size.**
+**The predeclared ≤1pp gate is not practically resolved by this design and
+budget.**
 The 95% CI on the full-accuracy difference is ±4.2pp at n=1000; resolving 1pp
 needs roughly n=15,000 (~12 GPU-hours per condition at 8B). It should be
 restated as an equivalence test with a declared margin. The defensible claim is
@@ -175,11 +181,15 @@ behind the table above pass that check. See
 
 Full report: `reports/tooltrie-phase2/findings.md`.
 
-**The no-tool regression is confirmed.** All 240 BFCL irrelevance tasks x 5 menu
-seeds on Qwen3-8B, bootstrap clustered on the 240 tasks: ToolTrie-v0 is
+**The no-tool regression is resolved for the fixed replay sequence.** All 240
+BFCL irrelevance tasks x 5 menu seeds on Qwen3-8B, bootstrap clustered on the
+240 tasks: ToolTrie-v0 is
 **-3.75pp** vs alphabetical, 95% CI **[-5.67, -2.00]**, discordant pairs 54 vs 9.
-The interval excludes zero. The same ~4pp effect was seen underpowered at n=100
-and n=1000; this run resolved it.
+The interval excludes zero for that emitted sequence. Because ToolTrie orderings
+depend on preceding requests, this task bootstrap does not cover alternative
+request sequences; full planner replays over predeclared sequence replicates are
+needed for population-level uncertainty. The n=100 no-tool difference was
+0.00pp; the n=1000 point estimate was -4.00pp on a nested sample.
 
 **ToolTrie beats every measured causal baseline except the ContextPilot
 static-refit adaptation.** vLLM Qwen3-0.6B, 200 requests, 3 trials:
@@ -203,10 +213,12 @@ Two results that overturned earlier drafts:
    that later ones follow; treating the batch atemporally destroys that
    self-reinforcement.
 
-**CacheWeaver does nothing here.** The Algorithm-1 reimplementation returned the
-unmodified input order on 200/200 BFCL requests, so it scores identically to
-`original`. All five fitted policies (frequency, schema-cost, FP-tree, pair,
-triple) collapse to within 0.01pp of each other and of alphabetical.
+**CacheWeaver is a no-op on BFCL, but not on ToolRet.** The Algorithm-1
+reimplementation returned the unmodified input order on 200/200 BFCL requests
+and 180/200 ToolRet requests. On BFCL the five fitted policies (frequency,
+schema-cost, FP-tree, pair, triple) fall within 0.01pp of one another at 39.69%,
+but alphabetical is lower at 38.13%; on ToolRet, alphabetical is substantially
+higher than the fitted group.
 
 **A systematic quality trade-off.** At n=800 on 8B, ranking orderings by
 function-name accuracy reverses their ranking on no-tool accuracy. Alphabetical
@@ -215,13 +227,17 @@ ContextPilot-derived adapters show the reverse. ToolTrie sits mid-curve with a
 smaller no-tool cost (-1.88pp) than CacheWeaver (-6.88pp), offline ContextPilot
 (-6.88pp) or the **causal static-refit adaptation
 (-7.50pp, the largest penalty measured, discordant 12:0)** — all three CIs
-exclude zero. The regression is a property of reuse-optimizing orderings, not a
-ToolTrie defect.
+exclude zero in the fixed-sequence analysis. This is an association among the
+measured orderings, not evidence that every reuse-optimizing ordering must incur
+the same trade-off.
 
-**SGLang/RadixAttention replicates the ordering effect** (87.11% vLLM vs 87.29%
-SGLang for ToolTrie on BFCL, identical ranking). Only cached *ratios* are
-cross-engine comparable: the two engines render the same tools through different
-chat templates, costing SGLang a constant +640 tokens per request.
+**The historical SGLang arm shows the same ordering ranking** (87.11% vLLM vs
+87.29% SGLang for ToolTrie on BFCL), but its contamination check must be rerun
+from the raw artifacts. The old reconciliation compared one response-derived
+sum with another instead of the independent aggregate server counter. Cached
+ratios are the closest cross-engine summary, but not a strictly controlled
+comparison: the engines render different prompts, with SGLang adding 640 tokens
+per request in this workload.
 
 **Both benchmarks ship invalid JSON Schema** - 74 BFCL and 187 ToolRet tools use
 Python type names, plus one ToolRet tool colliding with the reserved `title`
@@ -381,7 +397,7 @@ counter, samples KV occupancy, and can enforce a predeclared pressure threshold.
 - 1,362 canonical BFCL functions and 1,240 BFCL tasks;
 - 45,815 total schemas tokenized with `Qwen/Qwen3-0.6B`;
 - all ToolRet label references resolve to the downloaded corpus;
-- 101 unit tests pass.
+- 110 unit tests pass.
 
 ## Reports are generated, not hand-written
 
@@ -393,14 +409,18 @@ section instead of replacing it with "not yet measured." Other generated
 sections are still overwritten. `PROJECT_STATUS.md` and `cluster/README.md` are
 hand-maintained.
 
-## Initial brief formally closed
+## Initial brief substantively executed
 
 The explicit Tasks A-F in `initial-research-brief.md` now have reported
-evidence, and the later stricter gap-closure manifest is fully accepted:
+evidence, and the later stricter gap-closure execution manifest is accepted:
 retrieved-menu replay, ordinary fallback, direct partial reuse, exact
 rendered-prefix auditing, and controlled memory pressure are all measured. This
-closes the initial stage; it does not retroactively make a §9 retained-tool or
-KV-composition extension part of the result.
+completes the planned initial experiment stage; it does not retroactively make
+a §9 retained-tool or KV-composition extension part of the result. Formal
+publication-grade closure still requires corrected analysis paths and an
+artifact-to-report audit. Initial experimental question 4 is also partial:
+schema-token weighting was tested, but separately measured per-schema prefill-
+time weighting was not.
 
 The corrected GPU handover is commit `6378d78`, with measurements executed at
 the pinned `65b86ba`. The only mid-run worktree change was the documentation-only
@@ -444,7 +464,7 @@ Measured rendered-prompt cache reuse on the same menus is:
 ToolTrie is best at every retrieved menu size, but only by 0.76-1.65 percentage
 points over ordinary text prefill. No resolved TTFT improvement follows: the
 three-trial intervals overlap and no paired-difference interval was declared.
-The true retrieved-set overlap, rather than the padded shared-catalog result,
+The BM25-retrieved-set overlap, rather than the padded shared-catalog result,
 is therefore the limiting regime for deployment claims.
 
 The first pressure matrix completed cleanly, but 0/24 regime-runs met the
@@ -470,10 +490,13 @@ in every regime, so the 24 executions represent four distinct orderings rather
 than six independent policies. See
 `reports/initial-brief-pressure-rerun/ordering-equivalence.json`.
 
-The initial brief is now formally closed. The next extension may evaluate safe
-inactive-tool retention, but it must retain ordinary selected-tool text prefill
-as fallback and compare against both the clearly labelled static-refit adapter
-and official persistent ContextPilot, the no-retention baselines, and multiple
+Before a formal closure claim, regenerate affected comparisons with metric-
+specific scoping, treat sequence-dependent intervals as fixed-sequence
+descriptions, and revalidate the raw SGLang runs against the independent
+aggregate cached-token counter. The next extension may evaluate safe inactive-
+tool retention, but it must retain ordinary selected-tool text prefill as
+fallback and compare against both the clearly labelled static-refit adapter and
+official persistent ContextPilot, the no-retention baselines, and multiple
 random seeds.
 
 Analytical reuse estimates must still be labelled as estimates, but they are no

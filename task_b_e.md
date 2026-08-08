@@ -6,6 +6,14 @@ methodology corrections that changed earlier Task D conclusions. Every latency
 and cache figure here is a measured vLLM result, not an analytical estimate;
 where a number is extrapolated it is labelled as such.
 
+> **Historical snapshot.** This report records the first Task B/E pass. Later
+> quality, retrieved-menu, pressure, and external-baseline experiments supersede
+> its recommendations; use `reports/consolidated-report.md` and
+> `reports/tooltrie-phase2/findings.md` for current conclusions. In particular,
+> sequence-dependent quality intervals are descriptive for a fixed request
+> order, and the historical SGLang arm awaits corrected aggregate-counter
+> revalidation.
+
 ## Measurement environment
 
 | Property | Value |

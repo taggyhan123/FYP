@@ -30,7 +30,7 @@ and cache blocks.
 
 **The headline is a positive mechanism with a negative magnitude.** Ordering
 does create exact prefix reuse, and the trie planner leads every ordering
-baseline at every menu size. But on realistically retrieved menus the margin is
+baseline at every menu size. But on deterministic BM25-retrieved menus the margin is
 **+0.76 to +1.65 percentage points** with no established latency gain, against
 **+49 points** on padded menus drawn from a shared catalog. The large figure is a
 property of the workload, not of the planner.
@@ -41,7 +41,16 @@ points on padded-menu reuse**, and that lead survives removing future-request
 visibility. A post-run audit found that this arm used nonstandard `alpha=0.5`,
 not the persistent online API, and omitted annotations and eviction feedback;
 it must not be presented as full ContextPilot. Reuse-optimizing orders also
-carry a **confirmed regression on correctly declining irrelevant requests**.
+show a **fixed-sequence regression on correctly declining irrelevant requests**.
+
+**Audit note (2026-08-08).** Sequence-dependent planner intervals in the
+historical reports describe their fixed request order; they do not include
+uncertainty over alternative request sequences. The SGLang raw runs also require
+revalidation against the independent aggregate cached-token counter. Tables are
+retained as measured observations, with those inference limits.
+The generalized ContextPilot static-refit adapter's integer-ID restoration was
+fixed as well; the historical Phase 2 builder already used an equivalent inverse
+mapping, so that repair does not alter the old emitted workload.
 
 ---
 
@@ -131,7 +140,8 @@ know; the measured counters adjudicate afterwards.
 ### 2.4 Fallback
 
 The default fallback is alphabetical — ordinary deterministic text prefill with
-no special machinery, and the quality-preserving path required by the brief. A
+no special machinery, and the conservative text path required by the brief. It
+is not guaranteed to preserve model behavior relative to another ordering. A
 `frequency` fallback exists but is **refused at construction time** unless given
 support statistics fitted on a separate training workload, encoding the rule
 that benchmark frequency must never be read as production popularity.
@@ -143,10 +153,11 @@ assert set(ordered_ids) == set(ids)
 assert len(ordered_ids) == len(ids)
 ```
 
-The output is strictly a permutation of the retrieved set. Model semantics are
-unchanged, so any measured difference between conditions is attributable to
-ordering alone. This is verified independently: within each menu size, all seven
-conditions carry byte-identical sorted tool sets per case.
+The output is strictly a permutation of the retrieved set. Tool membership and
+schema content are unchanged, so ordering is the only intended intervention;
+model behavior can still change because tool position changes. This is verified
+independently: within each menu size, all seven conditions carry byte-identical
+sorted tool sets per case.
 
 **Source:** `reports/initial-brief-closure/20260805-222246-gpu-executor/HANDOVER.md`.
 
@@ -229,15 +240,15 @@ used afterwards solely to score retrieval.
 
 Even at k=128, **19.5% of queries retrieve none of their gold tools**. No
 ordering or caching method can recover a tool that was never retrieved. This is
-a reproducible lexical baseline, not the official ToolRet retriever, so these
-are floor numbers.
+a reproducible lexical baseline, not the official ToolRet retriever; they are
+not a proven lower or upper bound for stronger retrieval systems.
 
 **Why sparse retrieval.** BM25 is deterministic, has no fitted parameters, and
 reads only fields available before evaluation, so menu membership is
 byte-reproducible and cannot leak gold labels into selection. The retriever is
-not the object of study; it only has to produce a realistic, reproducible menu.
+not the object of study; it supplies a deterministic, reproducible menu.
 
-### 4.2 Reuse on true retrieved menus — the central result
+### 4.2 Reuse on BM25-retrieved menus — the central result
 
 **Source:** `reports/initial-brief-closure/findings.md` §2;
 `retrieved-k{4,16,64,128}-summary.json` in the closure handover.
@@ -297,8 +308,8 @@ treating analytical schema-token estimates as server tokenization.
 
 **Source:** `reports/tooltrie-phase2/findings.md` §2, §2a, §5, §7.
 
-Measured on vLLM and replicated on a second engine. **Padded shared-catalog
-menus**, Qwen3-0.6B, 3 trials.
+Measured on vLLM, with the same ranking observed provisionally on a second
+engine. **Padded shared-catalog menus**, Qwen3-0.6B, 3 trials.
 
 | Condition | vLLM cached (BFCL) | SGLang cached (BFCL) |
 | --- | ---: | ---: |
@@ -330,15 +341,17 @@ Three conclusions:
    files. It targets overlapping retrieved text evidence; tool menus drawn from a
    shared catalog do not present that structure. Any write-up must say this
    rather than claiming a win.
-3. **The ordering effect replicates across engines.** Cached ratios agree within
-   about 0.2 points under vLLM's paged APC and SGLang's radix tree, with
-   identical condition ranking — evidence the mechanism belongs to the ordering,
-   not to one cache implementation.
+3. **The ordering ranking appears across engines, pending corrected raw-counter
+   validation.** Cached ratios agree within about 0.2 points under vLLM's paged
+   APC and SGLang's radix tree. This is encouraging evidence, but the historical
+   SGLang reconciliation was not independent and must be rerun against the
+   aggregate server counter.
 
 **Comparability limits.** The two engines use different chat templates
 (`hermes` vs `qwen`), and SGLang's rendering costs exactly +640 tokens on every
-request, so totals differ by about 9%. Only cached *ratios* are cross-engine
-comparable; absolute tokens, prefill, and TTFT are not. SGLang's higher absolute
+request, so totals differ by about 9%. Cached *ratios* are the closest
+cross-engine summary, but even they have different rendered denominators;
+absolute tokens, prefill, and TTFT are not comparable. SGLang's higher absolute
 TTFT must **not** be attributed to RadixAttention — the scheduler, attention
 backend, and memory configuration all differ.
 
@@ -351,13 +364,16 @@ See §7.2.
 `reports/initial-brief-pressure-rerun/ordering-equivalence.json`.
 
 Frequency, schema-cost weighting, FP-tree-derived, pair, and triple policies
-land within 0.01 points of one another (39.69% on BFCL). Under controlled
+land within 0.01 points of one another (39.69% on BFCL), while alphabetical is
+38.13%. On ToolRet, alphabetical is substantially higher than the fitted group.
+Under controlled
 pressure, three of them were shown to emit **byte-identical tool sequences** for
 all 200 requests in every regime, verified by SHA-256 sequence digests.
 
-The interpretation is that the cache rewards **identical**, not **important**.
-Modelling which tools matter adds nothing if the resulting order still varies per
-request; what pays is emitting the same prefix repeatedly.
+The interpretation is that these measured cache conditions reward **identical**
+prefixes, not importance scores by themselves. In this workload, the fitted
+importance/co-occurrence policies added little unless they caused requests to
+emit the same prefix repeatedly.
 
 ### 4.7 Quality and safety — a real frontier
 
@@ -387,10 +403,13 @@ irrelevance tasks under 5 fixed menu seeds, bootstrap clustered on tasks:
 | Task-clustered 95% CI | **[-5.67, -2.00]**, excludes zero |
 | Discordant pairs | alphabetical-only correct **54**, ToolTrie-only correct **9** |
 
-**This is a confirmed regression, not a null result.** The point estimate has
-been stable near -4 points across three independent measurements; only the
-interval changed. Plain alphabetical ordering remains the safest condition
-measured at declining irrelevant requests.
+**This is a resolved difference for the fixed emitted sequence, not a null
+result.** The earlier n=100 no-tool difference was 0.00 points, while the nested
+n=1000 run produced a -4.00-point estimate. These are not three independent
+measurements. Because ToolTrie ordering depends on preceding requests, the task-
+clustered interval above does not cover alternative request sequences. Plain
+alphabetical remains the strongest measured condition for declining irrelevant
+requests in this workload.
 
 Counting the historical axes honestly: the static-refit adapter beats
 ToolTrie-v0 on reuse, function-name accuracy, and full-call accuracy. ToolTrie-v0
@@ -413,7 +432,7 @@ This was verified to be a genuine scale effect rather than a capacity confound:
 the 8B planner ran at 44,656-token capacity versus 190,896 at 0.6B and evicted
 424 trie nodes, yet produced **byte-identical orderings on all 100 records**.
 
-**The 8B regression was itself sampling noise.** Repeated at 200 per domain
+**The larger nested sample reversed the 8B point estimates.** Repeated at 200 per domain
 (n=1,000), a nested superset of the 100 above:
 
 | ToolTrie - alphabetical, Qwen3-8B | n=100 | n=1,000 | 95% CI at n=1,000 |
@@ -423,7 +442,7 @@ the 8B planner ran at 44,656-token capacity versus 190,896 at 0.6B and evicted
 | no-tool | +0.00 | -4.00 | -10.89 … +2.89 |
 
 Both headline metrics reverse sign and zero sits inside every interval, so **no
-quality cost is detectable at 8B on this sample**. Two methodological lessons
+quality cost is resolved in this fixed 8B replay**. Two methodological lessons
 follow:
 
 1. **A 100-task BFCL sample got the *sign* wrong, not merely the magnitude.**
@@ -438,9 +457,11 @@ specifically than this mixed-set sweep.
 
 A consequence for the predeclared gate: the 95% CI on the full-accuracy
 difference is about +/-4.2 points at n=1,000, so resolving a 1-point threshold
-needs roughly n=15,000 — about 12 GPU-hours per condition at 8B. **The 1-point
-gate is unfalsifiable at any affordable sample size** and should be restated as
-an equivalence test with a declared margin.
+is much wider than a 1-point equivalence margin. A crude independent-proportions
+calculation suggests a much larger sample, but paired precision depends on
+discordance and ToolTrie treatment depends on request history. **This design and
+budget do not practically resolve the 1-point gate**; it should be restated as
+an equivalence test with a declared margin and predeclared sequence replicates.
 
 ### 4.9 Behaviour under controlled cache pressure
 
@@ -510,15 +531,19 @@ prefill whenever expected savings do not exceed context, decode, retrieval, and
 safety costs. No inactive tools are retained and no KV tensors are composed in
 that fallback.
 
-The initial brief is formally closed. Section 9 extensions — retained inactive
-tools, active-tool manifests, admission policy, KV composition — remain future
-work and are unbuilt.
+Tasks A-F and the main planned experiment matrix are substantively complete;
+experimental question 4 remains partial because measured per-schema prefill-time
+weighting was not tested. Formal
+publication-grade closure still requires corrected sequence-dependent analysis,
+raw SGLang counter revalidation, and artifact-to-report traceability. Section 9
+extensions — retained inactive tools, active-tool manifests, admission policy,
+KV composition — remain future work and are unbuilt.
 
 ---
 
 ## 7. Limitations and open questions
 
-### 7.1 The retriever is a lexical floor
+### 7.1 The retriever is a lexical baseline
 
 BM25 is a reproducible baseline, not the official ToolRet retriever. A dense
 retriever returns more semantically clustered menus, which could mean *more*
@@ -550,14 +575,16 @@ the measured numbers.
 ### 7.5 Latency claims are deliberately weak
 
 No paired-difference interval was predeclared for TTFT on the retrieved arm, and
-the predeclared 1-point quality gate is unfalsifiable at affordable sample sizes
-(§4.8). Latency across the two cache capacities in §4.9 is not comparable at all.
+the predeclared 1-point quality gate is not practically resolved by the current
+design and budget (§4.8). Latency across the two cache capacities in §4.9 is not
+comparable at all.
 
 ### 7.6 Recommended next experiment
 
-The active-tool manifest with constrained generation, because it targets the one
-confirmed regression: separating the tools present in cached context from the
-tools that may actually be called would allow reuse without the decline penalty.
+The active-tool manifest with constrained generation, because it targets the
+fixed-sequence decline regression: separating the tools present in cached
+context from the tools that may actually be called could allow reuse without the
+same decline penalty.
 It must be evaluated against the historical static-refit adapter, the corrected
 persistent-API arm, and the ordinary text-prefill fallback. It should include a
 random-seed sensitivity sweep rather than promoting seed 42 as an algorithm.

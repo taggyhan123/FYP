@@ -1,0 +1,577 @@
+{
+  "evaluation": {
+    "hit_rate": 0.755,
+    "mean_precision": 0.01351562,
+    "mean_recall": 0.64208333,
+    "mean_reciprocal_rank": 0.40607927,
+    "menu_size": 64,
+    "offset": 0,
+    "ordering": "original",
+    "queries": 200,
+    "queries_requiring_deterministic_zero_score_fallback": 0,
+    "random_seed": 42
+  },
+  "format_version": 1,
+  "gold_labels_used_for_selection": false,
+  "ordering_fit": {
+    "evaluation_overlap_tasks": 0,
+    "support_mode": "disjoint",
+    "support_provenance": "disjoint_toolret_gold_labels",
+    "support_tasks": 7761
+  },
+  "retrieval_curve": [
+    {
+      "hit_rate": 0.515,
+      "k": 4,
+      "mean_precision": 0.135,
+      "mean_recall": 0.41708333,
+      "mean_reciprocal_rank": 0.38583333,
+      "queries": 200,
+      "queries_requiring_deterministic_zero_score_fallback": 0
+    },
+    {
+      "hit_rate": 0.655,
+      "k": 16,
+      "mean_precision": 0.045,
+      "mean_recall": 0.55041667,
+      "mean_reciprocal_rank": 0.40221367,
+      "queries": 200,
+      "queries_requiring_deterministic_zero_score_fallback": 0
+    },
+    {
+      "hit_rate": 0.755,
+      "k": 64,
+      "mean_precision": 0.01351562,
+      "mean_recall": 0.64208333,
+      "mean_reciprocal_rank": 0.40607927,
+      "queries": 200,
+      "queries_requiring_deterministic_zero_score_fallback": 0
+    },
+    {
+      "hit_rate": 0.805,
+      "k": 128,
+      "mean_precision": 0.00722656,
+      "mean_recall": 0.67541667,
+      "mean_reciprocal_rank": 0.40663761,
+      "queries": 200,
+      "queries_requiring_deterministic_zero_score_fallback": 0
+    }
+  ],
+  "retrieved_frequency_top_100": [
+    {
+      "name": "get_23andMe_names",
+      "retrieved_frequency": 66,
+      "tool_id": "toolbench_tool_13554"
+    },
+    {
+      "name": "scrape_for_me_is_it_up",
+      "retrieved_frequency": 64,
+      "tool_id": "toolbench_tool_8962"
+    },
+    {
+      "name": "get_23andMe_relatives",
+      "retrieved_frequency": 58,
+      "tool_id": "toolbench_tool_4887"
+    },
+    {
+      "name": "AION_List_my_Bots",
+      "retrieved_frequency": 51,
+      "tool_id": "toolbench_tool_10293"
+    },
+    {
+      "name": "MyMemory_Translation_Memory_set_contribution",
+      "retrieved_frequency": 50,
+      "tool_id": "toolbench_tool_8418"
+    },
+    {
+      "name": "ARImageSynthesizer_My_Images",
+      "retrieved_frequency": 48,
+      "tool_id": "toolbench_tool_8750"
+    },
+    {
+      "name": "EveryEarthquake_Latest_Earthquake_Near_Me",
+      "retrieved_frequency": 46,
+      "tool_id": "toolbench_tool_11483"
+    },
+    {
+      "name": "get_23andMe_user",
+      "retrieved_frequency": 42,
+      "tool_id": "toolbench_tool_4879"
+    },
+    {
+      "name": "HelpSystem",
+      "retrieved_frequency": 42,
+      "tool_id": "tool_be_honest_tool_381"
+    },
+    {
+      "name": "Validate domain or email address",
+      "retrieved_frequency": 38,
+      "tool_id": "toolLens_tool_55"
+    },
+    {
+      "name": "Self_help_Quotes_Get_all_available_tags_for_self_help_quotes",
+      "retrieved_frequency": 33,
+      "tool_id": "toolbench_tool_5082"
+    },
+    {
+      "name": "Get Help",
+      "retrieved_frequency": 32,
+      "tool_id": "toolACE_tool_1813"
+    },
+    {
+      "name": "Self_help_Quotes_Get_a_random_self_help_quote",
+      "retrieved_frequency": 31,
+      "tool_id": "toolbench_tool_5084"
+    },
+    {
+      "name": "oDesk_APIs_Get_My_Jobs",
+      "retrieved_frequency": 31,
+      "tool_id": "toolbench_tool_2975"
+    },
+    {
+      "name": "GetMyTasks",
+      "retrieved_frequency": 30,
+      "tool_id": "toolACE_tool_6186"
+    },
+    {
+      "name": "Email_Existence_Validator_Help_Page",
+      "retrieved_frequency": 29,
+      "tool_id": "toolbench_tool_6074"
+    },
+    {
+      "name": "Amazon_Turkey_Data_Scrapeer_Get_Product_Offers_in_Turkey",
+      "retrieved_frequency": 29,
+      "tool_id": "toolbench_tool_1091"
+    },
+    {
+      "name": "Self_help_Quotes_Get_all_available_self_help_books",
+      "retrieved_frequency": 28,
+      "tool_id": "toolbench_tool_5083"
+    },
+    {
+      "name": "Get Self-Help Quote Tags",
+      "retrieved_frequency": 28,
+      "tool_id": "toolACE_tool_7942"
+    },
+    {
+      "name": "Amazon_Turkey_Data_Scrapeer_Get_Product_Reviews_in_Turkey",
+      "retrieved_frequency": 28,
+      "tool_id": "toolbench_tool_1092"
+    },
+    {
+      "name": "MyPersonal_MyEndpoint",
+      "retrieved_frequency": 27,
+      "tool_id": "toolbench_tool_11791"
+    },
+    {
+      "name": "pe_demo_Get_help",
+      "retrieved_frequency": 25,
+      "tool_id": "toolbench_tool_6547"
+    },
+    {
+      "name": "Appointment_System_API_Login",
+      "retrieved_frequency": 24,
+      "tool_id": "toolbench_tool_2340"
+    },
+    {
+      "name": "MyNewTestApi_MyTestEndpoint",
+      "retrieved_frequency": 22,
+      "tool_id": "toolbench_tool_10094"
+    },
+    {
+      "name": "Ocoya_me",
+      "retrieved_frequency": 19,
+      "tool_id": "toolbench_tool_4064"
+    },
+    {
+      "name": "PUT_me_player_pause",
+      "retrieved_frequency": 19,
+      "tool_id": "webtools_spotify_tool_18"
+    },
+    {
+      "name": "talkfpl",
+      "retrieved_frequency": 19,
+      "tool_id": "metatool_which_tool_67"
+    },
+    {
+      "name": "Get a random self-help quote",
+      "retrieved_frequency": 19,
+      "tool_id": "toolLens_tool_288"
+    },
+    {
+      "name": "caregiver.schedule_appointment",
+      "retrieved_frequency": 19,
+      "tool_id": "toolACE_tool_12610"
+    },
+    {
+      "name": "ProxyPage_Tier1",
+      "retrieved_frequency": 17,
+      "tool_id": "toolbench_tool_8500"
+    },
+    {
+      "name": "Get 23andMe Risks",
+      "retrieved_frequency": 17,
+      "tool_id": "toolACE_tool_8391"
+    },
+    {
+      "name": "Demo_Project_Me",
+      "retrieved_frequency": 17,
+      "tool_id": "toolbench_tool_1706"
+    },
+    {
+      "name": "Onboarding_Project_Me",
+      "retrieved_frequency": 17,
+      "tool_id": "toolbench_tool_2592"
+    },
+    {
+      "name": "get_23andMe_carriers",
+      "retrieved_frequency": 17,
+      "tool_id": "toolbench_tool_13552"
+    },
+    {
+      "name": "automation.task_scheduling",
+      "retrieved_frequency": 17,
+      "tool_id": "toolACE_tool_9884"
+    },
+    {
+      "name": "Yandex_SERP_GetMyTasks_free_of_use",
+      "retrieved_frequency": 17,
+      "tool_id": "toolbench_tool_8263"
+    },
+    {
+      "name": "cancelSpaAppointment",
+      "retrieved_frequency": 17,
+      "tool_id": "toolACE_tool_3231"
+    },
+    {
+      "name": "medicine.internal_medicine.appointment_scheduler",
+      "retrieved_frequency": 17,
+      "tool_id": "toolACE_tool_1900"
+    },
+    {
+      "name": "ProxyPage_Tier2",
+      "retrieved_frequency": 16,
+      "tool_id": "toolbench_tool_8499"
+    },
+    {
+      "name": "scheduleSpeechTherapyAppointment",
+      "retrieved_frequency": 16,
+      "tool_id": "toolACE_tool_5814"
+    },
+    {
+      "name": "legalAidClinic.scheduleAppointment",
+      "retrieved_frequency": 16,
+      "tool_id": "toolACE_tool_10927"
+    },
+    {
+      "name": "set_appointment_reminder",
+      "retrieved_frequency": 16,
+      "tool_id": "ultraTool_tool_831"
+    },
+    {
+      "name": "HealthAppointments.scheduleAppointment",
+      "retrieved_frequency": 16,
+      "tool_id": "toolACE_tool_6353"
+    },
+    {
+      "name": "Ticketbud_Me",
+      "retrieved_frequency": 15,
+      "tool_id": "toolbench_tool_5146"
+    },
+    {
+      "name": "Email_Checkup_email_format",
+      "retrieved_frequency": 15,
+      "tool_id": "toolbench_tool_2869"
+    },
+    {
+      "name": "healthcare.cancelAppointment",
+      "retrieved_frequency": 15,
+      "tool_id": "toolACE_tool_7058"
+    },
+    {
+      "name": "book_therapist_appointment",
+      "retrieved_frequency": 15,
+      "tool_id": "appbench_tool_26"
+    },
+    {
+      "name": "CreateAppointment",
+      "retrieved_frequency": 15,
+      "tool_id": "reversechain_tool_412"
+    },
+    {
+      "name": "GetAppointment",
+      "retrieved_frequency": 15,
+      "tool_id": "reversechain_tool_252"
+    },
+    {
+      "name": "schedule_appointment",
+      "retrieved_frequency": 15,
+      "tool_id": "toolACE_tool_15841"
+    },
+    {
+      "name": "Tank01_Fantasy_Stats_Get_Player_Information",
+      "retrieved_frequency": 15,
+      "tool_id": "toolbench_tool_1271"
+    },
+    {
+      "name": "Omniinfer_Progress",
+      "retrieved_frequency": 14,
+      "tool_id": "toolbench_tool_7364"
+    },
+    {
+      "name": "roomReservation.modify",
+      "retrieved_frequency": 14,
+      "tool_id": "toolACE_tool_13092"
+    },
+    {
+      "name": "NotesTool",
+      "retrieved_frequency": 14,
+      "tool_id": "metatool_which_tool_9"
+    },
+    {
+      "name": "Ishan_MyOrganizationsdefaultsitecollection",
+      "retrieved_frequency": 14,
+      "tool_id": "toolbench_tool_6087"
+    },
+    {
+      "name": "PUT_me_player_play",
+      "retrieved_frequency": 13,
+      "tool_id": "webtools_spotify_tool_19"
+    },
+    {
+      "name": "roomReservation.create",
+      "retrieved_frequency": 13,
+      "tool_id": "toolACE_tool_11551"
+    },
+    {
+      "name": "ConfirmAppointment",
+      "retrieved_frequency": 13,
+      "tool_id": "reversechain_tool_253"
+    },
+    {
+      "name": "GET_me_player_devices",
+      "retrieved_frequency": 12,
+      "tool_id": "webtools_spotify_tool_16"
+    },
+    {
+      "name": "Disposable_Email_Validation_Validate_domain_or_email_address",
+      "retrieved_frequency": 12,
+      "tool_id": "toolbench_tool_9137"
+    },
+    {
+      "name": "Instagram_Bulk_Profile_Scrapper_Music_Search_by_Keyword",
+      "retrieved_frequency": 12,
+      "tool_id": "toolbench_tool_11735"
+    },
+    {
+      "name": "MyAPI_apitest",
+      "retrieved_frequency": 12,
+      "tool_id": "toolbench_tool_10154"
+    },
+    {
+      "name": "myPlayvv_myplayvv",
+      "retrieved_frequency": 12,
+      "tool_id": "toolbench_tool_11944"
+    },
+    {
+      "name": "Instagram_API_2023_Search_user",
+      "retrieved_frequency": 12,
+      "tool_id": "toolbench_tool_11751"
+    },
+    {
+      "name": "Tank01_MLB_Live_In_Game_Real_Time_Statistics_Get_Player_Information",
+      "retrieved_frequency": 12,
+      "tool_id": "toolbench_tool_13130"
+    },
+    {
+      "name": "book_appointment",
+      "retrieved_frequency": 12,
+      "tool_id": "toolACE_tool_4286"
+    },
+    {
+      "name": "GET_me",
+      "retrieved_frequency": 11,
+      "tool_id": "webtools_spotify_tool_7"
+    },
+    {
+      "name": "The23andMe",
+      "retrieved_frequency": 11,
+      "tool_id": "toolemu_tool_14"
+    },
+    {
+      "name": "add_advance_reminder_to_alarm",
+      "retrieved_frequency": 11,
+      "tool_id": "ultraTool_tool_593"
+    },
+    {
+      "name": "SuperchargeMyEV",
+      "retrieved_frequency": 11,
+      "tool_id": "metatool_which_tool_95"
+    },
+    {
+      "name": "Instagram_API_2023_Search_Hashtags",
+      "retrieved_frequency": 11,
+      "tool_id": "toolbench_tool_12760"
+    },
+    {
+      "name": "Instagram_API_2023_Search_Music_Audio",
+      "retrieved_frequency": 11,
+      "tool_id": "toolbench_tool_12768"
+    },
+    {
+      "name": "schedule_reminder",
+      "retrieved_frequency": 11,
+      "tool_id": "ultraTool_tool_484"
+    },
+    {
+      "name": "AppointmentRegistration",
+      "retrieved_frequency": 11,
+      "tool_id": "apibank_tool_58"
+    },
+    {
+      "name": "healthcare.scheduleAppointment",
+      "retrieved_frequency": 11,
+      "tool_id": "toolACE_tool_7059"
+    },
+    {
+      "name": "MLB_Data_Game_Type_Info",
+      "retrieved_frequency": 10,
+      "tool_id": "toolbench_tool_1215"
+    },
+    {
+      "name": "POST_me_player_next",
+      "retrieved_frequency": 10,
+      "tool_id": "webtools_spotify_tool_17"
+    },
+    {
+      "name": "Demo_Project_v3_Me",
+      "retrieved_frequency": 10,
+      "tool_id": "toolbench_tool_1910"
+    },
+    {
+      "name": "Demo_Project_v13_Me",
+      "retrieved_frequency": 10,
+      "tool_id": "toolbench_tool_2851"
+    },
+    {
+      "name": "Email_Checkup_email_exist",
+      "retrieved_frequency": 10,
+      "tool_id": "toolbench_tool_2868"
+    },
+    {
+      "name": "Dr_Thoths_Tarot",
+      "retrieved_frequency": 10,
+      "tool_id": "metatool_which_tool_159"
+    },
+    {
+      "name": "festival_schedule_finder",
+      "retrieved_frequency": 10,
+      "tool_id": "toolACE_tool_2341"
+    },
+    {
+      "name": "Instagram_API_2023_Get_place_ids_from_city_names",
+      "retrieved_frequency": 10,
+      "tool_id": "toolbench_tool_11747"
+    },
+    {
+      "name": "calculate_scheduled_orders",
+      "retrieved_frequency": 10,
+      "tool_id": "toolink_tool_1729"
+    },
+    {
+      "name": "book_stylist_appointment",
+      "retrieved_frequency": 10,
+      "tool_id": "appbench_tool_24"
+    },
+    {
+      "name": "My_API_12345_getOrderById",
+      "retrieved_frequency": 10,
+      "tool_id": "toolbench_tool_3421"
+    },
+    {
+      "name": "support.schedule_appointment",
+      "retrieved_frequency": 10,
+      "tool_id": "toolACE_tool_11973"
+    },
+    {
+      "name": "add_meeting_reminder",
+      "retrieved_frequency": 10,
+      "tool_id": "ultraTool_tool_839"
+    },
+    {
+      "name": "matches_v2_list_by_league",
+      "retrieved_frequency": 10,
+      "tool_id": "apigen_tool_3377"
+    },
+    {
+      "name": "ufc_fight_night_holloway_vs_allen_april_15_2023",
+      "retrieved_frequency": 9,
+      "tool_id": "apigen_tool_2265"
+    },
+    {
+      "name": "POST_me_player_previous",
+      "retrieved_frequency": 9,
+      "tool_id": "webtools_spotify_tool_20"
+    },
+    {
+      "name": "Basketball_Data_Under_Over_Analysis",
+      "retrieved_frequency": 9,
+      "tool_id": "toolbench_tool_8682"
+    },
+    {
+      "name": "get_23andMe_traits",
+      "retrieved_frequency": 9,
+      "tool_id": "toolbench_tool_4880"
+    },
+    {
+      "name": "ColorMe_SpecificColorSet",
+      "retrieved_frequency": 9,
+      "tool_id": "toolbench_tool_6494"
+    },
+    {
+      "name": "QRMaster_API_http_emiledaou99_pythonanywhere_com_url",
+      "retrieved_frequency": 9,
+      "tool_id": "toolbench_tool_10415"
+    },
+    {
+      "name": "file_delete",
+      "retrieved_frequency": 9,
+      "tool_id": "ultraTool_tool_8"
+    },
+    {
+      "name": "get_nurthDrJcontents",
+      "retrieved_frequency": 9,
+      "tool_id": "rotbench_tool_700"
+    },
+    {
+      "name": "analyze_a_reciMe_search_query",
+      "retrieved_frequency": 9,
+      "tool_id": "rotbench_tool_790"
+    },
+    {
+      "name": "set_reminder_for_meetings",
+      "retrieved_frequency": 9,
+      "tool_id": "ultraTool_tool_811"
+    },
+    {
+      "name": "add_event_reminder",
+      "retrieved_frequency": 9,
+      "tool_id": "ultraTool_tool_907"
+    }
+  ],
+  "retriever": {
+    "average_document_terms": 47.6313,
+    "b": 0.75,
+    "corpus_tools": 44453,
+    "document_fields": [
+      "function_name_x3",
+      "description",
+      "parameter_names_and_descriptions"
+    ],
+    "k1": 1.5,
+    "name": "bm25_canonical_tools_v1",
+    "vocabulary_terms": 29516
+  },
+  "selection_mode": "retrieved_menu",
+  "workload": "/home/taghan/contextpilot-confirmation-20260807-222212/toolret-bm25-k64-original.jsonl"
+}

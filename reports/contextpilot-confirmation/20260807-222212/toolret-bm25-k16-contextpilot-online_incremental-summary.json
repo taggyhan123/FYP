@@ -1,0 +1,56 @@
+{
+  "annotations_enabled": false,
+  "eviction_feedback_enabled": false,
+  "format_version": 2,
+  "full_contextpilot_system": false,
+  "group_count": null,
+  "index_stats": {
+    "total_evictions": 0,
+    "total_insertions": 86,
+    "total_search_time_us": 142851.2023994699,
+    "total_searches": 199,
+    "total_traversal_time_us": 100.64174421131611
+  },
+  "information_regime": "causal",
+  "input": "/home/taghan/contextpilot-confirmation-20260807-222212/toolret-bm25-k16-original.jsonl",
+  "input_records": 200,
+  "input_sha256": "c89c3a68e4cfbc212639a023ccb882d2825d4a676760590849ca8c95cae8abec",
+  "limit": null,
+  "mode": "online_incremental",
+  "official_online_api_used": true,
+  "offline_transductive": false,
+  "ordering": "contextpilot_online_incremental",
+  "output": "/home/taghan/contextpilot-confirmation-20260807-222212/toolret-bm25-k16-contextpilot-online_incremental.jsonl",
+  "output_sha256": "b7e515c3a721e60fd1a64f3d67e13b9af3347b379a09b38d1e9c5f3312baa601",
+  "planning": {
+    "max_operation_seconds": 0.071593525,
+    "mean_seconds_per_request": 0.00079093,
+    "planning_operations": 200,
+    "requests": 200,
+    "total_seconds": 0.158185995
+  },
+  "reference": {
+    "alpha": 0.001,
+    "alpha_within_paper_range": true,
+    "annotations_enabled": false,
+    "api": "contextpilot.server.live_index.ContextPilot.reorder",
+    "commit": "1fa0a143fdeda344585666648ab2b30cb7fea77f",
+    "context_unit": "tool_schema",
+    "deduplication_enabled": false,
+    "eviction_feedback_enabled": false,
+    "linkage_method": "average",
+    "official_online_api_used": true,
+    "package_versions": {
+      "contextpilot": "0.4.2",
+      "numpy": "2.5.1",
+      "scipy": "1.18.0"
+    },
+    "persistent_index": true,
+    "repository": "https://github.com/EfficientContext/ContextPilot",
+    "use_gpu_for_planning": false
+  },
+  "request_order_changed": false,
+  "requests": 200,
+  "scheduler_enabled": false,
+  "unique_tools": 2203
+}

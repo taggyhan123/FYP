@@ -1,0 +1,82 @@
+ContextPilot confirmation run 20260807-222212
+FYP commit      ece2b267fe9411c861bc6cbcb7f52a04ad0ad656
+ContextPilot    1fa0a143fdeda344585666648ab2b30cb7fea77f  alpha=0.001
+Engine          vLLM 0.26.0 APC, unmodified; GPU 2 (RTX 3090), exclusive
+
+SECTION 3 -- systems matrix, Qwen3-0.6B, 200 requests x 3 trials per cell
+Reuse = cached / (cached + computed) prompt tokens, mean of 3 trials +/- 95% t half-width
+
+  BFCL padded-64 positive control
+    equivalence guards (case set / sequence / tool sets): True / True / True
+    original                           reuse    1.19% +/-  0.00   ttft  54.104s +/- 0.219   trials=3 req=200
+    alphabetical                       reuse   38.13% +/-  0.00   ttft  40.639s +/- 0.932   trials=3 req=200
+    tooltrie_v0                        reuse   87.19% +/-  0.00   ttft  17.482s +/- 0.993   trials=3 req=200
+    contextpilot-online_incremental    reuse   96.16% +/-  0.00   ttft  12.915s +/- 0.415   trials=3 req=200
+
+  ToolRet padded-64 positive control
+    equivalence guards (case set / sequence / tool sets): True / True / True
+    original                           reuse   13.87% +/-  0.00   ttft  48.994s +/- 0.512   trials=3 req=200
+    alphabetical                       reuse   51.05% +/-  0.00   ttft  34.627s +/- 0.937   trials=3 req=200
+    tooltrie_v0                        reuse   83.58% +/-  0.00   ttft  20.174s +/- 1.205   trials=3 req=200
+    contextpilot-online_incremental    reuse   95.27% +/-  0.00   ttft  14.081s +/- 0.222   trials=3 req=200
+
+  ToolRet BM25 retrieved menus, k=4
+    equivalence guards (case set / sequence / tool sets): True / True / True
+    original                           reuse   15.87% +/-  0.00   ttft   6.472s +/- 0.356   trials=3 req=200
+    alphabetical                       reuse   15.28% +/-  0.00   ttft   6.456s +/- 0.414   trials=3 req=200
+    tooltrie_v0                        reuse   17.48% +/-  0.00   ttft   6.418s +/- 0.236   trials=3 req=200
+    contextpilot-online_incremental    reuse   18.72% +/-  0.00   ttft   6.403s +/- 0.307   trials=3 req=200
+
+  ToolRet BM25 retrieved menus, k=16
+    equivalence guards (case set / sequence / tool sets): True / True / True
+    original                           reuse    6.12% +/-  0.00   ttft  14.317s +/- 0.440   trials=3 req=200
+    alphabetical                       reuse    6.27% +/-  0.00   ttft  14.499s +/- 0.015   trials=3 req=200
+    tooltrie_v0                        reuse    7.77% +/-  0.00   ttft  14.313s +/- 0.147   trials=3 req=200
+    contextpilot-online_incremental    reuse    9.93% +/-  0.00   ttft  14.155s +/- 0.270   trials=3 req=200
+
+  ToolRet BM25 retrieved menus, k=64
+    equivalence guards (case set / sequence / tool sets): True / True / True
+    original                           reuse    0.91% +/-  0.00   ttft  70.772s +/- 0.493   trials=3 req=200
+    alphabetical                       reuse    1.24% +/-  0.00   ttft  70.809s +/- 0.569   trials=3 req=200
+    tooltrie_v0                        reuse    1.90% +/-  0.00   ttft  70.529s +/- 0.245   trials=3 req=200
+    contextpilot-online_incremental    reuse    4.78% +/-  0.00   ttft  69.086s +/- 0.706   trials=3 req=200
+
+  ToolRet BM25 retrieved menus, k=128
+    equivalence guards (case set / sequence / tool sets): True / True / True
+    original                           reuse    0.37% +/-  0.00   ttft 187.875s +/- 1.529   trials=3 req=200
+    alphabetical                       reuse    0.58% +/-  0.00   ttft 187.945s +/- 0.415   trials=3 req=200
+    tooltrie_v0                        reuse    1.13% +/-  0.00   ttft 187.577s +/- 0.314   trials=3 req=200
+    contextpilot-online_incremental    reuse    1.99% +/-  0.00   ttft 186.872s +/- 0.525   trials=3 req=200
+
+SECTION 4 -- BFCL quality, Qwen3-8B, n=800 (640 relevance + 160 irrelevance), single pass
+
+    alphabetical                       full  76.41%   name  82.81%   no_tool  89.38%
+    tooltrie_v0                        full  77.66%   name  83.75%   no_tool  87.50%
+    contextpilot-online_incremental    full  78.44%   name  84.84%   no_tool  84.38%
+
+  Paired task-clustered bootstrap, 50000 samples, seed 42, no equivalence margin declared
+  (estimation only -- these carry no equivalence pass/fail claim)
+
+    contextpilot-online_incremental vs alphabetical
+      name_correct      +2.03 pp  95% CI [ +0.47,  +3.59]  n=640  McNemar p=0.0192
+      full_correct      +2.03 pp  95% CI [ +0.16,  +3.91]  n=640  McNemar p=0.0533
+      no_tool_correct   -5.00 pp  95% CI [ -8.75,  -1.88]  n=160  McNemar p=0.0078
+
+    contextpilot-online_incremental vs tooltrie_v0
+      name_correct      +1.09 pp  95% CI [ +0.00,  +2.19]  n=640  McNemar p=0.0923
+      full_correct      +0.78 pp  95% CI [ -0.31,  +1.88]  n=640  McNemar p=0.2668
+      no_tool_correct   -3.12 pp  95% CI [ -6.25,  -0.62]  n=160  McNemar p=0.0625
+
+    tooltrie_v0 vs alphabetical
+      name_correct      +0.94 pp  95% CI [ -0.47,  +2.34]  n=640  McNemar p=0.2632
+      full_correct      +1.25 pp  95% CI [ -0.47,  +3.12]  n=640  McNemar p=0.2295
+      no_tool_correct   -1.88 pp  95% CI [ -4.38,  +0.00]  n=160  McNemar p=0.2500
+
+SECTION 2 -- quarantined
+    contextpilot-static_refit_causal   BLOCKED, 0 replays -- see STATIC_REFIT_DEFECT.md
+
+COUNTS
+    accepted replays    72 systems (Qwen3-0.6B) + 3 quality (Qwen3-8B) = 75
+    quarantined arms    1 (static_refit_causal)
+    counter validation  clean on all 75; cache reset before every replay
+    --allow-counter-mismatch never passed to any run

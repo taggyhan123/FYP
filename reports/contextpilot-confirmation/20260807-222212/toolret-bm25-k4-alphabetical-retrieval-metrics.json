@@ -1,0 +1,577 @@
+{
+  "evaluation": {
+    "hit_rate": 0.515,
+    "mean_precision": 0.135,
+    "mean_recall": 0.41708333,
+    "mean_reciprocal_rank": 0.38583333,
+    "menu_size": 4,
+    "offset": 0,
+    "ordering": "alphabetical",
+    "queries": 200,
+    "queries_requiring_deterministic_zero_score_fallback": 0,
+    "random_seed": 42
+  },
+  "format_version": 1,
+  "gold_labels_used_for_selection": false,
+  "ordering_fit": {
+    "evaluation_overlap_tasks": 0,
+    "support_mode": "disjoint",
+    "support_provenance": "disjoint_toolret_gold_labels",
+    "support_tasks": 7761
+  },
+  "retrieval_curve": [
+    {
+      "hit_rate": 0.515,
+      "k": 4,
+      "mean_precision": 0.135,
+      "mean_recall": 0.41708333,
+      "mean_reciprocal_rank": 0.38583333,
+      "queries": 200,
+      "queries_requiring_deterministic_zero_score_fallback": 0
+    },
+    {
+      "hit_rate": 0.655,
+      "k": 16,
+      "mean_precision": 0.045,
+      "mean_recall": 0.55041667,
+      "mean_reciprocal_rank": 0.40221367,
+      "queries": 200,
+      "queries_requiring_deterministic_zero_score_fallback": 0
+    },
+    {
+      "hit_rate": 0.755,
+      "k": 64,
+      "mean_precision": 0.01351562,
+      "mean_recall": 0.64208333,
+      "mean_reciprocal_rank": 0.40607927,
+      "queries": 200,
+      "queries_requiring_deterministic_zero_score_fallback": 0
+    },
+    {
+      "hit_rate": 0.805,
+      "k": 128,
+      "mean_precision": 0.00722656,
+      "mean_recall": 0.67541667,
+      "mean_reciprocal_rank": 0.40663761,
+      "queries": 200,
+      "queries_requiring_deterministic_zero_score_fallback": 0
+    }
+  ],
+  "retrieved_frequency_top_100": [
+    {
+      "name": "AION_List_my_Bots",
+      "retrieved_frequency": 22,
+      "tool_id": "toolbench_tool_10293"
+    },
+    {
+      "name": "scrape_for_me_is_it_up",
+      "retrieved_frequency": 12,
+      "tool_id": "toolbench_tool_8962"
+    },
+    {
+      "name": "get_23andMe_names",
+      "retrieved_frequency": 9,
+      "tool_id": "toolbench_tool_13554"
+    },
+    {
+      "name": "HelpSystem",
+      "retrieved_frequency": 8,
+      "tool_id": "tool_be_honest_tool_381"
+    },
+    {
+      "name": "calculate_scheduled_orders",
+      "retrieved_frequency": 7,
+      "tool_id": "toolink_tool_1729"
+    },
+    {
+      "name": "healthcare.cancelAppointment",
+      "retrieved_frequency": 5,
+      "tool_id": "toolACE_tool_7058"
+    },
+    {
+      "name": "roomReservation.modify",
+      "retrieved_frequency": 5,
+      "tool_id": "toolACE_tool_13092"
+    },
+    {
+      "name": "smart_home_control",
+      "retrieved_frequency": 5,
+      "tool_id": "ultraTool_tool_1049"
+    },
+    {
+      "name": "Tank01_Fantasy_Stats_Get_Player_Information",
+      "retrieved_frequency": 5,
+      "tool_id": "toolbench_tool_1271"
+    },
+    {
+      "name": "matches_v2_list_by_league",
+      "retrieved_frequency": 5,
+      "tool_id": "apigen_tool_3377"
+    },
+    {
+      "name": "GET_me",
+      "retrieved_frequency": 4,
+      "tool_id": "webtools_spotify_tool_7"
+    },
+    {
+      "name": "roomReservation.create",
+      "retrieved_frequency": 4,
+      "tool_id": "toolACE_tool_11551"
+    },
+    {
+      "name": "DeleteBankAccount",
+      "retrieved_frequency": 4,
+      "tool_id": "apibank_tool_26"
+    },
+    {
+      "name": "RecordHealthData",
+      "retrieved_frequency": 4,
+      "tool_id": "apibank_tool_62"
+    },
+    {
+      "name": "cancelSpaAppointment",
+      "retrieved_frequency": 4,
+      "tool_id": "toolACE_tool_3231"
+    },
+    {
+      "name": "automation.task_scheduling",
+      "retrieved_frequency": 4,
+      "tool_id": "toolACE_tool_9884"
+    },
+    {
+      "name": "get_definition",
+      "retrieved_frequency": 4,
+      "tool_id": "rotbench_tool_404"
+    },
+    {
+      "name": "get_definition",
+      "retrieved_frequency": 4,
+      "tool_id": "tooleyes_tool_53"
+    },
+    {
+      "name": "norwegianDictionary",
+      "retrieved_frequency": 4,
+      "tool_id": "toolACE_tool_5141"
+    },
+    {
+      "name": "get_word_definition",
+      "retrieved_frequency": 4,
+      "tool_id": "toolACE_tool_14025"
+    },
+    {
+      "name": "ModifyReminder",
+      "retrieved_frequency": 4,
+      "tool_id": "apibank_tool_7"
+    },
+    {
+      "name": "CancelTimedSwitch",
+      "retrieved_frequency": 4,
+      "tool_id": "apibank_tool_69"
+    },
+    {
+      "name": "TimedSwitch",
+      "retrieved_frequency": 4,
+      "tool_id": "apibank_tool_68"
+    },
+    {
+      "name": "myBooky_DEMO_resetPassword",
+      "retrieved_frequency": 4,
+      "tool_id": "toolbench_tool_3386"
+    },
+    {
+      "name": "GetAppointment",
+      "retrieved_frequency": 4,
+      "tool_id": "reversechain_tool_252"
+    },
+    {
+      "name": "medicine.internal_medicine.appointment_scheduler",
+      "retrieved_frequency": 4,
+      "tool_id": "toolACE_tool_1900"
+    },
+    {
+      "name": "add_meeting_reminder",
+      "retrieved_frequency": 4,
+      "tool_id": "ultraTool_tool_839"
+    },
+    {
+      "name": "schedule_reminder",
+      "retrieved_frequency": 4,
+      "tool_id": "ultraTool_tool_484"
+    },
+    {
+      "name": "Ticketbud_Me",
+      "retrieved_frequency": 3,
+      "tool_id": "toolbench_tool_5146"
+    },
+    {
+      "name": "DeleteAccount",
+      "retrieved_frequency": 3,
+      "tool_id": "apibank_tool_2"
+    },
+    {
+      "name": "delete_transaction_by_amount",
+      "retrieved_frequency": 3,
+      "tool_id": "ultraTool_tool_39"
+    },
+    {
+      "name": "GET_me_player_devices",
+      "retrieved_frequency": 3,
+      "tool_id": "webtools_spotify_tool_16"
+    },
+    {
+      "name": "casting.get_audition_schedule",
+      "retrieved_frequency": 3,
+      "tool_id": "toolACE_tool_1939"
+    },
+    {
+      "name": "MyMemory_Translation_Memory_set_contribution",
+      "retrieved_frequency": 3,
+      "tool_id": "toolbench_tool_8418"
+    },
+    {
+      "name": "reset_password",
+      "retrieved_frequency": 3,
+      "tool_id": "ultraTool_tool_42"
+    },
+    {
+      "name": "generate_password_reset_token",
+      "retrieved_frequency": 3,
+      "tool_id": "toolACE_tool_9944"
+    },
+    {
+      "name": "bacterial_growth",
+      "retrieved_frequency": 3,
+      "tool_id": "apigen_tool_272"
+    },
+    {
+      "name": "calculate_population",
+      "retrieved_frequency": 3,
+      "tool_id": "toolink_tool_487"
+    },
+    {
+      "name": "calculate_growth_rate",
+      "retrieved_frequency": 3,
+      "tool_id": "toolink_tool_488"
+    },
+    {
+      "name": "get_today_date",
+      "retrieved_frequency": 2,
+      "tool_id": "rotbench_tool_372"
+    },
+    {
+      "name": "Get Today's Date Count",
+      "retrieved_frequency": 2,
+      "tool_id": "toolACE_tool_611"
+    },
+    {
+      "name": "Current_Affairs_Of_India_History_Of_Today",
+      "retrieved_frequency": 2,
+      "tool_id": "toolbench_tool_2693"
+    },
+    {
+      "name": "AddScene",
+      "retrieved_frequency": 2,
+      "tool_id": "apibank_tool_64"
+    },
+    {
+      "name": "generate_dance_routine",
+      "retrieved_frequency": 2,
+      "tool_id": "toolACE_tool_8780"
+    },
+    {
+      "name": "director.sceneSetup",
+      "retrieved_frequency": 2,
+      "tool_id": "toolACE_tool_10179"
+    },
+    {
+      "name": "eTsiHzmHi",
+      "retrieved_frequency": 2,
+      "tool_id": "rotbench_tool_508"
+    },
+    {
+      "name": "Check WhatsApp Registration",
+      "retrieved_frequency": 2,
+      "tool_id": "toolACE_tool_4300"
+    },
+    {
+      "name": "ufc_fight_night_kara_france_vs_albazi_june_03_2023",
+      "retrieved_frequency": 2,
+      "tool_id": "apigen_tool_406"
+    },
+    {
+      "name": "ufc_fight_night_vettori_vs_cannonier_june_17_2023",
+      "retrieved_frequency": 2,
+      "tool_id": "apigen_tool_2468"
+    },
+    {
+      "name": "registration_check",
+      "retrieved_frequency": 2,
+      "tool_id": "apigen_tool_2500"
+    },
+    {
+      "name": "set_specific_ringtone",
+      "retrieved_frequency": 2,
+      "tool_id": "ultraTool_tool_888"
+    },
+    {
+      "name": "change_account_password",
+      "retrieved_frequency": 2,
+      "tool_id": "ultraTool_tool_196"
+    },
+    {
+      "name": "change_password",
+      "retrieved_frequency": 2,
+      "tool_id": "ultraTool_tool_176"
+    },
+    {
+      "name": "submit_password_change",
+      "retrieved_frequency": 2,
+      "tool_id": "ultraTool_tool_177"
+    },
+    {
+      "name": "OpenBankAccount",
+      "retrieved_frequency": 2,
+      "tool_id": "apibank_tool_25"
+    },
+    {
+      "name": "verifyBankAccount",
+      "retrieved_frequency": 2,
+      "tool_id": "toolalpaca_tool_381"
+    },
+    {
+      "name": "Bank Account Verification",
+      "retrieved_frequency": 2,
+      "tool_id": "toolACE_tool_5975"
+    },
+    {
+      "name": "HealthAppointments.scheduleAppointment",
+      "retrieved_frequency": 2,
+      "tool_id": "toolACE_tool_6353"
+    },
+    {
+      "name": "CreateAppointment",
+      "retrieved_frequency": 2,
+      "tool_id": "reversechain_tool_412"
+    },
+    {
+      "name": "The23andMe",
+      "retrieved_frequency": 2,
+      "tool_id": "toolemu_tool_14"
+    },
+    {
+      "name": "create_meeting_reminder",
+      "retrieved_frequency": 2,
+      "tool_id": "ultraTool_tool_485"
+    },
+    {
+      "name": "set_meeting_reminder",
+      "retrieved_frequency": 2,
+      "tool_id": "ultraTool_tool_814"
+    },
+    {
+      "name": "dQsnrSqAqc",
+      "retrieved_frequency": 2,
+      "tool_id": "rotbench_tool_39"
+    },
+    {
+      "name": "PredictFutureStockPrice",
+      "retrieved_frequency": 2,
+      "tool_id": "reversechain_tool_291"
+    },
+    {
+      "name": "Latest_Stock_Price_price",
+      "retrieved_frequency": 2,
+      "tool_id": "toolbench_tool_2072"
+    },
+    {
+      "name": "stock_get_stock_historical_price_data",
+      "retrieved_frequency": 2,
+      "tool_id": "apigen_tool_828"
+    },
+    {
+      "name": "checkAccountBalance",
+      "retrieved_frequency": 2,
+      "tool_id": "toolalpaca_tool_382"
+    },
+    {
+      "name": "eazita_com_Check_Account_Balance",
+      "retrieved_frequency": 2,
+      "tool_id": "toolbench_tool_10354"
+    },
+    {
+      "name": "check_balance",
+      "retrieved_frequency": 2,
+      "tool_id": "ultraTool_tool_107"
+    },
+    {
+      "name": "check_current_balance",
+      "retrieved_frequency": 2,
+      "tool_id": "ultraTool_tool_164"
+    },
+    {
+      "name": "festival_schedule_finder",
+      "retrieved_frequency": 2,
+      "tool_id": "toolACE_tool_2341"
+    },
+    {
+      "name": "getInjuryReport",
+      "retrieved_frequency": 2,
+      "tool_id": "toolACE_tool_13118"
+    },
+    {
+      "name": "NotesTool",
+      "retrieved_frequency": 2,
+      "tool_id": "metatool_which_tool_9"
+    },
+    {
+      "name": "book_therapist_appointment",
+      "retrieved_frequency": 2,
+      "tool_id": "appbench_tool_26"
+    },
+    {
+      "name": "All Climate Change News",
+      "retrieved_frequency": 2,
+      "tool_id": "toolLens_tool_297"
+    },
+    {
+      "name": "QuerySmartHome",
+      "retrieved_frequency": 2,
+      "tool_id": "apibank_tool_70"
+    },
+    {
+      "name": "reschedule_conflicting_events",
+      "retrieved_frequency": 2,
+      "tool_id": "ultraTool_tool_884"
+    },
+    {
+      "name": "ForgotPassword",
+      "retrieved_frequency": 2,
+      "tool_id": "apibank_tool_4"
+    },
+    {
+      "name": "searchZoonoticDiseases",
+      "retrieved_frequency": 2,
+      "tool_id": "toolACE_tool_4151"
+    },
+    {
+      "name": "dataETL.extract_weather_data",
+      "retrieved_frequency": 2,
+      "tool_id": "toolACE_tool_3989"
+    },
+    {
+      "name": "Search Anime Quotes",
+      "retrieved_frequency": 2,
+      "tool_id": "toolACE_tool_1660"
+    },
+    {
+      "name": "getLocationByIP",
+      "retrieved_frequency": 2,
+      "tool_id": "toolalpaca_tool_997"
+    },
+    {
+      "name": "calculate_final_population(initial_population, doubling_time, total_time)",
+      "retrieved_frequency": 2,
+      "tool_id": "craft_Math_algebra_tool_113"
+    },
+    {
+      "name": "Africa_Api_languages_Per_Country",
+      "retrieved_frequency": 2,
+      "tool_id": "toolbench_tool_12066"
+    },
+    {
+      "name": "Africa_Api_languages_AllCountries",
+      "retrieved_frequency": 2,
+      "tool_id": "toolbench_tool_5614"
+    },
+    {
+      "name": "probability_of_consecutive_rolls",
+      "retrieved_frequency": 2,
+      "tool_id": "apigen_tool_189"
+    },
+    {
+      "name": "Roll Die",
+      "retrieved_frequency": 2,
+      "tool_id": "toolACE_tool_9928"
+    },
+    {
+      "name": "Get Historical Events of Today",
+      "retrieved_frequency": 1,
+      "tool_id": "toolACE_tool_14425"
+    },
+    {
+      "name": "getPublicArtEvents",
+      "retrieved_frequency": 1,
+      "tool_id": "toolACE_tool_15523"
+    },
+    {
+      "name": "TheClique_Events",
+      "retrieved_frequency": 1,
+      "tool_id": "toolbench_tool_13036"
+    },
+    {
+      "name": "Today's International Current Affairs",
+      "retrieved_frequency": 1,
+      "tool_id": "toolLens_tool_59"
+    },
+    {
+      "name": "get_23andMe_user",
+      "retrieved_frequency": 1,
+      "tool_id": "toolbench_tool_4879"
+    },
+    {
+      "name": "register_device_information",
+      "retrieved_frequency": 1,
+      "tool_id": "apigen_tool_1480"
+    },
+    {
+      "name": "Maytapi_WhatsApp_redeploy",
+      "retrieved_frequency": 1,
+      "tool_id": "toolbench_tool_5307"
+    },
+    {
+      "name": "DeleteAlarm",
+      "retrieved_frequency": 1,
+      "tool_id": "apibank_tool_19"
+    },
+    {
+      "name": "AddAlarm",
+      "retrieved_frequency": 1,
+      "tool_id": "apibank_tool_18"
+    },
+    {
+      "name": "Image_CDN_Show_History",
+      "retrieved_frequency": 1,
+      "tool_id": "toolbench_tool_10105"
+    },
+    {
+      "name": "Show_Air_Dates_Today",
+      "retrieved_frequency": 1,
+      "tool_id": "toolbench_tool_8034"
+    },
+    {
+      "name": "show_history",
+      "retrieved_frequency": 1,
+      "tool_id": "apigen_tool_3446"
+    },
+    {
+      "name": "current_balance_query",
+      "retrieved_frequency": 1,
+      "tool_id": "ultraTool_tool_135"
+    }
+  ],
+  "retriever": {
+    "average_document_terms": 47.6313,
+    "b": 0.75,
+    "corpus_tools": 44453,
+    "document_fields": [
+      "function_name_x3",
+      "description",
+      "parameter_names_and_descriptions"
+    ],
+    "k1": 1.5,
+    "name": "bm25_canonical_tools_v1",
+    "vocabulary_terms": 29516
+  },
+  "selection_mode": "retrieved_menu",
+  "workload": "/home/taghan/contextpilot-confirmation-20260807-222212/toolret-bm25-k4-alphabetical.jsonl"
+}

@@ -168,10 +168,19 @@ used, and the natural one to reach for — is itself worse than doing nothing
 (−2.81 points at 4B, −11.57 at 0.6B), so much of the apparent benefit in any
 comparison drawn against it is recovering ground that baseline gave away.
 
-Per-case at 4B, of 160 irrelevance tasks, the high-reuse policies never repair a
-case and only break them: ContextPilot loses 5 and recovers 0, the counter loses
-7 and recovers 0, while ToolTrie-v0 is bidirectional at 5 and 4. Small counts, so
-this is a direction rather than a resolved magnitude.
+Per-case at 4B against original order, of 160 irrelevance tasks (original
+correct on 141):
+
+| Policy | cases broken | cases repaired | net |
+| --- | ---: | ---: | ---: |
+| ToolTrie-v0 | 5 | **4** | −1 |
+| ContextPilot persistent | 5 | **0** | −5 |
+| Online frequency counter | 7 | **0** | −7 |
+
+ToolTrie-v0 is bidirectional, which is what noise looks like. The two high-reuse
+policies repair **zero** cases — they only break them. Exact McNemar gives
+p ≈ 0.016 for the counter and p ≈ 0.063 for ContextPilot. Small counts, so this
+is a direction rather than a resolved magnitude.
 
 **Model scale matters more than policy here.** Ordering moves full-call accuracy
 by 11.6 points at 0.6B and 3.8 points at 4B, and an irrelevance regression

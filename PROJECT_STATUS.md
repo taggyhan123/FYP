@@ -9,7 +9,7 @@ Status after the first local research pass:
 | C — normalize datasets | Complete for ToolRet and five BFCL V4 static subsets | `scripts/download_datasets.py`, `scripts/run_pipeline.py`, `reports/dataset-inventory.md` |
 | D — access patterns | Complete for benchmark evidence, four controlled replays, and the retrieved-menu ordering matrix | `reports/access-patterns.md`, `reports/tables/`, `reports/initial-brief-closure/findings.md` |
 | E — exact ToolTrie baseline | Measured on GPU on shared padded catalogs and true BM25-retrieved menus, with ordinary text prefill retained as the explicit fallback | `src/tatm/tooltrie.py`, "Task E" and "ToolTrie-v0" below, `reports/tooltrie-v0/findings.md`, `reports/initial-brief-closure/findings.md` |
-| F — initial report | Substantively complete; local scientific-language and traceability audit complete, two cluster-side validations remain | `reports/initial-findings.md`, `reports/initial-brief-closure/findings.md`, `reports/contextpilot-confirmation/findings.md` |
+| F — initial report | Substantively complete; the dual-model replication is accepted, while archive backup and two separately claimed cluster handovers remain | `reports/initial-findings.md`, `reports/initial-brief-closure/findings.md`, `reports/contextpilot-dual-model/findings.md` |
 
 The external comparison from `NUS_GPU_PHASE2_INSTRUCTIONS.md` has now been
 **measured on GPU** — targeted no-tool evaluation, CacheWeaver, fitted
@@ -62,29 +62,43 @@ menus, while realistic retrieved-menu reuse remains small.
 
 The confirmation's Qwen3-8B quality replay finds +2.03pp function-name,
 +2.03pp full-call, and −5.00pp no-tool accuracy against alphabetical on the
-fixed sequence. A separately recorded Qwen3-4B run reproduces the relevance
-gain but not the no-tool loss: 0.00pp versus alphabetical. The decline penalty
-is therefore model-sensitive on current evidence, not a universal effect.
+fixed sequence. An earlier Qwen3-4B run found 0.00pp on no-tool, and the fresh
+dual-model 4B run finds −0.62pp with an interval spanning zero. The relevance
+gain reproduces, but the decline penalty is model-sensitive on current
+evidence, not a universal effect.
 
-The corrected `alpha=0.001` static-refit arm is the one remaining confirmation
-cell: 18 Qwen3-0.6B systems trials and one Qwen3-8B quality replay. The accepted
-persistent trials must not be rerun. See
-`reports/contextpilot-confirmation/findings.md` and
-`NUS_GPU_CONTEXTPILOT_CONFIRMATION_INSTRUCTIONS.md`.
+The corrected `alpha=0.001` static-refit and persistent-API adaptations are now
+both measured in a fresh dual-model experiment. Qwen3-4B is the primary model
+and Qwen3-0.6B is a separately reported replication. All 190 predeclared GPU
+replays are accepted, all 33 GPU-side audit checks pass, and the copied
+protocol manifest is byte-identical to the predeclared manifest. Both
+ContextPilot adaptations lead ToolTrie-v0 in all 12 systems cells. The more
+important result is the magnitude collapse: adaptive ordering reaches 82–96%
+reuse on padded shared catalogs but only 0.9–18.7% for ToolTrie and 1.3–18.7%
+for the best ContextPilot arm on 4B BM25-retrieved menus.
 
-**Supervisor-requested model update (predeclared; results pending):** Qwen3-4B
-will now be the primary ContextPilot/ToolTrie comparison, with Qwen3-0.6B kept
-as the brief-aligned small-model replication. The new experiment is a
-self-contained 190-replay matrix: five conditions, six systems workloads ×
-three trials, and five n=800 quality conditions on each model. It uses pinned
-model revisions, requires identical tokenizer/chat-template evidence, uses
-native per-model cache capacities, rebuilds ToolTrie for each live capacity,
-and forbids pooled or absolute cross-model latency claims.
-See `cluster/contextpilot-dual-model-manifest.json` and
-`NUS_GPU_CONTEXTPILOT_DUAL_MODEL_INSTRUCTIONS.md`. Existing 0.6B/4B/8B results
-remain preserved and are not silently folded into the new primary tables. The
-new protocol does not retroactively fill the historical runbook's one missing
-Qwen3-8B static-refit quality cell.
+The quality result does not identify one overall winner. On 4B, ContextPilot
+has the highest relevance-side point estimates while original order has the
+highest no-tool accuracy. On 0.6B, original order has the highest relevance
+accuracy and alphabetical has the highest no-tool accuracy. These are
+fixed-sequence descriptions from this repository's reduced BFCL-style checker,
+not official leaderboard scores or uncertainty over alternative planner
+sequences. Cross-model differences are model-sensitive observations, not a
+pure model-size effect, because native capacities differ and ToolTrie is
+rebuilt per model.
+
+See `reports/contextpilot-dual-model/findings.md`,
+`cluster/contextpilot-dual-model-manifest.json`, and
+`NUS_GPU_CONTEXTPILOT_DUAL_MODEL_INSTRUCTIONS.md`. Do not rerun the accepted
+dual-model matrix. Its 58 MB raw archive still has no verified off-machine
+copy.
+
+The GPU executor also reports that the historical Qwen3-8B static-refit quality
+cell and the 72/72 SGLang raw-counter audit were completed outside this
+protocol. Their compact handovers are not present in commit `d133670` or any
+currently fetched remote branch, so those two claims are not yet integrated
+into project status. The dual-model run does not retroactively fill the
+historical 8B cell.
 
 ## Notable findings
 
@@ -412,13 +426,13 @@ directional, not final. This is what closes brief question 7 for the first
 time, at least partially.
 
 **Update, same workload replayed on `Qwen/Qwen3-8B`:** the name/full-accuracy
-gap above was mostly a small-model artefact. At 8B both orderings score
-identically on function-name (91.25%) and full accuracy (81.25%) — the gap that
-looked real at 0.6B vanishes at deployment-grade model capability. The
-no-tool-accuracy gap survives, smaller: 95.0% vs 90.0% at 8B (was 95.0% vs
-85.0% at 0.6B), same direction both times. Revised reading: alphabetical does
-not cost selection accuracy the way the 0.6B run suggested; the caution that
-remains is narrower and only about correctly declining irrelevant requests.
+gap above is model- or sample-sensitive. At 8B both orderings score identically
+on function-name (91.25%) and full accuracy (81.25%) — the gap observed at
+0.6B vanishes for this checkpoint and workload. The no-tool-accuracy gap
+survives, smaller: 95.0% vs 90.0% at 8B (was 95.0% vs 85.0% at 0.6B), same
+direction both times. Revised reading: alphabetical does not show a resolved
+selection-accuracy cost across models; the remaining caution is narrower and
+concerns correctly declining irrelevant requests.
 
 ## Task D — locality is now measurable
 

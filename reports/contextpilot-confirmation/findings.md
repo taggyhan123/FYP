@@ -2,9 +2,16 @@
 
 ## Status
 
-The **persistent-API adaptation** is measured and accepted. The corrected
-**static-refit causal adaptation** has not yet been replayed and remains the
-only missing cell in the predeclared confirmation matrix.
+For this historical confirmation run, the **persistent-API adaptation** is
+measured and accepted. Its corrected **static-refit causal adaptation** remains
+missing from the tracked historical Qwen3-8B matrix.
+
+A separate, fresh dual-model replication has since measured both adaptations
+on Qwen3-4B and Qwen3-0.6B. All 190 of its predeclared replays are accepted; see
+[`reports/contextpilot-dual-model/findings.md`](../contextpilot-dual-model/findings.md).
+That experiment does not retroactively fill the historical 8B cell. The GPU
+executor reports that the 8B cell was also completed separately, but no compact
+handover for that claim is present on a fetched remote branch yet.
 
 These labels are mandatory:
 
@@ -119,16 +126,19 @@ Three limitations remain material:
 3. The static-refit arm was quarantined before serving because pinned
    ContextPilot returned internal integer IDs. The adapter now restores caller
    IDs through the public, positionally aligned `IndexResult.original_contexts`
-   field and has a real-upstream integration test, but its 18 systems trials and
-   one Qwen3-8B quality replay still require GPU execution.
+   field and has a real-upstream integration test. Its 18 systems trials and
+   one Qwen3-8B quality replay remain absent from this tracked historical
+   handover; the executor's claim that they were completed separately still
+   needs its own pushed evidence.
 
-A supervisor-requested follow-up has now been predeclared, but has no results
-yet. It makes Qwen3-4B the primary model and runs a fresh, complete matrix on
-both Qwen3-4B and Qwen3-0.6B. The two models will be reported separately because
-their native KV capacities differ and ToolTrie is rebuilt from each capacity.
-This follow-up does not alter or retroactively replace the accepted evidence
-above. Its protocol is
-[`NUS_GPU_CONTEXTPILOT_DUAL_MODEL_INSTRUCTIONS.md`](../../NUS_GPU_CONTEXTPILOT_DUAL_MODEL_INSTRUCTIONS.md).
+A supervisor-requested follow-up is now complete. It makes Qwen3-4B the primary
+model and reports Qwen3-0.6B separately because their native KV capacities
+differ and ToolTrie is rebuilt from each capacity. This follow-up does not
+alter or retroactively replace the accepted historical evidence above. Its
+protocol is
+[`NUS_GPU_CONTEXTPILOT_DUAL_MODEL_INSTRUCTIONS.md`](../../NUS_GPU_CONTEXTPILOT_DUAL_MODEL_INSTRUCTIONS.md),
+and its reconciled findings are
+[`reports/contextpilot-dual-model/findings.md`](../contextpilot-dual-model/findings.md).
 
 ## Research conclusion
 

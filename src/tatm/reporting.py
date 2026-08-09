@@ -719,11 +719,11 @@ def _quality_section(probe: dict[str, Any] | None) -> str:
         sections.append(
             "The name/full-accuracy gap that looked real at 0.6B is not present "
             "at 8B — both orderings score identically there. Checking a "
-            "counterintuitive small-model result against a second model size "
-            "found that most of the apparent quality tradeoff was a small-model "
-            "artefact; only a smaller no-tool-accuracy gap favouring alphabetical "
-            "survives at both scales. One run per condition, no repeats; read as "
-            "directional rather than final."
+            "counterintuitive result against a second model found that the "
+            "apparent quality tradeoff is model- or sample-sensitive; only a "
+            "smaller no-tool-accuracy gap favouring alphabetical survives at "
+            "both checkpoints. One run per condition, no repeats; read as "
+            "directional rather than as a general model-size law."
         )
     else:
         sections.append(
@@ -1287,7 +1287,7 @@ points). These are analytical estimates, not vLLM hit-rate or latency results.
 
 {closure_section}
 
-## ContextPilot persistent-API confirmation
+## ContextPilot confirmation and dual-model replication
 
 A pinned confirmation run used upstream commit
 `1fa0a143fdeda344585666648ab2b30cb7fea77f`, the paper/default
@@ -1305,20 +1305,27 @@ shared-menu positive-control result rather than a realistic retrieval result.
 
 The Qwen3-8B quality replay gives the persistent arm +2.03 points on function
 name, +2.03 on full call, and −5.00 on no-tool accuracy against alphabetical
-on one fixed request sequence. A Qwen3-4B addendum reproduces the relevance
-gain but gives exactly 0.00 points on no-tool. The current evidence supports a
-model-sensitive quality frontier, not a universal safety penalty. See
-`reports/contextpilot-confirmation/findings.md`.
+on one fixed request sequence. An earlier Qwen3-4B addendum found 0.00 points
+on no-tool; the fresh 4B-primary dual-model run finds −0.62 points with an
+interval spanning zero. The current evidence supports a model-sensitive
+quality frontier, not a universal safety penalty.
+
+The fresh predeclared matrix accepts all 190 replays across Qwen3-4B primary and
+Qwen3-0.6B replication. Both the persistent-API and corrected static-refit
+adaptations beat ToolTrie-v0 reuse in all 12 model/workload cells, but none is a
+universal quality winner. See `reports/contextpilot-confirmation/findings.md`
+and `reports/contextpilot-dual-model/findings.md`.
 
 ## Recommendation
 
 The retrieved-menu arm changes the recommendation. Alphabetical remains a
 strong simple baseline on the padded shared-catalog workload, but it is not a
-universal winner once menu membership comes from retrieval. ToolTrie-v0 gives
-the highest reuse at all four retrieved menu sizes, yet its gain is small in
-absolute terms and does not produce a resolved TTFT improvement. Retrieval
-coverage and selected-set overlap are now the dominant bottlenecks: increasing
-the BM25 menu from 4 to 128 raises macro recall from 41.71% to 67.54%, while
+universal winner once menu membership comes from retrieval. ToolTrie-v0 is the
+strongest in-brief ordering baseline at all four retrieved menu sizes, but both
+corrected ContextPilot adaptations exceed it in the fresh external comparison.
+The absolute gains remain small and do not produce a resolved TTFT improvement.
+Retrieval coverage and selected-set overlap are now the dominant bottlenecks:
+increasing the BM25 menu from 4 to 128 raises macro recall from 41.71% to 67.54%, while
 prompt cost grows about 25x and exact reuse falls.
 
 Under the separately controlled 7,680-token pressure condition, fixed random
@@ -1334,8 +1341,10 @@ ToolTrie-v0 on every padded and retrieved reuse cell measured. Both lose most
 reuse on independently retrieved large menus, so retrieval overlap is the
 stronger systems bottleneck. The historical static-refit arm and the persistent
 arm must retain their exact labels; neither is full ContextPilot. The corrected
-`alpha=0.001` static-refit confirmation and independent raw SGLang counter audit
-remain GPU work.
+`alpha=0.001` static-refit adaptation is measured in the dual-model run. The GPU
+executor says the separate historical 8B static cell and independent SGLang
+counter audit are also done, but their compact handovers have not been pushed
+to a fetched branch and are not yet integrated evidence.
 
 Do not pursue arbitrary independent KV concatenation yet. Native exact APC
 already converts the local token-reuse signal into a repeatable TTFT benefit
@@ -1357,12 +1366,13 @@ observed evictions. The original 0/24 runs remain preserved as valid low-
 occupancy evidence rather than being rewritten.
 
 This completes the planned initial experiment stage. The local analysis and
-artifact-to-report audit are complete, but formal publication-grade closure
-still needs the corrected `alpha=0.001` static-refit GPU cells, regeneration of
-the GPU-side quality comparisons with sequence-state metadata, and independent
-raw SGLang counter revalidation. Later §9 retained-tool or KV-composition
-experiments remain extensions and must preserve the ordinary selected-tool text
-fallback and the measured quality/safety frontier.
+artifact-to-report audit are complete, and the fresh 190-replay dual-model
+matrix is accepted for its declared scope. Operational closure still needs
+off-machine archive backup and pushed compact handovers for the separately
+claimed historical 8B static-refit and SGLang counter-audit results. Later §9
+retained-tool or KV-composition experiments remain extensions and must preserve
+the ordinary selected-tool text fallback and the measured quality/safety
+frontier.
 """
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(text, encoding="utf-8")

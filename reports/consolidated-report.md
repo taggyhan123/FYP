@@ -10,8 +10,9 @@ came from; see Appendix A for the full traceability map.
 **Status of this document.** This is a hand-written synthesis of the tracked
 reports, written to put the mechanism and the external comparison in one place.
 The generated reports remain authoritative: where any figure here disagrees with
-`reports/initial-findings.md`, `reports/initial-brief-closure/findings.md`, or
-`reports/tooltrie-phase2/findings.md`, those win.
+`reports/initial-findings.md`, `reports/initial-brief-closure/findings.md`,
+`reports/tooltrie-phase2/findings.md`, or
+`reports/contextpilot-dual-model/findings.md`, those win.
 
 ---
 
@@ -44,19 +45,25 @@ persistent arm's reuse falls from 95–96% on padded menus to 1.99–18.72% on
 retrieved menus, confirming that workload overlap—not the planner label—drives
 the large headline.
 
-**Audit note (2026-08-08).** Sequence-dependent planner intervals in the
+**Audit note (updated 2026-08-09).** Sequence-dependent planner intervals in the
 historical reports describe their fixed request order; they do not include
 uncertainty over alternative request sequences. The SGLang raw runs also require
 revalidation against the independent aggregate cached-token counter. Tables are
 retained as measured observations, with those inference limits.
 The generalized ContextPilot static-refit adapter's integer-ID restoration was
 fixed as well; the historical Phase 2 builder already used an equivalent inverse
-mapping, so that repair does not alter the old emitted workload. The remaining
-`alpha=0.001` static-refit cells have not yet run. Quality intervals for all
-stateful planners are fixed-sequence descriptions. In particular, the
-persistent arm's 8B no-tool difference is −5.00 points, but the separately
-measured 4B difference is 0.00 points; a universal safety penalty is not
-supported.
+mapping, so that repair does not alter the old emitted workload. A fresh,
+predeclared 190-replay experiment has now measured both corrected ContextPilot
+adaptations on Qwen3-4B and Qwen3-0.6B. Quality intervals for all stateful
+planners remain fixed-sequence descriptions. In particular, the persistent
+arm's historical 8B no-tool difference is −5.00 points, while its fresh 4B
+difference from alphabetical is −0.62 points with an interval spanning zero; a
+universal safety penalty is not supported.
+
+The GPU executor separately reports that the historical 8B static-refit cell
+and the SGLang 72/72 raw-counter audit are complete. Their compact handovers are
+not present in the fetched repository refs, so this report does not treat those
+two claims as integrated evidence yet.
 
 ---
 
@@ -200,13 +207,13 @@ Measured on an isolated RTX 3090, vLLM 0.26.0, temperature 0, seed 0, thinking
 disabled. Live APC capacity was read back from the server (190,896 tokens =
 16 tokens/block x 11,931 blocks) rather than assumed.
 
-**Two models, by design.** All systems measurements — reuse, prefill, TTFT, and
-cache pressure — use `Qwen/Qwen3-0.6B`, keeping them comparable across the whole
-measurement series; cache behaviour depends on the serving stack and prompt
-tokens, not on model quality. All correctness and safety measurements use
-`Qwen/Qwen3-8B`, because ordering-quality effects at 0.6B proved to be
-small-model artefacts. Section 4.8 documents the difference, which inverts sign
-between the two scales.
+**Multiple models, by design.** The original systems series — reuse, prefill,
+TTFT, and cache pressure — uses `Qwen/Qwen3-0.6B` for within-series
+comparability, while the original correctness and safety series uses
+`Qwen/Qwen3-8B`. The fresh replication instead makes Qwen3-4B primary and
+reports Qwen3-0.6B separately. Ordering-quality effects are model-sensitive;
+the evidence does not establish a general model-size law. Section 4.8 documents
+the sign changes and their inference limits.
 
 | Stage | Declared | Produced | Status |
 | --- | ---: | ---: | --- |
@@ -313,7 +320,8 @@ treating analytical schema-token estimates as server tokenization.
 ### 4.5 External comparison — what this was measured against
 
 **Source:** `reports/tooltrie-phase2/findings.md` §2, §2a, §5, §7;
-`reports/contextpilot-confirmation/findings.md`.
+`reports/contextpilot-confirmation/findings.md`;
+`reports/contextpilot-dual-model/findings.md`.
 
 Measured on vLLM, with the same ranking observed provisionally on a second
 engine. **Padded shared-catalog menus**, Qwen3-0.6B, 3 trials.
@@ -347,6 +355,23 @@ requests and selected sets, upstream commit `1fa0a143`, and `alpha=0.001`:
 | ToolRet BM25 k=64 | 0.91% | 1.24% | 1.90% | **4.78%** |
 | ToolRet BM25 k=128 | 0.37% | 0.58% | 1.13% | **1.99%** |
 
+The fresh dual-model replication then ran both corrected ContextPilot
+adaptations in one predeclared matrix. Qwen3-4B is primary:
+
+| Qwen3-4B workload | Original | Alphabetical | ToolTrie-v0 | CP persistent API | CP static refit |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| BFCL padded 64 | 1.19% | 37.99% | 87.19% | **96.16%** | **96.16%** |
+| ToolRet padded 64 | 6.56% | 43.81% | 82.18% | 95.27% | **95.74%** |
+| ToolRet BM25 k=4 | 15.87% | 15.28% | 17.48% | **18.72%** | 18.42% |
+| ToolRet BM25 k=16 | 5.14% | 5.40% | 6.73% | 9.10% | **9.36%** |
+| ToolRet BM25 k=64 | 0.72% | 0.98% | 1.63% | 3.07% | **3.48%** |
+| ToolRet BM25 k=128 | 0.34% | 0.44% | 0.89% | 1.35% | **2.23%** |
+
+Qwen3-0.6B separately replicates the ordering result: both ContextPilot arms
+beat ToolTrie-v0 in all six cells. Across the two model arms, that is 12/12
+systems cells. The persistent and static-refit variants are close and neither
+dominates the other.
+
 Three conclusions:
 
 1. **Both ContextPilot-derived policies are stronger measured ordering
@@ -362,11 +387,12 @@ Three conclusions:
    files. It targets overlapping retrieved text evidence; tool menus drawn from a
    shared catalog do not present that structure. Any write-up must say this
    rather than claiming a win.
-3. **The ordering ranking appears across engines, pending corrected raw-counter
-   validation.** Cached ratios agree within about 0.2 points under vLLM's paged
-   APC and SGLang's radix tree. This is encouraging evidence, but the historical
-   SGLang reconciliation was not independent and must be rerun against the
-   aggregate server counter.
+3. **The ordering ranking appears across engines, pending integration of the
+   corrected raw-counter evidence.** Cached ratios agree within about 0.2
+   points under vLLM's paged APC and SGLang's radix tree. The GPU executor says
+   the independent aggregate-counter audit now passes 72/72, but its compact
+   handover has not been pushed to a fetched branch. Until it is, the tracked
+   SGLang evidence retains its earlier validation caveat.
 
 **Comparability limits.** The two engines use different chat templates
 (`hermes` vs `qwen`), and SGLang's rendering costs exactly +640 tokens on every
@@ -376,9 +402,9 @@ absolute tokens, prefill, and TTFT are not comparable. SGLang's higher absolute
 TTFT must **not** be attributed to RadixAttention — the scheduler, attention
 backend, and memory configuration all differ.
 
-The retrieved-menu gap is now measured for the persistent-API adaptation. The
-historical static-refit arm at `alpha=0.5` was not retroactively mixed into that
-matrix, and its corrected `alpha=0.001` confirmation remains pending. See §7.2.
+The retrieved-menu gap is now measured for both corrected `alpha=0.001`
+adaptations in the fresh dual-model matrix. The historical static-refit arm at
+`alpha=0.5` was not retroactively mixed into it. See §7.2.
 
 ### 4.6 Statistical ordering policies collapse onto one order
 
@@ -400,7 +426,8 @@ emit the same prefix repeatedly.
 ### 4.7 Quality and safety — a real frontier
 
 **Source:** `reports/tooltrie-phase2/findings.md` §1 and §4;
-`reports/contextpilot-confirmation/findings.md`.
+`reports/contextpilot-confirmation/findings.md`;
+`reports/contextpilot-dual-model/findings.md`.
 
 Historical BFCL correctness, n=800 (160 per domain), Qwen3-8B:
 
@@ -410,23 +437,39 @@ Historical BFCL correctness, n=800 (160 per domain), Qwen3-8B:
 | ToolTrie-v0 | 83.75% | 77.66% | 87.50% |
 | ContextPilot static-refit causal adaptation (alpha=0.5) | **84.84%** | **79.06%** | 81.88% |
 
-The corrected persistent-API confirmation used the same 800 cases:
+The historical persistent-API confirmation and the fresh dual-model run use
+the same 800-case quality design:
 
 | Model | Condition | function-name | full call | no-tool |
 | --- | --- | ---: | ---: | ---: |
 | Qwen3-8B | Alphabetical | 82.81% | 76.41% | **89.38%** |
 | Qwen3-8B | ToolTrie-v0 | 83.75% | 77.66% | 87.50% |
 | Qwen3-8B | ContextPilot persistent API | **84.84%** | **78.44%** | 84.38% |
-| Qwen3-4B | Alphabetical | 82.03% | 73.28% | 85.62% |
-| Qwen3-4B | ToolTrie-v0 | 83.75% | 75.31% | **86.88%** |
-| Qwen3-4B | ContextPilot persistent API | **84.53%** | **77.19%** | 85.62% |
+| Qwen3-4B | Original | 83.13% | 76.09% | **88.12%** |
+| Qwen3-4B | Alphabetical | 82.19% | 73.28% | 85.62% |
+| Qwen3-4B | ToolTrie-v0 | 83.75% | 75.31% | 87.50% |
+| Qwen3-4B | ContextPilot persistent API | **84.38%** | **77.03%** | 85.00% |
+| Qwen3-4B | ContextPilot static refit | **84.38%** | **77.03%** | 85.00% |
 
-The relevance-side ordering gain reproduces across 8B and 4B. The no-tool
-pattern does not: ContextPilot minus alphabetical is −5.00 points at 8B but
-exactly 0.00 at 4B. Ranking by function-name accuracy and no-tool accuracy is
-negatively associated in the historical 8B matrix, but the current evidence
-does **not** show a universal causal trade-off. Model size, sample variation,
-and request sequence remain plausible moderators.
+The fresh 4B relevance-side gain over alphabetical reproduces the earlier 4B
+addendum, but no-tool accuracy is highest under original order. ContextPilot
+minus alphabetical is −5.00 no-tool points in the historical 8B run and −0.62
+points in the fresh 4B run, whose fixed-sequence interval spans zero. Ranking
+by function-name accuracy and no-tool accuracy is negatively associated in the
+historical 8B matrix, but the current evidence does **not** show a universal
+causal trade-off.
+
+The 0.6B replication is qualitatively different: original order has the best
+relevance accuracy, while alphabetical has the best no-tool accuracy.
+Cross-model differences are therefore model-sensitive observations, not a pure
+model-size effect. Native capacities differ, ToolTrie is capacity-dependent,
+and only one checkpoint was tested at each size.
+
+All these quality values use the repository's reduced BFCL-style AST checker,
+not the official BFCL leaderboard evaluator. They also come from one complete
+replay per condition. The earlier and fresh 4B runs differ by at most one
+scored case per shared condition and metric, so complete sequence replicates or
+multiple inference seeds remain necessary for publication-grade uncertainty.
 
 The targeted analysis is better powered and more damaging. All 240 BFCL
 irrelevance tasks under 5 fixed menu seeds, bootstrap clustered on tasks:
@@ -457,23 +500,26 @@ weighting must be declared before looking at these numbers.
 
 For the persistent-API adaptation, ToolTrie likewise loses every measured reuse
 cell and the relevance-side point estimates. Its no-tool advantage is 3.12
-points at 8B but 1.25 points at 4B, with the 4B fixed-sequence interval spanning
+points at 8B and 2.50 points in the fresh 4B run, with the 4B fixed-sequence interval spanning
 zero. This reinforces the need for a predeclared utility rather than a single
 aggregate “score.”
 
 ### 4.8 Model scale: why two models, and what changed with size
 
 **Source:** `PROJECT_STATUS.md`, "ToolTrie-v0" section;
-`reports/tooltrie-phase2/findings.md` §4.
+`reports/tooltrie-phase2/findings.md` §4;
+`reports/contextpilot-dual-model/findings.md`.
 
 On the same 100 stratified BFCL tasks, ToolTrie minus alphabetical was **+7.50
 points** on function-name accuracy at 0.6B but **-3.75 points** at 8B — the
 effect inverted with model size. Reporting the 0.6B quality numbers alone would
 have produced a confident and wrong conclusion.
 
-This was verified to be a genuine scale effect rather than a capacity confound:
+The ordering/capacity explanation was ruled out for that specific comparison:
 the 8B planner ran at 44,656-token capacity versus 190,896 at 0.6B and evicted
 424 trie nodes, yet produced **byte-identical orderings on all 100 records**.
+That makes the observation model-dependent, but not a general scaling law: only
+one checkpoint was tested at each size.
 
 **The larger nested sample reversed the 8B point estimates.** Repeated at 200 per domain
 (n=1,000), a nested superset of the 100 above:
@@ -505,6 +551,12 @@ calculation suggests a much larger sample, but paired precision depends on
 discordance and ToolTrie treatment depends on request history. **This design and
 budget do not practically resolve the 1-point gate**; it should be restated as
 an equivalence test with a declared margin and predeclared sequence replicates.
+
+The fresh 4B-primary/0.6B-replication matrix reinforces the same caution. The
+quality spread across orderings is much larger at 0.6B, but native capacities
+differ, ToolTrie is rebuilt per model, and quality has one complete replay per
+condition. It is accurate to call the result model-sensitive; it is too strong
+to call every 0.6B difference a model-size artifact.
 
 ### 4.9 Behaviour under controlled cache pressure
 
@@ -578,11 +630,12 @@ that fallback.
 Tasks A-F and the main planned experiment matrix are substantively complete;
 experimental question 4 remains partial because measured per-schema prefill-time
 weighting was not tested. The local analysis and traceability repairs are now in
-place. Formal publication-grade closure still requires the corrected
-`alpha=0.001` static-refit GPU cells, regenerated sequence-state metadata from
-the GPU-side raw quality scores, and raw SGLang counter revalidation. Section 9
-extensions — retained inactive tools, active-tool manifests, admission policy,
-KV composition — remain future work and are unbuilt.
+place, and the 190-replay dual-model matrix is accepted for its declared scope.
+Operational closure still requires off-machine backup of the raw archives and
+repository handovers for the separately claimed 8B static-refit and SGLang
+counter-audit results. Section 9 extensions — retained inactive tools,
+active-tool manifests, admission policy, and KV composition — remain future
+work and are unbuilt.
 
 ---
 
@@ -597,24 +650,24 @@ sharing little prefix, this is the highest-value robustness check available.
 
 ### 7.2 The external retrieved-menu result is ordering-only
 
-The ContextPilot persistent-API adaptation has now been run on BM25-retrieved
-menus and leads ToolTrie by 0.86–2.88 reuse points. This closes the earlier
-head-to-head gap, while exposing a stronger limitation: its absolute reuse is
-only 1.99–18.72%, far below the 95–96% padded positive control. It is not the
-full ContextPilot system because eviction feedback, annotations,
-de-duplication, and interleaved planning/serving are absent. The corrected
-`alpha=0.001` static-refit cells remain specified in
-`NUS_GPU_CONTEXTPILOT_CONFIRMATION_INSTRUCTIONS.md`.
+Both corrected ContextPilot adaptations have now been run on BM25-retrieved
+menus in the fresh dual-model matrix, and both lead ToolTrie in every model/menu
+cell. This closes the earlier head-to-head gap while exposing a stronger
+limitation: their absolute reuse is only 1.35–18.72% on 4B, far below the
+95–96% padded positive control. Neither is the full ContextPilot system because
+eviction feedback, annotations, de-duplication, and interleaved
+planning/serving are absent. The separately claimed historical 8B static-refit
+closure still needs its own pushed compact handover.
 
 ### 7.3 The no-tool comparisons are model- and sequence-limited
 
 The historical static-refit adapter's −7.50-point no-tool penalty and the
 persistent arm's −5.00-point 8B penalty each come from 160 irrelevance cases on
-one planner sequence. The persistent difference is 0.00 points at 4B. The
-better-powered 240-task protocol was run only for ToolTrie against
-alphabetical. Complete predeclared request-sequence replicates, rather than
-resampling outcomes from one stateful sequence, are needed for a population
-claim.
+one planner sequence. The fresh persistent difference is −0.62 points versus
+alphabetical at 4B, with an interval spanning zero. The better-powered 240-task
+protocol was run only for ToolTrie against alphabetical. Complete predeclared
+request-sequence replicates, rather than resampling outcomes from one stateful
+sequence, are needed for a population claim.
 
 ### 7.4 No overall winner is claimed
 
@@ -655,6 +708,8 @@ random-seed sensitivity sweep rather than promoting seed 42 as an algorithm.
 | `reports/initial-brief-pressure-rerun/ordering-equivalence.json` | Sequence-equivalence audit (§4.6) |
 | `reports/contextpilot-confirmation/findings.md` | Reconciled persistent-API result and limitations |
 | `reports/contextpilot-confirmation/local-audit.json` | Compact-artifact invariant audit and explicit missing cells |
+| `reports/contextpilot-dual-model/findings.md` | Reconciled 4B-primary/0.6B-replication result and limitations |
+| `scripts/audit_contextpilot_dual_model_compact.py` | Reproducible 15-check audit of the tracked dual-model evidence |
 
 ### GPU execution records
 
@@ -664,13 +719,15 @@ random-seed sensitivity sweep rather than promoting seed 42 as an algorithm.
 | `reports/initial-brief-pressure-rerun/20260807-005414/HANDOVER.md` | 24/24 accepted controlled-pressure runs |
 | `reports/contextpilot-confirmation/20260807-222212/HANDOVER.md` | 72 systems replays, three Qwen3-8B quality replays, persistent-API adaptation |
 | `reports/contextpilot-quality-4b/20260808-105833/HANDOVER.md` | three-run Qwen3-4B quality addendum |
+| `reports/contextpilot-dual-model/20260809-004603/HANDOVER.md` | accepted 190-replay dual-model matrix |
 
 ### Predeclared protocols
 
 - `cluster/initial-brief-closure-manifest.json`
 - `cluster/initial-brief-pressure-rerun-manifest.json`
+- `cluster/contextpilot-dual-model-manifest.json`
 
-Both were written before execution. The pressure threshold was never lowered
+All were written before their corresponding execution. The pressure threshold was never lowered
 after inspection; a separate protocol was declared instead.
 
 ### Raw archives (outside version control)
@@ -681,6 +738,7 @@ after inspection; a separate protocol was declared instead.
 | `initial-brief-pressure-rerun-20260807-005414.tar.gz` | 833,218 B, 36 entries | `d18c613958dbeadbb9114a7ec6c1418d1c062803075974940b470791e86a78e0` |
 | `contextpilot-confirmation-20260807-222212.tar.gz` | 32 MB, 171 entries | `aa4e196d140dc8d478ea8fd8b9da069e460779b4c888647ba228a7a60ec4a6bd` |
 | `contextpilot-quality-4b-20260808-105833.tar.gz` | 6.2 MB, 40 entries | `c8883e5a268765e0d00904b1936417094979999294a5f1e4af14a0e579c3dbc5` |
+| `contextpilot-dual-model-20260809-004603.tar.gz` | 58 MB, 666 entries | `3fc5f5ec08580c22dcee65ed015fcb96ae6b36598aeaaaf3eeb8aeb8aac62012` |
 
 All currently have only one known copy on the GPU server's physical disk and
 require an off-machine backup.

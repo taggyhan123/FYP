@@ -86,9 +86,10 @@ INITIAL_FINDINGS_COVER = {
         "benefit at 303-token prompts but up to a 10.6x reduction on padded "
         "shared-catalog menus. On deterministic BM25-retrieved menus, ToolTrie "
         "adds only 0.76-1.65 percentage points of reuse without a resolved TTFT "
-        "gain. A corrected ContextPilot persistent-API adaptation leads "
-        "ToolTrie on every retrieved menu size, while both lose most reuse as "
-        "menu overlap falls. The recommendation is to keep ordinary text "
+        "gain. A fresh 4B-primary/0.6B-replication matrix finds that both "
+        "corrected ContextPilot adaptations lead ToolTrie on every retrieved "
+        "menu size, while all three lose most reuse as menu overlap falls. "
+        "The recommendation is to keep ordinary text "
         "prefill as fallback and treat safe retention as a separate extension."
     ),
 }

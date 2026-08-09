@@ -1,0 +1,15 @@
+{
+  "adapts_online": true,
+  "final_state": {
+    "max_presence": 66,
+    "requests_observed": 200,
+    "tools_seen": 7325
+  },
+  "format_version": 1,
+  "information_regime": "causal",
+  "input": "/home/taghan/contextpilot-dual-model-20260809-004603/shared-workloads/toolret-bm25-k64-original.jsonl",
+  "output": "/home/taghan/frequency-online-20260809-200701/toolret-bm25-k64-frequency_online.jsonl",
+  "policy": "frequency_online",
+  "requests": 200,
+  "training_input": null
+}

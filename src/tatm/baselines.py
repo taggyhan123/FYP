@@ -378,3 +378,72 @@ class FittedOrderingPlanner:
             "skipped_large_transactions": self.skipped_large_transactions,
             "max_cooccurrence_transaction_size": self.max_cooccurrence_transaction_size,
         }
+
+
+class OnlineFrequencyPlanner:
+    """Causal online presence-frequency ordering.
+
+    Orders a selected set by how many *already-served* requests contained each
+    tool, descending. This is the adaptive counterpart to
+    ``FittedOrderingPlanner``'s ``frequency_fitted`` policy, which freezes its
+    support on a task-disjoint training corpus and never updates it.
+
+    The distinction matters because every ordering policy benchmarked against
+    the fitted family — ToolTrie, CacheWeaver, both ContextPilot adaptations —
+    updates state from the served stream, while the fitted family cannot. This
+    planner isolates that difference: it uses the same frequency signal, but
+    estimated online.
+
+    ``plan`` reads only counts accumulated from strictly earlier requests, so it
+    never sees the request it is ordering. Call ``observe`` only after the
+    corresponding request has been served. Tools never seen before have count
+    zero and therefore sort last, which keeps novel tools out of the shared
+    prefix without a special case.
+    """
+
+    def __init__(self, tools: Mapping[str, CanonicalTool]) -> None:
+        self.tools = tools
+        self.presence: Counter[str] = Counter()
+        self.request_index = 0
+
+    def _validated_ids(self, tool_ids: Sequence[str]) -> tuple[str, ...]:
+        ids = tuple(tool_ids)
+        if len(ids) != len(set(ids)):
+            raise ValueError("An online-frequency menu must not repeat tool IDs")
+        unknown = [tool_id for tool_id in ids if tool_id not in self.tools]
+        if unknown:
+            sample = ", ".join(repr(item) for item in unknown[:3])
+            raise ValueError(f"Online frequency received unknown tool IDs: {sample}")
+        return ids
+
+    def _key(self, tool_id: str) -> tuple[int, str, str]:
+        return (
+            -self.presence[tool_id],
+            self.tools[tool_id].name.casefold(),
+            tool_id,
+        )
+
+    def plan(self, selected_ids: Sequence[str]) -> OrderingPlan:
+        ids = self._validated_ids(selected_ids)
+        ordered = tuple(sorted(ids, key=self._key))
+        if set(ordered) != set(ids) or len(ordered) != len(ids):
+            raise RuntimeError("Online frequency ordering is not a permutation")
+        return OrderingPlan(
+            ordered_ids=ordered,
+            matched_prefix_ids=(),
+            fallback_ids=ordered,
+            hinted_schema_tokens=0,
+        )
+
+    def observe(self, ordered_ids: Sequence[str]) -> dict[str, int]:
+        ids = self._validated_ids(ordered_ids)
+        self.request_index += 1
+        self.presence.update(ids)
+        return self.snapshot()
+
+    def snapshot(self) -> dict[str, int]:
+        return {
+            "requests_observed": self.request_index,
+            "tools_seen": len(self.presence),
+            "max_presence": max(self.presence.values(), default=0),
+        }

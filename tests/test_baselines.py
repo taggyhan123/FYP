@@ -1,4 +1,8 @@
-from tatm.baselines import CacheWeaverPlanner, FittedOrderingPlanner
+from tatm.baselines import (
+    CacheWeaverPlanner,
+    FittedOrderingPlanner,
+    OnlineFrequencyPlanner,
+)
 from tatm.models import CanonicalTool
 
 
@@ -69,3 +73,64 @@ def test_fp_tree_conditional_preserves_selected_set() -> None:
     plan = planner.plan(("e", "d", "a"))
     assert set(plan.ordered_ids) == {"a", "d", "e"}
     assert len(plan.ordered_ids) == 3
+
+
+def test_online_frequency_cold_start_is_alphabetical_by_name() -> None:
+    planner = OnlineFrequencyPlanner(TOOLS)
+    plan = planner.plan(("c", "a", "b"))
+    # No request observed yet, so every count is zero and the name tiebreak decides.
+    assert plan.ordered_ids == ("a", "b", "c")
+    assert plan.matched_prefix_ids == ()
+
+
+def test_online_frequency_orders_by_previously_served_presence() -> None:
+    planner = OnlineFrequencyPlanner(TOOLS)
+    for _ in range(3):
+        planner.observe(("c", "a"))
+    planner.observe(("b",))
+    # c and a seen 3x, b seen 1x, d never.
+    assert planner.plan(("d", "b", "a", "c")).ordered_ids == ("a", "c", "b", "d")
+
+
+def test_online_frequency_places_never_seen_tools_last() -> None:
+    planner = OnlineFrequencyPlanner(TOOLS)
+    planner.observe(("e", "f"))
+    ordered = planner.plan(("a", "e", "f")).ordered_ids
+    assert set(ordered[:2]) == {"e", "f"}
+    assert ordered[-1] == "a"
+
+
+def test_online_frequency_plan_cannot_see_the_current_request() -> None:
+    """plan() must depend only on strictly earlier requests."""
+    planner = OnlineFrequencyPlanner(TOOLS)
+    planner.observe(("a",))
+    before = planner.plan(("b", "c"))
+    # Planning twice without observing must be identical: no hidden state update.
+    assert planner.plan(("b", "c")).ordered_ids == before.ordered_ids
+    assert planner.snapshot()["requests_observed"] == 1
+
+
+def test_online_frequency_is_always_a_permutation() -> None:
+    planner = OnlineFrequencyPlanner(TOOLS)
+    menus = [("a", "b", "c"), ("c", "d"), ("e", "f", "a"), ("b", "f", "d", "a")]
+    for menu in menus:
+        plan = planner.plan(menu)
+        assert set(plan.ordered_ids) == set(menu)
+        assert len(plan.ordered_ids) == len(menu)
+        planner.observe(plan.ordered_ids)
+
+
+def test_online_frequency_rejects_repeated_and_unknown_ids() -> None:
+    planner = OnlineFrequencyPlanner(TOOLS)
+    try:
+        planner.plan(("a", "a"))
+    except ValueError as error:
+        assert "repeat" in str(error)
+    else:
+        raise AssertionError("expected ValueError for repeated tool IDs")
+    try:
+        planner.plan(("a", "zzz"))
+    except ValueError as error:
+        assert "unknown" in str(error).lower()
+    else:
+        raise AssertionError("expected ValueError for unknown tool IDs")

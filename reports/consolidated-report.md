@@ -65,6 +65,58 @@ accepted matrix except where noted:
 101,120; a same-session ContextPilot control reproduced the accepted values to
 within 0.01 points, so the columns are comparable.
 
+### What the percentages mean
+
+**Reuse %** — of all the prompt tokens the server had to process during one
+replay, the fraction it served from the KV cache instead of recomputing:
+
+```
+reuse = prompt_tokens_cached / (prompt_tokens_cached + request_prefill_kv_computed_tokens_sum)
+```
+
+Both terms are Prometheus counter deltas read from vLLM across the replay, so
+this is the engine's own accounting, not an estimate. 0% means every token was
+prefilled from scratch; 96% means only 4% of the work was actually done. Three
+things it is **not**:
+
+- **Not a latency saving.** It is prefill work avoided. Whether that converts
+  into faster time-to-first-token is a separate question this report does not
+  claim to have settled.
+- **Not token-exact.** vLLM matches whole 16-token blocks, so a prefix shorter
+  than a block boundary earns nothing.
+- **Not a per-request average.** It is one ratio over the whole 200-request
+  replay, which is why the first request — necessarily cold — is included.
+
+Because it depends only on the token sequence and the cache capacity, it is
+deterministic: every cell in this report has zero spread across its three
+trials.
+
+Where SGLang figures appear, the denominator is built differently — SGLang
+reports cached tokens directly and the computed term is derived as
+`prompt_tokens - cached_tokens` (`src/tatm/replay_summary.py`). SGLang also
+matches at token rather than block granularity, so its reuse reads slightly
+higher than vLLM's for the same ordering. Cross-engine values are therefore
+directionally comparable but not interchangeable.
+
+**Quality %** — one n=800 BFCL replay per condition, split 640 relevance cases
+and 160 irrelevance cases:
+
+- **function-name** — of the 640 relevance cases, the fraction where the model
+  called the correct function name(s). Ignores arguments.
+- **full call** — of the same 640, the fraction where name *and* arguments both
+  matched ground truth. Strictly harder than function-name, so always lower.
+- **no-tool** — of the 160 irrelevance cases, the fraction where the model
+  correctly declined to call any tool. A model that calls something when it
+  should stay silent loses points here, so this column is a safety measure
+  rather than a capability one.
+
+These use the repository's reduced BFCL-style AST checker, not the official BFCL
+leaderboard evaluator, so they are comparable **within** this report and not
+against published BFCL scores.
+
+**Points versus percent.** Differences are quoted in *percentage points*: 77.03%
+against 76.09% is "+0.94 points", not "+1.2%".
+
 Three things follow. Reuse collapses from 96% to under 3% between a padded menu
 and a realistically retrieved one, for **every** policy. On the padded control
 `frequency_online` and both ContextPilot arms are tied at the structural

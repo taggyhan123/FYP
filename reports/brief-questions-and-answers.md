@@ -264,12 +264,32 @@ removing any tool:
 yield 87.19% on padded shared-catalog menus and 1.90% at k=64 on independently
 retrieved menus. The large figure is a property of the workload, not the planner.
 
-### Q3. Does frequency-based ordering improve reusable prefix length? — **Answered: no**
+### Q3. Does frequency-based ordering improve reusable prefix length? — **Answered: it depends on the estimator**
 
-Frequency ordering is **not reliably better**. It can actively destroy the
-shared prefix by placing request-specific tools first, and it is not the winner
-on the retrieved arm. An early analytical model recommended it; the measured
-result inverted that recommendation.
+**Corrected 2026-08-10.** This was previously recorded as "no". That answer
+holds only for the *frozen* variant, and the distinction turns out to be the
+whole question.
+
+- **Frozen, fitted on a task-disjoint corpus (`frequency_fitted`): no.** 39.69%
+  on BFCL against alphabetical's 38.13%, and 41.58% on ToolRet against
+  alphabetical's 51.05% — actively worse. It can destroy the shared prefix by
+  placing request-specific tools early. A held-out corpus structurally cannot
+  know which tools *this* evaluation stream happens to share, so it places the
+  odd-tool-out at mean position 25.0 of 64, no better than alphabetical's 24.1.
+- **Estimated online from the served stream (`frequency_online`): yes.** 96.27%
+  on BFCL padded-64, tied with ContextPilot at the structural ceiling, and it
+  beats ToolTrie-v0 in 10 of 12 systems cells. Same signal, causal, no training
+  corpus, roughly thirty lines.
+
+The frozen fit was re-audited and is uncontaminated: a leaked fit would rank the
+universal tools first and reach ~96%, whereas it places them at mean position
+31.6 of 64. Its failure is evidence of its integrity, not of the signal being
+weak.
+
+Note also that the frozen family has no `observe()` at all, while every policy
+it was benchmarked against adapts to the served stream. Part of the original gap
+was adaptivity rather than algorithm. See `reports/frequency-online/findings.md`
+and `reports/key-findings.md` §6.
 
 ### Q4. Does weighting frequency by schema length or measured prefill time perform better? — **Partly answered**
 
@@ -280,13 +300,27 @@ tokenized schema length as a cost proxy; it does **not** test a policy weighted
 by separately measured per-schema prefill time, so that half of the question
 remains open.
 
-### Q5. How much additional benefit comes from pair/triple workflow structure? — **Answered: essentially none**
+### Q5. How much additional benefit comes from pair/triple workflow structure? — **Not tested on BFCL; no benefit on ToolRet**
 
-On BFCL, the pair, triple, frequency, schema-cost, and FP-tree fitted policies
-collapse to within **0.01 percentage points** of one another at 39.69%, while
-alphabetical is 38.13%. On ToolRet, alphabetical is substantially higher. Five
-statistical policies trained on disjoint data rediscover one stable fitted order
-within each workload.
+**Downgraded 2026-08-10** from "Answered: essentially none".
+
+On BFCL the five fitted policies do not merely land within 0.01 percentage
+points of one another — they emit **byte-identical `tool_ids` on all 200
+records**, differing only in the `ordering` label string. Their extra statistics
+never discriminate, so each key falls through to the same frequency ordering.
+An experiment in which the pair/triple policy produced the same file as the
+frequency policy did not test pair/triple structure and find it unhelpful; it
+**never tested it**. That is absence of evidence, not evidence of absence, and
+the BFCL row of that table reports one policy five times.
+
+On ToolRet the policies genuinely differ — `schema_cost_fitted` on 200/200
+records and `fp_tree_conditional` on 10/200, while `conditional_pair` and
+`conditional_pair_triple` remain identical to `frequency_fitted`. There the
+question was actually posed, and the answer is no benefit: all sit near 41.6%
+against alphabetical's 51.05%.
+
+Answering this properly for BFCL needs a workload whose co-occurrence structure
+discriminates, which is a new experiment rather than a reanalysis.
 The ContextPilot-derived static-refit ordering is the important measured
 competitor here, not evidence that the current pair/triple adaptation is
 sufficient. A later persistent-API adaptation also leads ToolTrie on every

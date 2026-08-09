@@ -98,18 +98,17 @@ fit is uncontaminated (a leaked fit would rank universal tools first and reach
 The brief's §7 Q3 answer — "does frequency ordering improve reusable prefix
 length? no" — holds only for the frozen variant.
 
-## 7. Defects found
+## 7. Defects found, and their status
 
-- **`static_refit_causal` was silently broken** — returned ContextPilot's
-  internal integer IDs. Fixed; changed no conclusion (the two ContextPilot APIs
-  give zero per-case quality differences across 800 cases).
-- **Five "learned" Phase-2 policies emit one ordering** on BFCL — byte-identical
-  `tool_ids`, only the label differs. That table reports one policy five times,
-  and §7 Q5's "pair/triple adds essentially nothing" was never actually tested
-  there.
-- **The 8B quality comparisons are uncontrolled** — no `original` row, and those
-  runs were unpinned, so it cannot be retro-fitted.
-- SGLang historical arm validated, 72/72.
+| Defect | Status |
+| --- | --- |
+| `static_refit_causal` returned ContextPilot's internal integer IDs, so the arm could never run | **Fixed** (`f4384db`), re-run, 18/18 cells clean. Changed no conclusion: the two ContextPilot APIs give zero per-case quality differences across 800 cases |
+| Five Phase-2 "learned" policies emit **byte-identical** `tool_ids` on BFCL — only the label differs | **Reporting corrected.** Brief §7 Q5 downgraded from "answered: essentially none" to "not tested on BFCL". Not a code bug: the policies degenerate when their statistics do not discriminate. Testing pair/triple properly needs a workload where co-occurrence discriminates — a new experiment |
+| The 8B quality comparisons have no `original` control | **Cannot be fixed retroactively.** Those runs were unpinned, so a replay today cannot be shown to use the same snapshot. Requires a fresh pinned five-condition 8B matrix, or the comparison is omitted |
+| Brief §7 Q3 recorded "frequency ordering does not help" | **Corrected**: true of the frozen estimator only; online estimation reaches 96.27% |
+
+Separately, the historical SGLang arm was **validated**, 72/72 against the
+independent aggregate counter — a clean result, not a defect.
 
 ## Not established
 

@@ -516,15 +516,21 @@ trie or clusterer from a simple counter. It is not a universal winner: it beats
 ToolTrie-v0 in 10/12 cells and loses both BM25 k=4 cells (17.01% versus
 17.48%). See `reports/frequency-online/findings.md`.
 
-**Both saturate the same ceiling, so 96.27% does not beat 96.16%.** A
-per-request audit shows `frequency_online` caches exactly 6,704 tokens — 419
-blocks — on every request from the third onward. That is the whole block-aligned
-shared prefix: preamble plus the 63 universal schemas. Nothing further *can* be
-cached, because everything after it differs by construction. Its only two losses
-are request 0, cold for any causal policy, and request 1, where the
-zero-information cold ordering diverges early. The gap to the persistent
-ContextPilot arm is 95 blocks across 200 requests, which is a tie at the
-structural maximum rather than a win.
+**The 0.11-point difference is not a meaningful separation.** A per-request
+audit shows `frequency_online` caching 6,704 tokens — 419 blocks — on **195 of
+198** warm requests, the remaining three caching slightly more. That plateau is
+the block-aligned shared prefix: preamble plus the 63 universal schemas. Its
+only two losses are request 0, cold for any causal policy, and request 1, where
+the zero-information cold ordering diverges early. The gap to the persistent
+ContextPilot arm is 1,536 tokens — 95 blocks across 200 requests.
+
+An independent check supports this being close to what the workload allows: an
+exact-token prefix trie over server-rendered prompts, simulated without
+eviction, predicts 96.16% for the ContextPilot ordering against 96.16%
+measured. Capacity is therefore not binding here, so each policy is achieving
+what its own ordering permits. **Whether some better ordering exists on this
+workload has not been established** — computing a true maximum over orderings
+remains open.
 
 One variable predicts the whole table: **how many tools per request are not
 shared by all**. BFCL padded-64 has 63 universal tools and exactly one

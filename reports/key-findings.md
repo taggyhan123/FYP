@@ -65,10 +65,10 @@ non-shared tool:
 | online frequency counter | 63.7 | 96.27% |
 
 A thirty-line counter with no clustering, no trie and no training corpus reaches
-the same result as hierarchical clustering — both saturate a structural ceiling,
-separated by 95 cache blocks across 200 requests. **Results on this workload
-therefore cannot support claims about ordering sophistication.** This is a
-finding about how tool-serving benchmarks should be constructed.
+the same result as hierarchical clustering, separated by 0.11 points — 95 cache
+blocks across 200 requests. **Results on this workload therefore cannot support
+claims about ordering sophistication.** This is a finding about how tool-serving
+benchmarks should be constructed.
 
 ## 3. ToolTrie-v0 is outperformed
 

@@ -1,0 +1,14 @@
+{
+  "accepted_quality_replays": 5,
+  "accepted_systems_replays": 90,
+  "all_replays_reset_and_counter_clean": true,
+  "diagnostic_warmups_excluded": 1,
+  "format_version": 1,
+  "model": "Qwen/Qwen3-4B",
+  "model_revision": "1cfa9a7208912126459214e8b04321603b3df60c",
+  "model_role": "primary",
+  "native_capacity_tokens": 96832,
+  "quality_score_files": 5,
+  "raw_outputs_preserved": true,
+  "status": "gpu_complete_pending_cpu_analysis"
+}

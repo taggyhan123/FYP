@@ -1,0 +1,11 @@
+{
+  "bootstrap_samples": 50000,
+  "bootstrap_seed": 42,
+  "format_version": 1,
+  "model": "Qwen/Qwen3-4B",
+  "model_revision": "1cfa9a7208912126459214e8b04321603b3df60c",
+  "quality_comparison_files": 27,
+  "sequence_state_dependent": true,
+  "status": "accepted",
+  "workers": 4
+}

@@ -1,0 +1,1357 @@
+{
+  "all_conditions_have_same_case_set": true,
+  "all_conditions_have_same_request_sequence": true,
+  "all_conditions_have_same_selected_tool_sets": true,
+  "conditions": {
+    "alphabetical": {
+      "direct_reuse_buckets": {
+        "cold": {
+          "cached_ratio": {
+            "ci95_half_width": 0.0,
+            "max": 0.0,
+            "mean": 0.0,
+            "min": 0.0,
+            "n": 3,
+            "stdev": 0.0
+          },
+          "mean_prefill_seconds": {
+            "ci95_half_width": 0.001658,
+            "max": 1.03963,
+            "mean": 1.038962,
+            "min": 1.038295,
+            "n": 3,
+            "stdev": 0.000668
+          },
+          "mean_ttft_seconds": {
+            "ci95_half_width": 0.001742,
+            "max": 1.078167,
+            "mean": 1.077728,
+            "min": 1.076919,
+            "n": 3,
+            "stdev": 0.000701
+          },
+          "mean_wall_seconds": {
+            "ci95_half_width": 0.001582,
+            "max": 1.476873,
+            "mean": 1.476245,
+            "min": 1.4756,
+            "n": 3,
+            "stdev": 0.000637
+          },
+          "requests": {
+            "ci95_half_width": 0.0,
+            "max": 1.0,
+            "mean": 1.0,
+            "min": 1.0,
+            "n": 3,
+            "stdev": 0.0
+          }
+        },
+        "partial_0_25": {
+          "cached_ratio": {
+            "ci95_half_width": 0.0,
+            "max": 0.146245,
+            "mean": 0.146245,
+            "min": 0.146245,
+            "n": 3,
+            "stdev": 0.0
+          },
+          "mean_prefill_seconds": {
+            "ci95_half_width": 0.000126,
+            "max": 0.913475,
+            "mean": 0.913445,
+            "min": 0.913387,
+            "n": 3,
+            "stdev": 5.1e-05
+          },
+          "mean_ttft_seconds": {
+            "ci95_half_width": 0.00059,
+            "max": 0.952831,
+            "mean": 0.952558,
+            "min": 0.952395,
+            "n": 3,
+            "stdev": 0.000238
+          },
+          "mean_wall_seconds": {
+            "ci95_half_width": 0.000588,
+            "max": 1.461934,
+            "mean": 1.461738,
+            "min": 1.461475,
+            "n": 3,
+            "stdev": 0.000237
+          },
+          "requests": {
+            "ci95_half_width": 0.0,
+            "max": 77.0,
+            "mean": 77.0,
+            "min": 77.0,
+            "n": 3,
+            "stdev": 0.0
+          }
+        },
+        "partial_25_50": {
+          "cached_ratio": {
+            "ci95_half_width": 0.0,
+            "max": 0.367684,
+            "mean": 0.367684,
+            "min": 0.367684,
+            "n": 3,
+            "stdev": 0.0
+          },
+          "mean_prefill_seconds": {
+            "ci95_half_width": 0.000343,
+            "max": 0.719807,
+            "mean": 0.71968,
+            "min": 0.719533,
+            "n": 3,
+            "stdev": 0.000138
+          },
+          "mean_ttft_seconds": {
+            "ci95_half_width": 0.000848,
+            "max": 0.759353,
+            "mean": 0.759153,
+            "min": 0.758759,
+            "n": 3,
+            "stdev": 0.000341
+          },
+          "mean_wall_seconds": {
+            "ci95_half_width": 0.001653,
+            "max": 1.288512,
+            "mean": 1.288007,
+            "min": 1.287253,
+            "n": 3,
+            "stdev": 0.000665
+          },
+          "requests": {
+            "ci95_half_width": 0.0,
+            "max": 35.0,
+            "mean": 35.0,
+            "min": 35.0,
+            "n": 3,
+            "stdev": 0.0
+          }
+        },
+        "partial_50_75": {
+          "cached_ratio": {
+            "ci95_half_width": 0.0,
+            "max": 0.614696,
+            "mean": 0.614696,
+            "min": 0.614696,
+            "n": 3,
+            "stdev": 0.0
+          },
+          "mean_prefill_seconds": {
+            "ci95_half_width": 9.1e-05,
+            "max": 0.470486,
+            "mean": 0.47045,
+            "min": 0.470413,
+            "n": 3,
+            "stdev": 3.7e-05
+          },
+          "mean_ttft_seconds": {
+            "ci95_half_width": 0.00189,
+            "max": 0.51039,
+            "mean": 0.50955,
+            "min": 0.508907,
+            "n": 3,
+            "stdev": 0.000761
+          },
+          "mean_wall_seconds": {
+            "ci95_half_width": 0.002283,
+            "max": 1.038002,
+            "mean": 1.036951,
+            "min": 1.0363,
+            "n": 3,
+            "stdev": 0.000919
+          },
+          "requests": {
+            "ci95_half_width": 0.0,
+            "max": 53.0,
+            "mean": 53.0,
+            "min": 53.0,
+            "n": 3,
+            "stdev": 0.0
+          }
+        },
+        "partial_75_100": {
+          "cached_ratio": {
+            "ci95_half_width": 0.0,
+            "max": 0.909678,
+            "mean": 0.909678,
+            "min": 0.909678,
+            "n": 3,
+            "stdev": 0.0
+          },
+          "mean_prefill_seconds": {
+            "ci95_half_width": 0.000638,
+            "max": 0.137077,
+            "mean": 0.136855,
+            "min": 0.136574,
+            "n": 3,
+            "stdev": 0.000257
+          },
+          "mean_ttft_seconds": {
+            "ci95_half_width": 0.001297,
+            "max": 0.176008,
+            "mean": 0.175571,
+            "min": 0.174993,
+            "n": 3,
+            "stdev": 0.000522
+          },
+          "mean_wall_seconds": {
+            "ci95_half_width": 0.000767,
+            "max": 0.660593,
+            "mean": 0.660311,
+            "min": 0.659981,
+            "n": 3,
+            "stdev": 0.000309
+          },
+          "requests": {
+            "ci95_half_width": 0.0,
+            "max": 34.0,
+            "mean": 34.0,
+            "min": 34.0,
+            "n": 3,
+            "stdev": 0.0
+          }
+        },
+        "partial_all": {
+          "cached_ratio": {
+            "ci95_half_width": 0.0,
+            "max": 0.440536,
+            "mean": 0.440536,
+            "min": 0.440536,
+            "n": 3,
+            "stdev": 0.0
+          },
+          "mean_prefill_seconds": {
+            "ci95_half_width": 0.000115,
+            "max": 0.628752,
+            "mean": 0.628699,
+            "min": 0.62867,
+            "n": 3,
+            "stdev": 4.6e-05
+          },
+          "mean_ttft_seconds": {
+            "ci95_half_width": 0.000957,
+            "max": 0.668243,
+            "mean": 0.667804,
+            "min": 0.667525,
+            "n": 3,
+            "stdev": 0.000385
+          },
+          "mean_wall_seconds": {
+            "ci95_half_width": 0.000919,
+            "max": 1.181519,
+            "mean": 1.181121,
+            "min": 1.180788,
+            "n": 3,
+            "stdev": 0.00037
+          },
+          "requests": {
+            "ci95_half_width": 0.0,
+            "max": 199.0,
+            "mean": 199.0,
+            "min": 199.0,
+            "n": 3,
+            "stdev": 0.0
+          }
+        }
+      },
+      "execution_condition": {
+        "materialization": "ordinary_selected_tool_text_prefill",
+        "modifies_kv_tensors": false,
+        "preserves_input_order": false,
+        "retains_inactive_tools": false,
+        "role": "ordering_candidate",
+        "selected_tool_membership": "input_workload",
+        "workload_orderings": [
+          "alphabetical"
+        ]
+      },
+      "measurements": {
+        "cached_prompt_tokens": {
+          "ci95_half_width": 0.0,
+          "max": 609776.0,
+          "mean": 609776.0,
+          "min": 609776.0,
+          "n": 3,
+          "stdev": 0.0
+        },
+        "cached_ratio": {
+          "ci95_half_width": 0.0,
+          "max": 0.438088,
+          "mean": 0.438088,
+          "min": 0.438088,
+          "n": 3,
+          "stdev": 0.0
+        },
+        "computed_prompt_tokens": {
+          "ci95_half_width": 0.0,
+          "max": 782126.0,
+          "mean": 782126.0,
+          "min": 782126.0,
+          "n": 3,
+          "stdev": 0.0
+        },
+        "prefill_seconds": {
+          "ci95_half_width": 0.022811,
+          "max": 126.160625,
+          "mean": 126.150025,
+          "min": 126.144517,
+          "n": 3,
+          "stdev": 0.009182
+        },
+        "ttft_seconds": {
+          "ci95_half_width": 0.188408,
+          "max": 134.057206,
+          "mean": 133.970679,
+          "min": 133.91574,
+          "n": 3,
+          "stdev": 0.075838
+        },
+        "wall_seconds": {
+          "ci95_half_width": 0.423103,
+          "max": 242.760603,
+          "mean": 242.6338,
+          "min": 242.440223,
+          "n": 3,
+          "stdev": 0.170308
+        }
+      },
+      "prompt_tokens": 1391902,
+      "requests": 200,
+      "trials": 3
+    },
+    "contextpilot-online_incremental": {
+      "direct_reuse_buckets": {
+        "cold": {
+          "cached_ratio": {
+            "ci95_half_width": 0.0,
+            "max": 0.0,
+            "mean": 0.0,
+            "min": 0.0,
+            "n": 3,
+            "stdev": 0.0
+          },
+          "mean_prefill_seconds": {
+            "ci95_half_width": 0.007079,
+            "max": 1.034242,
+            "mean": 1.031886,
+            "min": 1.028719,
+            "n": 3,
+            "stdev": 0.002849
+          },
+          "mean_ttft_seconds": {
+            "ci95_half_width": 0.007438,
+            "max": 1.072592,
+            "mean": 1.070341,
+            "min": 1.066943,
+            "n": 3,
+            "stdev": 0.002994
+          },
+          "mean_wall_seconds": {
+            "ci95_half_width": 0.00808,
+            "max": 1.470352,
+            "mean": 1.468089,
+            "min": 1.464362,
+            "n": 3,
+            "stdev": 0.003253
+          },
+          "requests": {
+            "ci95_half_width": 0.0,
+            "max": 1.0,
+            "mean": 1.0,
+            "min": 1.0,
+            "n": 3,
+            "stdev": 0.0
+          }
+        },
+        "partial_0_25": {
+          "cached_ratio": {
+            "ci95_half_width": 0.0,
+            "max": 0.015191,
+            "mean": 0.015191,
+            "min": 0.015191,
+            "n": 3,
+            "stdev": 0.0
+          },
+          "mean_prefill_seconds": {
+            "ci95_half_width": 0.004894,
+            "max": 0.996333,
+            "mean": 0.995061,
+            "min": 0.992792,
+            "n": 3,
+            "stdev": 0.00197
+          },
+          "mean_ttft_seconds": {
+            "ci95_half_width": 0.00876,
+            "max": 1.035928,
+            "mean": 1.033845,
+            "min": 1.029774,
+            "n": 3,
+            "stdev": 0.003526
+          },
+          "mean_wall_seconds": {
+            "ci95_half_width": 0.009671,
+            "max": 1.536651,
+            "mean": 1.534081,
+            "min": 1.529602,
+            "n": 3,
+            "stdev": 0.003893
+          },
+          "requests": {
+            "ci95_half_width": 0.0,
+            "max": 2.0,
+            "mean": 2.0,
+            "min": 2.0,
+            "n": 3,
+            "stdev": 0.0
+          }
+        },
+        "partial_75_100": {
+          "cached_ratio": {
+            "ci95_half_width": 0.0,
+            "max": 0.966906,
+            "mean": 0.966906,
+            "min": 0.966906,
+            "n": 3,
+            "stdev": 0.0
+          },
+          "mean_prefill_seconds": {
+            "ci95_half_width": 0.000993,
+            "max": 0.065878,
+            "mean": 0.065451,
+            "min": 0.065086,
+            "n": 3,
+            "stdev": 0.0004
+          },
+          "mean_ttft_seconds": {
+            "ci95_half_width": 0.00246,
+            "max": 0.10504,
+            "mean": 0.104251,
+            "min": 0.10314,
+            "n": 3,
+            "stdev": 0.00099
+          },
+          "mean_wall_seconds": {
+            "ci95_half_width": 0.002159,
+            "max": 0.624794,
+            "mean": 0.624103,
+            "min": 0.623127,
+            "n": 3,
+            "stdev": 0.000869
+          },
+          "requests": {
+            "ci95_half_width": 0.0,
+            "max": 197.0,
+            "mean": 197.0,
+            "min": 197.0,
+            "n": 3,
+            "stdev": 0.0
+          }
+        },
+        "partial_all": {
+          "cached_ratio": {
+            "ci95_half_width": 0.0,
+            "max": 0.957466,
+            "mean": 0.957466,
+            "min": 0.957466,
+            "n": 3,
+            "stdev": 0.0
+          },
+          "mean_prefill_seconds": {
+            "ci95_half_width": 0.001019,
+            "max": 0.075226,
+            "mean": 0.074794,
+            "min": 0.07441,
+            "n": 3,
+            "stdev": 0.00041
+          },
+          "mean_ttft_seconds": {
+            "ci95_half_width": 0.002411,
+            "max": 0.114395,
+            "mean": 0.113594,
+            "min": 0.112515,
+            "n": 3,
+            "stdev": 0.00097
+          },
+          "mean_wall_seconds": {
+            "ci95_half_width": 0.002105,
+            "max": 0.633952,
+            "mean": 0.633248,
+            "min": 0.632308,
+            "n": 3,
+            "stdev": 0.000847
+          },
+          "requests": {
+            "ci95_half_width": 0.0,
+            "max": 199.0,
+            "mean": 199.0,
+            "min": 199.0,
+            "n": 3,
+            "stdev": 0.0
+          }
+        }
+      },
+      "execution_condition": {
+        "materialization": "ordinary_selected_tool_text_prefill",
+        "modifies_kv_tensors": false,
+        "preserves_input_order": false,
+        "retains_inactive_tools": false,
+        "role": "ordering_candidate",
+        "selected_tool_membership": "input_workload",
+        "workload_orderings": [
+          "contextpilot_online_incremental"
+        ]
+      },
+      "measurements": {
+        "cached_prompt_tokens": {
+          "ci95_half_width": 0.0,
+          "max": 1326112.0,
+          "mean": 1326112.0,
+          "min": 1326112.0,
+          "n": 3,
+          "stdev": 0.0
+        },
+        "cached_ratio": {
+          "ci95_half_width": 0.0,
+          "max": 0.952734,
+          "mean": 0.952734,
+          "min": 0.952734,
+          "n": 3,
+          "stdev": 0.0
+        },
+        "computed_prompt_tokens": {
+          "ci95_half_width": 0.0,
+          "max": 65790.0,
+          "mean": 65790.0,
+          "min": 65790.0,
+          "n": 3,
+          "stdev": 0.0
+        },
+        "prefill_seconds": {
+          "ci95_half_width": 0.209499,
+          "max": 16.004301,
+          "mean": 15.915955,
+          "min": 15.836322,
+          "n": 3,
+          "stdev": 0.084328
+        },
+        "ttft_seconds": {
+          "ci95_half_width": 0.476569,
+          "max": 23.836011,
+          "mean": 23.67558,
+          "min": 23.463096,
+          "n": 3,
+          "stdev": 0.191829
+        },
+        "wall_seconds": {
+          "ci95_half_width": 0.543969,
+          "max": 133.802871,
+          "mean": 133.647598,
+          "min": 133.397158,
+          "n": 3,
+          "stdev": 0.218959
+        }
+      },
+      "prompt_tokens": 1391902,
+      "requests": 200,
+      "trials": 3
+    },
+    "contextpilot-static_refit_causal": {
+      "direct_reuse_buckets": {
+        "cold": {
+          "cached_ratio": {
+            "ci95_half_width": 0.0,
+            "max": 0.0,
+            "mean": 0.0,
+            "min": 0.0,
+            "n": 3,
+            "stdev": 0.0
+          },
+          "mean_prefill_seconds": {
+            "ci95_half_width": 0.004516,
+            "max": 1.03743,
+            "mean": 1.03551,
+            "min": 1.033816,
+            "n": 3,
+            "stdev": 0.001818
+          },
+          "mean_ttft_seconds": {
+            "ci95_half_width": 0.006053,
+            "max": 1.075051,
+            "mean": 1.072238,
+            "min": 1.070826,
+            "n": 3,
+            "stdev": 0.002436
+          },
+          "mean_wall_seconds": {
+            "ci95_half_width": 0.005307,
+            "max": 1.471989,
+            "mean": 1.469528,
+            "min": 1.468151,
+            "n": 3,
+            "stdev": 0.002136
+          },
+          "requests": {
+            "ci95_half_width": 0.0,
+            "max": 1.0,
+            "mean": 1.0,
+            "min": 1.0,
+            "n": 3,
+            "stdev": 0.0
+          }
+        },
+        "partial_0_25": {
+          "cached_ratio": {
+            "ci95_half_width": 0.0,
+            "max": 0.007044,
+            "mean": 0.007044,
+            "min": 0.007044,
+            "n": 3,
+            "stdev": 0.0
+          },
+          "mean_prefill_seconds": {
+            "ci95_half_width": 0.001682,
+            "max": 0.995993,
+            "mean": 0.995589,
+            "min": 0.994807,
+            "n": 3,
+            "stdev": 0.000677
+          },
+          "mean_ttft_seconds": {
+            "ci95_half_width": 0.007167,
+            "max": 1.035891,
+            "mean": 1.033615,
+            "min": 1.03037,
+            "n": 3,
+            "stdev": 0.002885
+          },
+          "mean_wall_seconds": {
+            "ci95_half_width": 0.008278,
+            "max": 1.64704,
+            "mean": 1.644439,
+            "min": 1.640683,
+            "n": 3,
+            "stdev": 0.003332
+          },
+          "requests": {
+            "ci95_half_width": 0.0,
+            "max": 1.0,
+            "mean": 1.0,
+            "min": 1.0,
+            "n": 3,
+            "stdev": 0.0
+          }
+        },
+        "partial_75_100": {
+          "cached_ratio": {
+            "ci95_half_width": 0.0,
+            "max": 0.966875,
+            "mean": 0.966875,
+            "min": 0.966875,
+            "n": 3,
+            "stdev": 0.0
+          },
+          "mean_prefill_seconds": {
+            "ci95_half_width": 0.000757,
+            "max": 0.065954,
+            "mean": 0.065728,
+            "min": 0.065381,
+            "n": 3,
+            "stdev": 0.000305
+          },
+          "mean_ttft_seconds": {
+            "ci95_half_width": 0.001666,
+            "max": 0.10502,
+            "mean": 0.104271,
+            "min": 0.103725,
+            "n": 3,
+            "stdev": 0.000671
+          },
+          "mean_wall_seconds": {
+            "ci95_half_width": 0.000653,
+            "max": 0.623949,
+            "mean": 0.623688,
+            "min": 0.623423,
+            "n": 3,
+            "stdev": 0.000263
+          },
+          "requests": {
+            "ci95_half_width": 0.0,
+            "max": 198.0,
+            "mean": 198.0,
+            "min": 198.0,
+            "n": 3,
+            "stdev": 0.0
+          }
+        },
+        "partial_all": {
+          "cached_ratio": {
+            "ci95_half_width": 0.0,
+            "max": 0.962188,
+            "mean": 0.962188,
+            "min": 0.962188,
+            "n": 3,
+            "stdev": 0.0
+          },
+          "mean_prefill_seconds": {
+            "ci95_half_width": 0.000748,
+            "max": 0.070621,
+            "mean": 0.0704,
+            "min": 0.070057,
+            "n": 3,
+            "stdev": 0.000301
+          },
+          "mean_ttft_seconds": {
+            "ci95_half_width": 0.001675,
+            "max": 0.109698,
+            "mean": 0.108942,
+            "min": 0.108403,
+            "n": 3,
+            "stdev": 0.000674
+          },
+          "mean_wall_seconds": {
+            "ci95_half_width": 0.000659,
+            "max": 0.62909,
+            "mean": 0.628818,
+            "min": 0.62856,
+            "n": 3,
+            "stdev": 0.000265
+          },
+          "requests": {
+            "ci95_half_width": 0.0,
+            "max": 199.0,
+            "mean": 199.0,
+            "min": 199.0,
+            "n": 3,
+            "stdev": 0.0
+          }
+        }
+      },
+      "execution_condition": {
+        "materialization": "ordinary_selected_tool_text_prefill",
+        "modifies_kv_tensors": false,
+        "preserves_input_order": false,
+        "retains_inactive_tools": false,
+        "role": "ordering_candidate",
+        "selected_tool_membership": "input_workload",
+        "workload_orderings": [
+          "contextpilot_static_refit_causal"
+        ]
+      },
+      "measurements": {
+        "cached_prompt_tokens": {
+          "ci95_half_width": 0.0,
+          "max": 1332560.0,
+          "mean": 1332560.0,
+          "min": 1332560.0,
+          "n": 3,
+          "stdev": 0.0
+        },
+        "cached_ratio": {
+          "ci95_half_width": 0.0,
+          "max": 0.957366,
+          "mean": 0.957366,
+          "min": 0.957366,
+          "n": 3,
+          "stdev": 0.0
+        },
+        "computed_prompt_tokens": {
+          "ci95_half_width": 0.0,
+          "max": 59342.0,
+          "mean": 59342.0,
+          "min": 59342.0,
+          "n": 3,
+          "stdev": 0.0
+        },
+        "prefill_seconds": {
+          "ci95_half_width": 0.14871,
+          "max": 15.087479,
+          "mean": 15.045145,
+          "min": 14.97666,
+          "n": 3,
+          "stdev": 0.059859
+        },
+        "ttft_seconds": {
+          "ci95_half_width": 0.339261,
+          "max": 22.904871,
+          "mean": 22.751556,
+          "min": 22.642968,
+          "n": 3,
+          "stdev": 0.13656
+        },
+        "wall_seconds": {
+          "ci95_half_width": 0.133214,
+          "max": 132.753608,
+          "mean": 132.693611,
+          "min": 132.650363,
+          "n": 3,
+          "stdev": 0.053622
+        }
+      },
+      "prompt_tokens": 1391902,
+      "requests": 200,
+      "trials": 3
+    },
+    "original": {
+      "direct_reuse_buckets": {
+        "cold": {
+          "cached_ratio": {
+            "ci95_half_width": 0.0,
+            "max": 0.0,
+            "mean": 0.0,
+            "min": 0.0,
+            "n": 3,
+            "stdev": 0.0
+          },
+          "mean_prefill_seconds": {
+            "ci95_half_width": 0.004148,
+            "max": 1.032601,
+            "mean": 1.031195,
+            "min": 1.02935,
+            "n": 3,
+            "stdev": 0.00167
+          },
+          "mean_ttft_seconds": {
+            "ci95_half_width": 0.004137,
+            "max": 1.070789,
+            "mean": 1.068951,
+            "min": 1.067543,
+            "n": 3,
+            "stdev": 0.001665
+          },
+          "mean_wall_seconds": {
+            "ci95_half_width": 0.004761,
+            "max": 1.468777,
+            "mean": 1.466635,
+            "min": 1.465082,
+            "n": 3,
+            "stdev": 0.001916
+          },
+          "requests": {
+            "ci95_half_width": 0.0,
+            "max": 1.0,
+            "mean": 1.0,
+            "min": 1.0,
+            "n": 3,
+            "stdev": 0.0
+          }
+        },
+        "partial_0_25": {
+          "cached_ratio": {
+            "ci95_half_width": 0.0,
+            "max": 0.011471,
+            "mean": 0.011471,
+            "min": 0.011471,
+            "n": 3,
+            "stdev": 0.0
+          },
+          "mean_prefill_seconds": {
+            "ci95_half_width": 0.001505,
+            "max": 1.027488,
+            "mean": 1.026865,
+            "min": 1.026278,
+            "n": 3,
+            "stdev": 0.000606
+          },
+          "mean_ttft_seconds": {
+            "ci95_half_width": 0.000597,
+            "max": 1.065843,
+            "mean": 1.065636,
+            "min": 1.065372,
+            "n": 3,
+            "stdev": 0.000241
+          },
+          "mean_wall_seconds": {
+            "ci95_half_width": 0.00058,
+            "max": 1.579213,
+            "mean": 1.57904,
+            "min": 1.578774,
+            "n": 3,
+            "stdev": 0.000234
+          },
+          "requests": {
+            "ci95_half_width": 0.0,
+            "max": 188.0,
+            "mean": 188.0,
+            "min": 188.0,
+            "n": 3,
+            "stdev": 0.0
+          }
+        },
+        "partial_75_100": {
+          "cached_ratio": {
+            "ci95_half_width": 0.0,
+            "max": 0.996004,
+            "mean": 0.996004,
+            "min": 0.996004,
+            "n": 3,
+            "stdev": 0.0
+          },
+          "mean_prefill_seconds": {
+            "ci95_half_width": 0.002016,
+            "max": 0.031932,
+            "mean": 0.031375,
+            "min": 0.030444,
+            "n": 3,
+            "stdev": 0.000811
+          },
+          "mean_ttft_seconds": {
+            "ci95_half_width": 0.002412,
+            "max": 0.069932,
+            "mean": 0.069251,
+            "min": 0.068139,
+            "n": 3,
+            "stdev": 0.000971
+          },
+          "mean_wall_seconds": {
+            "ci95_half_width": 0.002917,
+            "max": 0.557516,
+            "mean": 0.556525,
+            "min": 0.555228,
+            "n": 3,
+            "stdev": 0.001174
+          },
+          "requests": {
+            "ci95_half_width": 0.0,
+            "max": 11.0,
+            "mean": 11.0,
+            "min": 11.0,
+            "n": 3,
+            "stdev": 0.0
+          }
+        },
+        "partial_all": {
+          "cached_ratio": {
+            "ci95_half_width": 0.0,
+            "max": 0.065855,
+            "mean": 0.065855,
+            "min": 0.065855,
+            "n": 3,
+            "stdev": 0.0
+          },
+          "mean_prefill_seconds": {
+            "ci95_half_width": 0.001509,
+            "max": 0.972447,
+            "mean": 0.971838,
+            "min": 0.971232,
+            "n": 3,
+            "stdev": 0.000608
+          },
+          "mean_ttft_seconds": {
+            "ci95_half_width": 0.000569,
+            "max": 1.010792,
+            "mean": 1.010559,
+            "min": 1.010334,
+            "n": 3,
+            "stdev": 0.000229
+          },
+          "mean_wall_seconds": {
+            "ci95_half_width": 0.000564,
+            "max": 1.522737,
+            "mean": 1.522518,
+            "min": 1.522284,
+            "n": 3,
+            "stdev": 0.000227
+          },
+          "requests": {
+            "ci95_half_width": 0.0,
+            "max": 199.0,
+            "mean": 199.0,
+            "min": 199.0,
+            "n": 3,
+            "stdev": 0.0
+          }
+        }
+      },
+      "execution_condition": {
+        "materialization": "ordinary_selected_tool_text_prefill",
+        "modifies_kv_tensors": false,
+        "preserves_input_order": true,
+        "retains_inactive_tools": false,
+        "role": "ordinary_text_prefill_fallback",
+        "selected_tool_membership": "input_workload",
+        "workload_orderings": [
+          "original"
+        ]
+      },
+      "measurements": {
+        "cached_prompt_tokens": {
+          "ci95_half_width": 0.0,
+          "max": 91280.0,
+          "mean": 91280.0,
+          "min": 91280.0,
+          "n": 3,
+          "stdev": 0.0
+        },
+        "cached_ratio": {
+          "ci95_half_width": 0.0,
+          "max": 0.065579,
+          "mean": 0.065579,
+          "min": 0.065579,
+          "n": 3,
+          "stdev": 0.0
+        },
+        "computed_prompt_tokens": {
+          "ci95_half_width": 0.0,
+          "max": 1300622.0,
+          "mean": 1300622.0,
+          "min": 1300622.0,
+          "n": 3,
+          "stdev": 0.0
+        },
+        "prefill_seconds": {
+          "ci95_half_width": 0.303183,
+          "max": 194.548647,
+          "mean": 194.427045,
+          "min": 194.304576,
+          "n": 3,
+          "stdev": 0.122038
+        },
+        "ttft_seconds": {
+          "ci95_half_width": 0.112161,
+          "max": 202.215242,
+          "mean": 202.170225,
+          "min": 202.124949,
+          "n": 3,
+          "stdev": 0.045147
+        },
+        "wall_seconds": {
+          "ci95_half_width": 0.106284,
+          "max": 310.610053,
+          "mean": 310.575851,
+          "min": 310.52788,
+          "n": 3,
+          "stdev": 0.042782
+        }
+      },
+      "prompt_tokens": 1391902,
+      "requests": 200,
+      "trials": 3
+    },
+    "tooltrie_v0": {
+      "direct_reuse_buckets": {
+        "cold": {
+          "cached_ratio": {
+            "ci95_half_width": 0.0,
+            "max": 0.0,
+            "mean": 0.0,
+            "min": 0.0,
+            "n": 3,
+            "stdev": 0.0
+          },
+          "mean_prefill_seconds": {
+            "ci95_half_width": 0.003307,
+            "max": 1.039719,
+            "mean": 1.038444,
+            "min": 1.037063,
+            "n": 3,
+            "stdev": 0.001331
+          },
+          "mean_ttft_seconds": {
+            "ci95_half_width": 0.002854,
+            "max": 1.076742,
+            "mean": 1.075617,
+            "min": 1.074446,
+            "n": 3,
+            "stdev": 0.001149
+          },
+          "mean_wall_seconds": {
+            "ci95_half_width": 0.001296,
+            "max": 1.474277,
+            "mean": 1.473721,
+            "min": 1.473242,
+            "n": 3,
+            "stdev": 0.000522
+          },
+          "requests": {
+            "ci95_half_width": 0.0,
+            "max": 1.0,
+            "mean": 1.0,
+            "min": 1.0,
+            "n": 3,
+            "stdev": 0.0
+          }
+        },
+        "partial_0_25": {
+          "cached_ratio": {
+            "ci95_half_width": 0.0,
+            "max": 0.155382,
+            "mean": 0.155382,
+            "min": 0.155382,
+            "n": 3,
+            "stdev": 0.0
+          },
+          "mean_prefill_seconds": {
+            "ci95_half_width": 0.000351,
+            "max": 0.906762,
+            "mean": 0.906678,
+            "min": 0.906515,
+            "n": 3,
+            "stdev": 0.000141
+          },
+          "mean_ttft_seconds": {
+            "ci95_half_width": 0.001426,
+            "max": 0.945037,
+            "mean": 0.944645,
+            "min": 0.943986,
+            "n": 3,
+            "stdev": 0.000574
+          },
+          "mean_wall_seconds": {
+            "ci95_half_width": 0.001521,
+            "max": 1.41041,
+            "mean": 1.41004,
+            "min": 1.409333,
+            "n": 3,
+            "stdev": 0.000612
+          },
+          "requests": {
+            "ci95_half_width": 0.0,
+            "max": 8.0,
+            "mean": 8.0,
+            "min": 8.0,
+            "n": 3,
+            "stdev": 0.0
+          }
+        },
+        "partial_25_50": {
+          "cached_ratio": {
+            "ci95_half_width": 0.0,
+            "max": 0.459597,
+            "mean": 0.459597,
+            "min": 0.459597,
+            "n": 3,
+            "stdev": 0.0
+          },
+          "mean_prefill_seconds": {
+            "ci95_half_width": 0.000653,
+            "max": 0.61907,
+            "mean": 0.618863,
+            "min": 0.618567,
+            "n": 3,
+            "stdev": 0.000263
+          },
+          "mean_ttft_seconds": {
+            "ci95_half_width": 0.003986,
+            "max": 0.659552,
+            "mean": 0.658026,
+            "min": 0.656353,
+            "n": 3,
+            "stdev": 0.001605
+          },
+          "mean_wall_seconds": {
+            "ci95_half_width": 0.005217,
+            "max": 1.05013,
+            "mean": 1.047982,
+            "min": 1.045934,
+            "n": 3,
+            "stdev": 0.0021
+          },
+          "requests": {
+            "ci95_half_width": 0.0,
+            "max": 3.0,
+            "mean": 3.0,
+            "min": 3.0,
+            "n": 3,
+            "stdev": 0.0
+          }
+        },
+        "partial_50_75": {
+          "cached_ratio": {
+            "ci95_half_width": 0.0,
+            "max": 0.679655,
+            "mean": 0.679655,
+            "min": 0.679655,
+            "n": 3,
+            "stdev": 0.0
+          },
+          "mean_prefill_seconds": {
+            "ci95_half_width": 0.002044,
+            "max": 0.399356,
+            "mean": 0.39878,
+            "min": 0.397838,
+            "n": 3,
+            "stdev": 0.000823
+          },
+          "mean_ttft_seconds": {
+            "ci95_half_width": 0.001519,
+            "max": 0.43792,
+            "mean": 0.437484,
+            "min": 0.436785,
+            "n": 3,
+            "stdev": 0.000611
+          },
+          "mean_wall_seconds": {
+            "ci95_half_width": 0.002276,
+            "max": 0.980295,
+            "mean": 0.979702,
+            "min": 0.978647,
+            "n": 3,
+            "stdev": 0.000916
+          },
+          "requests": {
+            "ci95_half_width": 0.0,
+            "max": 60.0,
+            "mean": 60.0,
+            "min": 60.0,
+            "n": 3,
+            "stdev": 0.0
+          }
+        },
+        "partial_75_100": {
+          "cached_ratio": {
+            "ci95_half_width": 0.0,
+            "max": 0.945291,
+            "mean": 0.945291,
+            "min": 0.945291,
+            "n": 3,
+            "stdev": 0.0
+          },
+          "mean_prefill_seconds": {
+            "ci95_half_width": 0.000357,
+            "max": 0.093922,
+            "mean": 0.093836,
+            "min": 0.09367,
+            "n": 3,
+            "stdev": 0.000144
+          },
+          "mean_ttft_seconds": {
+            "ci95_half_width": 0.001359,
+            "max": 0.132521,
+            "mean": 0.132092,
+            "min": 0.131476,
+            "n": 3,
+            "stdev": 0.000547
+          },
+          "mean_wall_seconds": {
+            "ci95_half_width": 0.001467,
+            "max": 0.635936,
+            "mean": 0.635257,
+            "min": 0.634866,
+            "n": 3,
+            "stdev": 0.000591
+          },
+          "requests": {
+            "ci95_half_width": 0.0,
+            "max": 128.0,
+            "mean": 128.0,
+            "min": 128.0,
+            "n": 3,
+            "stdev": 0.0
+          }
+        },
+        "partial_all": {
+          "cached_ratio": {
+            "ci95_half_width": 0.0,
+            "max": 0.826248,
+            "mean": 0.826248,
+            "min": 0.826248,
+            "n": 3,
+            "stdev": 0.0
+          },
+          "mean_prefill_seconds": {
+            "ci95_half_width": 0.000834,
+            "max": 0.226596,
+            "mean": 0.226371,
+            "min": 0.225985,
+            "n": 3,
+            "stdev": 0.000336
+          },
+          "mean_ttft_seconds": {
+            "ci95_half_width": 0.000999,
+            "max": 0.265211,
+            "mean": 0.264764,
+            "min": 0.264432,
+            "n": 3,
+            "stdev": 0.000402
+          },
+          "mean_wall_seconds": {
+            "ci95_half_width": 0.001511,
+            "max": 0.777141,
+            "mean": 0.776478,
+            "min": 0.775945,
+            "n": 3,
+            "stdev": 0.000608
+          },
+          "requests": {
+            "ci95_half_width": 0.0,
+            "max": 199.0,
+            "mean": 199.0,
+            "min": 199.0,
+            "n": 3,
+            "stdev": 0.0
+          }
+        }
+      },
+      "execution_condition": {
+        "materialization": "ordinary_selected_tool_text_prefill",
+        "modifies_kv_tensors": false,
+        "preserves_input_order": false,
+        "retains_inactive_tools": false,
+        "role": "ordering_candidate",
+        "selected_tool_membership": "input_workload",
+        "workload_orderings": [
+          "tooltrie_v0"
+        ]
+      },
+      "measurements": {
+        "cached_prompt_tokens": {
+          "ci95_half_width": 0.0,
+          "max": 1143872.0,
+          "mean": 1143872.0,
+          "min": 1143872.0,
+          "n": 3,
+          "stdev": 0.0
+        },
+        "cached_ratio": {
+          "ci95_half_width": 0.0,
+          "max": 0.821805,
+          "mean": 0.821805,
+          "min": 0.821805,
+          "n": 3,
+          "stdev": 0.0
+        },
+        "computed_prompt_tokens": {
+          "ci95_half_width": 0.0,
+          "max": 248030.0,
+          "mean": 248030.0,
+          "min": 248030.0,
+          "n": 3,
+          "stdev": 0.0
+        },
+        "prefill_seconds": {
+          "ci95_half_width": 0.169005,
+          "max": 46.131195,
+          "mean": 46.086266,
+          "min": 46.007999,
+          "n": 3,
+          "stdev": 0.068028
+        },
+        "ttft_seconds": {
+          "ci95_half_width": 0.199465,
+          "max": 53.852564,
+          "mean": 53.763641,
+          "min": 53.696467,
+          "n": 3,
+          "stdev": 0.080289
+        },
+        "wall_seconds": {
+          "ci95_half_width": 0.275657,
+          "max": 162.12774,
+          "mean": 162.016242,
+          "min": 161.905832,
+          "n": 3,
+          "stdev": 0.110958
+        }
+      },
+      "prompt_tokens": 1391902,
+      "requests": 200,
+      "trials": 3
+    }
+  },
+  "engine": "vllm",
+  "format_version": 1
+}

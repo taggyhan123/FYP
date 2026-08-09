@@ -1,0 +1,558 @@
+{
+  "base_url": "http://127.0.0.1:8000",
+  "block_size": 16,
+  "capacity_tokens": 96832,
+  "format_version": 1,
+  "model": "Qwen/Qwen3-4B",
+  "model_revision": "1cfa9a7208912126459214e8b04321603b3df60c",
+  "model_role": "primary",
+  "quality_condition_order": [
+    "original",
+    "alphabetical",
+    "tooltrie_v0",
+    "contextpilot-static_refit_causal",
+    "contextpilot-online_incremental"
+  ],
+  "systems_plan": [
+    {
+      "condition": "original",
+      "max_tokens": 48,
+      "stem": "bfcl-padded64",
+      "trial": 1
+    },
+    {
+      "condition": "alphabetical",
+      "max_tokens": 48,
+      "stem": "bfcl-padded64",
+      "trial": 1
+    },
+    {
+      "condition": "tooltrie_v0",
+      "max_tokens": 48,
+      "stem": "bfcl-padded64",
+      "trial": 1
+    },
+    {
+      "condition": "contextpilot-static_refit_causal",
+      "max_tokens": 48,
+      "stem": "bfcl-padded64",
+      "trial": 1
+    },
+    {
+      "condition": "contextpilot-online_incremental",
+      "max_tokens": 48,
+      "stem": "bfcl-padded64",
+      "trial": 1
+    },
+    {
+      "condition": "contextpilot-online_incremental",
+      "max_tokens": 48,
+      "stem": "bfcl-padded64",
+      "trial": 2
+    },
+    {
+      "condition": "original",
+      "max_tokens": 48,
+      "stem": "bfcl-padded64",
+      "trial": 2
+    },
+    {
+      "condition": "alphabetical",
+      "max_tokens": 48,
+      "stem": "bfcl-padded64",
+      "trial": 2
+    },
+    {
+      "condition": "tooltrie_v0",
+      "max_tokens": 48,
+      "stem": "bfcl-padded64",
+      "trial": 2
+    },
+    {
+      "condition": "contextpilot-static_refit_causal",
+      "max_tokens": 48,
+      "stem": "bfcl-padded64",
+      "trial": 2
+    },
+    {
+      "condition": "contextpilot-static_refit_causal",
+      "max_tokens": 48,
+      "stem": "bfcl-padded64",
+      "trial": 3
+    },
+    {
+      "condition": "contextpilot-online_incremental",
+      "max_tokens": 48,
+      "stem": "bfcl-padded64",
+      "trial": 3
+    },
+    {
+      "condition": "original",
+      "max_tokens": 48,
+      "stem": "bfcl-padded64",
+      "trial": 3
+    },
+    {
+      "condition": "alphabetical",
+      "max_tokens": 48,
+      "stem": "bfcl-padded64",
+      "trial": 3
+    },
+    {
+      "condition": "tooltrie_v0",
+      "max_tokens": 48,
+      "stem": "bfcl-padded64",
+      "trial": 3
+    },
+    {
+      "condition": "original",
+      "max_tokens": 48,
+      "stem": "toolret-padded64",
+      "trial": 1
+    },
+    {
+      "condition": "alphabetical",
+      "max_tokens": 48,
+      "stem": "toolret-padded64",
+      "trial": 1
+    },
+    {
+      "condition": "tooltrie_v0",
+      "max_tokens": 48,
+      "stem": "toolret-padded64",
+      "trial": 1
+    },
+    {
+      "condition": "contextpilot-static_refit_causal",
+      "max_tokens": 48,
+      "stem": "toolret-padded64",
+      "trial": 1
+    },
+    {
+      "condition": "contextpilot-online_incremental",
+      "max_tokens": 48,
+      "stem": "toolret-padded64",
+      "trial": 1
+    },
+    {
+      "condition": "contextpilot-online_incremental",
+      "max_tokens": 48,
+      "stem": "toolret-padded64",
+      "trial": 2
+    },
+    {
+      "condition": "original",
+      "max_tokens": 48,
+      "stem": "toolret-padded64",
+      "trial": 2
+    },
+    {
+      "condition": "alphabetical",
+      "max_tokens": 48,
+      "stem": "toolret-padded64",
+      "trial": 2
+    },
+    {
+      "condition": "tooltrie_v0",
+      "max_tokens": 48,
+      "stem": "toolret-padded64",
+      "trial": 2
+    },
+    {
+      "condition": "contextpilot-static_refit_causal",
+      "max_tokens": 48,
+      "stem": "toolret-padded64",
+      "trial": 2
+    },
+    {
+      "condition": "contextpilot-static_refit_causal",
+      "max_tokens": 48,
+      "stem": "toolret-padded64",
+      "trial": 3
+    },
+    {
+      "condition": "contextpilot-online_incremental",
+      "max_tokens": 48,
+      "stem": "toolret-padded64",
+      "trial": 3
+    },
+    {
+      "condition": "original",
+      "max_tokens": 48,
+      "stem": "toolret-padded64",
+      "trial": 3
+    },
+    {
+      "condition": "alphabetical",
+      "max_tokens": 48,
+      "stem": "toolret-padded64",
+      "trial": 3
+    },
+    {
+      "condition": "tooltrie_v0",
+      "max_tokens": 48,
+      "stem": "toolret-padded64",
+      "trial": 3
+    },
+    {
+      "condition": "original",
+      "max_tokens": 1,
+      "stem": "toolret-bm25-k4",
+      "trial": 1
+    },
+    {
+      "condition": "alphabetical",
+      "max_tokens": 1,
+      "stem": "toolret-bm25-k4",
+      "trial": 1
+    },
+    {
+      "condition": "tooltrie_v0",
+      "max_tokens": 1,
+      "stem": "toolret-bm25-k4",
+      "trial": 1
+    },
+    {
+      "condition": "contextpilot-static_refit_causal",
+      "max_tokens": 1,
+      "stem": "toolret-bm25-k4",
+      "trial": 1
+    },
+    {
+      "condition": "contextpilot-online_incremental",
+      "max_tokens": 1,
+      "stem": "toolret-bm25-k4",
+      "trial": 1
+    },
+    {
+      "condition": "contextpilot-online_incremental",
+      "max_tokens": 1,
+      "stem": "toolret-bm25-k4",
+      "trial": 2
+    },
+    {
+      "condition": "original",
+      "max_tokens": 1,
+      "stem": "toolret-bm25-k4",
+      "trial": 2
+    },
+    {
+      "condition": "alphabetical",
+      "max_tokens": 1,
+      "stem": "toolret-bm25-k4",
+      "trial": 2
+    },
+    {
+      "condition": "tooltrie_v0",
+      "max_tokens": 1,
+      "stem": "toolret-bm25-k4",
+      "trial": 2
+    },
+    {
+      "condition": "contextpilot-static_refit_causal",
+      "max_tokens": 1,
+      "stem": "toolret-bm25-k4",
+      "trial": 2
+    },
+    {
+      "condition": "contextpilot-static_refit_causal",
+      "max_tokens": 1,
+      "stem": "toolret-bm25-k4",
+      "trial": 3
+    },
+    {
+      "condition": "contextpilot-online_incremental",
+      "max_tokens": 1,
+      "stem": "toolret-bm25-k4",
+      "trial": 3
+    },
+    {
+      "condition": "original",
+      "max_tokens": 1,
+      "stem": "toolret-bm25-k4",
+      "trial": 3
+    },
+    {
+      "condition": "alphabetical",
+      "max_tokens": 1,
+      "stem": "toolret-bm25-k4",
+      "trial": 3
+    },
+    {
+      "condition": "tooltrie_v0",
+      "max_tokens": 1,
+      "stem": "toolret-bm25-k4",
+      "trial": 3
+    },
+    {
+      "condition": "original",
+      "max_tokens": 1,
+      "stem": "toolret-bm25-k16",
+      "trial": 1
+    },
+    {
+      "condition": "alphabetical",
+      "max_tokens": 1,
+      "stem": "toolret-bm25-k16",
+      "trial": 1
+    },
+    {
+      "condition": "tooltrie_v0",
+      "max_tokens": 1,
+      "stem": "toolret-bm25-k16",
+      "trial": 1
+    },
+    {
+      "condition": "contextpilot-static_refit_causal",
+      "max_tokens": 1,
+      "stem": "toolret-bm25-k16",
+      "trial": 1
+    },
+    {
+      "condition": "contextpilot-online_incremental",
+      "max_tokens": 1,
+      "stem": "toolret-bm25-k16",
+      "trial": 1
+    },
+    {
+      "condition": "contextpilot-online_incremental",
+      "max_tokens": 1,
+      "stem": "toolret-bm25-k16",
+      "trial": 2
+    },
+    {
+      "condition": "original",
+      "max_tokens": 1,
+      "stem": "toolret-bm25-k16",
+      "trial": 2
+    },
+    {
+      "condition": "alphabetical",
+      "max_tokens": 1,
+      "stem": "toolret-bm25-k16",
+      "trial": 2
+    },
+    {
+      "condition": "tooltrie_v0",
+      "max_tokens": 1,
+      "stem": "toolret-bm25-k16",
+      "trial": 2
+    },
+    {
+      "condition": "contextpilot-static_refit_causal",
+      "max_tokens": 1,
+      "stem": "toolret-bm25-k16",
+      "trial": 2
+    },
+    {
+      "condition": "contextpilot-static_refit_causal",
+      "max_tokens": 1,
+      "stem": "toolret-bm25-k16",
+      "trial": 3
+    },
+    {
+      "condition": "contextpilot-online_incremental",
+      "max_tokens": 1,
+      "stem": "toolret-bm25-k16",
+      "trial": 3
+    },
+    {
+      "condition": "original",
+      "max_tokens": 1,
+      "stem": "toolret-bm25-k16",
+      "trial": 3
+    },
+    {
+      "condition": "alphabetical",
+      "max_tokens": 1,
+      "stem": "toolret-bm25-k16",
+      "trial": 3
+    },
+    {
+      "condition": "tooltrie_v0",
+      "max_tokens": 1,
+      "stem": "toolret-bm25-k16",
+      "trial": 3
+    },
+    {
+      "condition": "original",
+      "max_tokens": 1,
+      "stem": "toolret-bm25-k64",
+      "trial": 1
+    },
+    {
+      "condition": "alphabetical",
+      "max_tokens": 1,
+      "stem": "toolret-bm25-k64",
+      "trial": 1
+    },
+    {
+      "condition": "tooltrie_v0",
+      "max_tokens": 1,
+      "stem": "toolret-bm25-k64",
+      "trial": 1
+    },
+    {
+      "condition": "contextpilot-static_refit_causal",
+      "max_tokens": 1,
+      "stem": "toolret-bm25-k64",
+      "trial": 1
+    },
+    {
+      "condition": "contextpilot-online_incremental",
+      "max_tokens": 1,
+      "stem": "toolret-bm25-k64",
+      "trial": 1
+    },
+    {
+      "condition": "contextpilot-online_incremental",
+      "max_tokens": 1,
+      "stem": "toolret-bm25-k64",
+      "trial": 2
+    },
+    {
+      "condition": "original",
+      "max_tokens": 1,
+      "stem": "toolret-bm25-k64",
+      "trial": 2
+    },
+    {
+      "condition": "alphabetical",
+      "max_tokens": 1,
+      "stem": "toolret-bm25-k64",
+      "trial": 2
+    },
+    {
+      "condition": "tooltrie_v0",
+      "max_tokens": 1,
+      "stem": "toolret-bm25-k64",
+      "trial": 2
+    },
+    {
+      "condition": "contextpilot-static_refit_causal",
+      "max_tokens": 1,
+      "stem": "toolret-bm25-k64",
+      "trial": 2
+    },
+    {
+      "condition": "contextpilot-static_refit_causal",
+      "max_tokens": 1,
+      "stem": "toolret-bm25-k64",
+      "trial": 3
+    },
+    {
+      "condition": "contextpilot-online_incremental",
+      "max_tokens": 1,
+      "stem": "toolret-bm25-k64",
+      "trial": 3
+    },
+    {
+      "condition": "original",
+      "max_tokens": 1,
+      "stem": "toolret-bm25-k64",
+      "trial": 3
+    },
+    {
+      "condition": "alphabetical",
+      "max_tokens": 1,
+      "stem": "toolret-bm25-k64",
+      "trial": 3
+    },
+    {
+      "condition": "tooltrie_v0",
+      "max_tokens": 1,
+      "stem": "toolret-bm25-k64",
+      "trial": 3
+    },
+    {
+      "condition": "original",
+      "max_tokens": 1,
+      "stem": "toolret-bm25-k128",
+      "trial": 1
+    },
+    {
+      "condition": "alphabetical",
+      "max_tokens": 1,
+      "stem": "toolret-bm25-k128",
+      "trial": 1
+    },
+    {
+      "condition": "tooltrie_v0",
+      "max_tokens": 1,
+      "stem": "toolret-bm25-k128",
+      "trial": 1
+    },
+    {
+      "condition": "contextpilot-static_refit_causal",
+      "max_tokens": 1,
+      "stem": "toolret-bm25-k128",
+      "trial": 1
+    },
+    {
+      "condition": "contextpilot-online_incremental",
+      "max_tokens": 1,
+      "stem": "toolret-bm25-k128",
+      "trial": 1
+    },
+    {
+      "condition": "contextpilot-online_incremental",
+      "max_tokens": 1,
+      "stem": "toolret-bm25-k128",
+      "trial": 2
+    },
+    {
+      "condition": "original",
+      "max_tokens": 1,
+      "stem": "toolret-bm25-k128",
+      "trial": 2
+    },
+    {
+      "condition": "alphabetical",
+      "max_tokens": 1,
+      "stem": "toolret-bm25-k128",
+      "trial": 2
+    },
+    {
+      "condition": "tooltrie_v0",
+      "max_tokens": 1,
+      "stem": "toolret-bm25-k128",
+      "trial": 2
+    },
+    {
+      "condition": "contextpilot-static_refit_causal",
+      "max_tokens": 1,
+      "stem": "toolret-bm25-k128",
+      "trial": 2
+    },
+    {
+      "condition": "contextpilot-static_refit_causal",
+      "max_tokens": 1,
+      "stem": "toolret-bm25-k128",
+      "trial": 3
+    },
+    {
+      "condition": "contextpilot-online_incremental",
+      "max_tokens": 1,
+      "stem": "toolret-bm25-k128",
+      "trial": 3
+    },
+    {
+      "condition": "original",
+      "max_tokens": 1,
+      "stem": "toolret-bm25-k128",
+      "trial": 3
+    },
+    {
+      "condition": "alphabetical",
+      "max_tokens": 1,
+      "stem": "toolret-bm25-k128",
+      "trial": 3
+    },
+    {
+      "condition": "tooltrie_v0",
+      "max_tokens": 1,
+      "stem": "toolret-bm25-k128",
+      "trial": 3
+    }
+  ]
+}

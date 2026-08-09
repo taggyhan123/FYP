@@ -1,0 +1,275 @@
+{
+  "accepted_gpu_replays": 190,
+  "all_checks_passed": true,
+  "checks": [
+    {
+      "details": null,
+      "name": "protocol_manifest_preserved",
+      "passed": true
+    },
+    {
+      "details": null,
+      "name": "tokenizer_and_chat_template_compatibility",
+      "passed": true
+    },
+    {
+      "details": null,
+      "name": "shared_workload_provenance",
+      "passed": true
+    },
+    {
+      "details": "15285704e73af680c0125ea4bfeb0b54a14f278e",
+      "name": "provenance:fyp-git-commit.txt",
+      "passed": true
+    },
+    {
+      "details": "1fa0a143fdeda344585666648ab2b30cb7fea77f",
+      "name": "provenance:contextpilot-git-commit.txt",
+      "passed": true
+    },
+    {
+      "details": "0.26.0",
+      "name": "provenance:vllm-version.txt",
+      "passed": true
+    },
+    {
+      "details": null,
+      "name": "provenance:gpu-environment.csv",
+      "passed": true
+    },
+    {
+      "details": null,
+      "name": "qwen3-4b:provenance",
+      "passed": true
+    },
+    {
+      "details": {
+        "block_size": "16",
+        "capacity_tokens": 96832,
+        "enable_prefix_caching": true,
+        "num_gpu_blocks": "6052",
+        "raw_labels": {
+          "_block_size_resolved": "True",
+          "block_size": "16",
+          "cache_dtype": "auto",
+          "calculate_kv_scales": "False",
+          "enable_prefix_caching": "True",
+          "engine": "0",
+          "gpu_memory_utilization": "0.92",
+          "is_attention_free": "False",
+          "kv_cache_dtype_skip_layers": "[]",
+          "kv_cache_max_concurrency": "2.3640625",
+          "kv_cache_memory_bytes": "None",
+          "kv_cache_size_tokens": "96832",
+          "kv_offloading_backend": "native",
+          "kv_offloading_size": "None",
+          "kv_sharing_fast_prefill": "False",
+          "mamba_block_size": "None",
+          "mamba_cache_dtype": "auto",
+          "mamba_cache_mode": "none",
+          "mamba_page_size_padded": "None",
+          "mamba_ssm_cache_dtype": "auto",
+          "num_cpu_blocks": "None",
+          "num_gpu_blocks": "6052",
+          "num_gpu_blocks_override": "None",
+          "prefix_caching_hash_algo": "sha256",
+          "prefix_match_unit": "None",
+          "skip_page_size_padded": "None",
+          "sliding_window": "None",
+          "user_specified_block_size": "False",
+          "user_specified_mamba_block_size": "False"
+        }
+      },
+      "name": "qwen3-4b:cache_config",
+      "passed": true
+    },
+    {
+      "details": null,
+      "name": "qwen3-4b:excluded_warmup",
+      "passed": true
+    },
+    {
+      "details": 90,
+      "name": "qwen3-4b:systems_replay_count",
+      "passed": true
+    },
+    {
+      "details": 6,
+      "name": "qwen3-4b:systems_summary_guards",
+      "passed": true
+    },
+    {
+      "details": 5,
+      "name": "qwen3-4b:quality_replay_count",
+      "passed": true
+    },
+    {
+      "details": 5,
+      "name": "qwen3-4b:quality_score_count",
+      "passed": true
+    },
+    {
+      "details": null,
+      "name": "qwen3-4b:quality_compact_summary",
+      "passed": true
+    },
+    {
+      "details": 27,
+      "name": "qwen3-4b:quality_comparison_count",
+      "passed": true
+    },
+    {
+      "details": null,
+      "name": "qwen3-4b:analysis_summary",
+      "passed": true
+    },
+    {
+      "details": {
+        "accepted_quality_replays": 5,
+        "accepted_systems_replays": 90,
+        "all_replays_reset_and_counter_clean": true,
+        "diagnostic_warmups_excluded": 1,
+        "format_version": 1,
+        "model": "Qwen/Qwen3-4B",
+        "model_revision": "1cfa9a7208912126459214e8b04321603b3df60c",
+        "model_role": "primary",
+        "native_capacity_tokens": 96832,
+        "quality_score_files": 5,
+        "raw_outputs_preserved": true,
+        "status": "gpu_complete_pending_cpu_analysis"
+      },
+      "name": "qwen3-4b:model_run_summary",
+      "passed": true
+    },
+    {
+      "details": null,
+      "name": "qwen3-4b:all_model_checks_reached",
+      "passed": true
+    },
+    {
+      "details": null,
+      "name": "qwen3-0.6b:provenance",
+      "passed": true
+    },
+    {
+      "details": {
+        "block_size": "16",
+        "capacity_tokens": 188912,
+        "enable_prefix_caching": true,
+        "num_gpu_blocks": "11807",
+        "raw_labels": {
+          "_block_size_resolved": "True",
+          "block_size": "16",
+          "cache_dtype": "auto",
+          "calculate_kv_scales": "False",
+          "enable_prefix_caching": "True",
+          "engine": "0",
+          "gpu_memory_utilization": "0.92",
+          "is_attention_free": "False",
+          "kv_cache_dtype_skip_layers": "[]",
+          "kv_cache_max_concurrency": "4.612109375",
+          "kv_cache_memory_bytes": "None",
+          "kv_cache_size_tokens": "188912",
+          "kv_offloading_backend": "native",
+          "kv_offloading_size": "None",
+          "kv_sharing_fast_prefill": "False",
+          "mamba_block_size": "None",
+          "mamba_cache_dtype": "auto",
+          "mamba_cache_mode": "none",
+          "mamba_page_size_padded": "None",
+          "mamba_ssm_cache_dtype": "auto",
+          "num_cpu_blocks": "None",
+          "num_gpu_blocks": "11807",
+          "num_gpu_blocks_override": "None",
+          "prefix_caching_hash_algo": "sha256",
+          "prefix_match_unit": "None",
+          "skip_page_size_padded": "None",
+          "sliding_window": "None",
+          "user_specified_block_size": "False",
+          "user_specified_mamba_block_size": "False"
+        }
+      },
+      "name": "qwen3-0.6b:cache_config",
+      "passed": true
+    },
+    {
+      "details": null,
+      "name": "qwen3-0.6b:excluded_warmup",
+      "passed": true
+    },
+    {
+      "details": 90,
+      "name": "qwen3-0.6b:systems_replay_count",
+      "passed": true
+    },
+    {
+      "details": 6,
+      "name": "qwen3-0.6b:systems_summary_guards",
+      "passed": true
+    },
+    {
+      "details": 5,
+      "name": "qwen3-0.6b:quality_replay_count",
+      "passed": true
+    },
+    {
+      "details": 5,
+      "name": "qwen3-0.6b:quality_score_count",
+      "passed": true
+    },
+    {
+      "details": null,
+      "name": "qwen3-0.6b:quality_compact_summary",
+      "passed": true
+    },
+    {
+      "details": 27,
+      "name": "qwen3-0.6b:quality_comparison_count",
+      "passed": true
+    },
+    {
+      "details": null,
+      "name": "qwen3-0.6b:analysis_summary",
+      "passed": true
+    },
+    {
+      "details": {
+        "accepted_quality_replays": 5,
+        "accepted_systems_replays": 90,
+        "all_replays_reset_and_counter_clean": true,
+        "diagnostic_warmups_excluded": 1,
+        "format_version": 1,
+        "model": "Qwen/Qwen3-0.6B",
+        "model_revision": "c1899de289a04d12100db370d81485cdf75e47ca",
+        "model_role": "replication",
+        "native_capacity_tokens": 188912,
+        "quality_score_files": 5,
+        "raw_outputs_preserved": true,
+        "status": "gpu_complete_pending_cpu_analysis"
+      },
+      "name": "qwen3-0.6b:model_run_summary",
+      "passed": true
+    },
+    {
+      "details": null,
+      "name": "qwen3-0.6b:all_model_checks_reached",
+      "passed": true
+    },
+    {
+      "details": [],
+      "name": "cross_model_capacity_independent_workloads",
+      "passed": true
+    },
+    {
+      "details": {
+        "Qwen/Qwen3-0.6B": 188912,
+        "Qwen/Qwen3-4B": 96832
+      },
+      "name": "native_capacities_recorded_separately",
+      "passed": true
+    }
+  ],
+  "expected_fyp_commit": "15285704e73af680c0125ea4bfeb0b54a14f278e",
+  "format_version": 1,
+  "status": "accepted"
+}

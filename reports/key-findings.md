@@ -24,20 +24,31 @@ almost none.**
 | Original text prefill | 1.19% | 0.34% | 76.09% | **88.12%** |
 | Alphabetical | 37.99% | 0.44% | 73.28% | 85.62% |
 | ToolTrie-v0 (ours) | 87.19% | 0.89% | 75.31% | 87.50% |
-| ContextPilot, persistent API | **96.16%** | 1.35% | **77.03%** | 85.00% |
-| ContextPilot, static refit | **96.16%** | **2.23%** | **77.03%** | 85.00% |
+| ContextPilot-derived, persistent API † | **96.16%** | 1.35% | **77.03%** | 85.00% |
+| ContextPilot-derived, static refit † | **96.16%** | **2.23%** | **77.03%** | 85.00% |
 | Online frequency counter | 96.27% | 2.33% | 76.88% | 83.75% |
+
+† Both are **ordering-only adaptations at alpha=0.001**, built on the pinned
+upstream ContextPilot commit. Neither is the full ContextPilot system: both omit
+relevance annotations, eviction feedback and de-duplication. They should not be
+read as an evaluation of that system.
 
 Reuse falls from 82–96% to 0.3–19% between the two menu types, for every
 policy, at both model sizes.
 
-## 1. The widely-quoted 95–96% figure is a property of the workload
+## 1. The 95–96% padded-menu figure is a property of the workload
 
 Padded evaluation menus share 60–63 of their 64 tools between requests; menus
-built by BM25 retrieval do not. We reproduce the published ContextPilot figure
-exactly (96.16%) and show it collapses to 1.35% on retrieved menus of the same
-size. Any deployment estimate taken from padded menus will be optimistic by
-roughly two orders of magnitude.
+built by BM25 retrieval do not. The strongest ordering we measured reaches
+96.16% on padded menus and **1.35% on retrieved menus of the same size**. Any
+deployment estimate taken from padded menus will be optimistic by roughly two
+orders of magnitude.
+
+The 96.16% also reproduces our own earlier internal measurement of the same
+ordering under a different alpha, which is why we treat it as a stable property
+of the workload rather than a tuning artifact. We make no claim about numbers
+published elsewhere; nothing here was compared against a figure from the
+ContextPilot paper.
 
 ## 2. The standard padded benchmark cannot distinguish between methods
 
@@ -69,9 +80,11 @@ real but concentrated entirely in the padded regime.
 
 Against ordinary text prefill at 4B, the best relevance gain is **+0.94 points**
 of full-call accuracy, and every policy loses irrelevance accuracy. Alphabetical
-— the baseline most published comparisons use — is itself worse than doing
-nothing (−2.81 points at 4B, −11.57 at 0.6B), so much of the reported benefit in
-the literature is recovering ground that baseline gave away.
+— the baseline our own earlier comparisons used, and the natural one to reach
+for — is itself worse than doing nothing (−2.81 points at 4B, −11.57 at 0.6B).
+Much of the apparent benefit in any comparison drawn against it is therefore
+recovering ground that baseline gave away, which is why the table above reports
+against original text prefill instead.
 
 Per-case at 4B, of 160 irrelevance tasks, the high-reuse policies never repair a
 case and only break them: ContextPilot loses 5 and recovers 0, the counter loses
@@ -84,8 +97,8 @@ Fitting tool frequency on a held-out corpus reaches 39.69%, and on ToolRet is
 worse than alphabetical. Estimating the same signal online from the served
 stream reaches 96.27%. A held-out corpus structurally cannot know which tools a
 given evaluation stream shares. This reverses our earlier conclusion that
-frequency-based ordering does not help, and it means published comparisons
-should state which estimator they used.
+frequency-based ordering does not help, and it means any comparison of
+frequency ordering must state which estimator it used.
 
 ## 6. Ordering effects on quality are a small-model artifact
 

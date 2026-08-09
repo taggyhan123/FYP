@@ -93,28 +93,50 @@ from padded menus will be optimistic by roughly two orders of magnitude.**
 > **Brief §7 Q3** — *Does frequency-based ordering improve reusable prefix length?*
 > **Brief §7 Q4** — *Does weighting by schema length or prefill time perform better?*
 
-Fitting tool frequency on a held-out corpus reaches 39.69% on padded menus, and
-on ToolRet is *worse* than alphabetical. Estimating the same signal online from
-the served stream reaches 96.27%. A held-out corpus structurally cannot know
-which tools a given evaluation stream happens to share.
+Reuse on Qwen3-0.6B, vLLM, 3 trials — the same frequency signal, two estimators:
+
+| Ordering | BFCL padded-64 | ToolRet padded-64 |
+| --- | ---: | ---: |
+| Original text prefill | 1.19% | 13.87% |
+| Alphabetical | 38.13% | **51.05%** |
+| `frequency_fitted` — frozen on a held-out corpus | 39.69% | 41.58% |
+| `schema_cost_fitted` — frequency × schema length | 39.69% | 41.87% |
+| **`frequency_online` — estimated from the served stream** | **96.27%** | **94.80%** |
+
+The frozen estimator gains 1.56 points over alphabetical on BFCL and is **9.5
+points worse** than it on ToolRet. The online estimator reaches 96.27%. A
+held-out corpus structurally cannot know which tools a given evaluation stream
+happens to share — that is a property of the eval sample, not of the tool
+population.
 
 This reverses the earlier conclusion that frequency ordering does not help, and
 means any comparison of frequency ordering must state which estimator it used.
-Schema-cost weighting (Q4) adds nothing over plain frequency: on padded menus it
-emits an identical ordering.
+**Schema-cost weighting (Q4) adds nothing over plain frequency** — 39.69% on
+BFCL, identical to the digit, because it emits an identical ordering there.
 
 ## 4. Pair/triple structure was not actually tested on the padded workload
 > **Brief §7 Q5** — *How much additional benefit comes from pair/triple workflow structure?*
 
-On BFCL the five fitted policies — frequency, schema-cost, FP-tree, pair and
-triple — emit **byte-identical `tool_ids` on all 200 records**, differing only in
-the label string. Their extra statistics never discriminate, so each falls
-through to the same frequency key. An experiment in which the pair/triple policy
-produced the same file as the frequency policy did not test pair/triple structure
-and find it unhelpful; it never tested it.
+| Fitted policy | BFCL padded-64 | ToolRet padded-64 |
+| --- | ---: | ---: |
+| `frequency_fitted` | 39.69% | 41.58% |
+| `schema_cost_fitted` | 39.69% | 41.87% |
+| `fp_tree_conditional` | 39.69% | 41.56% |
+| `conditional_pair` | 39.69% | 41.58% |
+| `conditional_pair_triple` | 39.69% | 41.58% |
+| *alphabetical, for reference* | *38.13%* | *51.05%* |
 
-On ToolRet the policies genuinely differ, and there the answer is no benefit: all
-sit near 41.6% against alphabetical's 51.05%.
+On BFCL all five are **39.69% to the digit** — not merely close. They emit
+**byte-identical `tool_ids` on all 200 records**, differing only in the label
+string, because their extra statistics never discriminate and each key falls
+through to the same frequency ordering. An experiment in which the pair/triple
+policy produced the same file as the frequency policy did not test pair/triple
+structure and find it unhelpful; it never tested it.
+
+On ToolRet the policies do differ — `schema_cost_fitted` on all 200 records,
+`fp_tree_conditional` on 10 — so there the question was genuinely posed, and the
+answer is no benefit: all five sit near 41.6% while plain alphabetical reaches
+51.05%.
 
 ## 5. Under cache pressure, a fixed random ordering wins
 > **Brief §7 Q6** — *How sensitive are results to request ordering and session locality?*

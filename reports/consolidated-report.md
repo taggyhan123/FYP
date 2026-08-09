@@ -52,14 +52,27 @@ designates Qwen3-4B primary and Qwen3-0.6B a replication; 190 GPU replays were
 accepted with all 33 audit checks passing. The headline numbers, all from that
 accepted matrix except where noted:
 
-| Qwen3-4B (native capacity 96,832) | reuse %<br>BFCL padded-64 | reuse %<br>BM25 k=128 | accuracy %<br>full call | accuracy %<br>no-tool |
-| --- | ---: | ---: | ---: | ---: |
-| Original text prefill | 1.19% | 0.34% | 76.09% | **88.12%** |
-| Alphabetical | 37.99% | 0.44% | 73.28% | 85.62% |
-| ToolTrie-v0 | 87.19% | 0.89% | 75.31% | 87.50% |
-| ContextPilot persistent API | **96.16%** | 1.35% | **77.03%** | 85.00% |
-| ContextPilot static refit | **96.16%** | **2.23%** | **77.03%** | 85.00% |
-| `frequency_online` | 96.27% † | 2.33% † | 76.88% | 83.75% |
+Prefix-cache reuse, 200 requests x 3 trials per cell:
+
+| Qwen3-4B (native capacity 96,832) | BFCL padded-64 | BM25 k=128 |
+| --- | ---: | ---: |
+| Original text prefill | 1.19% | 0.34% |
+| Alphabetical | 37.99% | 0.44% |
+| ToolTrie-v0 | 87.19% | 0.89% |
+| ContextPilot persistent API | **96.16%** | 1.35% |
+| ContextPilot static refit | **96.16%** | **2.23%** |
+| `frequency_online` | 96.27% † | 2.33% † |
+
+Function-calling accuracy, a separate n=800 BFCL replay per condition:
+
+| Qwen3-4B | full call (640 cases) | no-tool (160 cases) |
+| --- | ---: | ---: |
+| Original text prefill | 76.09% | **88.12%** |
+| Alphabetical | 73.28% | 85.62% |
+| ToolTrie-v0 | 75.31% | 87.50% |
+| ContextPilot persistent API | **77.03%** | 85.00% |
+| ContextPilot static refit | **77.03%** | 85.00% |
+| `frequency_online` | 76.88% | 83.75% |
 
 † `frequency_online` systems figures come from a separate run at capacity
 101,120; a same-session ContextPilot control reproduced the accepted values to

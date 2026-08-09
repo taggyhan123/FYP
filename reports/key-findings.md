@@ -19,28 +19,45 @@ quoted in percentage points.
 menu barely changes between requests. Under realistic retrieval it produces
 almost none.**
 
-| Qwen3-4B | reuse %<br>padded menu | reuse %<br>retrieved k=128 | accuracy %<br>full call | accuracy %<br>no-tool |
-| --- | ---: | ---: | ---: | ---: |
-| Original text prefill | 1.19% | 0.34% | 76.09% | **88.12%** |
-| Alphabetical | 37.99% | 0.44% | 73.28% | 85.62% |
-| ToolTrie-v0 (ours) | 87.19% | 0.89% | 75.31% | 87.50% |
-| ContextPilot-derived, persistent API † | **96.16%** | 1.35% | **77.03%** | 85.00% |
-| ContextPilot-derived, static refit † | **96.16%** | **2.23%** | **77.03%** | 85.00% |
-| Online frequency counter | 96.27% | 2.33% | 76.88% | 83.75% |
+**Table 1 — prefix-cache reuse.** 200 requests per workload, 3 trials, zero
+spread. Reuse only; no accuracy is involved.
 
-† Both are **ordering-only adaptations at alpha=0.001**, built on the pinned
-upstream ContextPilot commit. Neither is the full ContextPilot system: both omit
-relevance annotations, eviction feedback and de-duplication. They should not be
-read as an evaluation of that system.
+| Qwen3-4B | padded menu (64 tools) | retrieved menu, BM25 k=128 |
+| --- | ---: | ---: |
+| Original text prefill | 1.19% | 0.34% |
+| Alphabetical | 37.99% | 0.44% |
+| ToolTrie-v0 (ours) | 87.19% | 0.89% |
+| ContextPilot-derived, persistent API † | **96.16%** | 1.35% |
+| ContextPilot-derived, static refit † | **96.16%** | **2.23%** |
+| Online frequency counter | 96.27% | 2.33% |
 
-The first two columns are the same measurement on two workloads; the last two
-come from the separate n=800 quality run. The workloads differ structurally:
+The two workloads differ structurally, and that difference is the finding:
 padded menus hold 64 tools drawn from a 262-tool pool with **63 present in every
 request** (98.4% overlap between consecutive requests), while BM25 retrieval
 draws 128 tools from a 12,353-tool pool with **none universal** (7.7% overlap).
+Reuse falls from 82–96% to 0.3–19% between them, for every policy, at both
+model sizes.
 
-Reuse falls from 82–96% to 0.3–19% between the two menu types, for every
-policy, at both model sizes.
+**Table 2 — function-calling accuracy.** A separate experiment: one n=800 BFCL
+replay per condition, 640 relevance cases and 160 irrelevance cases. No reuse is
+involved.
+
+| Qwen3-4B | full call (640 cases) | no-tool (160 cases) |
+| --- | ---: | ---: |
+| Original text prefill | 76.09% | **88.12%** |
+| Alphabetical | 73.28% | 85.62% |
+| ToolTrie-v0 (ours) | 75.31% | 87.50% |
+| ContextPilot-derived, persistent API † | **77.03%** | 85.00% |
+| ContextPilot-derived, static refit † | **77.03%** | 85.00% |
+| Online frequency counter | 76.88% | 83.75% |
+
+† Both ContextPilot rows are **ordering-only adaptations at alpha=0.001** on the
+pinned upstream commit. Neither is the full ContextPilot system: both omit
+relevance annotations, eviction feedback and de-duplication. They should not be
+read as an evaluation of that system.
+
+The two tables move almost independently — the ordering that wins Table 1 is not
+the one that wins Table 2, which is why no policy is best across both.
 
 ## 1. The 95–96% padded-menu figure is a property of the workload
 

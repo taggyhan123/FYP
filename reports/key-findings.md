@@ -57,17 +57,22 @@ the one that wins Table 2.
 ## 1. The problem is real: tool-schema prefill dominates TTFT
 > **Brief §7 Q1** — *How much of TTFT is caused by selected tool-schema prefill?*
 
-| k | prompt tokens/query | TTFT (fallback) | TTFT (ToolTrie-v0) |
-| ---: | ---: | ---: | ---: |
-| 4 | 640 | 32.3 ms | 31.2 ms |
-| 16 | 2,139 | 70.7 ms | 70.3 ms |
-| 64 | 8,361 | 349.7 ms | 350.0 ms |
-| 128 | 16,267 | 937.0 ms | 933.5 ms |
+Qwen3-4B, the primary model, from the accepted dual-model matrix; Qwen3-0.6B
+alongside for scale. TTFT is per request, mean of 3 trials × 200 requests.
 
-Prompt cost grows about 25× from k=4 to k=128 and TTFT tracks it, from 32 ms to
-937 ms, while retrieval macro-recall rises only 25.8 points. Deeper menus buy
-little and cost a great deal, which is what makes the optimisation worth
-attempting at all.
+| k | prompt tokens/query | 4B fallback | 4B ToolTrie-v0 | 0.6B fallback |
+| ---: | ---: | ---: | ---: | ---: |
+| 4 | 640 | 89.7 ms | 88.0 ms | 31.8 ms |
+| 16 | 2,139 | 289.0 ms | 284.8 ms | 71.2 ms |
+| 64 | 8,361 | 1,360.4 ms | 1,351.8 ms | 353.4 ms |
+| 128 | 16,267 | **3,291.1 ms** | 3,280.1 ms | 940.4 ms |
+
+Prompt cost grows about 25× from k=4 to k=128 and TTFT tracks it — to **3.3
+seconds** before the first token on the primary model — while retrieval
+macro-recall rises only 25.8 points. Deeper menus buy little and cost a great
+deal, which is what makes the optimisation worth attempting at all. The cost is
+roughly 3.5× larger at 4B than at 0.6B, so results quoted on the small model
+understate it.
 
 **But ordering does not fix it.** The three-trial TTFT intervals overlap at every
 depth and no paired-difference test was predeclared, so nothing here shows that
@@ -76,7 +81,9 @@ reordering makes retrieved-menu serving faster.
 ## 2. Available reuse depends almost entirely on the workload
 > **Brief §7 Q2** — *How much exact prefix reuse is available without changing the tool set?*
 
-The project's central result. The two workloads in Table 1 differ structurally:
+The project's central result. The table below is menu composition, so it is
+model-independent; the reuse figures it explains are Qwen3-4B from Table 1,
+and Qwen3-0.6B shows the same collapse.
 
 | | padded menu | retrieved k=128 |
 | --- | ---: | ---: |
@@ -117,6 +124,8 @@ BFCL, identical to the digit, because it emits an identical ordering there.
 ## 4. Pair/triple structure was not actually tested on the padded workload
 > **Brief §7 Q5** — *How much additional benefit comes from pair/triple workflow structure?*
 
+Qwen3-0.6B, vLLM, 3 trials — these policies were only ever run at that size:
+
 | Fitted policy | BFCL padded-64 | ToolRet padded-64 |
 | --- | ---: | ---: |
 | `frequency_fitted` | 39.69% | 41.58% |
@@ -138,12 +147,17 @@ On ToolRet the policies do differ — `schema_cost_fitted` on all 200 records,
 answer is no benefit: all five sit near 41.6% while plain alphabetical reaches
 51.05%.
 
+**A 4B rerun would not change this finding.** The claim is that the emitted
+`tool_ids` are identical, which is a property of the workload files and holds
+whatever model serves them. Only the illustrative reuse percentages would move.
+
 ## 5. Under cache pressure, a fixed random ordering wins
 > **Brief §7 Q6** — *How sensitive are results to request ordering and session locality?*
 > **Brief §4.5** — requires empirical, uniform, skewed and session-bursty replays.
 
-Cache capped at 480 blocks, all 24 regime-runs accepted at 91.0–91.9% peak
-occupancy:
+Qwen3-0.6B with the cache deliberately capped at 480 blocks — capacity is the
+controlled variable here, so it overrides the model's native size. All 24
+regime-runs accepted at 91.0–91.9% peak occupancy:
 
 | Ordering | empirical | uniform | skewed | session-bursty |
 | --- | ---: | ---: | ---: | ---: |
@@ -153,7 +167,9 @@ occupancy:
 | Frequency = schema-cost = FP-tree | 9.44% | 8.99% | 9.51% | 9.00% |
 
 A fixed random permutation leads in **every** regime, with the fitted policies
-more than 20 points behind. The locality regime itself barely moves any row —
+more than 20 points behind. Because the cache is capped and both models share a
+byte-identical tokenizer, these reuse values would reproduce at 4B; the model
+size is not what is being varied. The locality regime itself barely moves any row —
 ordering matters far more than the request distribution. One run per cell at one
 seed, so this motivates a seed sweep rather than a recommendation; but it is hard
 to reconcile with the premise that engineered orderings beat arbitrary ones.
@@ -199,8 +215,9 @@ Three regimes, in increasing order of how badly it does:
   twelve systems cells, and the online counter beats it in ten of twelve. Its
   advantage over the static baselines is concentrated entirely in the padded
   regime.
-- **On the padded benchmark, the workload itself is the problem.** Reuse there is
-  almost exactly the position of the single non-shared tool:
+- **On the padded benchmark, the workload itself is the problem.** Position is a
+  property of the emitted ordering and so model-independent; the reuse column is
+  Qwen3-0.6B. Reuse is almost exactly the position of the single non-shared tool:
 
   | ordering | position of that tool | reuse |
   | --- | ---: | ---: |

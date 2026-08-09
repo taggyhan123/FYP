@@ -1,0 +1,108 @@
+{
+  "adapts_online": true,
+  "format_version": 1,
+  "information_regime": "causal",
+  "metric": "vllm:prompt_tokens_cached / (cached + request_prefill_kv_computed_tokens_sum)",
+  "models": {
+    "Qwen/Qwen3-0.6B": {
+      "conditions": {
+        "contextpilot-online_incremental": {
+          "toolret-bm25-k128": {
+            "cached_ratio_mean": 0.019883015771047785,
+            "spread": 0.0,
+            "trials": 3
+          },
+          "toolret-bm25-k16": {
+            "cached_ratio_mean": 0.09932079353760186,
+            "spread": 0.0,
+            "trials": 3
+          }
+        },
+        "frequency_online": {
+          "bfcl-padded64": {
+            "cached_ratio_mean": 0.9626694980929881,
+            "spread": 0.0,
+            "trials": 3
+          },
+          "toolret-bm25-k128": {
+            "cached_ratio_mean": 0.024117316186301845,
+            "spread": 0.0,
+            "trials": 3
+          },
+          "toolret-bm25-k16": {
+            "cached_ratio_mean": 0.0815515366900083,
+            "spread": 0.0,
+            "trials": 3
+          },
+          "toolret-bm25-k4": {
+            "cached_ratio_mean": 0.17005181266167035,
+            "spread": 0.0,
+            "trials": 3
+          },
+          "toolret-bm25-k64": {
+            "cached_ratio_mean": 0.03134639512867834,
+            "spread": 0.0,
+            "trials": 3
+          },
+          "toolret-padded64": {
+            "cached_ratio_mean": 0.9479747855811688,
+            "spread": 0.0,
+            "trials": 3
+          }
+        }
+      },
+      "native_capacity_tokens": 190896
+    },
+    "Qwen/Qwen3-4B": {
+      "conditions": {
+        "contextpilot-online_incremental": {
+          "toolret-bm25-k128": {
+            "cached_ratio_mean": 0.013558613524803054,
+            "spread": 0.0,
+            "trials": 3
+          },
+          "toolret-bm25-k16": {
+            "cached_ratio_mean": 0.09101600402146341,
+            "spread": 0.0,
+            "trials": 3
+          }
+        },
+        "frequency_online": {
+          "bfcl-padded64": {
+            "cached_ratio_mean": 0.9626694980929881,
+            "spread": 0.0,
+            "trials": 3
+          },
+          "toolret-bm25-k128": {
+            "cached_ratio_mean": 0.023320618547194808,
+            "spread": 0.0,
+            "trials": 3
+          },
+          "toolret-bm25-k16": {
+            "cached_ratio_mean": 0.08136449188108626,
+            "spread": 0.0,
+            "trials": 3
+          },
+          "toolret-bm25-k4": {
+            "cached_ratio_mean": 0.17005181266167035,
+            "spread": 0.0,
+            "trials": 3
+          },
+          "toolret-bm25-k64": {
+            "cached_ratio_mean": 0.02959536023595913,
+            "spread": 0.0,
+            "trials": 3
+          },
+          "toolret-padded64": {
+            "cached_ratio_mean": 0.9479747855811688,
+            "spread": 0.0,
+            "trials": 3
+          }
+        }
+      },
+      "native_capacity_tokens": 101120
+    }
+  },
+  "policy": "frequency_online",
+  "training_input": null
+}

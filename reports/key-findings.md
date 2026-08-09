@@ -19,7 +19,7 @@ quoted in percentage points.
 menu barely changes between requests. Under realistic retrieval it produces
 almost none.**
 
-| Qwen3-4B | padded menu | retrieved menu (k=128) | full call | no-tool |
+| Qwen3-4B | reuse %<br>padded menu | reuse %<br>retrieved k=128 | accuracy %<br>full call | accuracy %<br>no-tool |
 | --- | ---: | ---: | ---: | ---: |
 | Original text prefill | 1.19% | 0.34% | 76.09% | **88.12%** |
 | Alphabetical | 37.99% | 0.44% | 73.28% | 85.62% |
@@ -32,6 +32,12 @@ almost none.**
 upstream ContextPilot commit. Neither is the full ContextPilot system: both omit
 relevance annotations, eviction feedback and de-duplication. They should not be
 read as an evaluation of that system.
+
+The first two columns are the same measurement on two workloads; the last two
+come from the separate n=800 quality run. The workloads differ structurally:
+padded menus hold 64 tools drawn from a 262-tool pool with **63 present in every
+request** (98.4% overlap between consecutive requests), while BM25 retrieval
+draws 128 tools from a 12,353-tool pool with **none universal** (7.7% overlap).
 
 Reuse falls from 82–96% to 0.3–19% between the two menu types, for every
 policy, at both model sizes.

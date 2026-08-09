@@ -52,7 +52,7 @@ designates Qwen3-4B primary and Qwen3-0.6B a replication; 190 GPU replays were
 accepted with all 33 audit checks passing. The headline numbers, all from that
 accepted matrix except where noted:
 
-| Qwen3-4B (native capacity 96,832) | BFCL padded-64 reuse | BM25 k=128 reuse | full call | no-tool |
+| Qwen3-4B (native capacity 96,832) | reuse %<br>BFCL padded-64 | reuse %<br>BM25 k=128 | accuracy %<br>full call | accuracy %<br>no-tool |
 | --- | ---: | ---: | ---: | ---: |
 | Original text prefill | 1.19% | 0.34% | 76.09% | **88.12%** |
 | Alphabetical | 37.99% | 0.44% | 73.28% | 85.62% |

@@ -1,0 +1,889 @@
+{
+  "accepted_runs": 72,
+  "all_clean": true,
+  "conditions": [
+    "original",
+    "alphabetical",
+    "tooltrie_v0",
+    "cacheweaver",
+    "frequency_fitted",
+    "schema_cost_fitted",
+    "fp_tree_conditional",
+    "conditional_pair",
+    "conditional_pair_triple",
+    "contextpilot_intra",
+    "contextpilot_intra_schedule",
+    "contextpilot_causal"
+  ],
+  "declared_runs": 72,
+  "format_version": 1,
+  "input_dir": "/home/taghan/FYP/cluster/results/tooltrie-phase2-20260803-181133",
+  "output_dir": "/home/taghan/sglang-counter-audit-20260808-234909",
+  "refused_runs": 0,
+  "runs": [
+    {
+      "aggregate_cached_tokens": 17880.0,
+      "checks": {
+        "cached_total_equals_sum": true,
+        "no_failed_requests": true,
+        "only_index_0_missing": true,
+        "prompt_counter_matches": true,
+        "request_counter_matches": true
+      },
+      "file": "bfcl-original-sglang-trial-1.json",
+      "reported_cached_tokens": 17880
+    },
+    {
+      "aggregate_cached_tokens": 17880.0,
+      "checks": {
+        "cached_total_equals_sum": true,
+        "no_failed_requests": true,
+        "only_index_0_missing": true,
+        "prompt_counter_matches": true,
+        "request_counter_matches": true
+      },
+      "file": "bfcl-original-sglang-trial-2.json",
+      "reported_cached_tokens": 17880
+    },
+    {
+      "aggregate_cached_tokens": 17880.0,
+      "checks": {
+        "cached_total_equals_sum": true,
+        "no_failed_requests": true,
+        "only_index_0_missing": true,
+        "prompt_counter_matches": true,
+        "request_counter_matches": true
+      },
+      "file": "bfcl-original-sglang-trial-3.json",
+      "reported_cached_tokens": 17880
+    },
+    {
+      "aggregate_cached_tokens": 573471.0,
+      "checks": {
+        "cached_total_equals_sum": true,
+        "no_failed_requests": true,
+        "only_index_0_missing": true,
+        "prompt_counter_matches": true,
+        "request_counter_matches": true
+      },
+      "file": "bfcl-alphabetical-sglang-trial-1.json",
+      "reported_cached_tokens": 573471
+    },
+    {
+      "aggregate_cached_tokens": 573471.0,
+      "checks": {
+        "cached_total_equals_sum": true,
+        "no_failed_requests": true,
+        "only_index_0_missing": true,
+        "prompt_counter_matches": true,
+        "request_counter_matches": true
+      },
+      "file": "bfcl-alphabetical-sglang-trial-2.json",
+      "reported_cached_tokens": 573471
+    },
+    {
+      "aggregate_cached_tokens": 573471.0,
+      "checks": {
+        "cached_total_equals_sum": true,
+        "no_failed_requests": true,
+        "only_index_0_missing": true,
+        "prompt_counter_matches": true,
+        "request_counter_matches": true
+      },
+      "file": "bfcl-alphabetical-sglang-trial-3.json",
+      "reported_cached_tokens": 573471
+    },
+    {
+      "aggregate_cached_tokens": 1316561.0,
+      "checks": {
+        "cached_total_equals_sum": true,
+        "no_failed_requests": true,
+        "only_index_0_missing": true,
+        "prompt_counter_matches": true,
+        "request_counter_matches": true
+      },
+      "file": "bfcl-tooltrie_v0-sglang-trial-1.json",
+      "reported_cached_tokens": 1316561
+    },
+    {
+      "aggregate_cached_tokens": 1316561.0,
+      "checks": {
+        "cached_total_equals_sum": true,
+        "no_failed_requests": true,
+        "only_index_0_missing": true,
+        "prompt_counter_matches": true,
+        "request_counter_matches": true
+      },
+      "file": "bfcl-tooltrie_v0-sglang-trial-2.json",
+      "reported_cached_tokens": 1316561
+    },
+    {
+      "aggregate_cached_tokens": 1316561.0,
+      "checks": {
+        "cached_total_equals_sum": true,
+        "no_failed_requests": true,
+        "only_index_0_missing": true,
+        "prompt_counter_matches": true,
+        "request_counter_matches": true
+      },
+      "file": "bfcl-tooltrie_v0-sglang-trial-3.json",
+      "reported_cached_tokens": 1316561
+    },
+    {
+      "aggregate_cached_tokens": 17880.0,
+      "checks": {
+        "cached_total_equals_sum": true,
+        "no_failed_requests": true,
+        "only_index_0_missing": true,
+        "prompt_counter_matches": true,
+        "request_counter_matches": true
+      },
+      "file": "bfcl-cacheweaver-sglang-trial-1.json",
+      "reported_cached_tokens": 17880
+    },
+    {
+      "aggregate_cached_tokens": 17880.0,
+      "checks": {
+        "cached_total_equals_sum": true,
+        "no_failed_requests": true,
+        "only_index_0_missing": true,
+        "prompt_counter_matches": true,
+        "request_counter_matches": true
+      },
+      "file": "bfcl-cacheweaver-sglang-trial-2.json",
+      "reported_cached_tokens": 17880
+    },
+    {
+      "aggregate_cached_tokens": 17880.0,
+      "checks": {
+        "cached_total_equals_sum": true,
+        "no_failed_requests": true,
+        "only_index_0_missing": true,
+        "prompt_counter_matches": true,
+        "request_counter_matches": true
+      },
+      "file": "bfcl-cacheweaver-sglang-trial-3.json",
+      "reported_cached_tokens": 17880
+    },
+    {
+      "aggregate_cached_tokens": 596992.0,
+      "checks": {
+        "cached_total_equals_sum": true,
+        "no_failed_requests": true,
+        "only_index_0_missing": true,
+        "prompt_counter_matches": true,
+        "request_counter_matches": true
+      },
+      "file": "bfcl-frequency_fitted-sglang-trial-1.json",
+      "reported_cached_tokens": 596992
+    },
+    {
+      "aggregate_cached_tokens": 596992.0,
+      "checks": {
+        "cached_total_equals_sum": true,
+        "no_failed_requests": true,
+        "only_index_0_missing": true,
+        "prompt_counter_matches": true,
+        "request_counter_matches": true
+      },
+      "file": "bfcl-frequency_fitted-sglang-trial-2.json",
+      "reported_cached_tokens": 596992
+    },
+    {
+      "aggregate_cached_tokens": 596992.0,
+      "checks": {
+        "cached_total_equals_sum": true,
+        "no_failed_requests": true,
+        "only_index_0_missing": true,
+        "prompt_counter_matches": true,
+        "request_counter_matches": true
+      },
+      "file": "bfcl-frequency_fitted-sglang-trial-3.json",
+      "reported_cached_tokens": 596992
+    },
+    {
+      "aggregate_cached_tokens": 596992.0,
+      "checks": {
+        "cached_total_equals_sum": true,
+        "no_failed_requests": true,
+        "only_index_0_missing": true,
+        "prompt_counter_matches": true,
+        "request_counter_matches": true
+      },
+      "file": "bfcl-schema_cost_fitted-sglang-trial-1.json",
+      "reported_cached_tokens": 596992
+    },
+    {
+      "aggregate_cached_tokens": 596992.0,
+      "checks": {
+        "cached_total_equals_sum": true,
+        "no_failed_requests": true,
+        "only_index_0_missing": true,
+        "prompt_counter_matches": true,
+        "request_counter_matches": true
+      },
+      "file": "bfcl-schema_cost_fitted-sglang-trial-2.json",
+      "reported_cached_tokens": 596992
+    },
+    {
+      "aggregate_cached_tokens": 596992.0,
+      "checks": {
+        "cached_total_equals_sum": true,
+        "no_failed_requests": true,
+        "only_index_0_missing": true,
+        "prompt_counter_matches": true,
+        "request_counter_matches": true
+      },
+      "file": "bfcl-schema_cost_fitted-sglang-trial-3.json",
+      "reported_cached_tokens": 596992
+    },
+    {
+      "aggregate_cached_tokens": 596992.0,
+      "checks": {
+        "cached_total_equals_sum": true,
+        "no_failed_requests": true,
+        "only_index_0_missing": true,
+        "prompt_counter_matches": true,
+        "request_counter_matches": true
+      },
+      "file": "bfcl-fp_tree_conditional-sglang-trial-1.json",
+      "reported_cached_tokens": 596992
+    },
+    {
+      "aggregate_cached_tokens": 596992.0,
+      "checks": {
+        "cached_total_equals_sum": true,
+        "no_failed_requests": true,
+        "only_index_0_missing": true,
+        "prompt_counter_matches": true,
+        "request_counter_matches": true
+      },
+      "file": "bfcl-fp_tree_conditional-sglang-trial-2.json",
+      "reported_cached_tokens": 596992
+    },
+    {
+      "aggregate_cached_tokens": 596992.0,
+      "checks": {
+        "cached_total_equals_sum": true,
+        "no_failed_requests": true,
+        "only_index_0_missing": true,
+        "prompt_counter_matches": true,
+        "request_counter_matches": true
+      },
+      "file": "bfcl-fp_tree_conditional-sglang-trial-3.json",
+      "reported_cached_tokens": 596992
+    },
+    {
+      "aggregate_cached_tokens": 596992.0,
+      "checks": {
+        "cached_total_equals_sum": true,
+        "no_failed_requests": true,
+        "only_index_0_missing": true,
+        "prompt_counter_matches": true,
+        "request_counter_matches": true
+      },
+      "file": "bfcl-conditional_pair-sglang-trial-1.json",
+      "reported_cached_tokens": 596992
+    },
+    {
+      "aggregate_cached_tokens": 596992.0,
+      "checks": {
+        "cached_total_equals_sum": true,
+        "no_failed_requests": true,
+        "only_index_0_missing": true,
+        "prompt_counter_matches": true,
+        "request_counter_matches": true
+      },
+      "file": "bfcl-conditional_pair-sglang-trial-2.json",
+      "reported_cached_tokens": 596992
+    },
+    {
+      "aggregate_cached_tokens": 596992.0,
+      "checks": {
+        "cached_total_equals_sum": true,
+        "no_failed_requests": true,
+        "only_index_0_missing": true,
+        "prompt_counter_matches": true,
+        "request_counter_matches": true
+      },
+      "file": "bfcl-conditional_pair-sglang-trial-3.json",
+      "reported_cached_tokens": 596992
+    },
+    {
+      "aggregate_cached_tokens": 596992.0,
+      "checks": {
+        "cached_total_equals_sum": true,
+        "no_failed_requests": true,
+        "only_index_0_missing": true,
+        "prompt_counter_matches": true,
+        "request_counter_matches": true
+      },
+      "file": "bfcl-conditional_pair_triple-sglang-trial-1.json",
+      "reported_cached_tokens": 596992
+    },
+    {
+      "aggregate_cached_tokens": 596992.0,
+      "checks": {
+        "cached_total_equals_sum": true,
+        "no_failed_requests": true,
+        "only_index_0_missing": true,
+        "prompt_counter_matches": true,
+        "request_counter_matches": true
+      },
+      "file": "bfcl-conditional_pair_triple-sglang-trial-2.json",
+      "reported_cached_tokens": 596992
+    },
+    {
+      "aggregate_cached_tokens": 596992.0,
+      "checks": {
+        "cached_total_equals_sum": true,
+        "no_failed_requests": true,
+        "only_index_0_missing": true,
+        "prompt_counter_matches": true,
+        "request_counter_matches": true
+      },
+      "file": "bfcl-conditional_pair_triple-sglang-trial-3.json",
+      "reported_cached_tokens": 596992
+    },
+    {
+      "aggregate_cached_tokens": 1460979.0,
+      "checks": {
+        "cached_total_equals_sum": true,
+        "no_failed_requests": true,
+        "only_index_0_missing": true,
+        "prompt_counter_matches": true,
+        "request_counter_matches": true
+      },
+      "file": "bfcl-contextpilot_intra-sglang-trial-1.json",
+      "reported_cached_tokens": 1460979
+    },
+    {
+      "aggregate_cached_tokens": 1460979.0,
+      "checks": {
+        "cached_total_equals_sum": true,
+        "no_failed_requests": true,
+        "only_index_0_missing": true,
+        "prompt_counter_matches": true,
+        "request_counter_matches": true
+      },
+      "file": "bfcl-contextpilot_intra-sglang-trial-2.json",
+      "reported_cached_tokens": 1460979
+    },
+    {
+      "aggregate_cached_tokens": 1460979.0,
+      "checks": {
+        "cached_total_equals_sum": true,
+        "no_failed_requests": true,
+        "only_index_0_missing": true,
+        "prompt_counter_matches": true,
+        "request_counter_matches": true
+      },
+      "file": "bfcl-contextpilot_intra-sglang-trial-3.json",
+      "reported_cached_tokens": 1460979
+    },
+    {
+      "aggregate_cached_tokens": 1460979.0,
+      "checks": {
+        "cached_total_equals_sum": true,
+        "no_failed_requests": true,
+        "only_index_0_missing": true,
+        "prompt_counter_matches": true,
+        "request_counter_matches": true
+      },
+      "file": "bfcl-contextpilot_intra_schedule-sglang-trial-1.json",
+      "reported_cached_tokens": 1460979
+    },
+    {
+      "aggregate_cached_tokens": 1460979.0,
+      "checks": {
+        "cached_total_equals_sum": true,
+        "no_failed_requests": true,
+        "only_index_0_missing": true,
+        "prompt_counter_matches": true,
+        "request_counter_matches": true
+      },
+      "file": "bfcl-contextpilot_intra_schedule-sglang-trial-2.json",
+      "reported_cached_tokens": 1460979
+    },
+    {
+      "aggregate_cached_tokens": 1460979.0,
+      "checks": {
+        "cached_total_equals_sum": true,
+        "no_failed_requests": true,
+        "only_index_0_missing": true,
+        "prompt_counter_matches": true,
+        "request_counter_matches": true
+      },
+      "file": "bfcl-contextpilot_intra_schedule-sglang-trial-3.json",
+      "reported_cached_tokens": 1460979
+    },
+    {
+      "aggregate_cached_tokens": 1453690.0,
+      "checks": {
+        "cached_total_equals_sum": true,
+        "no_failed_requests": true,
+        "only_index_0_missing": true,
+        "prompt_counter_matches": true,
+        "request_counter_matches": true
+      },
+      "file": "bfcl-contextpilot_causal-sglang-trial-1.json",
+      "reported_cached_tokens": 1453690
+    },
+    {
+      "aggregate_cached_tokens": 1453690.0,
+      "checks": {
+        "cached_total_equals_sum": true,
+        "no_failed_requests": true,
+        "only_index_0_missing": true,
+        "prompt_counter_matches": true,
+        "request_counter_matches": true
+      },
+      "file": "bfcl-contextpilot_causal-sglang-trial-2.json",
+      "reported_cached_tokens": 1453690
+    },
+    {
+      "aggregate_cached_tokens": 1453690.0,
+      "checks": {
+        "cached_total_equals_sum": true,
+        "no_failed_requests": true,
+        "only_index_0_missing": true,
+        "prompt_counter_matches": true,
+        "request_counter_matches": true
+      },
+      "file": "bfcl-contextpilot_causal-sglang-trial-3.json",
+      "reported_cached_tokens": 1453690
+    },
+    {
+      "aggregate_cached_tokens": 171568.0,
+      "checks": {
+        "cached_total_equals_sum": true,
+        "no_failed_requests": true,
+        "only_index_0_missing": true,
+        "prompt_counter_matches": true,
+        "request_counter_matches": true
+      },
+      "file": "toolret-original-sglang-trial-1.json",
+      "reported_cached_tokens": 171568
+    },
+    {
+      "aggregate_cached_tokens": 171568.0,
+      "checks": {
+        "cached_total_equals_sum": true,
+        "no_failed_requests": true,
+        "only_index_0_missing": true,
+        "prompt_counter_matches": true,
+        "request_counter_matches": true
+      },
+      "file": "toolret-original-sglang-trial-2.json",
+      "reported_cached_tokens": 171568
+    },
+    {
+      "aggregate_cached_tokens": 171568.0,
+      "checks": {
+        "cached_total_equals_sum": true,
+        "no_failed_requests": true,
+        "only_index_0_missing": true,
+        "prompt_counter_matches": true,
+        "request_counter_matches": true
+      },
+      "file": "toolret-original-sglang-trial-3.json",
+      "reported_cached_tokens": 171568
+    },
+    {
+      "aggregate_cached_tokens": 758674.0,
+      "checks": {
+        "cached_total_equals_sum": true,
+        "no_failed_requests": true,
+        "only_index_0_missing": true,
+        "prompt_counter_matches": true,
+        "request_counter_matches": true
+      },
+      "file": "toolret-alphabetical-sglang-trial-1.json",
+      "reported_cached_tokens": 758674
+    },
+    {
+      "aggregate_cached_tokens": 758674.0,
+      "checks": {
+        "cached_total_equals_sum": true,
+        "no_failed_requests": true,
+        "only_index_0_missing": true,
+        "prompt_counter_matches": true,
+        "request_counter_matches": true
+      },
+      "file": "toolret-alphabetical-sglang-trial-2.json",
+      "reported_cached_tokens": 758674
+    },
+    {
+      "aggregate_cached_tokens": 758674.0,
+      "checks": {
+        "cached_total_equals_sum": true,
+        "no_failed_requests": true,
+        "only_index_0_missing": true,
+        "prompt_counter_matches": true,
+        "request_counter_matches": true
+      },
+      "file": "toolret-alphabetical-sglang-trial-3.json",
+      "reported_cached_tokens": 758674
+    },
+    {
+      "aggregate_cached_tokens": 1272153.0,
+      "checks": {
+        "cached_total_equals_sum": true,
+        "no_failed_requests": true,
+        "only_index_0_missing": true,
+        "prompt_counter_matches": true,
+        "request_counter_matches": true
+      },
+      "file": "toolret-tooltrie_v0-sglang-trial-1.json",
+      "reported_cached_tokens": 1272153
+    },
+    {
+      "aggregate_cached_tokens": 1272153.0,
+      "checks": {
+        "cached_total_equals_sum": true,
+        "no_failed_requests": true,
+        "only_index_0_missing": true,
+        "prompt_counter_matches": true,
+        "request_counter_matches": true
+      },
+      "file": "toolret-tooltrie_v0-sglang-trial-2.json",
+      "reported_cached_tokens": 1272153
+    },
+    {
+      "aggregate_cached_tokens": 1272153.0,
+      "checks": {
+        "cached_total_equals_sum": true,
+        "no_failed_requests": true,
+        "only_index_0_missing": true,
+        "prompt_counter_matches": true,
+        "request_counter_matches": true
+      },
+      "file": "toolret-tooltrie_v0-sglang-trial-3.json",
+      "reported_cached_tokens": 1272153
+    },
+    {
+      "aggregate_cached_tokens": 269612.0,
+      "checks": {
+        "cached_total_equals_sum": true,
+        "no_failed_requests": true,
+        "only_index_0_missing": true,
+        "prompt_counter_matches": true,
+        "request_counter_matches": true
+      },
+      "file": "toolret-cacheweaver-sglang-trial-1.json",
+      "reported_cached_tokens": 269612
+    },
+    {
+      "aggregate_cached_tokens": 269612.0,
+      "checks": {
+        "cached_total_equals_sum": true,
+        "no_failed_requests": true,
+        "only_index_0_missing": true,
+        "prompt_counter_matches": true,
+        "request_counter_matches": true
+      },
+      "file": "toolret-cacheweaver-sglang-trial-2.json",
+      "reported_cached_tokens": 269612
+    },
+    {
+      "aggregate_cached_tokens": 269612.0,
+      "checks": {
+        "cached_total_equals_sum": true,
+        "no_failed_requests": true,
+        "only_index_0_missing": true,
+        "prompt_counter_matches": true,
+        "request_counter_matches": true
+      },
+      "file": "toolret-cacheweaver-sglang-trial-3.json",
+      "reported_cached_tokens": 269612
+    },
+    {
+      "aggregate_cached_tokens": 619530.0,
+      "checks": {
+        "cached_total_equals_sum": true,
+        "no_failed_requests": true,
+        "only_index_0_missing": true,
+        "prompt_counter_matches": true,
+        "request_counter_matches": true
+      },
+      "file": "toolret-frequency_fitted-sglang-trial-1.json",
+      "reported_cached_tokens": 619530
+    },
+    {
+      "aggregate_cached_tokens": 619530.0,
+      "checks": {
+        "cached_total_equals_sum": true,
+        "no_failed_requests": true,
+        "only_index_0_missing": true,
+        "prompt_counter_matches": true,
+        "request_counter_matches": true
+      },
+      "file": "toolret-frequency_fitted-sglang-trial-2.json",
+      "reported_cached_tokens": 619530
+    },
+    {
+      "aggregate_cached_tokens": 619530.0,
+      "checks": {
+        "cached_total_equals_sum": true,
+        "no_failed_requests": true,
+        "only_index_0_missing": true,
+        "prompt_counter_matches": true,
+        "request_counter_matches": true
+      },
+      "file": "toolret-frequency_fitted-sglang-trial-3.json",
+      "reported_cached_tokens": 619530
+    },
+    {
+      "aggregate_cached_tokens": 625405.0,
+      "checks": {
+        "cached_total_equals_sum": true,
+        "no_failed_requests": true,
+        "only_index_0_missing": true,
+        "prompt_counter_matches": true,
+        "request_counter_matches": true
+      },
+      "file": "toolret-schema_cost_fitted-sglang-trial-1.json",
+      "reported_cached_tokens": 625405
+    },
+    {
+      "aggregate_cached_tokens": 625405.0,
+      "checks": {
+        "cached_total_equals_sum": true,
+        "no_failed_requests": true,
+        "only_index_0_missing": true,
+        "prompt_counter_matches": true,
+        "request_counter_matches": true
+      },
+      "file": "toolret-schema_cost_fitted-sglang-trial-2.json",
+      "reported_cached_tokens": 625405
+    },
+    {
+      "aggregate_cached_tokens": 625405.0,
+      "checks": {
+        "cached_total_equals_sum": true,
+        "no_failed_requests": true,
+        "only_index_0_missing": true,
+        "prompt_counter_matches": true,
+        "request_counter_matches": true
+      },
+      "file": "toolret-schema_cost_fitted-sglang-trial-3.json",
+      "reported_cached_tokens": 625405
+    },
+    {
+      "aggregate_cached_tokens": 619172.0,
+      "checks": {
+        "cached_total_equals_sum": true,
+        "no_failed_requests": true,
+        "only_index_0_missing": true,
+        "prompt_counter_matches": true,
+        "request_counter_matches": true
+      },
+      "file": "toolret-fp_tree_conditional-sglang-trial-1.json",
+      "reported_cached_tokens": 619172
+    },
+    {
+      "aggregate_cached_tokens": 619172.0,
+      "checks": {
+        "cached_total_equals_sum": true,
+        "no_failed_requests": true,
+        "only_index_0_missing": true,
+        "prompt_counter_matches": true,
+        "request_counter_matches": true
+      },
+      "file": "toolret-fp_tree_conditional-sglang-trial-2.json",
+      "reported_cached_tokens": 619172
+    },
+    {
+      "aggregate_cached_tokens": 619172.0,
+      "checks": {
+        "cached_total_equals_sum": true,
+        "no_failed_requests": true,
+        "only_index_0_missing": true,
+        "prompt_counter_matches": true,
+        "request_counter_matches": true
+      },
+      "file": "toolret-fp_tree_conditional-sglang-trial-3.json",
+      "reported_cached_tokens": 619172
+    },
+    {
+      "aggregate_cached_tokens": 619530.0,
+      "checks": {
+        "cached_total_equals_sum": true,
+        "no_failed_requests": true,
+        "only_index_0_missing": true,
+        "prompt_counter_matches": true,
+        "request_counter_matches": true
+      },
+      "file": "toolret-conditional_pair-sglang-trial-1.json",
+      "reported_cached_tokens": 619530
+    },
+    {
+      "aggregate_cached_tokens": 619530.0,
+      "checks": {
+        "cached_total_equals_sum": true,
+        "no_failed_requests": true,
+        "only_index_0_missing": true,
+        "prompt_counter_matches": true,
+        "request_counter_matches": true
+      },
+      "file": "toolret-conditional_pair-sglang-trial-2.json",
+      "reported_cached_tokens": 619530
+    },
+    {
+      "aggregate_cached_tokens": 619530.0,
+      "checks": {
+        "cached_total_equals_sum": true,
+        "no_failed_requests": true,
+        "only_index_0_missing": true,
+        "prompt_counter_matches": true,
+        "request_counter_matches": true
+      },
+      "file": "toolret-conditional_pair-sglang-trial-3.json",
+      "reported_cached_tokens": 619530
+    },
+    {
+      "aggregate_cached_tokens": 619530.0,
+      "checks": {
+        "cached_total_equals_sum": true,
+        "no_failed_requests": true,
+        "only_index_0_missing": true,
+        "prompt_counter_matches": true,
+        "request_counter_matches": true
+      },
+      "file": "toolret-conditional_pair_triple-sglang-trial-1.json",
+      "reported_cached_tokens": 619530
+    },
+    {
+      "aggregate_cached_tokens": 619530.0,
+      "checks": {
+        "cached_total_equals_sum": true,
+        "no_failed_requests": true,
+        "only_index_0_missing": true,
+        "prompt_counter_matches": true,
+        "request_counter_matches": true
+      },
+      "file": "toolret-conditional_pair_triple-sglang-trial-2.json",
+      "reported_cached_tokens": 619530
+    },
+    {
+      "aggregate_cached_tokens": 619530.0,
+      "checks": {
+        "cached_total_equals_sum": true,
+        "no_failed_requests": true,
+        "only_index_0_missing": true,
+        "prompt_counter_matches": true,
+        "request_counter_matches": true
+      },
+      "file": "toolret-conditional_pair_triple-sglang-trial-3.json",
+      "reported_cached_tokens": 619530
+    },
+    {
+      "aggregate_cached_tokens": 1467013.0,
+      "checks": {
+        "cached_total_equals_sum": true,
+        "no_failed_requests": true,
+        "only_index_0_missing": true,
+        "prompt_counter_matches": true,
+        "request_counter_matches": true
+      },
+      "file": "toolret-contextpilot_intra-sglang-trial-1.json",
+      "reported_cached_tokens": 1467013
+    },
+    {
+      "aggregate_cached_tokens": 1467013.0,
+      "checks": {
+        "cached_total_equals_sum": true,
+        "no_failed_requests": true,
+        "only_index_0_missing": true,
+        "prompt_counter_matches": true,
+        "request_counter_matches": true
+      },
+      "file": "toolret-contextpilot_intra-sglang-trial-2.json",
+      "reported_cached_tokens": 1467013
+    },
+    {
+      "aggregate_cached_tokens": 1467013.0,
+      "checks": {
+        "cached_total_equals_sum": true,
+        "no_failed_requests": true,
+        "only_index_0_missing": true,
+        "prompt_counter_matches": true,
+        "request_counter_matches": true
+      },
+      "file": "toolret-contextpilot_intra-sglang-trial-3.json",
+      "reported_cached_tokens": 1467013
+    },
+    {
+      "aggregate_cached_tokens": 1467013.0,
+      "checks": {
+        "cached_total_equals_sum": true,
+        "no_failed_requests": true,
+        "only_index_0_missing": true,
+        "prompt_counter_matches": true,
+        "request_counter_matches": true
+      },
+      "file": "toolret-contextpilot_intra_schedule-sglang-trial-1.json",
+      "reported_cached_tokens": 1467013
+    },
+    {
+      "aggregate_cached_tokens": 1467013.0,
+      "checks": {
+        "cached_total_equals_sum": true,
+        "no_failed_requests": true,
+        "only_index_0_missing": true,
+        "prompt_counter_matches": true,
+        "request_counter_matches": true
+      },
+      "file": "toolret-contextpilot_intra_schedule-sglang-trial-2.json",
+      "reported_cached_tokens": 1467013
+    },
+    {
+      "aggregate_cached_tokens": 1467013.0,
+      "checks": {
+        "cached_total_equals_sum": true,
+        "no_failed_requests": true,
+        "only_index_0_missing": true,
+        "prompt_counter_matches": true,
+        "request_counter_matches": true
+      },
+      "file": "toolret-contextpilot_intra_schedule-sglang-trial-3.json",
+      "reported_cached_tokens": 1467013
+    },
+    {
+      "aggregate_cached_tokens": 1444624.0,
+      "checks": {
+        "cached_total_equals_sum": true,
+        "no_failed_requests": true,
+        "only_index_0_missing": true,
+        "prompt_counter_matches": true,
+        "request_counter_matches": true
+      },
+      "file": "toolret-contextpilot_causal-sglang-trial-1.json",
+      "reported_cached_tokens": 1444624
+    },
+    {
+      "aggregate_cached_tokens": 1444624.0,
+      "checks": {
+        "cached_total_equals_sum": true,
+        "no_failed_requests": true,
+        "only_index_0_missing": true,
+        "prompt_counter_matches": true,
+        "request_counter_matches": true
+      },
+      "file": "toolret-contextpilot_causal-sglang-trial-2.json",
+      "reported_cached_tokens": 1444624
+    },
+    {
+      "aggregate_cached_tokens": 1444624.0,
+      "checks": {
+        "cached_total_equals_sum": true,
+        "no_failed_requests": true,
+        "only_index_0_missing": true,
+        "prompt_counter_matches": true,
+        "request_counter_matches": true
+      },
+      "file": "toolret-contextpilot_causal-sglang-trial-3.json",
+      "reported_cached_tokens": 1444624
+    }
+  ]
+}

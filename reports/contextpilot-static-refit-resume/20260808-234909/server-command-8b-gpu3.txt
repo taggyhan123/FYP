@@ -1,0 +1,8 @@
+PATH=/home/taghan/tatm/.venv/bin:$PATH \
+VLLM_SERVER_DEV_MODE=1 VLLM_USE_FLASHINFER_SAMPLER=0 \
+CUDA_VISIBLE_DEVICES=3 \
+CPATH=/home/taghan/miniconda3/envs/hdr312/include/python3.12 \
+/home/taghan/tatm/.venv/bin/vllm serve Qwen/Qwen3-8B \
+  --enable-prefix-caching --enable-auto-tool-choice --tool-call-parser hermes \
+  --host 127.0.0.1 --port 8003 \
+  2>&1 | tee "$RESUME_RESULTS/vllm-qwen3-8b-gpu3.log"

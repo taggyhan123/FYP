@@ -114,7 +114,45 @@ case and only break them: ContextPilot loses 5 and recovers 0, the counter loses
 7 and recovers 0, while ToolTrie-v0 is bidirectional at 5 and 4. The counts are
 small, so this indicates a direction rather than a resolved magnitude.
 
-## 5. How frequency is estimated decides whether it works
+## 5. Tool-schema prefill dominates TTFT, and retrieval depth sets the cost
+
+The brief's first question. Prompt size and time-to-first-token both scale with
+menu depth, on the retrieved workloads:
+
+| k | prompt tokens/query | TTFT (fallback) | TTFT (ToolTrie-v0) |
+| ---: | ---: | ---: | ---: |
+| 4 | 640 | 32.3 ms | 31.2 ms |
+| 16 | 2,139 | 70.7 ms | 70.3 ms |
+| 64 | 8,361 | 349.7 ms | 350.0 ms |
+| 128 | 16,267 | 937.0 ms | 933.5 ms |
+
+Prompt cost grows about 25× from k=4 to k=128 while retrieval macro-recall rises
+only 25.8 points, so deeper menus buy little and cost a great deal. **Ordering
+does not change this**: the three-trial TTFT intervals overlap at every depth and
+no paired-difference test was predeclared, so nothing here establishes that
+reordering makes retrieved-menu serving faster.
+
+## 6. Under cache pressure, a fixed random ordering wins
+
+The brief asks for the empirical order plus uniform, skewed and session-bursty
+replays. With the cache capped at 480 blocks and all 24 regime-runs accepted at
+91.0–91.9% peak occupancy:
+
+| Ordering | empirical | uniform | skewed | session-bursty |
+| --- | ---: | ---: | ---: | ---: |
+| Original | 1.18% | 0.69% | 1.24% | 0.69% |
+| Alphabetical | 29.21% | 29.35% | 28.06% | 27.76% |
+| **Random, seed 42** | **32.16%** | **31.27%** | **32.67%** | **30.19%** |
+| Frequency = schema-cost = FP-tree | 9.44% | 8.99% | 9.51% | 9.00% |
+
+A fixed random permutation leads in **every** regime, and the fitted policies
+trail it by more than 20 points. Locality regime barely moves any row — the
+ordering matters far more than the request distribution. This is one run per
+cell at one seed with no repeated-trial interval, so it motivates a seed sweep
+rather than a recommendation; but it is hard to reconcile with the premise that
+engineered orderings beat arbitrary ones.
+
+## 7. How frequency is estimated decides whether it works
 
 Fitting tool frequency on a held-out corpus reaches 39.69%, and on ToolRet is
 worse than alphabetical. Estimating the same signal online from the served
@@ -123,7 +161,7 @@ given evaluation stream shares. This reverses our earlier conclusion that
 frequency-based ordering does not help, and it means any comparison of
 frequency ordering must state which estimator it used.
 
-## 6. Ordering effects on quality are a small-model artifact
+## 8. Ordering effects on quality are a small-model artifact
 
 Ordering moves full-call accuracy by 11.6 points at 0.6B and 3.8 points at 4B.
 An irrelevance regression visible at 8B (−5.00 points) does not reproduce at 4B
@@ -132,12 +170,16 @@ model rather than the method — which is why the primary result uses 4B.
 
 ## Scope and limitations
 
-- **Latency is not established.** Reuse measures prefill work avoided, not
-  time-to-first-token. Planning cost is excluded from every figure and is not
-  negligible: static refit costs 0.75 s/request at n=800 against roughly 2–7 ms
-  for the persistent API.
+- **No ordering policy is shown to be faster.** Finding 5 establishes that
+  tool-schema prefill dominates TTFT, but the three-trial intervals between
+  orderings overlap at every depth. Planning cost is also excluded from every
+  figure and is not negligible: static refit costs 0.75 s/request at n=800
+  against roughly 2–7 ms for the persistent API.
 - One menu seed and one request sequence per condition; single-tenant server
   with no competing traffic. All figures are therefore best cases.
+- The cache-pressure matrix (finding 6) is one run per cell at a single random
+  seed, on a deliberately capped 480-block cache. Its values must not be
+  compared numerically against the 190,896-token results above.
 - Quality uses a reduced BFCL-style AST checker, so values are comparable within
   this work but not against published BFCL leaderboard scores.
 - No equivalence margins were declared, so quality comparisons are estimation
@@ -153,7 +195,11 @@ model rather than the method — which is why the primary result uses 4B.
    fixed at 128 throughout with no sensitivity analysis, and its `visit_count`
    field is maintained but never read — the popularity signal its objective
    currently lacks.
-3. **Add menu seeds to the irrelevance measurement.** 160 cases at one seed
+3. **Sweep the random seed under cache pressure.** Finding 6 shows one random
+   permutation beating every engineered ordering by 20+ points in all four
+   locality regimes. Either that generalises, which undercuts the premise of
+   ordering optimisation, or it does not, which is equally worth knowing.
+4. **Add menu seeds to the irrelevance measurement.** 160 cases at one seed
    cannot settle whether high-reuse orderings genuinely harm refusal behaviour.
-4. **Build a retrieval-realistic benchmark.** The central negative result argues
+5. **Build a retrieval-realistic benchmark.** The central negative result argues
    that padded menus should not be used to evaluate ordering policies at all.

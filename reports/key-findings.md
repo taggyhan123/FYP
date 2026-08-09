@@ -100,7 +100,9 @@ from padded menus will be optimistic by roughly two orders of magnitude.**
 > **Brief §7 Q3** — *Does frequency-based ordering improve reusable prefix length?*
 > **Brief §7 Q4** — *Does weighting by schema length or prefill time perform better?*
 
-Reuse on Qwen3-0.6B, vLLM, 3 trials — the same frequency signal, two estimators:
+Reuse on **Qwen3-0.6B** at 190,896-token capacity, vLLM, 3 trials — the same
+frequency signal under two estimators. These policies were only ever run at that
+size; the menus are byte-identical to those in Table 1.
 
 | Ordering | BFCL padded-64 | ToolRet padded-64 |
 | --- | ---: | ---: |
@@ -124,7 +126,8 @@ BFCL, identical to the digit, because it emits an identical ordering there.
 ## 4. Pair/triple structure was not actually tested on the padded workload
 > **Brief §7 Q5** — *How much additional benefit comes from pair/triple workflow structure?*
 
-Qwen3-0.6B, vLLM, 3 trials — these policies were only ever run at that size:
+**Qwen3-0.6B** at 190,896-token capacity, vLLM, 3 trials — these policies were
+only ever run at that size:
 
 | Fitted policy | BFCL padded-64 | ToolRet padded-64 |
 | --- | ---: | ---: |
@@ -209,10 +212,10 @@ method — which is why the primary result uses 4B.
 
 Three regimes, in increasing order of how badly it does:
 
-- **Retrieved menus.** ToolTrie-v0 reaches 0.89% at k=128 against a 0.34%
-  fallback. The gain is real but negligible in absolute terms.
-- **Against stronger comparators.** Both ContextPilot adaptations beat it in all
-  twelve systems cells, and the online counter beats it in ten of twelve. Its
+- **Retrieved menus.** On Qwen3-4B, ToolTrie-v0 reaches 0.89% at k=128 against a
+  0.34% fallback. The gain is real but negligible in absolute terms.
+- **Against stronger comparators.** Across both models, both ContextPilot
+  adaptations beat it in all twelve systems cells, and the online counter beats it in ten of twelve. Its
   advantage over the static baselines is concentrated entirely in the padded
   regime.
 - **On the padded benchmark, the workload itself is the problem.** Position is a

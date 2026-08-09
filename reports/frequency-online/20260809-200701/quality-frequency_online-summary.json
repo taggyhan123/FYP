@@ -1,0 +1,15 @@
+{
+  "adapts_online": true,
+  "final_state": {
+    "max_presence": 800,
+    "requests_observed": 800,
+    "tools_seen": 1078
+  },
+  "format_version": 1,
+  "information_regime": "causal",
+  "input": "/home/taghan/contextpilot-dual-model-20260809-004603/shared-workloads/quality-original.jsonl",
+  "output": "/home/taghan/frequency-online-20260809-200701/quality-frequency_online.jsonl",
+  "policy": "frequency_online",
+  "requests": 800,
+  "training_input": null
+}

@@ -10,8 +10,9 @@ adopt this policy.
 model revisions matching the dual-model run.
 
 **Raw archive** `/home/taghan/frequency-online-20260809-200701.tar.gz`
-9.6 MB, 87 entries, `tar -tzf` verified,
-sha256 `e6a774b158069a3742adb66584d35dc7053c443da8d5ef500f077f51e308caef`.
+14 MB, 102 entries, `tar -tzf` verified,
+sha256 `9089bc5c69403375546cf30292c451f7dbe044def0c8bd93c3be62ffe296939b`.
+(Re-archived after the quality replays below were added.)
 
 `PREDECLARATION.md` in this directory was written **before** any workload was
 built or any replay executed.
@@ -28,7 +29,8 @@ reported gap was therefore adaptivity, not algorithm.
 
 The structural reason it fails on this benchmark: across the 200
 `bfcl-padded64` menus there are 262 distinct tools, of which **63 appear in
-every single menu** and 199 appear in exactly one each. Measured reuse tracks
+every single menu**, 198 appear in exactly one, and one appears in two
+(verified distribution `{1: 198, 2: 1, 200: 63}`). Measured reuse tracks
 the mean position of the one non-shared tool almost exactly:
 
 | ordering | mean position of unique tool | measured reuse |
@@ -68,8 +70,10 @@ near-identical. Baseline columns are from the accepted dual-model run.
 36 `frequency_online` replays, all 200 requests, zero failures, all
 `counter_validation.clean`, cache reset before each.
 
-**`frequency_online` beats `tooltrie_v0` in all 12 cells** and matches
-ContextPilot on padded menus.
+**`frequency_online` beats `tooltrie_v0` in 10 of 12 cells** and matches
+ContextPilot on padded menus. It loses both BM25 k=4 cells (17.01% against
+17.48%). An earlier version of this handover claimed 12/12; that was wrong and
+is corrected here.
 
 ### Same-session control
 
@@ -116,12 +120,67 @@ padded menus, 1–19% on BM25 — held on both counts.
 
 ## Limits
 
-- **Systems only. No quality replay was run for `frequency_online`.** Ordering
-  moved `full_accuracy` by up to 11.6 pp at 0.6B, so nothing should be assumed
-  about its quality effect in either direction.
+- Quality has since been measured (see below); the earlier "systems only"
+  limitation no longer applies.
 - No equivalence margin declared; no equivalence claim is made.
 - Single menu seed (42), inherited from the shared workloads.
 - The two servers ran concurrently on GPU 2 and GPU 3, so latency figures from
   this run are contention-affected and are not reported. Reuse is deterministic
   and unaffected — demonstrated by zero spread across trials and identical
   values at two very different cache sizes.
+
+
+## Quality — added after the systems run
+
+n=800 BFCL, 640 relevance + 160 irrelevance, `--max-tokens 128
+--disable-thinking --reset-before`. Both replays: 800 requests, zero failures,
+`counter_validation.clean`, correct pinned model. Baseline columns are the
+accepted dual-model arms.
+
+### Qwen3-4B (primary)
+
+| condition | full | name | no_tool |
+| --- | --- | --- | --- |
+| original | 76.09% | 83.13% | **88.12%** |
+| alphabetical | 73.28% | 82.19% | 85.62% |
+| tooltrie_v0 | 75.31% | 83.75% | 87.50% |
+| cp-online | **77.03%** | **84.38%** | 85.00% |
+| cp-static-refit | **77.03%** | **84.38%** | 85.00% |
+| **frequency_online** | 76.88% | **84.38%** | 83.75% |
+
+`frequency_online` is identical to both ContextPilot arms on `name_correct` and
+0.15 pp below them on `full_correct` — one case out of 640. Having already
+matched them on reuse, it matches them on quality.
+
+### Qwen3-0.6B (replication)
+
+| condition | full | name | no_tool |
+| --- | --- | --- | --- |
+| original | **55.16%** | **73.75%** | 86.25% |
+| alphabetical | 43.59% | 60.47% | **94.37%** |
+| tooltrie_v0 | 53.28% | 69.06% | 93.13% |
+| cp-online | 51.72% | 68.91% | 91.25% |
+| cp-static-refit | 51.88% | 68.91% | 91.25% |
+| **frequency_online** | 53.28% | 69.84% | 90.62% |
+
+At 0.6B **every** reordering policy is worse than `original` on both relevance
+metrics and better on `no_tool`. `frequency_online` is the least damaging of
+them on relevance.
+
+### Reuse and irrelevance accuracy are in tension
+
+Among the policies that actually achieve reuse, `no_tool` accuracy at 4B
+degrades monotonically with reuse:
+
+| policy | BFCL padded-64 reuse | no_tool vs original |
+| --- | --- | --- |
+| tooltrie_v0 | 87.19% | −0.62 pp |
+| cp-online | 96.16% | −3.12 pp |
+| frequency_online | 96.27% | −4.37 pp |
+
+These policies all work by pushing the request-specific tool behind ~63 stable
+ones, so the menu is dominated by a block the model has seen repeatedly. A
+plausible reading is that this primes tool-calling and suppresses declining.
+**This is a hypothesis, not a measured mechanism**, and no equivalence margin
+was declared for any of these comparisons — they are estimation only. If it
+holds, the "free win" framing of ordering optimisation is wrong.

@@ -1,0 +1,112 @@
+{
+  "format_version": 1,
+  "models": {
+    "Qwen/Qwen3-0.6B": {
+      "by_domain": {
+        "irrelevance": {
+          "full_accuracy": null,
+          "function_name_accuracy": null,
+          "irrelevance_tasks": 160,
+          "no_tool_accuracy": 0.9062,
+          "relevance_tasks": 0,
+          "tasks_scored": 160
+        },
+        "multiple": {
+          "full_accuracy": 0.6188,
+          "function_name_accuracy": 0.7875,
+          "irrelevance_tasks": 0,
+          "no_tool_accuracy": null,
+          "relevance_tasks": 160,
+          "tasks_scored": 160
+        },
+        "parallel": {
+          "full_accuracy": 0.4,
+          "function_name_accuracy": 0.5813,
+          "irrelevance_tasks": 0,
+          "no_tool_accuracy": null,
+          "relevance_tasks": 160,
+          "tasks_scored": 160
+        },
+        "parallel_multiple": {
+          "full_accuracy": 0.3563,
+          "function_name_accuracy": 0.5125,
+          "irrelevance_tasks": 0,
+          "no_tool_accuracy": null,
+          "relevance_tasks": 160,
+          "tasks_scored": 160
+        },
+        "simple_python": {
+          "full_accuracy": 0.7562,
+          "function_name_accuracy": 0.9125,
+          "irrelevance_tasks": 0,
+          "no_tool_accuracy": null,
+          "relevance_tasks": 160,
+          "tasks_scored": 160
+        }
+      },
+      "overall": {
+        "full_accuracy": 0.5328,
+        "function_name_accuracy": 0.6984,
+        "irrelevance_tasks": 160,
+        "no_tool_accuracy": 0.9062,
+        "relevance_tasks": 640,
+        "tasks_scored": 800
+      }
+    },
+    "Qwen/Qwen3-4B": {
+      "by_domain": {
+        "irrelevance": {
+          "full_accuracy": null,
+          "function_name_accuracy": null,
+          "irrelevance_tasks": 160,
+          "no_tool_accuracy": 0.8375,
+          "relevance_tasks": 0,
+          "tasks_scored": 160
+        },
+        "multiple": {
+          "full_accuracy": 0.8625,
+          "function_name_accuracy": 0.9625,
+          "irrelevance_tasks": 0,
+          "no_tool_accuracy": null,
+          "relevance_tasks": 160,
+          "tasks_scored": 160
+        },
+        "parallel": {
+          "full_accuracy": 0.7125,
+          "function_name_accuracy": 0.7812,
+          "irrelevance_tasks": 0,
+          "no_tool_accuracy": null,
+          "relevance_tasks": 160,
+          "tasks_scored": 160
+        },
+        "parallel_multiple": {
+          "full_accuracy": 0.5687,
+          "function_name_accuracy": 0.6312,
+          "irrelevance_tasks": 0,
+          "no_tool_accuracy": null,
+          "relevance_tasks": 160,
+          "tasks_scored": 160
+        },
+        "simple_python": {
+          "full_accuracy": 0.9313,
+          "function_name_accuracy": 1.0,
+          "irrelevance_tasks": 0,
+          "no_tool_accuracy": null,
+          "relevance_tasks": 160,
+          "tasks_scored": 160
+        }
+      },
+      "overall": {
+        "full_accuracy": 0.7688,
+        "function_name_accuracy": 0.8438,
+        "irrelevance_tasks": 160,
+        "no_tool_accuracy": 0.8375,
+        "relevance_tasks": 640,
+        "tasks_scored": 800
+      }
+    }
+  },
+  "n_per_model": 800,
+  "note": "Compact view; per-case rows in the raw archive.",
+  "policy": "frequency_online"
+}

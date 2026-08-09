@@ -11,8 +11,10 @@ evidence limits.
 model revisions matching the dual-model run.
 
 **Raw archive** `/home/taghan/frequency-online-20260809-200701.tar.gz`
-9.6 MB, 87 entries, `tar -tzf` verified,
-sha256 `e6a774b158069a3742adb66584d35dc7053c443da8d5ef500f077f51e308caef`.
+14 MB, 102 entries, `tar -tzf` verified,
+sha256 `9089bc5c69403375546cf30292c451f7dbe044def0c8bd93c3be62ffe296939b`.
+(Re-archived after the quality replays below were added; the earlier
+systems-only archive `e6a774b1…` no longer exists on disk.)
 
 The executor states that `PREDECLARATION.md` was written **before** any workload
 was built or replay executed. It was pushed in the same final commit as the
@@ -127,9 +129,7 @@ padded menus, 1–19% on BM25 — held on both counts.
 
 ## Limits
 
-- **Systems only. No quality replay was run for `frequency_online`.** Ordering
-  moved `full_accuracy` by up to 11.6 pp at 0.6B, so nothing should be assumed
-  about its quality effect in either direction.
+- Quality has since been measured (see below).
 - No equivalence margin declared; no equivalence claim is made.
 - Single menu seed (42), inherited from the shared workloads.
 - The predeclaration specified one server at a time, but the two model servers
@@ -142,3 +142,58 @@ padded menus, 1–19% on BM25 — held on both counts.
 - Git contains aggregate reuse values and builder summaries, not the 36 raw
   replay files. The executor's clean-counter claim depends on the server-only
   archive until it is copied and re-audited.
+
+## Quality — added after the systems run
+
+n=800 BFCL, 640 relevance + 160 irrelevance, `--max-tokens 128
+--disable-thinking --reset-before`. Both replays: 800 requests, zero failures,
+`counter_validation.clean`, correct pinned model. Baseline columns are the
+accepted dual-model arms.
+
+### Qwen3-4B (primary)
+
+| condition | full | name | no_tool |
+| --- | --- | --- | --- |
+| original | 76.09% | 83.13% | **88.12%** |
+| alphabetical | 73.28% | 82.19% | 85.62% |
+| tooltrie_v0 | 75.31% | 83.75% | 87.50% |
+| cp-online | **77.03%** | **84.38%** | 85.00% |
+| cp-static-refit | **77.03%** | **84.38%** | 85.00% |
+| **frequency_online** | 76.88% | **84.38%** | 83.75% |
+
+`frequency_online` is identical to both ContextPilot arms on `name_correct` and
+0.15 pp below them on `full_correct` — one case out of 640. Having already
+matched them on reuse, it matches them on quality.
+
+### Qwen3-0.6B (replication)
+
+| condition | full | name | no_tool |
+| --- | --- | --- | --- |
+| original | **55.16%** | **73.75%** | 86.25% |
+| alphabetical | 43.59% | 60.47% | **94.37%** |
+| tooltrie_v0 | 53.28% | 69.06% | 93.13% |
+| cp-online | 51.72% | 68.91% | 91.25% |
+| cp-static-refit | 51.88% | 68.91% | 91.25% |
+| **frequency_online** | 53.28% | 69.84% | 90.62% |
+
+At 0.6B **every** reordering policy is worse than `original` on both relevance
+metrics and better on `no_tool`. `frequency_online` is the least damaging of
+them on relevance.
+
+### Reuse and irrelevance accuracy are in tension
+
+Among the policies that actually achieve reuse, `no_tool` accuracy at 4B
+degrades monotonically with reuse:
+
+| policy | BFCL padded-64 reuse | no_tool vs original |
+| --- | --- | --- |
+| tooltrie_v0 | 87.19% | −0.62 pp |
+| cp-online | 96.16% | −3.12 pp |
+| frequency_online | 96.27% | −4.37 pp |
+
+These policies all work by pushing the request-specific tool behind ~63 stable
+ones, so the menu is dominated by a block the model has seen repeatedly. A
+plausible reading is that this primes tool-calling and suppresses declining.
+**This is a hypothesis, not a measured mechanism**, and no equivalence margin
+was declared for any of these comparisons — they are estimation only. If it
+holds, the "free win" framing of ordering optimisation is wrong.

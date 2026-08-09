@@ -12,3 +12,8 @@ data/tokenizers/
 
 # Local experiment output.
 cluster/results/
+
+# Rendered report HTML — regenerate with scripts/render_task_report.py
+task_b_e.html
+task_c_d.html
+reports/initial-findings.html

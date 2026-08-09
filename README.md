@@ -3,7 +3,8 @@
 This repository contains the local, reproducible foundation for the FYP
 described in [initial-research-brief.md](initial-research-brief.md).
 See [PROJECT_STATUS.md](PROJECT_STATUS.md) for the task-by-task completion and
-the exact SoC cluster boundary.
+the exact SoC cluster boundary, and [REPOSITORY.md](REPOSITORY.md) for what
+every tracked file is for.
 
 Implemented locally:
 
@@ -58,9 +59,10 @@ if the cluster experiment uses a different model.
 
 ## Main outputs
 
-- `task_c_d.html` — polished browser report for Tasks C and D;
-- `task_c_d.pdf` — print-ready version of the same report;
-- `task_c_d.md` — maintainable source used to generate both versions;
+- `task_c_d.md` / `task_b_e.md` — maintainable sources for the task reports;
+- `task_c_d.pdf` / `task_b_e.pdf` — print-ready versions;
+  (the browser `.html` is generated, not tracked — run
+  `uv run python scripts/render_task_report.py`);
 - `notes/reading-note.md` — Task A reading note and request-flow diagram;
 - `reports/dataset-inventory.md` — Task C dataset and schema report;
 - `reports/access-patterns.md` — Task D workload and trie analysis;

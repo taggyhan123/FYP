@@ -1,0 +1,56 @@
+{
+  "by_domain": {
+    "irrelevance": {
+      "full_accuracy": null,
+      "function_name_accuracy": null,
+      "irrelevance_tasks": 160,
+      "no_tool_accuracy": 0.8438,
+      "relevance_tasks": 0,
+      "tasks_scored": 160
+    },
+    "multiple": {
+      "full_accuracy": 0.8875,
+      "function_name_accuracy": 0.9688,
+      "irrelevance_tasks": 0,
+      "no_tool_accuracy": null,
+      "relevance_tasks": 160,
+      "tasks_scored": 160
+    },
+    "parallel": {
+      "full_accuracy": 0.75,
+      "function_name_accuracy": 0.7875,
+      "irrelevance_tasks": 0,
+      "no_tool_accuracy": null,
+      "relevance_tasks": 160,
+      "tasks_scored": 160
+    },
+    "parallel_multiple": {
+      "full_accuracy": 0.575,
+      "function_name_accuracy": 0.65,
+      "irrelevance_tasks": 0,
+      "no_tool_accuracy": null,
+      "relevance_tasks": 160,
+      "tasks_scored": 160
+    },
+    "simple_python": {
+      "full_accuracy": 0.925,
+      "function_name_accuracy": 0.9875,
+      "irrelevance_tasks": 0,
+      "no_tool_accuracy": null,
+      "relevance_tasks": 160,
+      "tasks_scored": 160
+    }
+  },
+  "condition": "contextpilot-static_refit_causal",
+  "format_version": 1,
+  "model": "Qwen/Qwen3-8B",
+  "n": 800,
+  "overall": {
+    "full_accuracy": 0.7844,
+    "function_name_accuracy": 0.8484,
+    "irrelevance_tasks": 160,
+    "no_tool_accuracy": 0.8438,
+    "relevance_tasks": 640,
+    "tasks_scored": 800
+  }
+}

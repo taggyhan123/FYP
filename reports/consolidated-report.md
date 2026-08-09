@@ -47,6 +47,31 @@ persistent arm's reuse falls from 95–96% on padded menus to 1.99–18.72% on
 retrieved menus, confirming that workload overlap—not the planner label—drives
 the large headline.
 
+**The primary model is Qwen3-4B.** The supervisor-requested dual-model protocol
+designates Qwen3-4B primary and Qwen3-0.6B a replication; 190 GPU replays were
+accepted with all 33 audit checks passing. The headline numbers, all from that
+accepted matrix except where noted:
+
+| Qwen3-4B (native capacity 96,832) | BFCL padded-64 reuse | BM25 k=128 reuse | full call | no-tool |
+| --- | ---: | ---: | ---: | ---: |
+| Original text prefill | 1.19% | 0.34% | 76.09% | **88.12%** |
+| Alphabetical | 37.99% | 0.44% | 73.28% | 85.62% |
+| ToolTrie-v0 | 87.19% | 0.89% | 75.31% | 87.50% |
+| ContextPilot persistent API | **96.16%** | 1.35% | **77.03%** | 85.00% |
+| ContextPilot static refit | **96.16%** | **2.23%** | **77.03%** | 85.00% |
+| `frequency_online` | 96.27% † | 2.33% † | 76.88% | 83.75% |
+
+† `frequency_online` systems figures come from a separate run at capacity
+101,120; a same-session ContextPilot control reproduced the accepted values to
+within 0.01 points, so the columns are comparable.
+
+Three things follow. Reuse collapses from 96% to under 3% between a padded menu
+and a realistically retrieved one, for **every** policy. On the padded control
+`frequency_online` and both ContextPilot arms are tied at the structural
+ceiling, so that benchmark cannot separate a counter from a clusterer. And no
+reordering improves on ordinary text prefill by more than about one point of
+full-call accuracy, while all of them lose no-tool accuracy.
+
 **Audit note (updated 2026-08-09).** Sequence-dependent planner intervals in the
 historical reports describe their fixed request order; they do not include
 uncertainty over alternative request sequences. The replacement SGLang audit
@@ -436,8 +461,35 @@ The causal `frequency_online` ablation then isolates adaptivity. It reaches
 unseen non-universal tool moves to the tail after the first observation. This
 is a valid demonstration that the padded positive control cannot distinguish a
 trie or clusterer from a simple counter. It is not a universal winner: it beats
-ToolTrie-v0 in 10/12 cells, loses both BM25 k=4 cells (17.01% versus 17.48%),
-and has no quality replay. See `reports/frequency-online/findings.md`.
+ToolTrie-v0 in 10/12 cells and loses both BM25 k=4 cells (17.01% versus
+17.48%). See `reports/frequency-online/findings.md`.
+
+**Both saturate the same ceiling, so 96.27% does not beat 96.16%.** A
+per-request audit shows `frequency_online` caches exactly 6,704 tokens — 419
+blocks — on every request from the third onward. That is the whole block-aligned
+shared prefix: preamble plus the 63 universal schemas. Nothing further *can* be
+cached, because everything after it differs by construction. Its only two losses
+are request 0, cold for any causal policy, and request 1, where the
+zero-information cold ordering diverges early. The gap to the persistent
+ContextPilot arm is 95 blocks across 200 requests, which is a tie at the
+structural maximum rather than a win.
+
+One variable predicts the whole table: **how many tools per request are not
+shared by all**. BFCL padded-64 has 63 universal tools and exactly one
+non-shared tool per request, and counting ties clustering there. ToolRet
+padded-64 has 60 universal and four non-shared, and clustering pulls ahead
+(95.27% versus 94.80%) because the order *among* those four then matters. The
+BM25 workloads have no universal set at all.
+
+The frozen `frequency_fitted` result was re-audited to the same standard and is
+sound: counters clean, request 0 cold in every trial, zero trial spread,
+aggregate equal to the sum of per-request deltas, and total prompt tokens
+identical across all conditions on the same menus. A leakage check is decisive
+in the other direction — a fit contaminated by evaluation data would rank the
+universal tools first and reach ~96%, whereas the fitted ranking places them
+mid-menu (mean position 31.6 of 64 on BFCL) and on ToolRet promotes a
+training-frequent tool to near-first, destroying the prefix immediately. Its
+failure is itself evidence of its integrity.
 
 ### 4.7 Quality and safety — a real frontier
 
@@ -468,6 +520,25 @@ the same 800-case quality design:
 | Qwen3-4B | ToolTrie-v0 | 83.75% | 75.31% | 87.50% |
 | Qwen3-4B | ContextPilot persistent API | **84.38%** | **77.03%** | 85.00% |
 | Qwen3-4B | ContextPilot static refit | **84.38%** | **77.03%** | 85.00% |
+| Qwen3-4B | `frequency_online` | **84.38%** | 76.88% | 83.75% |
+
+The Qwen3-0.6B replication, same 800-case design:
+
+| Model | Condition | function-name | full call | no-tool |
+| --- | --- | ---: | ---: | ---: |
+| Qwen3-0.6B | Original | **73.75%** | **55.16%** | 86.25% |
+| Qwen3-0.6B | Alphabetical | 60.47% | 43.59% | **94.37%** |
+| Qwen3-0.6B | ToolTrie-v0 | 69.06% | 53.28% | 93.13% |
+| Qwen3-0.6B | ContextPilot persistent API | 68.91% | 51.72% | 91.25% |
+| Qwen3-0.6B | ContextPilot static refit | 68.91% | 51.88% | 91.25% |
+| Qwen3-0.6B | `frequency_online` | 69.84% | 53.28% | 90.62% |
+
+`frequency_online` matches both ContextPilot arms on 4B function-name accuracy
+exactly and sits 0.15 points below them on full-call accuracy, a difference of
+one scored case in 640. Having matched them on reuse it also matches them on
+quality, with no clustering, no trie and no training corpus. At 0.6B it is the
+least damaging reordering on relevance, though every reordering there is worse
+than original order.
 
 The fresh 4B relevance-side gain over alphabetical reproduces the earlier 4B
 addendum, but no-tool accuracy is highest under original order. ContextPilot
@@ -476,6 +547,24 @@ points in the fresh 4B run, whose fixed-sequence interval spans zero. Ranking
 by function-name accuracy and no-tool accuracy is negatively associated in the
 historical 8B matrix, but the current evidence does **not** show a universal
 causal trade-off.
+
+A per-case audit against `original` at 4B sharpens what the no-tool column is
+showing. Of 160 irrelevance cases, `original` is correct on 141, and the
+reordering policies differ from it as follows:
+
+| Policy | cases lost | cases recovered | net |
+| --- | ---: | ---: | ---: |
+| ToolTrie-v0 | 5 | **4** | −1 |
+| ContextPilot persistent API | 5 | **0** | −5 |
+| `frequency_online` | 7 | **0** | −7 |
+
+ToolTrie-v0 is bidirectional, which is what noise looks like. The two
+high-reuse policies recover **zero** cases: exact McNemar gives p ≈ 0.016 for
+`frequency_online` and p ≈ 0.063 for the persistent API. So the defensible
+statement is that the high-reuse policies never repair an irrelevance case and
+only break them — **not** that degradation scales with reuse, which 1, 5 and 7
+cases out of 160 cannot establish. No equivalence margin was declared for any of
+these comparisons, so they remain estimation only.
 
 The two 8B ContextPilot rows have identical aggregate and paired statistics,
 but the 8B matrix has no `original` row. Because alphabetical is a harmful

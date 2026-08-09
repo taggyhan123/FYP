@@ -50,7 +50,7 @@ server described in `cluster/README.md`.
 
 The external-comparison sequence—including the targeted BFCL no-tool test,
 same-server vLLM controls, and separately labeled SGLang run—is in
-[`NUS_GPU_PHASE2_INSTRUCTIONS.md`](NUS_GPU_PHASE2_INSTRUCTIONS.md). Its GPU
+[`NUS_GPU_PHASE2_INSTRUCTIONS.md`](runbooks/NUS_GPU_PHASE2_INSTRUCTIONS.md). Its GPU
 measurements remain pending until that runbook is executed on the NUS server.
 
 The default tokenizer is `Qwen/Qwen3-0.6B`. Its official `tokenizer.json` is

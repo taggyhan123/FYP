@@ -22,23 +22,27 @@ reference, except where explicitly noted.
 | `task_b_e.md` / `task_b_e.pdf` | Task B/E deliverable and its print version |
 | `task_c_d.md` / `task_c_d.pdf` | Task C/D deliverable and its print version |
 
-## GPU runbooks (root)
+## `runbooks/` — GPU runbooks
 
-Predeclared protocols executed on the NUS server. Referenced **by path** from
-`PROJECT_STATUS.md`, `README.md`, `cluster/README.md`, and from handover records
-that state which runbook they executed. **Moving them breaks those links or
-forces edits to evidence documents, so they stay at the root.**
+Predeclared protocols executed on the NUS server; each fixes conditions, models
+and acceptance criteria before measurement. **All eight are executed; none is
+pending.** See `runbooks/README.md` for the status table, including the one
+protocol that was only partially executed before being superseded.
+
+Handover and findings documents name these in prose rather than linking to them,
+so they were moved out of the repository root on 2026-08-10 with only one link
+to update.
 
 | Runbook | Purpose |
 | --- | --- |
-| `NUS_GPU_AGENT_INSTRUCTIONS.md` | run ToolTrie-v0 |
-| `NUS_GPU_PHASE2_INSTRUCTIONS.md` | external comparison: CacheWeaver, fitted policies, SGLang |
-| `NUS_GPU_BRIEF_CLOSURE_INSTRUCTIONS.md` | close the initial research brief |
-| `NUS_GPU_PRESSURE_RERUN_INSTRUCTIONS.md` | controlled-cache pressure rerun |
-| `NUS_GPU_CONTEXTPILOT_CONFIRMATION_INSTRUCTIONS.md` | ContextPilot confirmation at alpha=0.001 |
-| `NUS_GPU_CONTEXTPILOT_STATIC_REFIT_RESUME_INSTRUCTIONS.md` | resume the quarantined static-refit cells |
-| `NUS_GPU_SGLANG_COUNTER_AUDIT_INSTRUCTIONS.md` | CPU-only audit of historical SGLang counters |
-| `NUS_GPU_CONTEXTPILOT_DUAL_MODEL_INSTRUCTIONS.md` | Qwen3-4B primary + Qwen3-0.6B replication |
+| `runbooks/NUS_GPU_AGENT_INSTRUCTIONS.md` | run ToolTrie-v0 |
+| `runbooks/NUS_GPU_PHASE2_INSTRUCTIONS.md` | external comparison: CacheWeaver, fitted policies, SGLang |
+| `runbooks/NUS_GPU_BRIEF_CLOSURE_INSTRUCTIONS.md` | close the initial research brief |
+| `runbooks/NUS_GPU_PRESSURE_RERUN_INSTRUCTIONS.md` | controlled-cache pressure rerun |
+| `runbooks/NUS_GPU_CONTEXTPILOT_CONFIRMATION_INSTRUCTIONS.md` | ContextPilot confirmation at alpha=0.001 |
+| `runbooks/NUS_GPU_CONTEXTPILOT_STATIC_REFIT_RESUME_INSTRUCTIONS.md` | resume the quarantined static-refit cells |
+| `runbooks/NUS_GPU_SGLANG_COUNTER_AUDIT_INSTRUCTIONS.md` | CPU-only audit of historical SGLang counters |
+| `runbooks/NUS_GPU_CONTEXTPILOT_DUAL_MODEL_INSTRUCTIONS.md` | Qwen3-4B primary + Qwen3-0.6B replication |
 
 ## `src/tatm/` — the library
 

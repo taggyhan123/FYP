@@ -132,12 +132,13 @@ Three findings:
    so this is a property of the algorithm on this workload, not a measurement
    artifact. It is designed for overlapping retrieved text evidence; tool menus
    drawn from a shared catalog do not present the overlap structure it seeks.
-2. **All five fitted baselines collapse onto one another on BFCL, not onto
-   alphabetical on both datasets.** Frequency, schema-cost, FP-tree, pair and
-   triple land within 0.01pp of each other (39.69% on BFCL), while alphabetical
-   is 38.13%. On ToolRet, alphabetical is 51.05% and the fitted group is around
-   41.6–41.9%. The fitted policies rediscover essentially one stable global
-   order within each workload, but that order is not generally alphabetical.
+2. **All five fitted labels emit one byte-identical BFCL ordering, not five
+   independent policies.** Deterministic reconstruction finds zero tool-ID
+   sequence mismatches across all 200 requests. On ToolRet there are three
+   distinct fitted sequences: frequency/pair/triple are identical, while
+   schema-cost and FP-tree each differ. Alphabetical is 51.05% there and the
+   fitted group is around 41.6–41.9%. See
+   `fitted-policy-equivalence.json`.
 3. **The ContextPilot-derived order leads, and §2a shows future-batch visibility
    is not the explanation.** This result applies to the static-refit adaptation;
    the later persistent-API confirmation is reported in the dated addendum
@@ -317,9 +318,9 @@ fixed template overhead, not content drift). Totals therefore differ by ~9%
 Consequently cached *ratios* are the closest cross-engine summary because each
 is normalized by its own engine's prompt tokens, but even they are not a strict
 apples-to-apples comparison when the denominators contain different templates.
-Absolute token counts, prefill tokens, and TTFT are not comparable. Agreement to
-~0.2pp is encouraging descriptive evidence, subject to corrected raw-counter
-validation.
+Absolute token counts, prefill tokens, and TTFT are not comparable. Agreement
+to ~0.2pp is encouraging descriptive evidence. A later independent aggregate-
+counter audit accepts all 72/72 historical runs with no refusals.
 
 | BFCL | vLLM cached | vLLM TTFT | SGLang cached | SGLang TTFT |
 | --- | --- | --- | --- | --- |
@@ -339,11 +340,12 @@ validation.
 | cacheweaver | 22.46% | 17.75% |
 | original | 13.88% | 11.29% |
 
-**The historical second-engine arm shows the same ranking, pending raw counter
-revalidation.** Cached ratios agree to within ~0.2pp on BFCL (87.11% vs 87.29%
-for ToolTrie) and the condition ranking is identical on both engines. This is
-consistent with an ordering-level mechanism, but the corrected independent
-counter check must pass before treating it as a clean replication.
+**The historical second-engine arm shows the same ranking and its counter audit
+now passes.** Cached ratios agree to within ~0.2pp on BFCL (87.11% vs 87.29%
+for ToolTrie), and the independent `sglang:cached_tokens_total` audit accepts
+72/72 raw runs. This validates counter cleanliness. It does not prove that all
+12 condition labels are behaviorally distinct; the five BFCL fitted labels are
+one exact sequence.
 
 **SGLang's absolute TTFT is 2–3× vLLM's here, and that must not be attributed to
 RadixAttention.** The entire engine differs — scheduler, attention backend

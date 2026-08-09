@@ -9,7 +9,7 @@ Status after the first local research pass:
 | C — normalize datasets | Complete for ToolRet and five BFCL V4 static subsets | `scripts/download_datasets.py`, `scripts/run_pipeline.py`, `reports/dataset-inventory.md` |
 | D — access patterns | Complete for benchmark evidence, four controlled replays, and the retrieved-menu ordering matrix | `reports/access-patterns.md`, `reports/tables/`, `reports/initial-brief-closure/findings.md` |
 | E — exact ToolTrie baseline | Measured on GPU on shared padded catalogs and true BM25-retrieved menus, with ordinary text prefill retained as the explicit fallback | `src/tatm/tooltrie.py`, "Task E" and "ToolTrie-v0" below, `reports/tooltrie-v0/findings.md`, `reports/initial-brief-closure/findings.md` |
-| F — initial report | Substantively complete; the dual-model replication is accepted, while archive backup and two separately claimed cluster handovers remain | `reports/initial-findings.md`, `reports/initial-brief-closure/findings.md`, `reports/contextpilot-dual-model/findings.md` |
+| F — initial report | Substantively complete; dual-model, static-refit, and SGLang compact evidence are integrated. Raw-archive backup remains; the historical 8B fallback comparison is optional and uncontrolled unless its unpinned model snapshot can be recovered | `reports/initial-findings.md`, `reports/initial-brief-closure/findings.md`, `reports/contextpilot-dual-model/findings.md` |
 
 The external comparison from `NUS_GPU_PHASE2_INSTRUCTIONS.md` has now been
 **measured on GPU** — targeted no-tool evaluation, CacheWeaver, fitted
@@ -23,10 +23,10 @@ on all three systems arms and replicates to within 0.27pp (BFCL 96.16 / 96.18 /
 96.38% on unsanitized vLLM, sanitized vLLM, SGLang). A post-run audit found that
 this row is a **static-refit causal adaptation** (`alpha=0.5`, ordering only),
 not official persistent online ContextPilot. The second engine validates the
-same precomputed ordering but does not validate planner/API parity. A later
-audit found that the SGLang reconciliation was not independent;
-the raw runs must be checked against the aggregate cached-token counter before
-the cross-engine arm is called contamination-validated.
+same precomputed ordering but does not validate planner/API parity. The old
+SGLang reconciliation was circular, but the later fail-closed audit now checks
+all 72 raw runs against the independently recorded aggregate cached-token
+counter and accepts 72/72 with no refusals.
 The generalized static-refit adapter's integer-ID restoration was also fixed;
 the historical Phase 2 builder already performed the equivalent inverse
 mapping, so that correction does not invalidate its emitted workload.
@@ -93,24 +93,34 @@ See `reports/contextpilot-dual-model/findings.md`,
 dual-model matrix. Its 58 MB raw archive still has no verified off-machine
 copy.
 
-The GPU executor also reports that the historical Qwen3-8B static-refit quality
-cell and the 72/72 SGLang raw-counter audit were completed outside this
-protocol. Their compact handovers are not present in commit `d133670` or any
-currently fetched remote branch, so those two claims are not yet integrated
-into project status. The dual-model run does not retroactively fill the
-historical 8B cell.
+The separately pushed static-refit/SGLang handover is now integrated. A local
+compact audit verifies 18/18 static-refit systems trials, the Qwen3-8B aggregate
+quality cell, six corrected paired comparisons, and 72/72 independent SGLang
+counter decisions. The two raw archives remain server-only. The historical 8B
+quality matrix still has no `original` condition, so its ContextPilot and
+ToolTrie comparisons against alphabetical do not establish a gain over the
+ordinary selected-tool text fallback.
+
+A separately named `frequency_online` baseline was also reviewed. It is causal
+and uses only presence counts from earlier requests. It reaches 96.27% on BFCL
+padded-64, revealing that this positive control can be solved after one request
+by identifying its 63-tool universal core. The executor's “12/12” claim was
+wrong: it beats ToolTrie-v0 in 10/12 model/workload cells and loses both BM25
+k=4 cells, 17.01% versus 17.48%. It has no quality replay, its capacities differ
+slightly from the accepted dual-model run, and its raw replays remain
+server-only. See `reports/frequency-online/findings.md`.
 
 ## Notable findings
 
 The counterintuitive results, in order of how surprising they were:
 
-1. **The obvious ordering choice is close to the worst one.** Sorting tools by
-   how often they're needed (frequency) is nearly 9x worse for cache reuse than
-   plain alphabetical order (4.41% vs 38.15% measured). Frequency ranks each
-   request's own gold tool near the front — but the gold tool is the one thing
-   that changes request to request. It optimizes for "important" and
-   accidentally destroys "identical," which is the only thing the cache
-   rewards.
+1. **Frozen benchmark frequency and causal stream frequency answer different
+   questions.** Sorting by gold-support frequency is nearly 9x worse than
+   alphabetical on the original padded test (4.41% vs 38.15%) because it moves
+   the changing gold tool to the front. In contrast, `frequency_online` reaches
+   96.27% by counting menu presence from earlier requests and moving unseen
+   tools to the tail. The latter is not production popularity; it exposes a
+   workload whose 63 of 64 tools are universal.
 2. **A quality tradeoff that looked real turned out to be mostly a small-model
    artefact.** On `Qwen3-0.6B`, alphabetical won reuse by 9x but frequency
    scored higher on function-name and full accuracy (77.5%/51.25% vs
@@ -280,10 +290,12 @@ ordering cannot manufacture overlap among independently retrieved menus.
 
 **CacheWeaver is a no-op on BFCL, but not on ToolRet.** The Algorithm-1
 reimplementation returned the unmodified input order on 200/200 BFCL requests
-and 180/200 ToolRet requests. On BFCL the five fitted policies (frequency,
-schema-cost, FP-tree, pair, triple) fall within 0.01pp of one another at 39.69%,
-but alphabetical is lower at 38.13%; on ToolRet, alphabetical is substantially
-higher than the fitted group.
+and 180/200 ToolRet requests. Exact deterministic reconstruction now shows that
+the five fitted labels (frequency, schema-cost, FP-tree, pair, triple) emit one
+byte-identical 200-request sequence on BFCL, not five independent policies. On
+ToolRet there are three distinct fitted sequences: frequency/pair/triple are
+identical, while schema-cost and FP-tree each differ. See
+`reports/tooltrie-phase2/fitted-policy-equivalence.json`.
 
 **A systematic quality trade-off.** At n=800 on 8B, ranking orderings by
 function-name accuracy reverses their ranking on no-tool accuracy. Alphabetical
@@ -297,12 +309,11 @@ measured orderings, not evidence that every reuse-optimizing ordering must incur
 the same trade-off.
 
 **The historical SGLang arm shows the same ordering ranking** (87.11% vLLM vs
-87.29% SGLang for ToolTrie on BFCL), but its contamination check must be rerun
-from the raw artifacts. The old reconciliation compared one response-derived
-sum with another instead of the independent aggregate server counter. Cached
-ratios are the closest cross-engine summary, but not a strictly controlled
-comparison: the engines render different prompts, with SGLang adding 640 tokens
-per request in this workload.
+87.29% SGLang for ToolTrie on BFCL). Its replacement audit now accepts 72/72
+raw runs against the independent aggregate server counter. This validates
+counter cleanliness, not condition distinctness. Cached ratios remain only the
+closest cross-engine summary: the engines render different prompts, with
+SGLang adding 640 tokens per request in this workload.
 
 **Both benchmarks ship invalid JSON Schema** - 74 BFCL and 187 ToolRet tools use
 Python type names, plus one ToolRet tool colliding with the reserved `title`
@@ -462,7 +473,7 @@ counter, samples KV occupancy, and can enforce a predeclared pressure threshold.
 - 1,362 canonical BFCL functions and 1,240 BFCL tasks;
 - 45,815 total schemas tokenized with `Qwen/Qwen3-0.6B`;
 - all ToolRet label references resolve to the downloaded corpus;
-- 118 unit tests pass.
+- The full local test suite passes; run `uv run pytest` to reproduce it.
 
 ## Reports are generated, not hand-written
 
@@ -557,11 +568,16 @@ than six independent policies. See
 
 The local audit has repaired metric-specific quality scoping, explicit
 sequence-state metadata, fail-closed cache reset checks, and independent SGLang
-counter validation. Formal publication-grade closure still needs the GPU-side
-raw ContextPilot scores regenerated with the corrected metadata, the 19 missing
-static-refit replays, and the historical raw SGLang runs checked against the
-independent aggregate counter. None of those requires rerunning the 75 accepted
-persistent-API replays.
+counter validation. The 18 static-refit systems replays and one 8B quality
+replay are now tracked as compact evidence. Publication-grade closure still
+needs verified off-machine copies of the server-only archives and raw per-case
+verification of the executor's ContextPilot API-identity claim. The historical
+Qwen3-8B server was not pinned to a model revision, so adding one new
+`original` row is controlled only if the exact cached snapshot used by the old
+rows can be proved. Otherwise run a fresh pinned five-condition 8B matrix or
+omit that optional 8B fallback comparison. The accepted 4B-primary matrix
+already contains the fallback, and no accepted dual-model replay needs to be
+repeated.
 
 The next extension may evaluate safe inactive-tool retention, but it must retain
 ordinary selected-tool text prefill as fallback and compare against both

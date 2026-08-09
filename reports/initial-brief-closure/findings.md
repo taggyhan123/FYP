@@ -217,11 +217,13 @@ changes the engine versions, emitted sequence equivalence, or 24/24 acceptance.
    retrieved arm.
 4. **Schema-cost weighting is not reliably better either.** It narrowly beats
    several static controls in some rows but never beats ToolTrie here.
-5. **Simple pair/triple statistics add little on the measured fitted arm.** The
-   On BFCL, the Phase 2 pair, triple, frequency, schema-cost, and FP-tree fitted
-   policies collapse to within 0.01 percentage points of one another at 39.69%,
-   while alphabetical is 38.13%. On ToolRet, alphabetical is substantially
-   higher than that fitted group.
+5. **Simple pair/triple statistics add little on the measured fitted arm.** On
+   BFCL, exact reconstruction shows that the Phase 2 pair, triple, frequency,
+   schema-cost, and FP-tree fitted labels emit one byte-identical 200-request
+   tool sequence; they are one tested behavior, not five independent policies.
+   On ToolRet there are three fitted sequences: frequency/pair/triple are
+   identical, while schema-cost and FP-tree each differ. Alphabetical is
+   substantially higher than all of them on the measured ToolRet arm.
    The ContextPilot-derived static-refit ordering is the important historical
    competitor, not evidence that the current pair/triple adaptation is
    sufficient. A later persistent-API adaptation also leads ToolTrie on every

@@ -1,0 +1,262 @@
+{
+  "all_checks_passed": true,
+  "checks": [
+    {
+      "details": null,
+      "name": "policy_metadata",
+      "passed": true
+    },
+    {
+      "details": "15285704e73af680c0125ea4bfeb0b54a14f278e",
+      "name": "declared_base_commit",
+      "passed": true
+    },
+    {
+      "details": {
+        "bfcl-padded64": {
+          "max_presence": 200,
+          "requests_observed": 200,
+          "tools_seen": 262
+        },
+        "toolret-bm25-k128": {
+          "max_presence": 74,
+          "requests_observed": 200,
+          "tools_seen": 12353
+        },
+        "toolret-bm25-k16": {
+          "max_presence": 48,
+          "requests_observed": 200,
+          "tools_seen": 2203
+        },
+        "toolret-bm25-k4": {
+          "max_presence": 22,
+          "requests_observed": 200,
+          "tools_seen": 603
+        },
+        "toolret-bm25-k64": {
+          "max_presence": 66,
+          "requests_observed": 200,
+          "tools_seen": 7325
+        },
+        "toolret-padded64": {
+          "max_presence": 200,
+          "requests_observed": 200,
+          "tools_seen": 238
+        }
+      },
+      "name": "workload_builder_summaries",
+      "passed": true
+    },
+    {
+      "details": {
+        "comparison_cells": 12,
+        "control_cells": 4
+      },
+      "name": "aggregate_result_shape",
+      "passed": true
+    },
+    {
+      "details": {
+        "cells": 12,
+        "losses": [
+          [
+            "Qwen/Qwen3-0.6B",
+            "toolret-bm25-k4"
+          ],
+          [
+            "Qwen/Qwen3-4B",
+            "toolret-bm25-k4"
+          ]
+        ],
+        "wins": 10
+      },
+      "name": "frequency_online_vs_tooltrie_count",
+      "passed": true
+    },
+    {
+      "details": [
+        {
+          "absolute_difference": 9.861352480305431e-05,
+          "accepted_dual_model": 0.01346,
+          "model": "Qwen/Qwen3-4B",
+          "same_session": 0.013558613524803054,
+          "workload": "toolret-bm25-k128"
+        },
+        {
+          "absolute_difference": 4.021463412273718e-09,
+          "accepted_dual_model": 0.091016,
+          "model": "Qwen/Qwen3-4B",
+          "same_session": 0.09101600402146341,
+          "workload": "toolret-bm25-k16"
+        },
+        {
+          "absolute_difference": 1.5771047783691428e-08,
+          "accepted_dual_model": 0.019883,
+          "model": "Qwen/Qwen3-0.6B",
+          "same_session": 0.019883015771047785,
+          "workload": "toolret-bm25-k128"
+        },
+        {
+          "absolute_difference": 2.0646239815014233e-07,
+          "accepted_dual_model": 0.099321,
+          "model": "Qwen/Qwen3-0.6B",
+          "same_session": 0.09932079353760186,
+          "workload": "toolret-bm25-k16"
+        }
+      ],
+      "name": "same_session_contextpilot_controls_reproduce",
+      "passed": true
+    },
+    {
+      "details": [
+        {
+          "accepted_dual_model_run": 96832,
+          "difference_tokens": 4288,
+          "frequency_online_run": 101120,
+          "model": "Qwen/Qwen3-4B"
+        },
+        {
+          "accepted_dual_model_run": 188912,
+          "difference_tokens": 1984,
+          "frequency_online_run": 190896,
+          "model": "Qwen/Qwen3-0.6B"
+        }
+      ],
+      "name": "cross_run_capacity_difference_recorded",
+      "passed": true
+    },
+    {
+      "details": "e6a774b158069a3742adb66584d35dc7053c443da8d5ef500f077f51e308caef  /home/taghan/frequency-online-20260809-200701.tar.gz",
+      "name": "raw_archive_hash_recorded",
+      "passed": true
+    }
+  ],
+  "checks_passed": 8,
+  "checks_total": 8,
+  "comparisons": [
+    {
+      "contextpilot_online": 0.961569,
+      "contextpilot_static_refit": 0.961569,
+      "frequency_exceeds_tooltrie": true,
+      "frequency_minus_tooltrie_pp": 9.08185,
+      "frequency_online": 0.9626694980929881,
+      "model": "Qwen/Qwen3-4B",
+      "tooltrie_v0": 0.871851,
+      "workload": "bfcl-padded64"
+    },
+    {
+      "contextpilot_online": 0.952734,
+      "contextpilot_static_refit": 0.957366,
+      "frequency_exceeds_tooltrie": true,
+      "frequency_minus_tooltrie_pp": 12.616979,
+      "frequency_online": 0.9479747855811688,
+      "model": "Qwen/Qwen3-4B",
+      "tooltrie_v0": 0.821805,
+      "workload": "toolret-padded64"
+    },
+    {
+      "contextpilot_online": 0.187182,
+      "contextpilot_static_refit": 0.184181,
+      "frequency_exceeds_tooltrie": false,
+      "frequency_minus_tooltrie_pp": -0.475119,
+      "frequency_online": 0.17005181266167035,
+      "model": "Qwen/Qwen3-4B",
+      "tooltrie_v0": 0.174803,
+      "workload": "toolret-bm25-k4"
+    },
+    {
+      "contextpilot_online": 0.091016,
+      "contextpilot_static_refit": 0.093635,
+      "frequency_exceeds_tooltrie": true,
+      "frequency_minus_tooltrie_pp": 1.406549,
+      "frequency_online": 0.08136449188108626,
+      "model": "Qwen/Qwen3-4B",
+      "tooltrie_v0": 0.067299,
+      "workload": "toolret-bm25-k16"
+    },
+    {
+      "contextpilot_online": 0.030705,
+      "contextpilot_static_refit": 0.034772,
+      "frequency_exceeds_tooltrie": true,
+      "frequency_minus_tooltrie_pp": 1.332936,
+      "frequency_online": 0.02959536023595913,
+      "model": "Qwen/Qwen3-4B",
+      "tooltrie_v0": 0.016266,
+      "workload": "toolret-bm25-k64"
+    },
+    {
+      "contextpilot_online": 0.01346,
+      "contextpilot_static_refit": 0.022337,
+      "frequency_exceeds_tooltrie": true,
+      "frequency_minus_tooltrie_pp": 1.439962,
+      "frequency_online": 0.023320618547194808,
+      "model": "Qwen/Qwen3-4B",
+      "tooltrie_v0": 0.008921,
+      "workload": "toolret-bm25-k128"
+    },
+    {
+      "contextpilot_online": 0.961569,
+      "contextpilot_static_refit": 0.961569,
+      "frequency_exceeds_tooltrie": true,
+      "frequency_minus_tooltrie_pp": 9.08185,
+      "frequency_online": 0.9626694980929881,
+      "model": "Qwen/Qwen3-0.6B",
+      "tooltrie_v0": 0.871851,
+      "workload": "bfcl-padded64"
+    },
+    {
+      "contextpilot_online": 0.952734,
+      "contextpilot_static_refit": 0.957366,
+      "frequency_exceeds_tooltrie": true,
+      "frequency_minus_tooltrie_pp": 11.213479,
+      "frequency_online": 0.9479747855811688,
+      "model": "Qwen/Qwen3-0.6B",
+      "tooltrie_v0": 0.83584,
+      "workload": "toolret-padded64"
+    },
+    {
+      "contextpilot_online": 0.187182,
+      "contextpilot_static_refit": 0.184181,
+      "frequency_exceeds_tooltrie": false,
+      "frequency_minus_tooltrie_pp": -0.475119,
+      "frequency_online": 0.17005181266167035,
+      "model": "Qwen/Qwen3-0.6B",
+      "tooltrie_v0": 0.174803,
+      "workload": "toolret-bm25-k4"
+    },
+    {
+      "contextpilot_online": 0.099321,
+      "contextpilot_static_refit": 0.098011,
+      "frequency_exceeds_tooltrie": true,
+      "frequency_minus_tooltrie_pp": 0.381554,
+      "frequency_online": 0.0815515366900083,
+      "model": "Qwen/Qwen3-0.6B",
+      "tooltrie_v0": 0.077736,
+      "workload": "toolret-bm25-k16"
+    },
+    {
+      "contextpilot_online": 0.047766,
+      "contextpilot_static_refit": 0.040073,
+      "frequency_exceeds_tooltrie": true,
+      "frequency_minus_tooltrie_pp": 1.23534,
+      "frequency_online": 0.03134639512867834,
+      "model": "Qwen/Qwen3-0.6B",
+      "tooltrie_v0": 0.018993,
+      "workload": "toolret-bm25-k64"
+    },
+    {
+      "contextpilot_online": 0.019883,
+      "contextpilot_static_refit": 0.029611,
+      "frequency_exceeds_tooltrie": true,
+      "frequency_minus_tooltrie_pp": 1.284532,
+      "frequency_online": 0.024117316186301845,
+      "model": "Qwen/Qwen3-0.6B",
+      "tooltrie_v0": 0.011272,
+      "workload": "toolret-bm25-k128"
+    }
+  ],
+  "format_version": 1,
+  "quality_measured": false,
+  "raw_replay_counter_cleanliness_verified_by_this_audit": false,
+  "status": "compact_aggregates_consistent_raw_replays_not_locally_verified"
+}

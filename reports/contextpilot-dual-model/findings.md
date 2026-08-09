@@ -42,7 +42,7 @@ Local verification found:
   prompt tokens and the reported cache ratio recomputes from those counters;
 - both ContextPilot adaptations exceed ToolTrie-v0 reuse in all 12
   model/workload cells;
-- the full repository test suite passes: 119 tests.
+- the full repository test suite passes.
 
 The reproducible compact-artifact check is:
 
@@ -161,11 +161,17 @@ Only one model checkpoint was tested at each size, and the capacity-dependent
 ToolTrie condition differs across them. This run is not a pure causal estimate
 of model-size effects.
 
-The handover also states that a separate Qwen3-8B static-refit cell and a 72/72
-SGLang audit were completed. Neither compact handover is present in commit
-`d133670`, and no fetched remote branch contains a newer supporting commit.
-Those two claims must remain unintegrated until the GPU session pushes their
-branch, commit, summaries, and provenance.
+The separately pushed static-refit/SGLang handover is now integrated. Its local
+compact audit verifies 18 static-refit systems trials, the Qwen3-8B aggregate
+quality cell and paired statistics, and 72/72 independent SGLang aggregate-
+counter decisions. The raw per-case files and archives remain server-only. See
+`reports/contextpilot-static-refit-resume/findings.md`.
+
+That historical Qwen3-8B quality matrix still has no `original` fallback arm.
+The dual-model result demonstrates why that matters: alphabetical lowers full
+accuracy relative to original by 2.81 points at 4B and 11.57 points at 0.6B.
+The 8B ContextPilot gain versus alphabetical is therefore not yet a measured
+gain versus ordinary selected-tool text prefill.
 
 ## Scope limits
 
@@ -195,12 +201,21 @@ between retrieval and cache retention: safe, budgeted retention of inactive
 tools with an explicit active-tool manifest and the ordinary selected-tool
 text path as a predeclared fallback.
 
+The later `frequency_online` ablation sharpens this conclusion: a causal
+presence counter reaches 96.27% on BFCL padded-64 because 63 of 64 tools are
+universal, yet it does not dominate ToolTrie or ContextPilot across retrieved
+menus and has no quality measurement. The padded headline is a positive
+control for prefix reuse, not a benchmark of ordering sophistication.
+
 ## Immediate actions
 
 1. Copy all raw archives off the GPU server and verify their SHA-256 values and
    `tar -tzf` readability at the destination.
-2. Ask the GPU session to push separate compact evidence for the claimed 8B
-   static-refit closure and SGLang 72/72 audit.
+2. Do not append an unpinned Qwen3-8B `original` row to the historical table.
+   Its old server command omitted a model revision. Either prove the exact
+   cached snapshot and use it for the missing control, run a fresh pinned
+   five-condition 8B matrix, or omit the 8B ordinary-fallback comparison. The
+   accepted 4B-primary table already contains the controlled fallback.
 3. Do not rerun the accepted 190-replay dual-model matrix.
 4. Before a publication-quality quality claim, predeclare complete request-
    sequence replicates or multiple inference seeds and, ideally, validate with

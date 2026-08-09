@@ -1316,6 +1316,19 @@ adaptations beat ToolTrie-v0 reuse in all 12 model/workload cells, but none is a
 universal quality winner. See `reports/contextpilot-confirmation/findings.md`
 and `reports/contextpilot-dual-model/findings.md`.
 
+The separate static-refit resume is now integrated: 18/18 systems trials, one
+Qwen3-8B quality replay, and the independent 72/72 SGLang aggregate-counter
+audit pass their compact checks. The two ContextPilot APIs have identical 8B
+aggregate and paired statistics. That historical 8B quality matrix still lacks
+the `original` fallback, so its gain versus alphabetical is not a measured gain
+over ordinary selected-tool text prefill.
+
+A causal `frequency_online` ablation reaches 96.27% on BFCL padded-64 by
+identifying the 63 tools present in every request. This demonstrates that the
+padded positive control cannot distinguish a trie or clusterer from a simple
+counter. It beats ToolTrie-v0 in 10/12 cells, not the 12/12 originally claimed,
+and loses both BM25 k=4 cells (17.01% versus 17.48%). It has no quality replay.
+
 ## Recommendation
 
 The retrieved-menu arm changes the recommendation. Alphabetical remains a
@@ -1341,10 +1354,11 @@ ToolTrie-v0 on every padded and retrieved reuse cell measured. Both lose most
 reuse on independently retrieved large menus, so retrieval overlap is the
 stronger systems bottleneck. The historical static-refit arm and the persistent
 arm must retain their exact labels; neither is full ContextPilot. The corrected
-`alpha=0.001` static-refit adaptation is measured in the dual-model run. The GPU
-executor says the separate historical 8B static cell and independent SGLang
-counter audit are also done, but their compact handovers have not been pushed
-to a fetched branch and are not yet integrated evidence.
+`alpha=0.001` static-refit adaptation is measured in the dual-model run and its
+separate historical 8B cell is now tracked. The independent SGLang counter audit
+also accepts 72/72 raw runs. Counter cleanliness does not imply that every
+policy label is distinct: all five fitted BFCL labels emit one byte-identical
+sequence.
 
 Do not pursue arbitrary independent KV concatenation yet. Native exact APC
 already converts the local token-reuse signal into a repeatable TTFT benefit
@@ -1368,11 +1382,14 @@ occupancy evidence rather than being rewritten.
 This completes the planned initial experiment stage. The local analysis and
 artifact-to-report audit are complete, and the fresh 190-replay dual-model
 matrix is accepted for its declared scope. Operational closure still needs
-off-machine archive backup and pushed compact handovers for the separately
-claimed historical 8B static-refit and SGLang counter-audit results. Later §9
+off-machine archive backup. The historical Qwen3-8B table lacks `original`,
+but that server command did not pin a model revision; one appended row is
+controlled only if the exact historical snapshot can be proved. Otherwise use
+a fresh pinned five-condition matrix or omit that optional 8B comparison. The
+accepted 4B-primary table already includes the ordinary fallback. Later §9
 retained-tool or KV-composition experiments remain extensions and must preserve
-the ordinary selected-tool text fallback and the measured quality/safety
-frontier.
+that fallback, include `frequency_online` as an ablation, and report the
+measured quality/safety frontier.
 """
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(text, encoding="utf-8")

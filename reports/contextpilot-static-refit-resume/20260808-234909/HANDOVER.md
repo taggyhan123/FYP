@@ -103,3 +103,13 @@ has no `ensurepip` and the documented fix needs `sudo`, which project rules
 forbid. Already-recorded environment deviation.
 
 No quarantined attempts. `--allow-counter-mismatch` never passed.
+
+## Analysis-session review
+
+The compact package was integrated and re-audited locally. All six checks in
+`reports/contextpilot-static-refit-resume/local-audit.json` pass. The audit can
+verify 18 systems trials, aggregate quality equality, paired-statistic equality,
+and 72/72 SGLang counter decisions. It cannot verify the executor's stronger
+zero per-case-difference statement or reopen either raw archive because those
+files remain server-only. The historical 8B quality matrix also still lacks an
+ordinary `original` fallback condition; see the reconciled `findings.md`.

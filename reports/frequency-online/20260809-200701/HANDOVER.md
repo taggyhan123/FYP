@@ -1,8 +1,9 @@
 # `frequency_online` — proposal and measurement
 
-**Status: PROPOSAL, not merged.** `frequency_fitted` and every existing result
-are untouched. The analysis session owns `src/tatm/` and decides whether to
-adopt this policy.
+**Status: adopted as a separately named experimental baseline after local
+review.** `frequency_fitted` and every existing result remain untouched. See
+`reports/frequency-online/findings.md` for the analysis-session corrections and
+evidence limits.
 
 **Stamp** `20260809-200701`
 **Base commit** `15285704e73af680c0125ea4bfeb0b54a14f278e`
@@ -13,8 +14,10 @@ model revisions matching the dual-model run.
 9.6 MB, 87 entries, `tar -tzf` verified,
 sha256 `e6a774b158069a3742adb66584d35dc7053c443da8d5ef500f077f51e308caef`.
 
-`PREDECLARATION.md` in this directory was written **before** any workload was
-built or any replay executed.
+The executor states that `PREDECLARATION.md` was written **before** any workload
+was built or replay executed. It was pushed in the same final commit as the
+implementation and results, so Git does not provide an independent pre-run
+timestamp for that statement.
 
 ## Why
 
@@ -28,8 +31,10 @@ reported gap was therefore adaptivity, not algorithm.
 
 The structural reason it fails on this benchmark: across the 200
 `bfcl-padded64` menus there are 262 distinct tools, of which **63 appear in
-every single menu** and 199 appear in exactly one each. Measured reuse tracks
-the mean position of the one non-shared tool almost exactly:
+every single menu**. There are 199 other distinct tools: 198 appear once and
+one appears twice. Every menu still contains exactly one member outside the
+universal 63-tool set. Measured reuse tracks the mean position of that
+non-universal tool almost exactly:
 
 | ordering | mean position of unique tool | measured reuse |
 | --- | --- | --- |
@@ -41,8 +46,9 @@ the mean position of the one non-shared tool almost exactly:
 | **frequency_online** | **63.7** (last in 199/200) | **96.27%** |
 
 A disjoint training corpus structurally cannot know which 63 tools *this*
-stream shares — that is an artifact of the eval sampling. An online counter
-learns it in about 25 requests.
+stream shares — that is an artifact of the eval sampling. After observing the
+first request, the online counter already gives all 63 universal tools a higher
+count than the next unseen non-universal tool.
 
 ## The policy
 
@@ -68,8 +74,10 @@ near-identical. Baseline columns are from the accepted dual-model run.
 36 `frequency_online` replays, all 200 requests, zero failures, all
 `counter_validation.clean`, cache reset before each.
 
-**`frequency_online` beats `tooltrie_v0` in all 12 cells** and matches
-ContextPilot on padded menus.
+**Correction:** `frequency_online` beats `tooltrie_v0` in **10 of 12** cells. It
+loses both BM25 k=4 cells: 17.01% versus 17.48%. It is close to ContextPilot on
+padded menus, but no equivalence margin was declared, so “matches” is not an
+equivalence claim.
 
 ### Same-session control
 
@@ -83,9 +91,10 @@ was replayed on **these** servers for the two decisive BM25 depths:
 | 0.6B | k=16 | 8.16% | 9.93% | −1.78 pp |
 | 0.6B | k=128 | **2.41%** | 1.99% | **+0.42 pp** |
 
-The control reproduces the dual-model figures almost exactly (9.10 vs 9.10,
-1.36 vs 1.35, 9.93 vs 9.93, 1.99 vs 1.99), so the capacity difference had no
-measurable effect and the cross-run table is comparable.
+The control reproduces the dual-model figures to within 0.01 percentage point
+(9.10 vs 9.10, 1.36 vs 1.35, 9.93 vs 9.93, 1.99 vs 1.99). This supports the two
+controlled BM25 depths; it does not erase the capacity mismatch for the other
+four cross-run rows.
 
 ## Verification performed
 
@@ -99,12 +108,14 @@ measurable effect and the cross-run table is comparable.
 | Prompt fidelity | `tools` payload aligned to `tool_ids`, so the rendered prompt follows the reorder |
 | Cold start | record 0 is pure alphabetical-by-name; no prior information used |
 
-Tests: 124 pass (118 existing + 6 new), including
-`test_online_frequency_plan_cannot_see_the_current_request`.
+The executor reported 124 passing tests at its branch. The merged suite retains
+`test_online_frequency_plan_cannot_see_the_current_request` and adds compact
+and structural audits.
 
 ## What this means
 
-On `bfcl-padded64` the benchmark is solved to within 0.1 pp by counting how
+On the `bfcl-padded64` positive-control workload, the high-reuse result is
+reproduced to within 0.1 pp of ContextPilot by counting how
 often each tool has appeared. It therefore **cannot be evidence for
 hierarchical clustering, trie-aware planning, or ordering sophistication** —
 every method scoring well on it is being credited for discovering that 63 of
@@ -121,7 +132,13 @@ padded menus, 1–19% on BM25 — held on both counts.
   about its quality effect in either direction.
 - No equivalence margin declared; no equivalence claim is made.
 - Single menu seed (42), inherited from the shared workloads.
-- The two servers ran concurrently on GPU 2 and GPU 3, so latency figures from
-  this run are contention-affected and are not reported. Reuse is deterministic
-  and unaffected — demonstrated by zero spread across trials and identical
-  values at two very different cache sizes.
+- The predeclaration specified one server at a time, but the two model servers
+  actually ran concurrently on GPU 2 and GPU 3. Latency figures are therefore
+  excluded. Aggregate reuse is deterministic with zero trial spread, but this
+  remains a recorded protocol deviation.
+- The `frequency_online` capacities (101,120 at 4B; 190,896 at 0.6B) differ from
+  the accepted dual-model capacities (96,832; 188,912). Same-session ContextPilot
+  controls cover only BM25 k=16 and k=128.
+- Git contains aggregate reuse values and builder summaries, not the 36 raw
+  replay files. The executor's clean-counter claim depends on the server-only
+  archive until it is copied and re-audited.

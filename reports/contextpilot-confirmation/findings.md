@@ -3,15 +3,16 @@
 ## Status
 
 For this historical confirmation run, the **persistent-API adaptation** is
-measured and accepted. Its corrected **static-refit causal adaptation** remains
-missing from the tracked historical Qwen3-8B matrix.
+measured and accepted. The corrected **static-refit causal adaptation** has now
+been completed in a separately tracked resume branch: 18 systems trials and
+one Qwen3-8B quality replay are integrated and pass the local compact audit.
 
 A separate, fresh dual-model replication has since measured both adaptations
 on Qwen3-4B and Qwen3-0.6B. All 190 of its predeclared replays are accepted; see
 [`reports/contextpilot-dual-model/findings.md`](../contextpilot-dual-model/findings.md).
-That experiment does not retroactively fill the historical 8B cell. The GPU
-executor reports that the 8B cell was also completed separately, but no compact
-handover for that claim is present on a fetched remote branch yet.
+That experiment does not retroactively fill the historical 8B cell; the
+separate static-refit resume does. See
+[`reports/contextpilot-static-refit-resume/findings.md`](../contextpilot-static-refit-resume/findings.md).
 
 These labels are mandatory:
 
@@ -70,12 +71,26 @@ other request orders.
 | Alphabetical | 82.81% | 76.41% | **89.38%** |
 | ToolTrie-v0 | 83.75% | 77.66% | 87.50% |
 | ContextPilot persistent API | **84.84%** | **78.44%** | 84.38% |
+| ContextPilot static refit | **84.84%** | **78.44%** | 84.38% |
 
 Against alphabetical, the persistent arm is +2.03 points on function name,
 +2.03 on full call, and −5.00 on no-tool accuracy. The fixed-sequence 95%
 interval for the no-tool difference is [−8.75, −1.88]. This is evidence of an
 8B trade-off on this sequence, not evidence that reordering universally causes
 extra calls.
+
+The static-refit aggregate and paired statistics are numerically identical to
+the persistent API. The executor reports zero per-case score differences; the
+compact Git package cannot independently verify that stronger claim because
+the per-case score files remain in the raw archive.
+
+This n=800 8B matrix has no `original` fallback condition. Since alphabetical
+is worse than original on full accuracy at both 4B and 0.6B, the +2.03-point
+ContextPilot result versus alphabetical is not yet a measured gain over
+ordinary selected-tool text prefill at 8B. The historical server command did
+not pin a Qwen3-8B model revision, so a newly appended `original` row would be
+controlled only if the exact cached snapshot used by these rows can be proved;
+otherwise the 8B comparison must be rerun as a fresh pinned matrix or omitted.
 
 ### Qwen3-4B addendum
 
@@ -86,11 +101,11 @@ extra calls.
 | ContextPilot persistent API | **84.53%** | **77.19%** | 85.62% |
 
 The relevance-side gain reproduces at 4B, but the 8B no-tool drop does not:
-ContextPilot minus alphabetical is exactly 0.00 points, with a fixed-sequence
-interval of [−4.38, +4.38]. The defensible conclusion is model-sensitive
-evidence, not a universal safety penalty. More irrelevance cases and complete
-planner-sequence replicates are needed to distinguish model dependence from
-sampling noise.
+this addendum gives exactly 0.00 points, with a fixed-sequence interval of
+[−4.38, +4.38], while the fresh accepted 4B replay gives −0.62 point with an
+interval spanning zero. The defensible conclusion is model-sensitive evidence,
+not a universal safety penalty. More 8B menu seeds and complete planner-sequence
+replicates are needed to distinguish model dependence from sampling noise.
 
 ## Legitimacy audit
 
@@ -112,9 +127,8 @@ The machine-readable local audit passes every invariant available from the
 tracked compact artifacts: provenance, cache configuration, all six
 equivalence guards, three-trial shapes, cached-plus-computed token identities,
 and agreement between compact quality scores and all 18 comparison point
-estimates. It deliberately reports `partial_requires_cluster_followup` because
-compact artifacts cannot prove the raw archive and the missing cells below are
-real.
+estimates. The companion static-refit audit passes 6/6 checks. Both deliberately
+report that compact artifacts cannot prove the server-only raw archives.
 
 Three limitations remain material:
 
@@ -123,13 +137,11 @@ Three limitations remain material:
    incorrectly marks McNemar independence as satisfied. Point estimates and
    emitted model outputs are unchanged; the GPU-side raw score files must be
    re-analysed with `--sequence-state-dependent`.
-3. The static-refit arm was quarantined before serving because pinned
-   ContextPilot returned internal integer IDs. The adapter now restores caller
-   IDs through the public, positionally aligned `IndexResult.original_contexts`
-   field and has a real-upstream integration test. Its 18 systems trials and
-   one Qwen3-8B quality replay remain absent from this tracked historical
-   handover; the executor's claim that they were completed separately still
-   needs its own pushed evidence.
+3. The static-refit arm was initially quarantined because pinned ContextPilot
+   returned internal integer IDs. The adapter now restores caller IDs through
+   the public, positionally aligned `IndexResult.original_contexts` field and
+   has a real-upstream integration test. Its separate resume evidence is now
+   tracked; its raw archive is not backed up off the GPU server.
 
 A supervisor-requested follow-up is now complete. It makes Qwen3-4B the primary
 model and reports Qwen3-0.6B separately because their native KV capacities

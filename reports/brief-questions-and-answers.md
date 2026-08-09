@@ -87,11 +87,12 @@ reuse against 38.13% for alphabetical and 1.19% for the original order, with
 non-overlapping 95% intervals and a 2.3x aggregate TTFT reduction.
 
 Crucially, the *cost-aware* orderings the question anticipates do **not** win.
-Frequency ordering, schema-cost weighting, FP-tree-derived ordering, and pair and
-triple co-occurrence policies all land within 0.01 points of each other at
-39.69% on BFCL; alphabetical is 38.13%. On ToolRet, alphabetical is
-substantially higher than the fitted group. Three fitted labels were later shown to emit
-**byte-identical tool sequences** on all 200 requests.
+On BFCL, exact reconstruction shows that frequency, schema-cost,
+FP-tree-derived, pair, and triple fitted labels emit the **same byte-identical
+tool sequence** on all 200 requests; the five labels therefore represent one
+tested policy behavior there. On ToolRet there are three distinct fitted
+sequences: frequency/pair/triple are identical, while schema-cost and FP-tree
+each differ. Alphabetical is substantially higher than all three on that arm.
 
 The lesson in these measured workloads is that the cache rewards **identical**
 prefixes, not importance scores by themselves. Modelling which tools matter

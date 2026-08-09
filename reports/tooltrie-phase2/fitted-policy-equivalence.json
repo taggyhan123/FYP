@@ -1,0 +1,189 @@
+{
+  "all_checks_passed": true,
+  "checks": {
+    "bfcl_five_labels_emit_one_ordering": true,
+    "toolret_has_three_distinct_fitted_orderings": true
+  },
+  "experiment": "tooltrie-phase2-fitted-policy-equivalence",
+  "format_version": 1,
+  "generated_by": "scripts/audit_phase2_fitted_equivalence.py",
+  "inputs": {
+    "canonical_tools": 45815,
+    "tasks": 9201,
+    "tasks_jsonl_sha256": "a33f22e0d707e33956921554269612b48583c17943f21f60ed63e10edb06db7c",
+    "tools_jsonl_sha256": "9752e94501a6388b6ef8267951b41deb680ef8d8674f72e945cf2b8dbf1d79b9"
+  },
+  "partitions": {
+    "bfcl": {
+      "distinct_emitted_orderings": 1,
+      "equivalence_classes": [
+        [
+          "frequency_fitted",
+          "schema_cost_fitted",
+          "fp_tree_conditional",
+          "conditional_pair",
+          "conditional_pair_triple"
+        ]
+      ],
+      "evaluation_requests": 200,
+      "menu_size": 64,
+      "policies": {
+        "conditional_pair": {
+          "requests_different_from_frequency_fitted": 0,
+          "sequence_sha256": "9c9e8132b13fb84551b90382fcf8c60ef36df87a6ad885276707d7e73d7d0a2d",
+          "state": {
+            "fp_tree_nodes": 1315,
+            "max_cooccurrence_transaction_size": 25,
+            "pair_patterns": 868,
+            "policy": "conditional_pair",
+            "skipped_large_transactions": 0,
+            "training_tools": 1163,
+            "triple_patterns": 354
+          }
+        },
+        "conditional_pair_triple": {
+          "requests_different_from_frequency_fitted": 0,
+          "sequence_sha256": "9c9e8132b13fb84551b90382fcf8c60ef36df87a6ad885276707d7e73d7d0a2d",
+          "state": {
+            "fp_tree_nodes": 1315,
+            "max_cooccurrence_transaction_size": 25,
+            "pair_patterns": 868,
+            "policy": "conditional_pair_triple",
+            "skipped_large_transactions": 0,
+            "training_tools": 1163,
+            "triple_patterns": 354
+          }
+        },
+        "fp_tree_conditional": {
+          "requests_different_from_frequency_fitted": 0,
+          "sequence_sha256": "9c9e8132b13fb84551b90382fcf8c60ef36df87a6ad885276707d7e73d7d0a2d",
+          "state": {
+            "fp_tree_nodes": 1315,
+            "max_cooccurrence_transaction_size": 25,
+            "pair_patterns": 868,
+            "policy": "fp_tree_conditional",
+            "skipped_large_transactions": 0,
+            "training_tools": 1163,
+            "triple_patterns": 354
+          }
+        },
+        "frequency_fitted": {
+          "requests_different_from_frequency_fitted": 0,
+          "sequence_sha256": "9c9e8132b13fb84551b90382fcf8c60ef36df87a6ad885276707d7e73d7d0a2d",
+          "state": {
+            "fp_tree_nodes": 1315,
+            "max_cooccurrence_transaction_size": 25,
+            "pair_patterns": 868,
+            "policy": "frequency_fitted",
+            "skipped_large_transactions": 0,
+            "training_tools": 1163,
+            "triple_patterns": 354
+          }
+        },
+        "schema_cost_fitted": {
+          "requests_different_from_frequency_fitted": 0,
+          "sequence_sha256": "9c9e8132b13fb84551b90382fcf8c60ef36df87a6ad885276707d7e73d7d0a2d",
+          "state": {
+            "fp_tree_nodes": 1315,
+            "max_cooccurrence_transaction_size": 25,
+            "pair_patterns": 868,
+            "policy": "schema_cost_fitted",
+            "skipped_large_transactions": 0,
+            "training_tools": 1163,
+            "triple_patterns": 354
+          }
+        }
+      },
+      "random_seed": 42,
+      "training_requests": 1040
+    },
+    "toolret": {
+      "distinct_emitted_orderings": 3,
+      "equivalence_classes": [
+        [
+          "frequency_fitted",
+          "conditional_pair",
+          "conditional_pair_triple"
+        ],
+        [
+          "schema_cost_fitted"
+        ],
+        [
+          "fp_tree_conditional"
+        ]
+      ],
+      "evaluation_requests": 200,
+      "menu_size": 64,
+      "policies": {
+        "conditional_pair": {
+          "requests_different_from_frequency_fitted": 0,
+          "sequence_sha256": "a0afff74a524cd10ce5da5cb5e2600881009fa620e6f2e04615e85ea18b81ccb",
+          "state": {
+            "fp_tree_nodes": 8754,
+            "max_cooccurrence_transaction_size": 25,
+            "pair_patterns": 7501,
+            "policy": "conditional_pair",
+            "skipped_large_transactions": 0,
+            "training_tools": 7540,
+            "triple_patterns": 5906
+          }
+        },
+        "conditional_pair_triple": {
+          "requests_different_from_frequency_fitted": 0,
+          "sequence_sha256": "a0afff74a524cd10ce5da5cb5e2600881009fa620e6f2e04615e85ea18b81ccb",
+          "state": {
+            "fp_tree_nodes": 8754,
+            "max_cooccurrence_transaction_size": 25,
+            "pair_patterns": 7501,
+            "policy": "conditional_pair_triple",
+            "skipped_large_transactions": 0,
+            "training_tools": 7540,
+            "triple_patterns": 5906
+          }
+        },
+        "fp_tree_conditional": {
+          "requests_different_from_frequency_fitted": 10,
+          "sequence_sha256": "0a3bb6031f98ec5607a38ab08acf935144b90ceea0d9d85e02b6c00aaa5a7a58",
+          "state": {
+            "fp_tree_nodes": 8754,
+            "max_cooccurrence_transaction_size": 25,
+            "pair_patterns": 7501,
+            "policy": "fp_tree_conditional",
+            "skipped_large_transactions": 0,
+            "training_tools": 7540,
+            "triple_patterns": 5906
+          }
+        },
+        "frequency_fitted": {
+          "requests_different_from_frequency_fitted": 0,
+          "sequence_sha256": "a0afff74a524cd10ce5da5cb5e2600881009fa620e6f2e04615e85ea18b81ccb",
+          "state": {
+            "fp_tree_nodes": 8754,
+            "max_cooccurrence_transaction_size": 25,
+            "pair_patterns": 7501,
+            "policy": "frequency_fitted",
+            "skipped_large_transactions": 0,
+            "training_tools": 7540,
+            "triple_patterns": 5906
+          }
+        },
+        "schema_cost_fitted": {
+          "requests_different_from_frequency_fitted": 200,
+          "sequence_sha256": "608ab4f9499b769407523467046b11fb66d2fb236fb89d4cb1f59dbcfc865cd0",
+          "state": {
+            "fp_tree_nodes": 8754,
+            "max_cooccurrence_transaction_size": 25,
+            "pair_patterns": 7501,
+            "policy": "schema_cost_fitted",
+            "skipped_large_transactions": 0,
+            "training_tools": 7540,
+            "triple_patterns": 5906
+          }
+        }
+      },
+      "random_seed": 42,
+      "training_requests": 7761
+    }
+  },
+  "status": "accepted"
+}

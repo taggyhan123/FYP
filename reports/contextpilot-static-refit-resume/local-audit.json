@@ -1,0 +1,102 @@
+{
+  "all_checks_passed": true,
+  "checks": [
+    {
+      "details": {
+        "failures": [],
+        "files": 24
+      },
+      "name": "all_tracked_json_parses",
+      "passed": true
+    },
+    {
+      "details": {
+        "accepted_replays": 18,
+        "workloads": [
+          {
+            "cached_ratio": 0.961569,
+            "requests": 200,
+            "trials": 3,
+            "workload": "bfcl-padded64"
+          },
+          {
+            "cached_ratio": 0.957366,
+            "requests": 200,
+            "trials": 3,
+            "workload": "toolret-padded64"
+          },
+          {
+            "cached_ratio": 0.184181,
+            "requests": 200,
+            "trials": 3,
+            "workload": "toolret-bm25-k4"
+          },
+          {
+            "cached_ratio": 0.098011,
+            "requests": 200,
+            "trials": 3,
+            "workload": "toolret-bm25-k16"
+          },
+          {
+            "cached_ratio": 0.040073,
+            "requests": 200,
+            "trials": 3,
+            "workload": "toolret-bm25-k64"
+          },
+          {
+            "cached_ratio": 0.029611,
+            "requests": 200,
+            "trials": 3,
+            "workload": "toolret-bm25-k128"
+          }
+        ]
+      },
+      "name": "static_refit_systems_compact",
+      "passed": true
+    },
+    {
+      "details": {
+        "full_accuracy": 0.7844,
+        "function_name_accuracy": 0.8484,
+        "irrelevance_tasks": 160,
+        "no_tool_accuracy": 0.8438,
+        "relevance_tasks": 640,
+        "tasks_scored": 800
+      },
+      "name": "static_and_persistent_quality_aggregates_identical",
+      "passed": true
+    },
+    {
+      "details": {
+        "comparisons": 6
+      },
+      "name": "static_and_persistent_paired_statistics_identical",
+      "passed": true
+    },
+    {
+      "details": {
+        "accepted": 72,
+        "conditions": 12,
+        "declared": 72,
+        "refused": 0,
+        "unique_files": 72
+      },
+      "name": "sglang_independent_aggregate_counter_audit",
+      "passed": true
+    },
+    {
+      "details": [
+        "8473faaee1d74dbb1559ad3e035a54b146193eb7f7dc961547adbe5f501f9b12  /home/taghan/contextpilot-static-refit-20260808-234909.tar.gz",
+        "2a8dfb9063d4306d52390fefbbaf506a5aa16e741349629f3205e7a53c7a2e14  /home/taghan/sglang-counter-audit-20260808-234909.tar.gz"
+      ],
+      "name": "two_raw_archive_hashes_recorded",
+      "passed": true
+    }
+  ],
+  "checks_passed": 6,
+  "checks_total": 6,
+  "format_version": 1,
+  "per_case_static_vs_persistent_identity_verified_by_this_audit": false,
+  "raw_archives_verified_by_this_audit": false,
+  "status": "compact_evidence_valid_raw_archives_not_locally_verified"
+}

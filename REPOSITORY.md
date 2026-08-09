@@ -159,7 +159,8 @@ data lives outside Git.
 | `contextpilot-dual-model/` | **accepted 190-replay 4B/0.6B matrix** |
 | `frequency-online/` | causal online-frequency proposal |
 
-Top level of `reports/`: `consolidated-report.md` (main synthesis),
+Top level of `reports/`: **`key-findings.md`** (start here — one-page summary),
+`consolidated-report.md` (full synthesis, evidence and caveats),
 `brief-questions-and-answers.md` (every brief question, its answer, its status),
 `initial-findings.md`, `dataset-inventory.md` (Task C), `access-patterns.md`
 (Task D), `analysis-summary.json`, `retrieval-bm25-sweep.json`, and `tables/`

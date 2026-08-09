@@ -63,6 +63,8 @@ if the cluster experiment uses a different model.
 - `task_c_d.pdf` / `task_b_e.pdf` — print-ready versions;
   (the browser `.html` is generated, not tracked — run
   `uv run python scripts/render_task_report.py`);
+- `reports/key-findings.md` — **start here**: one-page results summary;
+- `reports/consolidated-report.md` — full synthesis with evidence and caveats;
 - `notes/reading-note.md` — Task A reading note and request-flow diagram;
 - `reports/dataset-inventory.md` — Task C dataset and schema report;
 - `reports/access-patterns.md` — Task D workload and trie analysis;

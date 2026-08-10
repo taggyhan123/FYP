@@ -10,8 +10,9 @@ status in [`brief-questions-and-answers.md`](brief-questions-and-answers.md).
 reuse = prompt_tokens_cached / (prompt_tokens_cached + request_prefill_kv_computed_tokens_sum)
 ```
 
-Findings are ordered by the brief's own experimental questions (§7), and each
-states which question it answers. Differences are quoted in percentage points.
+Findings 1–7 are ordered by the brief's own experimental questions (§7); finding
+8 answers the high-level research question the project is named after (§2 Q3).
+Each states which question it answers. Differences are in percentage points.
 
 ## Headline
 
@@ -247,6 +248,52 @@ Three regimes, in increasing order of how badly it does:
   ordering sophistication.** That is a finding about how tool-serving benchmarks
   should be constructed, and it is arguably the most transferable result here.
 
+## 8. Does the trie itself do the work? Not on this data
+> **Brief §2 Q3** — *Can frequently occurring tool sequences be represented as a
+> weighted trie or prefix memory under a limited cache budget?*
+
+The project is named after this mechanism, so it deserves a direct answer.
+Three tries were measured, and none beat a method without one.
+
+**A trie-based ordering and a frequency sort produce the same file.**
+`fp_tree_conditional` builds an FP-tree from training transactions and descends
+it greedily. Offline it is indistinguishable from sorting by frequency:
+
+| Ordering | Trie nodes | Node compression | Est. token reuse |
+| --- | ---: | ---: | ---: |
+| original | 9,952 | 29.45% | 26.91% |
+| alphabetical | 9,766 | 30.77% | 26.86% |
+| frequency | **8,904** | **36.88%** | 31.35% |
+| FP-tree global | **8,904** | **36.88%** | 31.35% |
+
+Identical to the digit — and on GPU the two emit **byte-identical `tool_ids`**
+on all 200 BFCL records, differing on 10 of 200 for ToolRet
+(`reports/tooltrie-phase2/fitted-policy-equivalence.json`). The tree structure
+changes nothing about what is served.
+
+**ToolTrie-v0 loses to counting.** It beats both static baselines everywhere,
+but both ContextPilot arms beat it in all twelve systems cells and a thirty-line
+online counter beats it in ten of twelve — 96.27% against 87.19% on padded
+menus, from a policy with no tree at all.
+
+**This is a fact about the workloads, not about tries.** A trie exploits shared
+prefixes across repeated sequences. Padded menus hold 63 of 64 tools fixed, so
+any method that finds that block wins without needing sequence structure;
+retrieved menus share 7.7% of membership in no consistent order, so there are
+almost no prefixes to share. Offline node compression never exceeds 36.88% on
+any ordering, which bounds how much structure exists to exploit.
+
+**Two parts of the question remain genuinely open**, and both are cheap to close:
+
+- **The weighted trie was never built.** `ToolTrie.plan()` tie-breaks on
+  reachable cached cost, then *frozen training* support. Its `visit_count` field
+  is incremented on every observation and never read, so the trie's own
+  measured popularity influences nothing.
+- **ToolTrie-v0 was never run under a limited cache budget.** Finding 5 is the
+  only capacity-constrained experiment and contains no ToolTrie condition — so
+  the clause "under a limited cache budget" has not been tested for the
+  project's own prototype.
+
 ## Scope and limitations
 
 - **No ordering policy is shown to be faster.** Finding 1 establishes that
@@ -280,8 +327,13 @@ Three regimes, in increasing order of how badly it does:
 4. **Ablate the ToolTrie retention parameters.** Its recency window has been fixed
    at 128 throughout with no sensitivity analysis, and its `visit_count` field is
    maintained but never read — the popularity signal its objective currently
-   lacks.
-5. **Add menu seeds to the irrelevance measurement.** 160 cases at one seed cannot
+   lacks. Reading it would make ToolTrie-v1 the *weighted* trie §2 Q3 asks for.
+5. **Run ToolTrie-v0 under cache pressure.** Finding 8's second open item. One
+   workload replayed into the existing 480-block harness across the four locality
+   regimes closes the "under a limited cache budget" clause of §2 Q3, and tests
+   whether the prototype survives the regime where a fixed random permutation
+   currently beats every engineered ordering.
+6. **Add menu seeds to the irrelevance measurement.** 160 cases at one seed cannot
    settle whether high-reuse orderings genuinely harm refusal behaviour.
-6. **Build a retrieval-realistic benchmark.** Finding 7 argues that padded menus
+7. **Build a retrieval-realistic benchmark.** Finding 7 argues that padded menus
    should not be used to evaluate ordering policies at all.

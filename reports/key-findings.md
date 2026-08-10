@@ -166,28 +166,35 @@ identical, a property of the workload files, so it should hold whatever model
 serves them. Running all five at 4B reproduced the five-way tie at a different
 value, which is the confirmation.
 
-## 5. Under cache pressure, a fixed random ordering wins
+## 5. Under cache pressure, locality barely matters and random beats every *static* ordering
 > **Brief §7 Q6** — *How sensitive are results to request ordering and session locality?*
 > **Brief §4.5** — requires empirical, uniform, skewed and session-bursty replays.
 
 Qwen3-0.6B with the cache deliberately capped at 480 blocks — capacity is the
-controlled variable here, so it overrides the model's native size. All 24
-regime-runs accepted at 91.0–91.9% peak occupancy:
+controlled variable here, so it overrides the model's native size. 24 regime-runs
+accepted at 91.0–91.9% peak occupancy, plus ToolTrie-v0 added later at
+90.4–90.8% (finding 8):
 
 | Ordering | empirical | uniform | skewed | session-bursty |
 | --- | ---: | ---: | ---: | ---: |
 | Original | 1.18% | 0.69% | 1.24% | 0.69% |
 | Alphabetical | 29.21% | 29.35% | 28.06% | 27.76% |
-| **Random, seed 42** | **32.16%** | **31.27%** | **32.67%** | **30.19%** |
+| Random, seed 42 | 32.16% | 31.27% | 32.67% | 30.19% |
 | Frequency = schema-cost = FP-tree | 9.44% | 8.99% | 9.51% | 9.00% |
+| **ToolTrie-v0** *(adaptive)* | **87.18%** | **88.54%** | **94.73%** | **91.62%** |
 
-A fixed random permutation leads in **every** regime, with the fitted policies
-more than 20 points behind. Because the cache is capped and both models share a
-byte-identical tokenizer, these reuse values would reproduce at 4B; the model
-size is not what is being varied. The locality regime itself barely moves any row —
-ordering matters far more than the request distribution. One run per cell at one
-seed, so this motivates a seed sweep rather than a recommendation; but it is hard
-to reconcile with the premise that engineered orderings beat arbitrary ones.
+**The answer to Q6 is that locality barely matters.** No row moves more than a
+few points across the four regimes — ordering dominates the request
+distribution, which is the finding this question asked for.
+
+Among the *static* orderings a fixed random permutation leads every regime, with
+the fitted policies more than 20 points behind — hard to reconcile with the
+premise that engineered orderings beat arbitrary ones. One run per cell at one
+seed, so this motivates a seed sweep rather than a recommendation.
+
+But the only *adaptive* policy in the matrix beats all of them by 55–62 points.
+The static-ordering result above is therefore a statement about static
+orderings, not about ordering optimisation in general.
 
 ## 6. No ordering policy is a quality win
 > **Brief §7 Q7** — *Does tool reordering change function-call accuracy?*
@@ -283,16 +290,36 @@ retrieved menus share 7.7% of membership in no consistent order, so there are
 almost no prefixes to share. Offline node compression never exceeds 36.88% on
 any ordering, which bounds how much structure exists to exploit.
 
-**Two parts of the question remain genuinely open**, and both are cheap to close:
+**But under a limited cache budget the trie wins, and by a wide margin.** The
+"under a limited cache budget" clause was untested until 2026-08-11; ToolTrie-v0
+was then run into the 480-block harness, 4/4 regimes accepted, 64/64 checks,
+peak occupancy 0.904–0.908:
 
-- **The weighted trie was never built.** `ToolTrie.plan()` tie-breaks on
-  reachable cached cost, then *frozen training* support. Its `visit_count` field
-  is incremented on every observation and never read, so the trie's own
-  measured popularity influences nothing.
-- **ToolTrie-v0 was never run under a limited cache budget.** Finding 5 is the
-  only capacity-constrained experiment and contains no ToolTrie condition — so
-  the clause "under a limited cache budget" has not been tested for the
-  project's own prototype.
+| Ordering | empirical | uniform | skewed | session-bursty |
+| --- | ---: | ---: | ---: | ---: |
+| Original | 1.18% | 0.69% | 1.24% | 0.69% |
+| Alphabetical | 29.21% | 29.35% | 28.06% | 27.76% |
+| Random, seed 42 | 32.16% | 31.27% | 32.67% | 30.19% |
+| Frequency = schema-cost = FP-tree | 9.44% | 8.99% | 9.51% | 9.00% |
+| **ToolTrie-v0** | **87.18%** | **88.54%** | **94.73%** | **91.62%** |
+
+It leads the previous best by 55–62 points and **loses nothing to a 25× smaller
+cache** — 87.18% here against 87.19% uncapped. The reason is prefix
+*concentration*, not reuse magnitude: ToolTrie places the one varying tool at
+position 57.3 of 64, so the shared core forms a single ~6,950-token prefix that
+fits inside the 7,680-token cache and stays hot. Alphabetical places it at 24.1,
+so most of each menu is unshared and thrashes.
+
+**This inverts the ranking.** Under abundant cache ToolTrie loses to
+ContextPilot and to a counter; under scarcity it is far ahead of everything
+tested. Reported in `reports/tooltrie-pressure/20260811-001032/`.
+
+**Two caveats, both material.** ContextPilot and the online counter were **not**
+run under pressure, and both concentrate the shared core harder still, so they
+may well match or beat this — that is the obvious next run, not a settled
+result. And this tests the *prefix-memory* clause of §2 Q3, not the *weighted*
+one: `ToolTrie.plan()` still tie-breaks on reachable cached cost then frozen
+training support, and `visit_count` remains incremented-but-never-read.
 
 ## Scope and limitations
 
@@ -318,9 +345,9 @@ any ordering, which bounds how much structure exists to exploit.
 1. **Measure end-to-end latency including planning cost.** Finding 1 shows the
    cost is real; nothing yet shows an ordering recovers it.
 2. **Sweep the random seed under cache pressure.** Finding 5 shows one random
-   permutation beating every engineered ordering by 20+ points in all four
-   locality regimes. Either that generalises, which undercuts the premise of
-   ordering optimisation, or it does not — both are worth knowing.
+   permutation beating every *static* engineered ordering by 20+ points in all
+   four locality regimes. Either that generalises, which undercuts the premise
+   of static ordering optimisation, or it does not — both are worth knowing.
 3. **Establish the retrieved-menu ceiling.** Finding 2 reports what was captured;
    the gap to what is available would decide whether better ordering is worth
    pursuing at all.
@@ -328,11 +355,11 @@ any ordering, which bounds how much structure exists to exploit.
    at 128 throughout with no sensitivity analysis, and its `visit_count` field is
    maintained but never read — the popularity signal its objective currently
    lacks. Reading it would make ToolTrie-v1 the *weighted* trie §2 Q3 asks for.
-5. **Run ToolTrie-v0 under cache pressure.** Finding 8's second open item. One
-   workload replayed into the existing 480-block harness across the four locality
-   regimes closes the "under a limited cache budget" clause of §2 Q3, and tests
-   whether the prototype survives the regime where a fixed random permutation
-   currently beats every engineered ordering.
+5. **Run ContextPilot and the online counter under cache pressure.** Finding 8
+   now shows ToolTrie-v0 leading every ordering in the pressure matrix by 55–62
+   points, but the two policies that beat it at full capacity were never in that
+   matrix. Until they are, "the trie wins under scarcity" is a claim about the
+   six orderings tested, not about the field.
 6. **Add menu seeds to the irrelevance measurement.** 160 cases at one seed cannot
    settle whether high-reuse orderings genuinely harm refusal behaviour.
 7. **Build a retrieval-realistic benchmark.** Finding 7 argues that padded menus

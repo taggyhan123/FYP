@@ -7,6 +7,7 @@ import argparse
 import json
 import sys
 from pathlib import Path
+from typing import Any
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT / "src"))
@@ -35,6 +36,17 @@ def main() -> None:
     )
     parser.add_argument("--expected-capacity-tokens", type=int, required=True)
     parser.add_argument("--required-peak-fraction", type=float, default=0.90)
+    parser.add_argument(
+        "--expected-ordering",
+        action="append",
+        metavar="NAME",
+        help=(
+            "Ordering the matrix must contain, repeatable. Defaults to the "
+            "predeclared six. Supply it to validate a different declared set, "
+            "such as a single added condition; the per-regime checks are "
+            "unchanged."
+        ),
+    )
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
 
@@ -42,10 +54,14 @@ def main() -> None:
         (label, json.loads(path.read_text(encoding="utf-8")))
         for label, path in args.run
     ]
+    optional: dict[str, Any] = {}
+    if args.expected_ordering:
+        optional["expected_orderings"] = tuple(args.expected_ordering)
     summary = summarize_pressure_replays(
         payloads,
         expected_capacity_tokens=args.expected_capacity_tokens,
         required_peak_fraction=args.required_peak_fraction,
+        **optional,
     )
     write_json(args.output, summary)
 

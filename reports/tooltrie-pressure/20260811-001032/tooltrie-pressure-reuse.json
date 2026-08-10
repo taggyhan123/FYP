@@ -1,0 +1,61 @@
+{
+  "capacity_tokens": 7680,
+  "experiment": "tooltrie-v0-controlled-cache-pressure",
+  "format_version": 1,
+  "menu_size": 64,
+  "model": "Qwen/Qwen3-0.6B",
+  "ordering": "tooltrie",
+  "partition": "bfcl",
+  "regimes": {
+    "empirical": {
+      "cache_reset_before": true,
+      "counter_validation_clean": true,
+      "estimated_peak_resident_tokens": 6942,
+      "measured_reuse_ratio": 0.87184,
+      "peak_kv_usage_fraction": 0.90397,
+      "planner_evictions": 1494,
+      "preemptions": 0,
+      "requirement_met": true,
+      "server_evictions": 10673,
+      "total_prompt_tokens": 1380694
+    },
+    "session_bursty": {
+      "cache_reset_before": true,
+      "counter_validation_clean": true,
+      "estimated_peak_resident_tokens": 6975,
+      "measured_reuse_ratio": 0.91619,
+      "peak_kv_usage_fraction": 0.90814,
+      "planner_evictions": 922,
+      "preemptions": 0,
+      "requirement_met": true,
+      "server_evictions": 6846,
+      "total_prompt_tokens": 1380694
+    },
+    "skewed": {
+      "cache_reset_before": true,
+      "counter_validation_clean": true,
+      "estimated_peak_resident_tokens": 6975,
+      "measured_reuse_ratio": 0.94734,
+      "peak_kv_usage_fraction": 0.90814,
+      "planner_evictions": 506,
+      "preemptions": 0,
+      "requirement_met": true,
+      "server_evictions": 4156,
+      "total_prompt_tokens": 1380323
+    },
+    "uniform": {
+      "cache_reset_before": true,
+      "counter_validation_clean": true,
+      "estimated_peak_resident_tokens": 6975,
+      "measured_reuse_ratio": 0.88535,
+      "peak_kv_usage_fraction": 0.90814,
+      "planner_evictions": 1342,
+      "preemptions": 0,
+      "requirement_met": true,
+      "server_evictions": 9514,
+      "total_prompt_tokens": 1381110
+    }
+  },
+  "requests_per_regime": 200,
+  "runs_per_cell": 1
+}

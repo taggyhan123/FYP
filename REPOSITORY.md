@@ -134,12 +134,16 @@ to update.
 
 ## `reports/` — the evidence chain
 
-Two kinds of document, and the distinction matters:
+Three kinds of document, and the distinctions matter:
 
 - **`findings.md`** — the analysis session's interpretation of a run.
 - **`<stamp>/HANDOVER.md`** — the GPU executor's record of what was executed:
   exact commits, model revisions, server commands, live capacities, acceptance
   counts, deviations, and the raw archive SHA-256.
+- **`PREDECLARATION.md`** — conditions, predictions and stop conditions fixed
+  and committed *before* measurement, so a result can be checked against what
+  was promised rather than what was found. Present in `frequency-online/` and
+  `tooltrie-pressure/`.
 
 **Handovers are load-bearing and must not be deleted.** `consolidated-report.md`
 cites them in a seven-row provenance table, `brief-questions-and-answers.md`
@@ -158,6 +162,7 @@ data lives outside Git.
 | `contextpilot-static-refit-resume/` | static-refit cells + SGLang counter audit |
 | `contextpilot-dual-model/` | **accepted 190-replay 4B/0.6B matrix** |
 | `frequency-online/` | causal online-frequency proposal |
+| `tooltrie-pressure/` | ToolTrie-v0 under the 480-block cache budget |
 
 Top level of `reports/`: **`key-findings.md`** (start here — one-page summary),
 `consolidated-report.md` (full synthesis, evidence and caveats),

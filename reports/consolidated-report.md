@@ -766,14 +766,36 @@ validation checks passed.
 | --- | ---: | ---: | ---: | ---: |
 | Original | 1.18% | 0.69% | 1.24% | 0.69% |
 | Alphabetical | 29.21% | 29.35% | 28.06% | 27.76% |
-| **Random, seed 42** | **32.16%** | **31.27%** | **32.67%** | **30.19%** |
+| Random, seed 42 | 32.16% | 31.27% | 32.67% | 30.19% |
 | Frequency = schema-cost = FP-tree | 9.44% | 8.99% | 9.51% | 9.00% |
+| **ToolTrie-v0** *(added 2026-08-11)* | **87.18%** | **88.54%** | **94.73%** | **91.62%** |
 
-Fixed random seed 42 leads reuse in every regime. This is **one run per cell and
-one seed with no repeated-trial interval** — a sensitivity result motivating a
-random-seed sweep, not a deployment recommendation. Reuse and latency here must
-not be compared numerically with the 190,896-token cache, and this is not
-evidence of natural production pressure.
+All six original orderings are **static** permutations — `locality_replay.py`
+held the intra-menu order constant across regimes by design, so the adaptive
+ToolTrie-v0 could not be expressed in that matrix and was absent. It was added
+later under the same capacity, regimes, seeds and gates: 4/4 accepted, 64/64
+checks, peak occupancy 0.904–0.908, 506–1,494 planner evictions per regime —
+the first time its own metadata-budget path has executed
+(`reports/tooltrie-pressure/20260811-001032/`).
+
+Among the static orderings, fixed random seed 42 leads every regime. This is
+**one run per cell and one seed with no repeated-trial interval** — a
+sensitivity result motivating a random-seed sweep, not a deployment
+recommendation.
+
+**ToolTrie-v0 leads all of them by 55–62 points, and loses nothing to the
+smaller cache** — 87.18% here against 87.19% at 190,896 tokens. The mechanism is
+prefix concentration: it places the single non-shared tool at mean position 57.3
+of 64, so the shared core forms one ~6,950-token prefix that fits inside the
+7,680-token capacity and stays resident, whereas alphabetical places it at 24.1
+and thrashes the remainder. **This inverts the full-capacity ranking**, where
+both ContextPilot arms and the online counter beat ToolTrie-v0.
+
+Two limits on that claim: neither ContextPilot nor `frequency_online` was run in
+this matrix, and both concentrate the shared core harder still at full capacity,
+so they may match or exceed it — untested. Reuse and latency here must not be
+compared numerically with the 190,896-token cache, and this is not evidence of
+natural production pressure.
 
 ---
 

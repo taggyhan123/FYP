@@ -3,7 +3,7 @@
 The predeclared experiment is
 [`cluster/initial-brief-closure-manifest.json`](../../cluster/initial-brief-closure-manifest.json),
 and the executable server procedure is
-[`NUS_GPU_BRIEF_CLOSURE_INSTRUCTIONS.md`](../../NUS_GPU_BRIEF_CLOSURE_INSTRUCTIONS.md).
+[`NUS_GPU_BRIEF_CLOSURE_INSTRUCTIONS.md`](../../runbooks/NUS_GPU_BRIEF_CLOSURE_INSTRUCTIONS.md).
 
 This directory is reserved for compact, reviewable summaries produced from the
 GPU run. Raw workloads, per-request results, token IDs, and server logs remain

@@ -148,7 +148,7 @@ model and reports Qwen3-0.6B separately because their native KV capacities
 differ and ToolTrie is rebuilt from each capacity. This follow-up does not
 alter or retroactively replace the accepted historical evidence above. Its
 protocol is
-[`NUS_GPU_CONTEXTPILOT_DUAL_MODEL_INSTRUCTIONS.md`](../../NUS_GPU_CONTEXTPILOT_DUAL_MODEL_INSTRUCTIONS.md),
+[`NUS_GPU_CONTEXTPILOT_DUAL_MODEL_INSTRUCTIONS.md`](../../runbooks/NUS_GPU_CONTEXTPILOT_DUAL_MODEL_INSTRUCTIONS.md),
 and its reconciled findings are
 [`reports/contextpilot-dual-model/findings.md`](../contextpilot-dual-model/findings.md).
 
@@ -180,6 +180,6 @@ selected-tool text prefill as the predeclared fallback.
 - Metric-scoping record:
   [`QUALITY_COMPARISON_SCOPING.md`](20260807-222212/QUALITY_COMPARISON_SCOPING.md)
 - Static-refit resume protocol:
-  [`NUS_GPU_CONTEXTPILOT_CONFIRMATION_INSTRUCTIONS.md`](../../NUS_GPU_CONTEXTPILOT_CONFIRMATION_INSTRUCTIONS.md)
+  [`NUS_GPU_CONTEXTPILOT_CONFIRMATION_INSTRUCTIONS.md`](../../runbooks/NUS_GPU_CONTEXTPILOT_CONFIRMATION_INSTRUCTIONS.md)
 - Supervisor-requested dual-model protocol:
-  [`NUS_GPU_CONTEXTPILOT_DUAL_MODEL_INSTRUCTIONS.md`](../../NUS_GPU_CONTEXTPILOT_DUAL_MODEL_INSTRUCTIONS.md)
+  [`NUS_GPU_CONTEXTPILOT_DUAL_MODEL_INSTRUCTIONS.md`](../../runbooks/NUS_GPU_CONTEXTPILOT_DUAL_MODEL_INSTRUCTIONS.md)

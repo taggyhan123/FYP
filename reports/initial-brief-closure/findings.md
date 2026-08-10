@@ -271,11 +271,11 @@ publication-oriented experiment may study safe retention. It must still be
 - ContextPilot historical-arm provenance correction:
   [`contextpilot-causal-provenance-correction.json`](../tooltrie-phase2/contextpilot-causal-provenance-correction.json)
 - Corrected ContextPilot confirmation runbook:
-  [`NUS_GPU_CONTEXTPILOT_CONFIRMATION_INSTRUCTIONS.md`](../../NUS_GPU_CONTEXTPILOT_CONFIRMATION_INSTRUCTIONS.md)
+  [`NUS_GPU_CONTEXTPILOT_CONFIRMATION_INSTRUCTIONS.md`](../../runbooks/NUS_GPU_CONTEXTPILOT_CONFIRMATION_INSTRUCTIONS.md)
 - Reconciled ContextPilot confirmation findings:
   [`contextpilot-confirmation/findings.md`](../contextpilot-confirmation/findings.md)
 - Controlled pressure rerun instructions:
-  [`NUS_GPU_PRESSURE_RERUN_INSTRUCTIONS.md`](../../NUS_GPU_PRESSURE_RERUN_INSTRUCTIONS.md)
+  [`NUS_GPU_PRESSURE_RERUN_INSTRUCTIONS.md`](../../runbooks/NUS_GPU_PRESSURE_RERUN_INSTRUCTIONS.md)
 - Accepted pressure handover:
   [`20260807-005414/HANDOVER.md`](../initial-brief-pressure-rerun/20260807-005414/HANDOVER.md)
 - Pressure sequence-equivalence audit:

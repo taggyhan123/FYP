@@ -27,15 +27,16 @@ listing these six:
 > questions are research extensions that may be pursued once the basic
 > measurements and baselines are reliable."*
 
-**Q1–Q3 are the questions the initial stage was required to answer, and all
-three are fully answered. Q4–Q6 were designated extensions from the outset.**
-Two of them were nevertheless answered in substantial part.
+**Q1–Q3 are the questions the initial stage was required to answer. Q1 and Q2
+are fully answered; Q3 is answered on its "prefix memory under a limited cache
+budget" clause and unanswered on its "weighted" clause.** Q4–Q6 were designated
+extensions from the outset; two were nevertheless answered in substantial part.
 
 | Question | Required by the initial stage? | Status |
 | --- | --- | --- |
 | Q1 Tool locality | **Yes** | **Answered** |
 | Q2 Prefix organization | **Yes** | **Answered** |
-| Q3 Trie-aware memory | **Yes** | **Answered** |
+| Q3 Trie-aware memory | **Yes** | **Partly** — bounded and budget-tested, never weighted |
 | Q4 Retention trade-off | No — extension (§9.1) | Deferred |
 | Q5 Long-tail tools | No — extension (§9.4) | Partly answered anyway |
 | Q6 Quality and safety | No — extension (§9.2) | Mostly answered anyway |
@@ -103,7 +104,7 @@ The magnitude is workload-dependent — see Part 2, Q2.
 **Source:** `reports/tooltrie-phase2/findings.md` §2;
 `reports/initial-brief-pressure-rerun/ordering-equivalence.json`.
 
-### Q3. Trie-aware memory — **Answered**
+### Q3. Trie-aware memory — **Partly answered**: bounded and budget-tested, but never weighted
 
 > *Can frequently occurring tool sequences be represented as a weighted trie or
 > prefix memory under a limited cache budget?*
@@ -120,6 +121,27 @@ The budget was exercised, not merely implemented: at Qwen3-8B the planner ran at
 a **44,656-token capacity** versus 190,896 at 0.6B and **evicted 424 nodes**, yet
 produced **byte-identical orderings on all 100 records**. The bounded structure
 therefore works without distorting the ordering at that scale.
+
+**Measured under a genuinely constrained cache on 2026-08-11.** The clause "under
+a limited cache budget" was untested until then. ToolTrie-v0 replayed into the
+480-block harness — 7,680 tokens, a 25× reduction — across all four locality
+regimes: 4/4 accepted, 64/64 checks, peak occupancy 0.904–0.908.
+
+| regime | empirical | uniform | skewed | session-bursty |
+| --- | ---: | ---: | ---: | ---: |
+| ToolTrie-v0 | **87.18%** | **88.54%** | **94.73%** | **91.62%** |
+| best of the six static orderings | 32.16% | 31.27% | 32.67% | 30.19% |
+
+It leads by **55–62 points** and loses nothing to the smaller cache — 87.18%
+against 87.19% uncapped — because it concentrates the shared core into a single
+~6,950-token prefix that fits inside the 7,680-token capacity. Its own metadata
+eviction fired 506–1,494 times per regime, the first time that path has run.
+**Source:** `reports/tooltrie-pressure/20260811-001032/`.
+
+**The "weighted" half of this question is still unanswered.** `plan()` tie-breaks
+on reachable cached cost then *frozen training* support; `visit_count` is
+incremented on every observation and never read. The trie is bounded and
+budget-tested, but it is not weighted by its own measurements.
 
 One clarification for readers of the code: this budget governs the **planner's
 own metadata** — how much served history it remembers — and is *not* KV-cache
@@ -337,6 +359,14 @@ bound for this planner, it is a different and worse algorithm.
 
 Under controlled pressure, `empirical` and `session_bursty` produce different
 reuse despite being permutations of one task multiset.
+
+**But the locality regime is the weaker of the two factors.** Across the 28
+regime-runs in the pressure matrix no ordering moves more than a few points
+between empirical, uniform, skewed and session-bursty, while the spread *between*
+orderings within one regime is 1.18% to 87.18%. Ordering dominates the request
+distribution. The strongest sensitivity is to whether the policy is adaptive at
+all: ToolTrie-v0 leads the best static ordering by 55–62 points in every regime
+(`reports/tooltrie-pressure/20260811-001032/`).
 
 ### Q7. Does tool reordering change function-call accuracy? — **Answered: yes**
 

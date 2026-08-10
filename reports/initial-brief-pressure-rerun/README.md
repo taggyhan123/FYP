@@ -3,7 +3,7 @@
 The predeclared replacement for the failed pressure criterion is
 [`cluster/initial-brief-pressure-rerun-manifest.json`](../../cluster/initial-brief-pressure-rerun-manifest.json).
 The executable GPU procedure is
-[`NUS_GPU_PRESSURE_RERUN_INSTRUCTIONS.md`](../../NUS_GPU_PRESSURE_RERUN_INSTRUCTIONS.md).
+[`NUS_GPU_PRESSURE_RERUN_INSTRUCTIONS.md`](../../runbooks/NUS_GPU_PRESSURE_RERUN_INSTRUCTIONS.md).
 
 This directory is reserved for a compact, independently validated GPU
 handover. The original 24 low-occupancy runs remain preserved under
@@ -22,6 +22,22 @@ server logs, and metrics remain outside Git in a checksummed archive.
 occupancy is 91.02-91.86%, every run records positive sampled evictions, and
 all runs preserve one running and zero waiting requests. The execution record
 is [`20260807-005414/HANDOVER.md`](20260807-005414/HANDOVER.md).
+
+## A seventh ordering was added later
+
+The six orderings here are all **static** permutations — `locality_replay.py`
+held the intra-menu order constant across regimes by design. ToolTrie-v0, which
+is adaptive, could not be expressed that way and was absent.
+
+It was added on 2026-08-11 in a separate directory,
+[`reports/tooltrie-pressure/20260811-001032/`](../tooltrie-pressure/20260811-001032/HANDOVER.md),
+under the same capacity, regimes, seeds and acceptance gates: 4/4 accepted,
+64/64 checks, peak occupancy 0.904–0.908. It reaches **87.18 / 88.54 / 94.73 /
+91.62%**, leading `random` — the best ordering here — by 55–62 points.
+
+**Nothing in this directory was rerun or relabelled.** Read the two together:
+the matrix below is the static-ordering result, and the adaptive condition sits
+alongside it.
 
 The GPU files did not retain ordered tool IDs. A deterministic local
 reconstruction under the pinned manifest parameters is recorded in

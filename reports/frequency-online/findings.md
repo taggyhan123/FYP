@@ -45,10 +45,13 @@ has count zero, so it moves to the tail immediately. All four BM25-retrieved
 workloads have zero tools present in every request.
 
 The implementation also passes direct causality and permutation tests:
-`plan()` reads the current counter without changing it, the workload builder
-records the plan, and only then calls `observe()`.
+`plan()` reads the current counter without changing it,
+`scripts/build_frequency_online_workload.py` records the plan, and only then
+calls `observe()`.
 
 Sources: `structure-audit.json`, `local-audit.json`,
+`scripts/build_frequency_online_workload.py` (the builder that produced every
+ordering measured here, from `OnlineFrequencyPlanner` in `src/tatm/baselines.py`),
 `scripts/audit_frequency_online_structure.py`, and
 `scripts/audit_frequency_online_compact.py`.
 

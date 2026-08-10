@@ -43,6 +43,7 @@ from tatm.measurement import (
     summarize_request_measurements,
 )
 from tatm.prompting import build_menu, order_tool_ids, workload_record
+from tatm.tooltrie import ToolTrie
 from tatm.vllm_client import (
     KvUsageSampler,
     fetch_text,
@@ -81,9 +82,14 @@ def main() -> None:
             "frequency",
             "schema_cost_weighted",
             "fp_tree_global",
+            "tooltrie",
         ),
         default="alphabetical",
-        help="Fixed intra-menu tool order, held constant across replay conditions.",
+        help=(
+            "Intra-menu tool order. All values except 'tooltrie' are fixed "
+            "permutations held constant across replay conditions; 'tooltrie' "
+            "plans causally from earlier requests and so differs per condition."
+        ),
     )
     parser.add_argument("--random-seed", type=int, default=42)
     parser.add_argument("--replay-seed", type=int, default=2026)
@@ -186,6 +192,22 @@ def main() -> None:
     empirical_multiset = Counter(task.task_id for task in replays["empirical"])
 
     def build_sequence(order: list) -> list[tuple[str, ...]]:
+        # Every fixed ordering is a stateless permutation applied per task.
+        # ToolTrie is causal: it plans from paths observed strictly earlier and
+        # observes only afterwards, so it needs a planner that persists across
+        # the regime. A fresh planner per regime matches the cache reset that
+        # precedes each one — a warm planner against a cold cache would
+        # misrepresent both.
+        planner = (
+            ToolTrie(
+                tools,
+                fallback="alphabetical",
+                recency_window=128,
+                capacity_tokens=capacity_tokens,
+            )
+            if args.ordering == "tooltrie"
+            else None
+        )
         sequences = []
         for task in order:
             tool_ids = deduplicated_existing_ids(task, tools)
@@ -193,9 +215,13 @@ def main() -> None:
                 tool_ids = build_menu(
                     tool_ids, distractor_pool, args.menu_size, seed=args.random_seed
                 )
-            ordered = order_tool_ids(
-                tool_ids, tools, support, args.ordering, random_seed=args.random_seed
-            )
+            if planner is None:
+                ordered = order_tool_ids(
+                    tool_ids, tools, support, args.ordering, random_seed=args.random_seed
+                )
+            else:
+                ordered = planner.plan(tool_ids).ordered_ids
+                planner.observe(ordered)
             sequences.append(ordered)
         return sequences
 

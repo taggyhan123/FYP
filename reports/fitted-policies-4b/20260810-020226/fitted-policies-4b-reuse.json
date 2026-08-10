@@ -1,0 +1,82 @@
+{
+  "conditions": {
+    "bfcl": {
+      "alphabetical": {
+        "cached_ratio_mean": 0.3798669364826674,
+        "spread": 0.0,
+        "trials": 3
+      },
+      "conditional_pair": {
+        "cached_ratio_mean": 0.3954648893962022,
+        "spread": 0.0,
+        "trials": 3
+      },
+      "conditional_pair_triple": {
+        "cached_ratio_mean": 0.3954648893962022,
+        "spread": 0.0,
+        "trials": 3
+      },
+      "fp_tree_conditional": {
+        "cached_ratio_mean": 0.3954648893962022,
+        "spread": 0.0,
+        "trials": 3
+      },
+      "frequency_fitted": {
+        "cached_ratio_mean": 0.3954648893962022,
+        "spread": 0.0,
+        "trials": 3
+      },
+      "original": {
+        "cached_ratio_mean": 0.011866496124412795,
+        "spread": 0.0,
+        "trials": 3
+      },
+      "schema_cost_fitted": {
+        "cached_ratio_mean": 0.3954648893962022,
+        "spread": 0.0,
+        "trials": 3
+      }
+    },
+    "toolret": {
+      "alphabetical": {
+        "cached_ratio_mean": 0.4430541805385724,
+        "spread": 0.0,
+        "trials": 3
+      },
+      "conditional_pair": {
+        "cached_ratio_mean": 0.34548409298930527,
+        "spread": 0.0,
+        "trials": 3
+      },
+      "conditional_pair_triple": {
+        "cached_ratio_mean": 0.34548409298930527,
+        "spread": 0.0,
+        "trials": 3
+      },
+      "fp_tree_conditional": {
+        "cached_ratio_mean": 0.3452771818705627,
+        "spread": 0.0,
+        "trials": 3
+      },
+      "frequency_fitted": {
+        "cached_ratio_mean": 0.34548409298930527,
+        "spread": 0.0,
+        "trials": 3
+      },
+      "original": {
+        "cached_ratio_mean": 0.07151078164985754,
+        "spread": 0.0,
+        "trials": 3
+      },
+      "schema_cost_fitted": {
+        "cached_ratio_mean": 0.3483578585273963,
+        "spread": 0.0,
+        "trials": 3
+      }
+    }
+  },
+  "format_version": 1,
+  "model": "Qwen/Qwen3-4B",
+  "native_capacity_tokens": 101120,
+  "note": "Phase-2 fitted policies replayed at 4B with same-session original/alphabetical controls."
+}

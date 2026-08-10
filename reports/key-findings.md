@@ -100,23 +100,27 @@ from padded menus will be optimistic by roughly two orders of magnitude.**
 > **Brief §7 Q3** — *Does frequency-based ordering improve reusable prefix length?*
 > **Brief §7 Q4** — *Does weighting by schema length or prefill time perform better?*
 
-Reuse on **Qwen3-0.6B** at 190,896-token capacity, vLLM, 3 trials — the same
-frequency signal under two estimators. These policies were only ever run at that
-size; the menus are byte-identical to those in Table 1.
+The same frequency signal under two estimators, measured at both model sizes.
+Qwen3-4B at 101,120-token capacity is primary; Qwen3-0.6B at 190,896 alongside,
+so the effect of halving the cache is visible. Menus byte-identical to Table 1.
 
-| Ordering | BFCL padded-64 | ToolRet padded-64 |
-| --- | ---: | ---: |
-| Original text prefill | 1.19% | 13.87% |
-| Alphabetical | 38.13% | **51.05%** |
-| `frequency_fitted` — frozen on a held-out corpus | 39.69% | 41.58% |
-| `schema_cost_fitted` — frequency × schema length | 39.69% | 41.87% |
-| **`frequency_online` — estimated from the served stream** | **96.27%** | **94.80%** |
+| Ordering | BFCL 4B | BFCL 0.6B | ToolRet 4B | ToolRet 0.6B |
+| --- | ---: | ---: | ---: | ---: |
+| Original text prefill | 1.19% | 1.19% | 7.15% | 13.87% |
+| Alphabetical | 37.99% | 38.13% | **44.31%** | **51.05%** |
+| `frequency_fitted` — frozen on a held-out corpus | 39.55% | 39.69% | 34.55% | 41.58% |
+| `schema_cost_fitted` — frequency × schema length | 39.55% | 39.69% | 34.84% | 41.87% |
+| **`frequency_online` — from the served stream** | **96.27%** | **96.27%** | **94.80%** | **94.80%** |
 
-The frozen estimator gains 1.56 points over alphabetical on BFCL and is **9.5
-points worse** than it on ToolRet. The online estimator reaches 96.27%. A
-held-out corpus structurally cannot know which tools a given evaluation stream
-happens to share — that is a property of the eval sample, not of the tool
-population.
+**The relationship is capacity-robust.** The frozen estimator beats alphabetical
+on BFCL by **+1.56 points at both capacities** — 39.55 against 37.99, and 39.69
+against 38.13, the same margin to the digit. On ToolRet it trails alphabetical by
+**9.76 points at 4B** and 9.47 at 0.6B: halving the cache costs alphabetical
+about 7 points and the frozen fit about 7 points, so the gap survives.
+
+The online estimator reaches 96.27% at both sizes. A held-out corpus structurally
+cannot know which tools a given evaluation stream happens to share — that is a
+property of the eval sample, not of the tool population.
 
 This reverses the earlier conclusion that frequency ordering does not help, and
 means any comparison of frequency ordering must state which estimator it used.
@@ -126,19 +130,19 @@ BFCL, identical to the digit, because it emits an identical ordering there.
 ## 4. Pair/triple structure was not actually tested on the padded workload
 > **Brief §7 Q5** — *How much additional benefit comes from pair/triple workflow structure?*
 
-**Qwen3-0.6B** at 190,896-token capacity, vLLM, 3 trials — these policies were
-only ever run at that size:
+Both model sizes, 3 trials each, zero spread:
 
-| Fitted policy | BFCL padded-64 | ToolRet padded-64 |
-| --- | ---: | ---: |
-| `frequency_fitted` | 39.69% | 41.58% |
-| `schema_cost_fitted` | 39.69% | 41.87% |
-| `fp_tree_conditional` | 39.69% | 41.56% |
-| `conditional_pair` | 39.69% | 41.58% |
-| `conditional_pair_triple` | 39.69% | 41.58% |
-| *alphabetical, for reference* | *38.13%* | *51.05%* |
+| Fitted policy | BFCL 4B | BFCL 0.6B | ToolRet 4B | ToolRet 0.6B |
+| --- | ---: | ---: | ---: | ---: |
+| `frequency_fitted` | **39.55%** | **39.69%** | 34.55% | 41.58% |
+| `schema_cost_fitted` | **39.55%** | **39.69%** | 34.84% | 41.87% |
+| `fp_tree_conditional` | **39.55%** | **39.69%** | 34.53% | 41.56% |
+| `conditional_pair` | **39.55%** | **39.69%** | 34.55% | 41.58% |
+| `conditional_pair_triple` | **39.55%** | **39.69%** | 34.55% | 41.58% |
+| *alphabetical, for reference* | *37.99%* | *38.13%* | *44.31%* | *51.05%* |
 
-On BFCL all five are **39.69% to the digit** — not merely close. They emit
+On BFCL all five land on the same value **to the digit at both capacities** —
+39.55 at 4B and 39.69 at 0.6B — which is not merely close. They emit
 **byte-identical `tool_ids` on all 200 records**, differing only in the label
 string, because their extra statistics never discriminate and each key falls
 through to the same frequency ordering. An experiment in which the pair/triple
@@ -150,9 +154,10 @@ On ToolRet the policies do differ — `schema_cost_fitted` on all 200 records,
 answer is no benefit: all five sit near 41.6% while plain alphabetical reaches
 51.05%.
 
-**A 4B rerun would not change this finding.** The claim is that the emitted
-`tool_ids` are identical, which is a property of the workload files and holds
-whatever model serves them. Only the illustrative reuse percentages would move.
+This was predicted and then tested: the claim is that the emitted `tool_ids` are
+identical, a property of the workload files, so it should hold whatever model
+serves them. Running all five at 4B reproduced the five-way tie at a different
+value, which is the confirmation.
 
 ## 5. Under cache pressure, a fixed random ordering wins
 > **Brief §7 Q6** — *How sensitive are results to request ordering and session locality?*

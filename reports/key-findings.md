@@ -17,19 +17,22 @@ states which question it answers. Differences are quoted in percentage points.
 
 **Reordering tool schemas produces large prefix-cache reuse only when the tool
 menu barely changes between requests. Under realistic retrieval it produces
-almost none, and no ordering policy is a quality win.**
+almost none, and the small relevance gains it buys are paid for in no-tool
+decisions.**
 
 **Table 1 — prefix-cache reuse.** 200 requests per workload, 3 trials, zero
-spread across trials. Reuse only; no accuracy is involved.
+spread across trials. Reuse only; no accuracy is involved. Qwen3-4B at its
+native 96,832-token capacity. **Bold marks the best value in each column**, the
+convention used in every policy-comparison table below.
 
 | Qwen3-4B | padded menu (64 tools) | retrieved menu, BM25 k=128 |
 | --- | ---: | ---: |
 | Original text prefill | 1.19% | 0.34% |
 | Alphabetical | 37.99% | 0.44% |
 | ToolTrie-v0 (ours) | 87.19% | 0.89% |
-| ContextPilot-derived, persistent API † | **96.16%** | 1.35% |
-| ContextPilot-derived, static refit † | **96.16%** | **2.23%** |
-| Online frequency counter | 96.27% | 2.33% |
+| ContextPilot-derived, persistent API † | 96.16% | 1.35% |
+| ContextPilot-derived, static refit † | 96.16% | 2.23% |
+| Online frequency counter | **96.27%** | **2.33%** |
 
 **Table 2 — function-calling accuracy.** A separate experiment: one n=800 BFCL
 replay per condition, 640 relevance cases and 160 irrelevance cases. No reuse is
@@ -94,7 +97,8 @@ and Qwen3-0.6B shows the same collapse.
 
 Reuse falls from 82–96% to 0.3–19% between them, for every policy, at both model
 sizes. Membership never changed — only order. **Any deployment estimate taken
-from padded menus will be optimistic by roughly two orders of magnitude.**
+from padded menus will be optimistic by one to two orders of magnitude** —
+between 41× and 98×, depending on the policy.
 
 ## 3. Frequency ordering works or fails depending on the estimator
 > **Brief §7 Q3** — *Does frequency-based ordering improve reusable prefix length?*
@@ -102,12 +106,14 @@ from padded menus will be optimistic by roughly two orders of magnitude.**
 
 The same frequency signal under two estimators, measured at both model sizes.
 Qwen3-4B at 101,120-token capacity is primary; Qwen3-0.6B at 190,896 alongside,
-so the effect of halving the cache is visible. Menus byte-identical to Table 1.
+so the effect of halving the cache is visible. Menus byte-identical to Table 1,
+but these are **same-session controls at a different capacity** from Table 1's
+96,832 — read the columns against each other, not against Table 1.
 
 | Ordering | BFCL 4B | BFCL 0.6B | ToolRet 4B | ToolRet 0.6B |
 | --- | ---: | ---: | ---: | ---: |
 | Original text prefill | 1.19% | 1.19% | 7.15% | 13.87% |
-| Alphabetical | 37.99% | 38.13% | **44.31%** | **51.05%** |
+| Alphabetical | 37.99% | 38.13% | 44.31% | 51.05% |
 | `frequency_fitted` — frozen on a held-out corpus | 39.55% | 39.69% | 34.55% | 41.58% |
 | `schema_cost_fitted` — frequency × schema length | 39.55% | 39.69% | 34.84% | 41.87% |
 | **`frequency_online` — from the served stream** | **96.27%** | **96.27%** | **94.80%** | **94.80%** |
@@ -198,8 +204,8 @@ correct on 141):
 | Policy | cases broken | cases repaired | net |
 | --- | ---: | ---: | ---: |
 | ToolTrie-v0 | 5 | **4** | −1 |
-| ContextPilot persistent | 5 | **0** | −5 |
-| Online frequency counter | 7 | **0** | −7 |
+| ContextPilot persistent | 5 | 0 | −5 |
+| Online frequency counter | 7 | 0 | −7 |
 
 ToolTrie-v0 is bidirectional, which is what noise looks like. The two high-reuse
 policies repair **zero** cases — they only break them. Exact McNemar gives

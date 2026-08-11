@@ -867,6 +867,14 @@ admission policy, and KV composition — remain future work and are unbuilt.
 
 ## 7. Limitations and open questions
 
+### 7.0 Every figure is a best case
+
+One menu seed and one request sequence per condition, on a single-tenant server
+with no competing traffic. Real serving shares the cache between tenants and
+interleaves requests, both of which reduce reuse below what is reported here.
+Nothing in this report establishes what any of these policies do under
+contention.
+
 ### 7.1 The retriever is a lexical baseline
 
 BM25 is a reproducible baseline, not the official ToolRet retriever. A dense

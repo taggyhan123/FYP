@@ -123,3 +123,43 @@ placeholder where the archive SHA-256 should be. The authoritative values are
 the ones above and in `raw-archive.sha256`:
 `aa4a377af9d11c51e085397fcf1262255aae64ad2f7d49c00f4f22492ad2c675`, verified
 with `sha256sum -c`. No tracked evidence file was affected.
+
+## Corrections after independent audit (2026-08-11)
+
+The analysis session reconstructed both runs from the committed artifacts and
+reproduced every number: 0/200 v0-vs-v1 orderings, matching eviction counts,
+69/200 and 194/200 pair/triple differences, and both pressure summaries. The
+measurements stand. Five claims in the original text did not, and are corrected
+here and in the reports.
+
+1. **"Both answers are negative" was wrong.** The weighted trie is a negative
+   result. Pair/triple ordering is a **small positive** one: +0.359 and +0.334
+   points. Small is not negative.
+2. **The pair "theorem" was overclaimed.** The audit counts only pairs observed
+   together and skips triples above menu width 16, which includes
+   `bfcl-padded64`. It bounds how much room a pair key has; it does not prove no
+   pair-keyed policy can differ. The defensible statement is the replay result:
+   0 of 200 differing orderings on that workload.
+3. **"Structure exists only on retrieved menus" was wrong.** `toolret-padded64`
+   has 46 support violations, and replaying the two online planners there shows
+   them differing on **4 of 200 records**. Retrieved menus hold much more usable
+   structure; padded ones do not hold none.
+4. **"The five-way tie is a theorem" was wrong.** Pair redundancy cannot explain
+   the `schema_cost_fitted` and `fp_tree_conditional` labels, which are not pair
+   keys. Their agreement is a verified property of the emitted sequences in this
+   fitted setup.
+5. **The predeclaration covered the empirical regime only.** Report Run A as
+   **1/1 predeclared run accepted, plus three regimes added afterwards** because
+   the summarizer requires all four — not as an unqualified 4/4.
+
+A sixth item was a self-contradiction rather than an overclaim: the text
+asserted no policy could hold 96% reuse and 90% occupancy at once, immediately
+above a table showing uniform and skewed doing exactly that. The sentence is
+removed. The defensible claim is that two regimes cleared the predeclared gate
+and two missed it narrowly.
+
+**Still open, unchanged by this audit:** brief §7 Q4 asks about weighting by
+schema length **or measured prefill time**; only the schema-length proxy has
+been measured. Run B's raw replay and counter files exist solely inside the
+archive, so counter cleanliness there rests on this session's assertion until
+the archive is verified off-machine.

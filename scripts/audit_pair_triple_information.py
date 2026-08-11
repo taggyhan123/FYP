@@ -6,20 +6,28 @@ structure. Every fitted policy that consumes that structure
 emitted byte-identical orderings to plain ``frequency_fitted`` on the padded
 workloads, so the question was never actually posed there.
 
-This audit explains why, and it is a structural fact about the workloads rather
-than a property of any planner. If pair support is a deterministic function of
-the two tools' presence counts, then ordering by pair co-occurrence cannot
-differ from ordering by frequency: the pair key carries no signal the frequency
-key does not already carry, so no planner built on it can discriminate.
+This audit measures how much room a pair key has to discriminate. Where observed
+pair support tracks the two tools' presence counts, a pair key adds little the
+frequency key does not already carry.
+
+**It is a measurement, not a proof.** Only pairs actually observed together are
+counted; an unobserved pair scores zero rather than ``min(presence)``, and
+triples are skipped on menus wider than ``TRIPLE_MENU_LIMIT`` — which includes
+``bfcl-padded64``. A workload reported as fully redundant can still admit a
+pair-keyed policy that differs. Confirm any consequence by replaying the
+planners and diffing their emitted orderings: on the real workloads the two
+online planners differ on 0/200 ``bfcl-padded64`` records but 4/200
+``toolret-padded64`` records, so redundancy is not total even on padded menus.
 
 The audit reports, per workload:
 
 * ``pair_equals_min_presence_fraction`` — how often
   ``support(a, b) == min(presence(a), presence(b))``. A menu whose tools are
   either universal or unique forces this identity.
-* ``presence_signature_violations`` — pairs sharing a presence signature but
-  disagreeing on support. Zero means support is a *function* of presence, and
-  therefore redundant with it.
+* ``presence_signature_violations`` — observed pairs sharing a presence
+  signature but disagreeing on support. Zero means support is a function of
+  presence *over the pairs actually seen*, which bounds but does not eliminate
+  what a pair key can do.
 
 CPU only. Reads committed workload files; runs no model and no server.
 """
@@ -143,11 +151,20 @@ def main() -> None:
         "workloads": workloads,
         "workloads_where_pair_support_is_redundant_with_frequency": degenerate,
         "conclusion": (
-            "On workloads listed as redundant, pair support is a deterministic "
-            "function of presence counts, so no ordering built on pair or triple "
-            "co-occurrence can differ from a frequency ordering. Q5 is not "
-            "answerable there by construction, independently of any planner."
+            "On workloads listed as redundant, observed pair support tracks "
+            "min(presence(a), presence(b)), so a pair key adds little a "
+            "frequency key does not already carry. This is evidence about these "
+            "workloads, not a proof about pair-keyed policies in general: only "
+            "pairs actually observed together are counted, unobserved pairs "
+            "score zero rather than min(presence), and triples are skipped on "
+            "menus wider than TRIPLE_MENU_LIMIT. Confirm any claim by replaying "
+            "the planners and diffing their emitted orderings."
         ),
+        "scope": {
+            "counts_observed_pairs_only": True,
+            "triple_menu_limit": TRIPLE_MENU_LIMIT,
+            "proves_no_pair_policy_can_differ": False,
+        },
     }
     write_json(args.output, summary)
 

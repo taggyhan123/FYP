@@ -134,7 +134,7 @@ means any comparison of frequency ordering must state which estimator it used.
 **Schema-cost weighting (Q4) adds nothing over plain frequency** — 39.69% on
 BFCL, identical to the digit, because it emits an identical ordering there.
 
-## 4. Pair/triple structure cannot help on padded menus, and is worth +0.35 points on retrieved ones
+## 4. Pair/triple structure is worth +0.35 points, and only where menus genuinely vary
 > **Brief §7 Q5** — *How much additional benefit comes from pair/triple workflow structure?*
 
 Both model sizes, 3 trials each, zero spread:
@@ -148,6 +148,12 @@ Both model sizes, 3 trials each, zero spread:
 | `conditional_pair_triple` | **39.55%** | **39.69%** | 34.55% | 41.58% |
 | *alphabetical, for reference* | *37.99%* | *38.13%* | *44.31%* | *51.05%* |
 
+**The five-way tie is a separate fact and pair redundancy does not explain it.**
+`schema_cost_fitted` differs by schema length and `fp_tree_conditional` by tree
+traversal; neither is a pair key. Their agreement with `frequency_fitted` on
+BFCL is a verified property of the emitted sequences in this fitted setup, not a
+consequence of the table above.
+
 On BFCL all five land on the same value **to the digit at both capacities** —
 39.55 at 4B and 39.69 at 0.6B — which is not merely close. They emit
 **byte-identical `tool_ids` on all 200 records**, differing only in the label
@@ -160,9 +166,10 @@ On ToolRet padded menus `schema_cost_fitted` differs on all 200 records and
 `fp_tree_conditional` on 10 — but **both pair/triple policies are byte-identical
 to `frequency_fitted` there too**, so Q5 was not posed on either padded workload.
 
-**Why, and it is a theorem rather than an accident.** When a menu is a fixed
-core plus one varying tool, pair support is a deterministic function of the two
-tools' presence counts, so a pair key carries no signal a frequency key does not:
+**Why: on padded menus the pair signal is redundant with frequency.** When a
+menu is a fixed core plus one varying tool, observed pair support tracks
+`min(presence(a), presence(b))`, so a pair key adds little a frequency key does
+not already carry:
 
 | workload | tools in every request | `pair == min(presence)` | violations |
 | --- | ---: | ---: | ---: |
@@ -171,8 +178,15 @@ tools' presence counts, so a pair key carries no signal a frequency key does not
 | toolret-bm25-k16 | 0 | 85.16% | 2,651 |
 | toolret-bm25-k128 | 0 | 67.34% | 208,615 |
 
-No pair-keyed ordering *can* differ from a frequency-keyed one on padded menus.
-Structure exists only where menus are genuinely retrieved.
+**Read this as a measured property of these workloads, not a proof.** The audit
+examines only pairs actually observed together, and skips triples on menus wider
+than 16 — which includes `bfcl-padded64`. What is established is narrower and
+sufficient: replaying both online planners over the real workloads, they emit
+**0 of 200 differing orderings on `bfcl-padded64`** and **4 of 200 on
+`toolret-padded64`**, which is why the fitted pair and triple policies produced
+one file. It does not follow that no pair-keyed policy could ever differ, and
+padded ToolRet shows the redundancy is not total even there — its 46 violations
+are real.
 
 **Measured where it exists, the answer is +0.33 to +0.36 points.** An online
 pair/triple estimator against an online frequency counter, Qwen3-0.6B at
@@ -360,12 +374,14 @@ ContextPilot has still never been run under pressure.
 That near-miss is itself worth recording: peak occupancy *falls* as a policy
 concentrates reuse better, because fewer distinct blocks stay resident. **A gate
 that certifies cache pressure therefore penalises the policies it exists to
-reward**, and at this capacity nothing can hold 96% reuse and 90% occupancy at
-once.
+reward**. Two regimes cleared the gate and two missed it narrowly; the counter
+reaches 96% reuse in all four.
 
 **And weighting the trie changes nothing.** `tooltrie_v1` reads the
-`visit_count` that v0 never consults, in selection and in eviction. It matches
-v0 **to five decimal places in all four regimes**, and re-deriving both planners
+`visit_count` that v0 never consults, in selection and in eviction. Only the
+empirical regime was predeclared — **1/1 predeclared run accepted, with three
+further regimes added afterwards and also accepted**, because the summarizer
+requires all four. It matches v0 **to five decimal places in all four regimes**, and re-deriving both planners
 offline on identical menus shows why: **0 of 200 records differ**, in every
 regime. The weighting genuinely acts — v1 evicts differently, 1,497 against
 1,494 on empirical — but the `_reachable_cached_cost` term decides almost every

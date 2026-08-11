@@ -143,7 +143,10 @@ eviction fired 506–1,494 times per regime, the first time that path has run.
 makes no difference.** `WeightedToolTrie` (`src/tatm/tooltrie_v1.py`) reads the
 `visit_count` v0 never consults — in the selection tie-break, and in eviction,
 where it drops the least-visited leaf instead of the least recent. Run into the
-same 480-block harness: **4/4 accepted, 64/64 checks**.
+same 480-block harness. The predeclaration named the empirical regime only, so
+this is **1/1 predeclared run accepted, with three further regimes added
+afterwards because the summarizer requires all four — 4/4 accepted, 64/64
+checks**.
 
 | regime | empirical | uniform | skewed | session-bursty |
 | --- | ---: | ---: | ---: | ---: |
@@ -341,10 +344,11 @@ tokenized schema length as a cost proxy; it does **not** test a policy weighted
 by separately measured per-schema prefill time, so that half of the question
 remains open.
 
-### Q5. How much additional benefit comes from pair/triple workflow structure? — **Answered 2026-08-11: +0.33 to +0.36 points, and only on retrieved menus**
+### Q5. How much additional benefit comes from pair/triple workflow structure? — **Answered 2026-08-11: a small positive effect, +0.33 to +0.36 points, concentrated on retrieved menus**
 
-Downgraded 2026-08-10 from "Answered: essentially none" to "never tested"; answered
-properly on 2026-08-11, first with a proof and then with a measurement.
+Downgraded 2026-08-10 from "Answered: essentially none" to "never tested";
+answered properly on 2026-08-11, first by measuring how much room a pair key has
+to discriminate, then by replaying an online estimator where it has some.
 
 On BFCL the five fitted policies do not merely land within 0.01 percentage
 points of one another — they emit **byte-identical `tool_ids` on all 200
@@ -363,11 +367,10 @@ said the question "was actually posed" on ToolRet and the answer was no benefit.
 That was wrong: the two policies carrying pair/triple structure never
 discriminated, and the ones that did differ test Q4 and FP-tree order instead.
 
-**Why no planner could have posed it: pair support is redundant with frequency.**
-When a menu is a fixed core plus one varying tool, `support(a, b)` equals
-`min(presence(a), presence(b))` exactly, so a pair key carries no signal a
-frequency key does not
-(`scripts/audit_pair_triple_information.py`):
+**Why the padded workloads leave a pair key so little room.** When a menu is a
+fixed core plus one varying tool, observed pair support tracks
+`min(presence(a), presence(b))`, so a pair key adds little a frequency key does
+not already carry (`scripts/audit_pair_triple_information.py`):
 
 | workload | tools in every request | `pair == min(presence)` | violations |
 | --- | ---: | ---: | ---: |
@@ -376,8 +379,12 @@ frequency key does not
 | toolret-bm25-k16 | 0 | 85.16% | 2,651 |
 | toolret-bm25-k128 | 0 | 67.34% | 208,615 |
 
-Zero violations over 14,490 BFCL pairs. The five-way tie is a theorem, not a
-coincidence, and structure exists only where menus are genuinely retrieved.
+Zero violations over 14,490 BFCL pairs. Replaying the two online planners
+confirms the consequence where it matters: **0 of 200 differing orderings on
+`bfcl-padded64`**, which is why the fitted pair and triple policies produced one
+file — but **4 of 200 on `toolret-padded64`**, so the redundancy is not total
+even on padded menus, and retrieved menus simply hold much more usable
+structure.
 
 **Measured where it exists.** `OnlinePairTriplePlanner` against an online
 frequency counter, Qwen3-0.6B at 190,896 tokens, 200 requests each, identical
@@ -388,10 +395,20 @@ prompt-token totals, orderings differing on 69/200 and 194/200 records:
 | toolret-bm25-k16 | 8.155% | **8.514%** | **+0.359 pp** |
 | toolret-bm25-k128 | 2.412% | **2.746%** | **+0.334 pp** |
 
-Real, consistent in sign across two depths, and small. Pair/triple structure
-helps precisely where there is almost nothing left to gain, and neither figure
-reaches ContextPilot at the same depth. The k=128 row is pair-only — triples are
-cubic in menu width and were capped.
+**A small positive result** — real, consistent in sign across two depths, and
+tiny in absolute terms. Pair/triple structure helps precisely where there is
+almost nothing left to gain, and neither figure reaches ContextPilot at the same
+depth. The k=128 row is pair-only: triples are cubic in menu width and were
+capped.
+
+Two scope limits on the redundancy table above. It counts only pairs observed
+together, and skips triples on menus wider than 16 — which includes
+`bfcl-padded64` — so it is evidence about these workloads rather than a proof
+about pair-keyed policies in general. And redundancy is not total on padded
+ToolRet: its 46 violations are real, and replaying the two online planners there
+shows them differing on **4 of 200 records**, against 0 of 200 on BFCL. The
+five-way fitted tie is a separate, verified property of those emitted sequences;
+pair redundancy does not explain the schema-cost or FP-tree labels.
 
 **Source:** `reports/tooltrie-weighted/20260811-144741/`.
 The ContextPilot-derived static-refit ordering is the important measured

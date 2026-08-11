@@ -50,8 +50,9 @@ server described in `cluster/README.md`.
 
 The external-comparison sequence—including the targeted BFCL no-tool test,
 same-server vLLM controls, and separately labeled SGLang run—is in
-[`NUS_GPU_PHASE2_INSTRUCTIONS.md`](runbooks/NUS_GPU_PHASE2_INSTRUCTIONS.md). Its GPU
-measurements remain pending until that runbook is executed on the NUS server.
+[`runbooks/NUS_GPU_PHASE2_INSTRUCTIONS.md`](runbooks/NUS_GPU_PHASE2_INSTRUCTIONS.md).
+It was executed on the NUS server; results are in `reports/tooltrie-phase2/`.
+`runbooks/README.md` carries the status of all eight runbooks.
 
 The default tokenizer is `Qwen/Qwen3-0.6B`. Its official `tokenizer.json` is
 cached under ignored `data/tokenizers/`. Override it with `--tokenizer MODEL_ID`
@@ -71,7 +72,7 @@ if the cluster experiment uses a different model.
 - `reports/analysis-summary.json` — machine-readable analysis;
 - `reports/tables/` — compact source tables;
 - `cluster/README.md` — exact steps for Task B/E on a CUDA vLLM server;
-- `NUS_GPU_PHASE2_INSTRUCTIONS.md` — reproducible external-comparison runbook.
+- `runbooks/NUS_GPU_PHASE2_INSTRUCTIONS.md` — reproducible external-comparison runbook (executed).
 
 The public datasets are benchmarks, not production traces. Reports deliberately
 label ToolRet relevance as **gold requirement** and BFCL function lists as

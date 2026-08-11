@@ -802,7 +802,8 @@ was not lowered and the failing output is preserved. This is mechanically
 informative rather than a fluke — peak occupancy *falls* as a policy
 concentrates reuse better, since fewer distinct blocks stay resident, so a gate
 that certifies pressure penalises the policies it exists to reward. At this
-capacity nothing can hold 96% reuse and 90% occupancy simultaneously.
+capacity two regimes clear the gate and two miss it narrowly, while the counter
+reaches 96% reuse in all four.
 
 `tooltrie_v1`, which reads the `visit_count` v0 never consults in both selection
 and eviction, matches v0 **to five decimal places in all four regimes**, with 0

@@ -58,6 +58,7 @@ to update.
 | `analysis.py` | offline corpus analysis: locality, co-occurrence, analytical trie |
 | `retrieval.py` | BM25 retrieval over tool documents |
 | `tooltrie.py` | **ToolTrie-v0 planner** — causal recent-path ordering |
+| `tooltrie_v1.py` | visit-weighted variant — a proposal, not a replacement |
 | `baselines.py` | ordering baselines: CacheWeaver, fitted policies, online frequency |
 | `contextpilot_adapter.py` | validation and materialization for ContextPilot orderings |
 | `vllm_client.py` | vLLM HTTP client, Prometheus counter parsing, cache reset |
@@ -91,6 +92,7 @@ to update.
 | `build_tooltrie_workload.py` | causal ToolTrie-v0 reordering |
 | `build_fitted_ordering_workload.py` | frozen training-only frequency / co-occurrence baselines |
 | `build_frequency_online_workload.py` | causal online presence-frequency ordering |
+| `build_pair_triple_online_workload.py` | causal online pair/triple co-occurrence ordering |
 | `build_contextpilot_workload.py` | labelled ContextPilot-derived orderings |
 
 **Replay and measurement**
@@ -131,6 +133,7 @@ to update.
 | `audit_pressure_ordering_equivalence.py` | reconstruct and hash pressure ordering sequences |
 | `audit_qwen_tokenizer_compatibility.py` | verify pinned models share tokenizer and chat template |
 | `audit_rendered_prefix.py` | capture server-rendered tokens, block boundaries, measured reuse |
+| `audit_pair_triple_information.py` | how much room a pair key has beyond frequency (CPU only) |
 
 ## `reports/` — the evidence chain
 
@@ -163,6 +166,8 @@ data lives outside Git.
 | `contextpilot-dual-model/` | **accepted 190-replay 4B/0.6B matrix** |
 | `frequency-online/` | causal online-frequency proposal |
 | `tooltrie-pressure/` | ToolTrie-v0 under the 480-block cache budget |
+| `tooltrie-weighted/` | weighted trie and online pair/triple |
+| `pair-triple-information/` | CPU audit behind the §7 Q5 answer |
 
 Top level of `reports/`: **`key-findings.md`** (start here — one-page summary),
 `consolidated-report.md` (full synthesis, evidence and caveats),
@@ -179,7 +184,8 @@ locality).
 | `cluster/README.md` | exact steps for running Task B/E on a CUDA vLLM server |
 | `cluster/*-manifest.json` | predeclared experiment manifests (conditions, models, acceptance) |
 | `notes/reading-note.md` | Task A reading note and request-flow diagram |
-| `notes/exact-tooltrie-proposal.md` | early design proposal, 2026-07-31 — **no inbound references**, kept as project history |
+| `notes/tooltrie-v0-design.md` | how ToolTrie-v0 works, with the code — linked from `reports/key-findings.md` |
+| `notes/exact-tooltrie-proposal.md` | early design proposal, 2026-07-31, superseded by `tooltrie-v0-design.md` |
 | `notes/open-questions.md` | early risk list, 2026-07-31 — **no inbound references**, and several entries have since been answered; read `brief-questions-and-answers.md` for current status |
 | `tests/` | pytest suite, 129 tests |
 

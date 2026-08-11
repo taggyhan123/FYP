@@ -13,6 +13,8 @@ reuse = prompt_tokens_cached / (prompt_tokens_cached + request_prefill_kv_comput
 Findings 1–7 are ordered by the brief's own experimental questions (§7); finding
 8 answers the high-level research question the project is named after (§2 Q3).
 Each states which question it answers. Differences are in percentage points.
+How the project's own planner works, with the code, is in
+[`notes/tooltrie-v0-design.md`](../notes/tooltrie-v0-design.md).
 
 ## Headline
 
@@ -30,7 +32,7 @@ convention used in every policy-comparison table below.
 | --- | ---: | ---: |
 | Original text prefill | 1.19% | 0.34% |
 | Alphabetical | 37.99% | 0.44% |
-| ToolTrie-v0 (ours) | 87.19% | 0.89% |
+| [ToolTrie-v0 (ours)](../notes/tooltrie-v0-design.md) | 87.19% | 0.89% |
 | ContextPilot-derived, persistent API † | 96.16% | 1.35% |
 | ContextPilot-derived, static refit † | 96.16% | 2.23% |
 | Online frequency counter | **96.27%** | **2.33%** |
@@ -137,7 +139,22 @@ BFCL, identical to the digit, because it emits an identical ordering there.
 ## 4. Pair/triple structure is worth +0.35 points, and only where menus genuinely vary
 > **Brief §7 Q5** — *How much additional benefit comes from pair/triple workflow structure?*
 
-Both model sizes, 3 trials each, zero spread:
+**The answer, on the only workloads where the question can be asked:** an online
+pair/triple estimator against an online frequency counter, Qwen3-0.6B at 190,896
+tokens, 200 requests each, identical prompt-token totals.
+
+| workload | `frequency_online` | `pair_triple_online` | delta |
+| --- | ---: | ---: | ---: |
+| BM25 k=16 | 8.155% | **8.514%** | **+0.359** |
+| BM25 k=128 | 2.412% | **2.746%** | **+0.334** |
+
+Orderings differ on 69/200 and 194/200 records. Real, consistent in sign, and
+small — pair/triple structure helps precisely where there is almost nothing left
+to gain, and neither figure reaches ContextPilot at the same depth. The k=128
+row is pair-only; triples are cubic in menu width and were capped.
+
+**On padded menus the question cannot be asked at all**, which is why every
+earlier attempt returned a tie. Both model sizes, 3 trials each, zero spread:
 
 | Fitted policy | BFCL 4B | BFCL 0.6B | ToolRet 4B | ToolRet 0.6B |
 | --- | ---: | ---: | ---: | ---: |
@@ -188,25 +205,6 @@ one file. It does not follow that no pair-keyed policy could ever differ, and
 padded ToolRet shows the redundancy is not total even there — its 46 violations
 are real.
 
-**Measured where it exists, the answer is +0.33 to +0.36 points.** An online
-pair/triple estimator against an online frequency counter, Qwen3-0.6B at
-190,896 tokens, 200 requests each, identical prompt-token totals:
-
-| workload | `frequency_online` | `pair_triple_online` | delta |
-| --- | ---: | ---: | ---: |
-| BM25 k=16 | 8.155% | **8.514%** | **+0.359** |
-| BM25 k=128 | 2.412% | **2.746%** | **+0.334** |
-
-Orderings differ on 69/200 and 194/200 records, so the question is genuinely
-posed. The benefit is real, consistent in sign, and small — pair/triple
-structure helps precisely where there is almost nothing left to gain, and
-neither figure reaches ContextPilot at the same depth. The k=128 row is
-pair-only; triples are cubic in menu width and were capped.
-
-This was predicted and then tested: the claim is that the emitted `tool_ids` are
-identical, a property of the workload files, so it should hold whatever model
-serves them. Running all five at 4B reproduced the five-way tie at a different
-value, which is the confirmation.
 
 ## 5. Under cache pressure, locality barely matters and random beats every *static* ordering
 > **Brief §7 Q6** — *How sensitive are results to request ordering and session locality?*
@@ -225,9 +223,8 @@ accepted at 91.0–91.9% peak occupancy, plus ToolTrie-v0 added later at
 | Frequency = schema-cost = FP-tree | 9.44% | 8.99% | 9.51% | 9.00% |
 | **ToolTrie-v0** *(adaptive)* | **87.18%** | **88.54%** | **94.73%** | **91.62%** |
 
-**The answer to Q6 is that locality barely matters.** No row moves more than a
-few points across the four regimes — ordering dominates the request
-distribution, which is the finding this question asked for.
+**Locality barely matters.** No row moves more than a few points across the four
+regimes: ordering dominates the request distribution.
 
 Among the *static* orderings a fixed random permutation leads every regime, with
 the fitted policies more than 20 points behind — hard to reconcile with the
@@ -294,15 +291,16 @@ Three regimes, in increasing order of how badly it does:
   A thirty-line counter with no clustering, no trie and no training corpus
   matches hierarchical clustering, separated by 0.11 points — 95 cache blocks
   across 200 requests. **Results on this workload cannot support claims about
-  ordering sophistication.** That is a finding about how tool-serving benchmarks
-  should be constructed, and it is arguably the most transferable result here.
+  ordering sophistication.** It is a finding about how tool-serving benchmarks
+  should be constructed.
 
 ## 8. The trie does not do the work — adaptivity does
 > **Brief §2 Q3** — *Can frequently occurring tool sequences be represented as a
 > weighted trie or prefix memory under a limited cache budget?*
 
-The project is named after this mechanism, so it deserves a direct answer.
-Three tries were measured, and none beat a method without one.
+Three tries were measured. None beats a method without one, and adding weights
+to ours changed nothing. How ToolTrie-v0 works, with the code, is in
+[`notes/tooltrie-v0-design.md`](../notes/tooltrie-v0-design.md).
 
 **A trie-based ordering and a frequency sort produce the same file.**
 `fp_tree_conditional` builds an FP-tree from training transactions and descends
@@ -315,79 +313,52 @@ it greedily. Offline it is indistinguishable from sorting by frequency:
 | frequency | **8,904** | **36.88%** | 31.35% |
 | FP-tree global | **8,904** | **36.88%** | 31.35% |
 
-Identical to the digit — and on GPU the two emit **byte-identical `tool_ids`**
-on all 200 BFCL records, differing on 10 of 200 for ToolRet
-(`reports/tooltrie-phase2/fitted-policy-equivalence.json`). The tree structure
-changes nothing about what is served.
+Identical to the digit, and on GPU the two emit **byte-identical `tool_ids`** on
+all 200 BFCL records (10 of 200 differ on ToolRet). The tree changes nothing
+about what is served.
 
-**ToolTrie-v0 loses to counting.** It beats both static baselines everywhere,
-but both ContextPilot arms beat it in all twelve systems cells and a thirty-line
-online counter beats it in ten of twelve — 96.27% against 87.19% on padded
-menus, from a policy with no tree at all.
+**ToolTrie-v0 loses to a thirty-line counter at both capacities.** It beats every
+static ordering everywhere — by 55–62 points under the 480-block cache, the
+largest margin in this report — but a policy with no tree at all beats it:
 
-**This is a fact about the workloads, not about tries.** A trie exploits shared
-prefixes across repeated sequences. Padded menus hold 63 of 64 tools fixed, so
-any method that finds that block wins without needing sequence structure;
-retrieved menus share 7.7% of membership in no consistent order, so there are
-almost no prefixes to share. Offline node compression never exceeds 36.88% on
-any ordering, which bounds how much structure exists to exploit.
+| Qwen3-0.6B | ToolTrie-v0 | online counter |
+| --- | ---: | ---: |
+| padded, native 190,896 | 87.19% | **96.27%** |
+| padded, 480-block cache | 87.18–94.73% | **96.16–96.40%** |
+| retrieved k=128 | 1.13% | **2.41%** |
 
-**But under a limited cache budget the trie wins, and by a wide margin.** The
-"under a limited cache budget" clause was untested until 2026-08-11; ToolTrie-v0
-was then run into the 480-block harness, 4/4 regimes accepted, 64/64 checks,
-peak occupancy 0.904–0.908:
+Both ContextPilot arms also beat it in all twelve systems cells. **So what wins
+under scarcity is adaptivity, not trie structure** — the trie's large lead in
+finding 5 is over *static* orderings only.
 
-| Ordering | empirical | uniform | skewed | session-bursty |
-| --- | ---: | ---: | ---: | ---: |
-| Original | 1.18% | 0.69% | 1.24% | 0.69% |
-| Alphabetical | 29.21% | 29.35% | 28.06% | 27.76% |
-| Random, seed 42 | 32.16% | 31.27% | 32.67% | 30.19% |
-| Frequency = schema-cost = FP-tree | 9.44% | 8.99% | 9.51% | 9.00% |
-| **ToolTrie-v0** | **87.18%** | **88.54%** | **94.73%** | **91.62%** |
+Two qualifications on the counter's pressure column. It reached peak occupancy
+0.89979 against the predeclared 0.90 gate on two of four regimes, so that matrix
+validates 2/4 and is not accepted as complete pressure evidence; the threshold
+was not lowered. The two regimes that pass still exceed the trie. And
+ContextPilot has never been run under pressure.
 
-It leads the previous best by 55–62 points and **loses nothing to a 25× smaller
-cache** — 87.18% here against 87.19% uncapped. The reason is prefix
-*concentration*, not reuse magnitude: ToolTrie places the one varying tool at
-position 57.3 of 64, so the shared core forms a single ~6,950-token prefix that
-fits inside the 7,680-token cache and stays hot. Alphabetical places it at 24.1,
-so most of each menu is unshared and thrashes.
-
-**This inverts the ranking.** Under abundant cache ToolTrie loses to
-ContextPilot and to a counter; under scarcity it is far ahead of everything
-tested. Reported in `reports/tooltrie-pressure/20260811-001032/`.
-
-**But the trie is not the best adaptive policy, even here.** The online counter
-was added to the same harness on 2026-08-11 and beats it in every regime:
-
-| Ordering | empirical | uniform | skewed | session-bursty |
-| --- | ---: | ---: | ---: | ---: |
-| ToolTrie-v0 | 87.18% | 88.54% | 94.73% | 91.62% |
-| **Online frequency counter** | **96.27%** | **96.16%** | **96.40%** | **96.33%** |
-
-So the correct claim is that **adaptive policies win under scarcity**, not that
-the trie does. Two qualifications: the counter reached peak occupancy 0.89979
-against the predeclared 0.90 gate on two of four regimes, so its matrix
-validates 2/4 and is not accepted as complete pressure evidence — the threshold
-was not lowered. The two regimes that do pass still exceed the trie. And
-ContextPilot has still never been run under pressure.
-
-That near-miss is itself worth recording: peak occupancy *falls* as a policy
+That near-miss is worth recording on its own: peak occupancy *falls* as a policy
 concentrates reuse better, because fewer distinct blocks stay resident. **A gate
-that certifies cache pressure therefore penalises the policies it exists to
-reward**. Two regimes cleared the gate and two missed it narrowly; the counter
-reaches 96% reuse in all four.
+certifying cache pressure penalises the policies it exists to reward.**
 
-**And weighting the trie changes nothing.** `tooltrie_v1` reads the
-`visit_count` that v0 never consults, in selection and in eviction. Only the
-empirical regime was predeclared — **1/1 predeclared run accepted, with three
-further regimes added afterwards and also accepted**, because the summarizer
-requires all four. It matches v0 **to five decimal places in all four regimes**, and re-deriving both planners
-offline on identical menus shows why: **0 of 200 records differ**, in every
-regime. The weighting genuinely acts — v1 evicts differently, 1,497 against
-1,494 on empirical — but the `_reachable_cached_cost` term decides almost every
-choice, so the tie-break where the weight lives is rarely reached. §2 Q3's
-weighting clause is now answered, and the answer is that it makes no difference
-here.
+**Weighting the trie changes nothing.** `tooltrie_v1` reads the `visit_count`
+that v0 never consults, in selection and in eviction. It matches v0 to five
+decimal places in all four regimes, and re-deriving both planners offline on
+identical menus shows **0 of 200 records differ**. The weighting does act — v1
+evicts 1,497 nodes against 1,494 on empirical — but `_reachable_cached_cost`
+decides almost every choice, so the tie-break holding the weight is rarely
+reached. Only the empirical regime was predeclared: **1/1 predeclared run
+accepted, three further regimes added afterwards and also accepted.**
+
+**Why the trie has so little to exploit here.** A trie rewards shared prefixes
+across repeated sequences. Padded menus hold 63 of 64 tools fixed, so anything
+that finds that block wins without needing sequence structure; retrieved menus
+share 7.7% of membership in no consistent order, so there are barely any
+prefixes to share. Offline node compression never exceeds 36.88% on any
+ordering, which bounds the structure available.
+
+Sources: `reports/tooltrie-pressure/20260811-001032/`,
+`reports/tooltrie-weighted/20260811-144741/`.
 
 ## Scope and limitations
 

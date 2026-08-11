@@ -50,8 +50,11 @@ The implementation also passes direct causality and permutation tests:
 calls `observe()`.
 
 Sources: `structure-audit.json`, `local-audit.json`,
-`scripts/build_frequency_online_workload.py` (the builder that produced every
-ordering measured here, from `OnlineFrequencyPlanner` in `src/tatm/baselines.py`),
+`scripts/build_frequency_online_workload.py` (the builder behind the
+`frequency_online` column, from `OnlineFrequencyPlanner` in
+`src/tatm/baselines.py`; the ToolTrie-v0 and ContextPilot columns come from
+`build_tooltrie_workload.py` and `build_contextpilot_workload.py` in the
+accepted dual-model run),
 `scripts/audit_frequency_online_structure.py`, and
 `scripts/audit_frequency_online_compact.py`.
 
@@ -105,8 +108,14 @@ equivalence or superiority test was declared.
    ContextPilot controls reproduce the accepted result within 0.01 percentage
    point at k=16 and k=128 only. Tiny cross-run differences elsewhere should
    not be treated as controlled wins.
-5. There is one request sequence and one menu seed. No `frequency_online`
-   quality replay was run, so no function-call or no-tool claim follows.
+5. There is one request sequence and one menu seed. An earlier version of this
+   limit said no `frequency_online` quality replay was run; that is wrong and
+   was already wrong when written. The quality replay is in this run directory
+   (`quality-frequency_online-summary.json`, `quality-scores-compact.json`),
+   `HANDOVER.md` reports it, and `reports/key-findings.md` publishes the
+   figures — 76.88% full call and 83.75% no-tool at 4B — with an exact McNemar
+   test. Both this document and the compact audit predate the quality commit by
+   about forty minutes and neither was revisited when it landed.
 
 ## Research consequence
 
@@ -115,9 +124,12 @@ counter: after one request, all can identify the fixed core. The retrieved-menu
 matrix remains the deployment-relevant test, where reuse is 2–17% and no one
 policy dominates every cell.
 
-ToolTrie-v0's `visit_count` is incremented but never read by its planner. That
-makes popularity-aware ToolTrie-v1 a legitimate hypothesis, but
-`frequency_online` is now the mandatory ablation: a v1 gain must exceed what a
-plain causal counter already provides and must retain the ordinary selected-tool
-text path as fallback. It also needs quality and multiple-sequence evaluation
-before it can replace v0.
+ToolTrie-v0's `visit_count` is incremented but never read by its planner, which
+made a popularity-aware ToolTrie-v1 a legitimate hypothesis. **It was built and
+measured on 2026-08-11, and it fails the ablation this section set.**
+`WeightedToolTrie` reads `visit_count` in both selection and eviction, and under
+the 480-block cache it matches v0 to five decimal places in all four regimes
+with **0 of 200 emitted orderings differing**. `frequency_online` remains the
+mandatory comparator and remains ahead: 96.16–96.40% against v0/v1's
+87.18–94.73% at that capacity.
+**Source:** `reports/tooltrie-weighted/20260811-144741/`.

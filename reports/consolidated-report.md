@@ -768,7 +768,9 @@ validation checks passed.
 | Alphabetical | 29.21% | 29.35% | 28.06% | 27.76% |
 | Random, seed 42 | 32.16% | 31.27% | 32.67% | 30.19% |
 | Frequency = schema-cost = FP-tree | 9.44% | 8.99% | 9.51% | 9.00% |
-| **ToolTrie-v0** *(added 2026-08-11)* | **87.18%** | **88.54%** | **94.73%** | **91.62%** |
+| ToolTrie-v0 *(added 2026-08-11)* | 87.18% | 88.54% | 94.73% | 91.62% |
+| ToolTrie-v1, visit-weighted *(added 2026-08-11)* | 87.18% | 88.54% | 94.73% | 91.62% |
+| **Online frequency counter** *(added 2026-08-11)* | **96.27%** | **96.16%** | **96.40%** | **96.33%** |
 
 All six original orderings are **static** permutations — `locality_replay.py`
 held the intra-menu order constant across regimes by design, so the adaptive
@@ -791,9 +793,24 @@ of 64, so the shared core forms one ~6,950-token prefix that fits inside the
 and thrashes the remainder. **This inverts the full-capacity ranking**, where
 both ContextPilot arms and the online counter beat ToolTrie-v0.
 
-Two limits on that claim: neither ContextPilot nor `frequency_online` was run in
-this matrix, and both concentrate the shared core harder still at full capacity,
-so they may match or exceed it — untested. Reuse and latency here must not be
+**Both later additions revise that claim.** `frequency_online` was run in this
+matrix and beats ToolTrie in every regime by up to 9.1 points, so the correct
+statement is that *adaptive* policies win under scarcity, not that the trie
+does. Its matrix validates only **2/4 regimes**: peak occupancy reached 0.89979
+against the predeclared 0.90 gate on empirical and session-bursty. The threshold
+was not lowered and the failing output is preserved. This is mechanically
+informative rather than a fluke — peak occupancy *falls* as a policy
+concentrates reuse better, since fewer distinct blocks stay resident, so a gate
+that certifies pressure penalises the policies it exists to reward. At this
+capacity nothing can hold 96% reuse and 90% occupancy simultaneously.
+
+`tooltrie_v1`, which reads the `visit_count` v0 never consults in both selection
+and eviction, matches v0 **to five decimal places in all four regimes**, with 0
+of 200 emitted orderings differing. The weighting acts — v1 evicts 1,497 nodes
+against v0's 1,494 on empirical — but `_reachable_cached_cost` decides almost
+every choice, so the tie-break holding the weight is rarely reached.
+
+ContextPilot remains the one policy never run under pressure. Reuse and latency here must not be
 compared numerically with the 190,896-token cache, and this is not evidence of
 natural production pressure.
 

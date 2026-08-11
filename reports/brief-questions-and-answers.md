@@ -27,16 +27,17 @@ listing these six:
 > questions are research extensions that may be pursued once the basic
 > measurements and baselines are reliable."*
 
-**Q1–Q3 are the questions the initial stage was required to answer. Q1 and Q2
-are fully answered; Q3 is answered on its "prefix memory under a limited cache
-budget" clause and unanswered on its "weighted" clause.** Q4–Q6 were designated
-extensions from the outset; two were nevertheless answered in substantial part.
+**Q1–Q3 are the questions the initial stage was required to answer, and all
+three are now answered — Q3's "weighted" clause was closed on 2026-08-11 and
+its answer is negative: weighting the trie changes no emitted ordering.** Q4–Q6
+were designated extensions from the outset; two were nevertheless answered in
+substantial part.
 
 | Question | Required by the initial stage? | Status |
 | --- | --- | --- |
 | Q1 Tool locality | **Yes** | **Answered** |
 | Q2 Prefix organization | **Yes** | **Answered** |
-| Q3 Trie-aware memory | **Yes** | **Partly** — bounded and budget-tested, never weighted |
+| Q3 Trie-aware memory | **Yes** | **Answered** — weighted variant measured; it changes no ordering |
 | Q4 Retention trade-off | No — extension (§9.1) | Deferred |
 | Q5 Long-tail tools | No — extension (§9.4) | Partly answered anyway |
 | Q6 Quality and safety | No — extension (§9.2) | Mostly answered anyway |
@@ -104,7 +105,7 @@ The magnitude is workload-dependent — see Part 2, Q2.
 **Source:** `reports/tooltrie-phase2/findings.md` §2;
 `reports/initial-brief-pressure-rerun/ordering-equivalence.json`.
 
-### Q3. Trie-aware memory — **Partly answered**: bounded and budget-tested, but never weighted
+### Q3. Trie-aware memory — **Answered**: built, bounded, budget-tested and weighted; the weighting changes nothing
 
 > *Can frequently occurring tool sequences be represented as a weighted trie or
 > prefix memory under a limited cache budget?*
@@ -138,10 +139,28 @@ against 87.19% uncapped — because it concentrates the shared core into a singl
 eviction fired 506–1,494 times per regime, the first time that path has run.
 **Source:** `reports/tooltrie-pressure/20260811-001032/`.
 
-**The "weighted" half of this question is still unanswered.** `plan()` tie-breaks
-on reachable cached cost then *frozen training* support; `visit_count` is
-incremented on every observation and never read. The trie is bounded and
-budget-tested, but it is not weighted by its own measurements.
+**The "weighted" half was answered on 2026-08-11, and the answer is that it
+makes no difference.** `WeightedToolTrie` (`src/tatm/tooltrie_v1.py`) reads the
+`visit_count` v0 never consults — in the selection tie-break, and in eviction,
+where it drops the least-visited leaf instead of the least recent. Run into the
+same 480-block harness: **4/4 accepted, 64/64 checks**.
+
+| regime | empirical | uniform | skewed | session-bursty |
+| --- | ---: | ---: | ---: | ---: |
+| ToolTrie-v0 | 87.184% | 88.535% | 94.734% | 91.619% |
+| ToolTrie-v1 weighted | 87.184% | 88.535% | 94.734% | 91.619% |
+
+Identical to five decimal places. Re-deriving both planners offline on the same
+menus shows **0 of 200 records differ**, in every regime. The weighting does act
+— v1 evicts differently, 1,497 nodes against 1,494 on empirical — but
+`_reachable_cached_cost` decides almost every choice, so the tie-break holding
+the weight is rarely reached.
+
+So the trie is now bounded, budget-tested **and** weighted, and the weighting
+changes nothing on this workload. The caveat is scope: one workload, one
+capacity, one seed. Weighting could matter where the leading term ties more
+often — narrower menus, or a workload without a fixed 63-tool core.
+**Source:** `reports/tooltrie-weighted/20260811-144741/`.
 
 One clarification for readers of the code: this budget governs the **planner's
 own metadata** — how much served history it remembers — and is *not* KV-cache
@@ -322,9 +341,10 @@ tokenized schema length as a cost proxy; it does **not** test a policy weighted
 by separately measured per-schema prefill time, so that half of the question
 remains open.
 
-### Q5. How much additional benefit comes from pair/triple workflow structure? — **Not tested on BFCL; no benefit on ToolRet**
+### Q5. How much additional benefit comes from pair/triple workflow structure? — **Answered 2026-08-11: +0.33 to +0.36 points, and only on retrieved menus**
 
-**Downgraded 2026-08-10** from "Answered: essentially none".
+Downgraded 2026-08-10 from "Answered: essentially none" to "never tested"; answered
+properly on 2026-08-11, first with a proof and then with a measurement.
 
 On BFCL the five fitted policies do not merely land within 0.01 percentage
 points of one another — they emit **byte-identical `tool_ids` on all 200
@@ -335,14 +355,45 @@ frequency policy did not test pair/triple structure and find it unhelpful; it
 **never tested it**. That is absence of evidence, not evidence of absence, and
 the BFCL row of that table reports one policy five times.
 
-On ToolRet the policies genuinely differ — `schema_cost_fitted` on 200/200
-records and `fp_tree_conditional` on 10/200, while `conditional_pair` and
-`conditional_pair_triple` remain identical to `frequency_fitted`. There the
-question was actually posed, and the answer is no benefit: all sit near 41.6%
-against alphabetical's 51.05%.
+On ToolRet padded menus `schema_cost_fitted` differs on 200/200 records and
+`fp_tree_conditional` on 10/200 — but `conditional_pair` and
+`conditional_pair_triple` remain identical to `frequency_fitted` **there too**,
+so Q5 was not posed on either padded workload. An earlier version of this entry
+said the question "was actually posed" on ToolRet and the answer was no benefit.
+That was wrong: the two policies carrying pair/triple structure never
+discriminated, and the ones that did differ test Q4 and FP-tree order instead.
 
-Answering this properly for BFCL needs a workload whose co-occurrence structure
-discriminates, which is a new experiment rather than a reanalysis.
+**Why no planner could have posed it: pair support is redundant with frequency.**
+When a menu is a fixed core plus one varying tool, `support(a, b)` equals
+`min(presence(a), presence(b))` exactly, so a pair key carries no signal a
+frequency key does not
+(`scripts/audit_pair_triple_information.py`):
+
+| workload | tools in every request | `pair == min(presence)` | violations |
+| --- | ---: | ---: | ---: |
+| bfcl-padded64 | 63 | **100.00%** | **0** |
+| toolret-padded64 | 60 | 99.39% | 46 |
+| toolret-bm25-k16 | 0 | 85.16% | 2,651 |
+| toolret-bm25-k128 | 0 | 67.34% | 208,615 |
+
+Zero violations over 14,490 BFCL pairs. The five-way tie is a theorem, not a
+coincidence, and structure exists only where menus are genuinely retrieved.
+
+**Measured where it exists.** `OnlinePairTriplePlanner` against an online
+frequency counter, Qwen3-0.6B at 190,896 tokens, 200 requests each, identical
+prompt-token totals, orderings differing on 69/200 and 194/200 records:
+
+| workload | `frequency_online` | `pair_triple_online` | delta |
+| --- | ---: | ---: | ---: |
+| toolret-bm25-k16 | 8.155% | **8.514%** | **+0.359 pp** |
+| toolret-bm25-k128 | 2.412% | **2.746%** | **+0.334 pp** |
+
+Real, consistent in sign across two depths, and small. Pair/triple structure
+helps precisely where there is almost nothing left to gain, and neither figure
+reaches ContextPilot at the same depth. The k=128 row is pair-only — triples are
+cubic in menu width and were capped.
+
+**Source:** `reports/tooltrie-weighted/20260811-144741/`.
 The ContextPilot-derived static-refit ordering is the important measured
 competitor here, not evidence that the current pair/triple adaptation is
 sufficient. A later persistent-API adaptation also leads ToolTrie on every

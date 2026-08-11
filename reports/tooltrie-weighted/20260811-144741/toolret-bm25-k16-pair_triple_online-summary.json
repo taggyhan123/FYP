@@ -1,0 +1,18 @@
+{
+  "adapts_online": true,
+  "final_state": {
+    "max_triple_menu_size": 32,
+    "menus_too_wide_for_triples": 0,
+    "pairs_seen": 20592,
+    "requests_observed": 200,
+    "tools_seen": 2203,
+    "triples_seen": 102554
+  },
+  "format_version": 1,
+  "information_regime": "causal",
+  "input": "/home/taghan/contextpilot-dual-model-20260809-004603/shared-workloads/toolret-bm25-k16-original.jsonl",
+  "output": "/home/taghan/FYP-tooltrie-weighted-20260811-144741/cluster/results/tooltrie-weighted-20260811-144741/workloads/toolret-bm25-k16-pair_triple_online.jsonl",
+  "policy": "pair_triple_online",
+  "requests": 200,
+  "training_input": null
+}

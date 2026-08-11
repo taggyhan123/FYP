@@ -1,0 +1,93 @@
+{
+  "experiment": "weighted-tooltrie-and-online-pair-triple",
+  "format_version": 1,
+  "model": "Qwen/Qwen3-0.6B",
+  "requests_per_condition": 200,
+  "run_a": {
+    "capacity_tokens": 7680,
+    "num_gpu_blocks": 480,
+    "regimes": {
+      "empirical": {
+        "frequency_online_gate_met": false,
+        "frequency_online_peak_kv": 0.89979,
+        "frequency_online_reuse": 0.96266,
+        "tooltrie_v0_reuse": 0.87184,
+        "tooltrie_v1_gate_met": true,
+        "tooltrie_v1_peak_kv": 0.90397,
+        "tooltrie_v1_reuse": 0.87184
+      },
+      "session_bursty": {
+        "frequency_online_gate_met": false,
+        "frequency_online_peak_kv": 0.89979,
+        "frequency_online_reuse": 0.96327,
+        "tooltrie_v0_reuse": 0.91619,
+        "tooltrie_v1_gate_met": true,
+        "tooltrie_v1_peak_kv": 0.90397,
+        "tooltrie_v1_reuse": 0.91619
+      },
+      "skewed": {
+        "frequency_online_gate_met": true,
+        "frequency_online_peak_kv": 0.90814,
+        "frequency_online_reuse": 0.96397,
+        "tooltrie_v0_reuse": 0.94734,
+        "tooltrie_v1_gate_met": true,
+        "tooltrie_v1_peak_kv": 0.90814,
+        "tooltrie_v1_reuse": 0.94734
+      },
+      "uniform": {
+        "frequency_online_gate_met": true,
+        "frequency_online_peak_kv": 0.90397,
+        "frequency_online_reuse": 0.96164,
+        "tooltrie_v0_reuse": 0.88535,
+        "tooltrie_v1_gate_met": true,
+        "tooltrie_v1_peak_kv": 0.90814,
+        "tooltrie_v1_reuse": 0.88535
+      }
+    },
+    "required_peak_fraction": 0.9
+  },
+  "run_b": {
+    "capacity_tokens": 190896,
+    "workloads": {
+      "k128": {
+        "frequency_online": {
+          "cache_reset_before": true,
+          "prompt_tokens": 3253430,
+          "requests": 200,
+          "reuse": 0.02412
+        },
+        "pair_triple_minus_frequency_pp": 0.334,
+        "pair_triple_online": {
+          "cache_reset_before": true,
+          "prompt_tokens": 3253430,
+          "requests": 200,
+          "reuse": 0.02746
+        }
+      },
+      "k16": {
+        "frequency_online": {
+          "cache_reset_before": true,
+          "prompt_tokens": 427705,
+          "requests": 200,
+          "reuse": 0.08155
+        },
+        "pair_triple_minus_frequency_pp": 0.359,
+        "pair_triple_online": {
+          "cache_reset_before": true,
+          "prompt_tokens": 427705,
+          "requests": 200,
+          "reuse": 0.08514
+        }
+      }
+    }
+  },
+  "runs_per_cell": 1,
+  "tooltrie_v0_vs_v1_differing_records": {
+    "empirical": 0,
+    "note": "re-derived offline with both planners on identical menus",
+    "records_per_regime": 200,
+    "session_bursty": 0,
+    "skewed": 0,
+    "uniform": 0
+  }
+}

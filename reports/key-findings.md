@@ -134,7 +134,7 @@ means any comparison of frequency ordering must state which estimator it used.
 **Schema-cost weighting (Q4) adds nothing over plain frequency** — 39.69% on
 BFCL, identical to the digit, because it emits an identical ordering there.
 
-## 4. Pair/triple structure was not actually tested on the padded workload
+## 4. Pair/triple structure cannot help on padded menus, and is worth +0.35 points on retrieved ones
 > **Brief §7 Q5** — *How much additional benefit comes from pair/triple workflow structure?*
 
 Both model sizes, 3 trials each, zero spread:
@@ -156,10 +156,38 @@ through to the same frequency ordering. An experiment in which the pair/triple
 policy produced the same file as the frequency policy did not test pair/triple
 structure and find it unhelpful; it never tested it.
 
-On ToolRet the policies do differ — `schema_cost_fitted` on all 200 records,
-`fp_tree_conditional` on 10 — so there the question was genuinely posed, and the
-answer is no benefit: all five sit near 41.6% while plain alphabetical reaches
-51.05%.
+On ToolRet padded menus `schema_cost_fitted` differs on all 200 records and
+`fp_tree_conditional` on 10 — but **both pair/triple policies are byte-identical
+to `frequency_fitted` there too**, so Q5 was not posed on either padded workload.
+
+**Why, and it is a theorem rather than an accident.** When a menu is a fixed
+core plus one varying tool, pair support is a deterministic function of the two
+tools' presence counts, so a pair key carries no signal a frequency key does not:
+
+| workload | tools in every request | `pair == min(presence)` | violations |
+| --- | ---: | ---: | ---: |
+| bfcl-padded64 | 63 | **100.00%** | **0** |
+| toolret-padded64 | 60 | 99.39% | 46 |
+| toolret-bm25-k16 | 0 | 85.16% | 2,651 |
+| toolret-bm25-k128 | 0 | 67.34% | 208,615 |
+
+No pair-keyed ordering *can* differ from a frequency-keyed one on padded menus.
+Structure exists only where menus are genuinely retrieved.
+
+**Measured where it exists, the answer is +0.33 to +0.36 points.** An online
+pair/triple estimator against an online frequency counter, Qwen3-0.6B at
+190,896 tokens, 200 requests each, identical prompt-token totals:
+
+| workload | `frequency_online` | `pair_triple_online` | delta |
+| --- | ---: | ---: | ---: |
+| BM25 k=16 | 8.155% | **8.514%** | **+0.359** |
+| BM25 k=128 | 2.412% | **2.746%** | **+0.334** |
+
+Orderings differ on 69/200 and 194/200 records, so the question is genuinely
+posed. The benefit is real, consistent in sign, and small — pair/triple
+structure helps precisely where there is almost nothing left to gain, and
+neither figure reaches ContextPilot at the same depth. The k=128 row is
+pair-only; triples are cubic in menu width and were capped.
 
 This was predicted and then tested: the claim is that the emitted `tool_ids` are
 identical, a property of the workload files, so it should hold whatever model
@@ -255,7 +283,7 @@ Three regimes, in increasing order of how badly it does:
   ordering sophistication.** That is a finding about how tool-serving benchmarks
   should be constructed, and it is arguably the most transferable result here.
 
-## 8. Does the trie itself do the work? Not on this data
+## 8. The trie does not do the work — adaptivity does
 > **Brief §2 Q3** — *Can frequently occurring tool sequences be represented as a
 > weighted trie or prefix memory under a limited cache budget?*
 
@@ -314,12 +342,36 @@ so most of each menu is unshared and thrashes.
 ContextPilot and to a counter; under scarcity it is far ahead of everything
 tested. Reported in `reports/tooltrie-pressure/20260811-001032/`.
 
-**Two caveats, both material.** ContextPilot and the online counter were **not**
-run under pressure, and both concentrate the shared core harder still, so they
-may well match or beat this — that is the obvious next run, not a settled
-result. And this tests the *prefix-memory* clause of §2 Q3, not the *weighted*
-one: `ToolTrie.plan()` still tie-breaks on reachable cached cost then frozen
-training support, and `visit_count` remains incremented-but-never-read.
+**But the trie is not the best adaptive policy, even here.** The online counter
+was added to the same harness on 2026-08-11 and beats it in every regime:
+
+| Ordering | empirical | uniform | skewed | session-bursty |
+| --- | ---: | ---: | ---: | ---: |
+| ToolTrie-v0 | 87.18% | 88.54% | 94.73% | 91.62% |
+| **Online frequency counter** | **96.27%** | **96.16%** | **96.40%** | **96.33%** |
+
+So the correct claim is that **adaptive policies win under scarcity**, not that
+the trie does. Two qualifications: the counter reached peak occupancy 0.89979
+against the predeclared 0.90 gate on two of four regimes, so its matrix
+validates 2/4 and is not accepted as complete pressure evidence — the threshold
+was not lowered. The two regimes that do pass still exceed the trie. And
+ContextPilot has still never been run under pressure.
+
+That near-miss is itself worth recording: peak occupancy *falls* as a policy
+concentrates reuse better, because fewer distinct blocks stay resident. **A gate
+that certifies cache pressure therefore penalises the policies it exists to
+reward**, and at this capacity nothing can hold 96% reuse and 90% occupancy at
+once.
+
+**And weighting the trie changes nothing.** `tooltrie_v1` reads the
+`visit_count` that v0 never consults, in selection and in eviction. It matches
+v0 **to five decimal places in all four regimes**, and re-deriving both planners
+offline on identical menus shows why: **0 of 200 records differ**, in every
+regime. The weighting genuinely acts — v1 evicts differently, 1,497 against
+1,494 on empirical — but the `_reachable_cached_cost` term decides almost every
+choice, so the tie-break where the weight lives is rarely reached. §2 Q3's
+weighting clause is now answered, and the answer is that it makes no difference
+here.
 
 ## Scope and limitations
 
@@ -351,15 +403,13 @@ training support, and `visit_count` remains incremented-but-never-read.
 3. **Establish the retrieved-menu ceiling.** Finding 2 reports what was captured;
    the gap to what is available would decide whether better ordering is worth
    pursuing at all.
-4. **Ablate the ToolTrie retention parameters.** Its recency window has been fixed
-   at 128 throughout with no sensitivity analysis, and its `visit_count` field is
-   maintained but never read — the popularity signal its objective currently
-   lacks. Reading it would make ToolTrie-v1 the *weighted* trie §2 Q3 asks for.
-5. **Run ContextPilot and the online counter under cache pressure.** Finding 8
-   now shows ToolTrie-v0 leading every ordering in the pressure matrix by 55–62
-   points, but the two policies that beat it at full capacity were never in that
-   matrix. Until they are, "the trie wins under scarcity" is a claim about the
-   six orderings tested, not about the field.
+4. **Ablate the ToolTrie recency window.** Fixed at 128 throughout with no
+   sensitivity analysis. `visit_count` is no longer the open item — finding 8
+   shows reading it changes no ordering — but the window has never been varied,
+   and it is what decides which nodes count as resident.
+5. **Run ContextPilot under cache pressure.** The online counter has now been
+   measured there and beats ToolTrie-v0; ContextPilot, which matches the counter
+   at full capacity, has not. It is the last policy missing from that matrix.
 6. **Add menu seeds to the irrelevance measurement.** 160 cases at one seed cannot
    settle whether high-reuse orderings genuinely harm refusal behaviour.
 7. **Build a retrieval-realistic benchmark.** Finding 7 argues that padded menus

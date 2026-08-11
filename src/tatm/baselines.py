@@ -484,12 +484,22 @@ class OnlinePairTriplePlanner:
         tools: Mapping[str, CanonicalTool],
         *,
         use_triples: bool = True,
+        max_triple_menu_size: int = 32,
     ) -> None:
+        if max_triple_menu_size < 3:
+            raise ValueError("max_triple_menu_size must be >= 3")
         self.tools = tools
         self.use_triples = use_triples
+        # Triples are cubic in menu size: a 128-tool menu yields 341,376 of them
+        # per request, which is 68M counter updates over 200 requests and buys
+        # nothing a pair already captures at that width. Menus above this size
+        # contribute pairs only, and the count is reported so the limitation is
+        # never silent. FittedOrderingPlanner caps its transactions the same way.
+        self.max_triple_menu_size = max_triple_menu_size
         self.presence: Counter[str] = Counter()
         self.pair_support: Counter[frozenset[str]] = Counter()
         self.triple_support: Counter[frozenset[str]] = Counter()
+        self.menus_too_wide_for_triples = 0
         self.request_index = 0
 
     def _validated_ids(self, tool_ids: Sequence[str]) -> tuple[str, ...]:
@@ -555,15 +565,13 @@ class OnlinePairTriplePlanner:
         self.presence.update(ids)
         self.pair_support.update(frozenset(items) for items in combinations(ids, 2))
         if self.use_triples:
-            self.triple_support.update(
-                frozenset(items) for items in combinations(ids, 3)
-            )
-        return {
-            "requests_observed": self.request_index,
-            "tools_seen": len(self.presence),
-            "pairs_seen": len(self.pair_support),
-            "triples_seen": len(self.triple_support),
-        }
+            if len(ids) <= self.max_triple_menu_size:
+                self.triple_support.update(
+                    frozenset(items) for items in combinations(ids, 3)
+                )
+            else:
+                self.menus_too_wide_for_triples += 1
+        return self.snapshot()
 
     def snapshot(self) -> dict[str, int]:
         return {
@@ -571,4 +579,6 @@ class OnlinePairTriplePlanner:
             "tools_seen": len(self.presence),
             "pairs_seen": len(self.pair_support),
             "triples_seen": len(self.triple_support),
+            "menus_too_wide_for_triples": self.menus_too_wide_for_triples,
+            "max_triple_menu_size": self.max_triple_menu_size,
         }

@@ -211,3 +211,24 @@ def test_online_pair_triple_rejects_duplicate_ids():
     planner = OnlinePairTriplePlanner(_pt_tools())
     with pytest.raises(ValueError):
         planner.plan(["t0", "t0"])
+
+
+def test_online_pair_triple_skips_triples_on_wide_menus():
+    """Triples are cubic in menu width; wide menus must degrade to pairs only."""
+    tools = {
+        f"t{i}": CanonicalTool(
+            tool_id=f"t{i}", name=f"tool_{i:03d}", description="d",
+            parameters={}, source="test", schema_tokens=10,
+        )
+        for i in range(40)
+    }
+    planner = OnlinePairTriplePlanner(tools, max_triple_menu_size=8)
+    wide = [f"t{i}" for i in range(20)]
+    planner.observe(wide)
+    state = planner.snapshot()
+    assert state["triples_seen"] == 0
+    assert state["menus_too_wide_for_triples"] == 1
+    assert state["pairs_seen"] == 190, "pairs must still accumulate"
+    planner.observe([f"t{i}" for i in range(5)])
+    assert planner.snapshot()["triples_seen"] == 10
+    assert planner.snapshot()["menus_too_wide_for_triples"] == 1

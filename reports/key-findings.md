@@ -299,8 +299,7 @@ Three regimes, in increasing order of how badly it does:
 > weighted trie or prefix memory under a limited cache budget?*
 
 Three tries were measured. None beats a method without one, and adding weights
-to ours changed nothing. How ToolTrie-v0 works, with the code, is in
-[`notes/tooltrie-v0-design.md`](../notes/tooltrie-v0-design.md).
+to ours changed nothing. 
 
 **A trie-based ordering and a frequency sort produce the same file.**
 `fp_tree_conditional` builds an FP-tree from training transactions and descends

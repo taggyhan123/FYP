@@ -115,3 +115,11 @@ skewed 96.40%) still exceed ToolTrie's, so the direction is not in question.
 (`_selection_key` extracted from an inline lambda), verified against the
 pre-refactor module from git: 1,500 orderings over 25 seeds, zero mismatches,
 identical snapshots. 140 tests pass.
+
+## Correction
+
+The commit that introduced this directory (`ef4abc7`) carries a garbled
+placeholder where the archive SHA-256 should be. The authoritative values are
+the ones above and in `raw-archive.sha256`:
+`aa4a377af9d11c51e085397fcf1262255aae64ad2f7d49c00f4f22492ad2c675`, verified
+with `sha256sum -c`. No tracked evidence file was affected.

@@ -43,7 +43,9 @@ from tatm.measurement import (
     summarize_request_measurements,
 )
 from tatm.prompting import build_menu, order_tool_ids, workload_record
+from tatm.baselines import OnlineFrequencyPlanner, OnlinePairTriplePlanner
 from tatm.tooltrie import ToolTrie
+from tatm.tooltrie_v1 import WeightedToolTrie
 from tatm.vllm_client import (
     KvUsageSampler,
     fetch_text,
@@ -83,12 +85,16 @@ def main() -> None:
             "schema_cost_weighted",
             "fp_tree_global",
             "tooltrie",
+            "tooltrie_v1",
+            "frequency_online",
+            "pair_triple_online",
         ),
         default="alphabetical",
         help=(
-            "Intra-menu tool order. All values except 'tooltrie' are fixed "
-            "permutations held constant across replay conditions; 'tooltrie' "
-            "plans causally from earlier requests and so differs per condition."
+            "Intra-menu tool order. The first six are fixed permutations held "
+            "constant across replay conditions. 'tooltrie', 'tooltrie_v1', "
+            "'frequency_online' and 'pair_triple_online' plan causally from "
+            "earlier requests and so differ per condition."
         ),
     )
     parser.add_argument("--random-seed", type=int, default=42)
@@ -198,16 +204,26 @@ def main() -> None:
         # the regime. A fresh planner per regime matches the cache reset that
         # precedes each one — a warm planner against a cold cache would
         # misrepresent both.
-        planner = (
-            ToolTrie(
+        if args.ordering == "tooltrie":
+            planner = ToolTrie(
                 tools,
                 fallback="alphabetical",
                 recency_window=128,
                 capacity_tokens=capacity_tokens,
             )
-            if args.ordering == "tooltrie"
-            else None
-        )
+        elif args.ordering == "tooltrie_v1":
+            planner = WeightedToolTrie(
+                tools,
+                fallback="alphabetical",
+                recency_window=128,
+                capacity_tokens=capacity_tokens,
+            )
+        elif args.ordering == "frequency_online":
+            planner = OnlineFrequencyPlanner(tools)
+        elif args.ordering == "pair_triple_online":
+            planner = OnlinePairTriplePlanner(tools)
+        else:
+            planner = None
         sequences = []
         for task in order:
             tool_ids = deduplicated_existing_ids(task, tools)

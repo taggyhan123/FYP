@@ -136,6 +136,26 @@ class ToolTrie:
         )
         return node.schema_tokens + downstream
 
+    def _selection_key(
+        self,
+        node: ToolTrieNode,
+        remaining: frozenset[str],
+    ) -> tuple[int, int, str]:
+        """Rank one candidate child during ``plan``.
+
+        Greater reachable cached cost wins, then greater training support, then
+        lexicographically smaller tool ID for complete determinism. Subclasses
+        override this to weight the choice differently; ``visit_count`` is
+        deliberately *not* consulted here, which is what makes this planner an
+        unweighted trie.
+        """
+
+        return (
+            -self._reachable_cached_cost(node, remaining),
+            -self.support.get(node.tool_id or "", 0),
+            node.tool_id or "",
+        )
+
     def _fallback_order(self, tool_ids: set[str]) -> tuple[str, ...]:
         if self.fallback == "alphabetical":
             key = lambda item: (self.tools[item].name.casefold(), item)
@@ -162,15 +182,9 @@ class ToolTrie:
             if not candidates:
                 break
 
-            # Greater reachable cached cost wins, then greater training support,
-            # then lexicographically smaller tool ID for complete determinism.
             chosen = min(
                 candidates,
-                key=lambda child: (
-                    -self._reachable_cached_cost(child, frozen_remaining),
-                    -self.support.get(child.tool_id or "", 0),
-                    child.tool_id or "",
-                ),
+                key=lambda child: self._selection_key(child, frozen_remaining),
             )
             assert chosen.tool_id is not None
             matched.append(chosen.tool_id)

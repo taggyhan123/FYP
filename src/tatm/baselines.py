@@ -447,3 +447,128 @@ class OnlineFrequencyPlanner:
             "tools_seen": len(self.presence),
             "max_presence": max(self.presence.values(), default=0),
         }
+
+
+class OnlinePairTriplePlanner:
+    """Causal online pair/triple co-occurrence ordering.
+
+    The adaptive counterpart to ``FittedOrderingPlanner``'s ``conditional_pair``
+    and ``conditional_pair_triple`` policies, which freeze their co-occurrence
+    statistics on a task-disjoint training corpus and never update them.
+
+    That freezing is why brief §7 Q5 has never been answered: both fitted
+    policies emit orderings byte-identical to ``frequency_fitted`` on every
+    workload measured, because the training corpus never observed the pairs that
+    appear in the evaluation menus, so every lookup returns zero and the key
+    falls through to plain frequency.
+
+    A second reason applies to padded menus specifically, and it is structural
+    rather than a property of any planner: when a menu holds a fixed core plus
+    one varying tool, pair support is a deterministic function of the two tools'
+    presence counts, so a pair key carries no signal a frequency key does not.
+    ``scripts/audit_pair_triple_information.py`` measures this — 100.00% of
+    ``bfcl-padded64`` pairs satisfy ``support(a, b) == min(presence(a),
+    presence(b))`` with zero violations, against 67.34% on ``toolret-bm25-k128``.
+    This planner can only discriminate where that identity breaks, which means
+    retrieved menus.
+
+    Statistics accumulate from **already-served** menus. ``plan`` reads only
+    counts from strictly earlier requests; call ``observe`` after the request has
+    been served. Ordering is a greedy chain: the first tool by presence, then
+    each next tool by triple support with the previous two, then pair support
+    with the previous one, then presence, then function name, then tool ID.
+    """
+
+    def __init__(
+        self,
+        tools: Mapping[str, CanonicalTool],
+        *,
+        use_triples: bool = True,
+    ) -> None:
+        self.tools = tools
+        self.use_triples = use_triples
+        self.presence: Counter[str] = Counter()
+        self.pair_support: Counter[frozenset[str]] = Counter()
+        self.triple_support: Counter[frozenset[str]] = Counter()
+        self.request_index = 0
+
+    def _validated_ids(self, tool_ids: Sequence[str]) -> tuple[str, ...]:
+        ids = tuple(tool_ids)
+        if len(ids) != len(set(ids)):
+            raise ValueError("A pair/triple menu must not repeat tool IDs")
+        unknown = [tool_id for tool_id in ids if tool_id not in self.tools]
+        if unknown:
+            sample = ", ".join(repr(item) for item in unknown[:3])
+            raise ValueError(f"Online pair/triple received unknown tool IDs: {sample}")
+        return ids
+
+    def plan(self, selected_ids: Sequence[str]) -> OrderingPlan:
+        ids = self._validated_ids(selected_ids)
+        remaining = set(ids)
+        ordered: list[str] = []
+
+        while remaining:
+            if not ordered:
+                chosen = min(
+                    remaining,
+                    key=lambda item: (
+                        -self.presence[item],
+                        self.tools[item].name.casefold(),
+                        item,
+                    ),
+                )
+            else:
+                previous = ordered[-1]
+
+                def key(candidate: str) -> tuple[int, int, int, str, str]:
+                    pair = self.pair_support[frozenset((previous, candidate))]
+                    triple = 0
+                    if self.use_triples and len(ordered) >= 2:
+                        triple = self.triple_support[
+                            frozenset((ordered[-2], previous, candidate))
+                        ]
+                    return (
+                        -triple,
+                        -pair,
+                        -self.presence[candidate],
+                        self.tools[candidate].name.casefold(),
+                        candidate,
+                    )
+
+                chosen = min(remaining, key=key)
+            ordered.append(chosen)
+            remaining.remove(chosen)
+
+        result = tuple(ordered)
+        if set(result) != set(ids) or len(result) != len(ids):
+            raise RuntimeError("Online pair/triple ordering is not a permutation")
+        return OrderingPlan(
+            ordered_ids=result,
+            matched_prefix_ids=(),
+            fallback_ids=result,
+            hinted_schema_tokens=0,
+        )
+
+    def observe(self, ordered_ids: Sequence[str]) -> dict[str, int]:
+        ids = self._validated_ids(ordered_ids)
+        self.request_index += 1
+        self.presence.update(ids)
+        self.pair_support.update(frozenset(items) for items in combinations(ids, 2))
+        if self.use_triples:
+            self.triple_support.update(
+                frozenset(items) for items in combinations(ids, 3)
+            )
+        return {
+            "requests_observed": self.request_index,
+            "tools_seen": len(self.presence),
+            "pairs_seen": len(self.pair_support),
+            "triples_seen": len(self.triple_support),
+        }
+
+    def snapshot(self) -> dict[str, int]:
+        return {
+            "requests_observed": self.request_index,
+            "tools_seen": len(self.presence),
+            "pairs_seen": len(self.pair_support),
+            "triples_seen": len(self.triple_support),
+        }

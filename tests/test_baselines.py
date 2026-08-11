@@ -1,7 +1,10 @@
+import pytest
+
 from tatm.baselines import (
     CacheWeaverPlanner,
     FittedOrderingPlanner,
     OnlineFrequencyPlanner,
+    OnlinePairTriplePlanner,
 )
 from tatm.models import CanonicalTool
 
@@ -134,3 +137,77 @@ def test_online_frequency_rejects_repeated_and_unknown_ids() -> None:
         assert "unknown" in str(error).lower()
     else:
         raise AssertionError("expected ValueError for unknown tool IDs")
+
+
+def _pt_tools():
+    return {
+        f"t{i}": CanonicalTool(
+            tool_id=f"t{i}",
+            name=f"tool_{i}",
+            description="d",
+            parameters={},
+            source="test",
+            schema_tokens=10,
+        )
+        for i in range(6)
+    }
+
+
+def test_online_pair_triple_plan_cannot_see_the_current_request():
+    planner = OnlinePairTriplePlanner(_pt_tools())
+    before = planner.snapshot()
+    planner.plan(["t3", "t1", "t2"])
+    assert planner.snapshot() == before, "plan must not mutate observed counts"
+
+
+def test_online_pair_triple_cold_start_is_alphabetical_by_name():
+    planner = OnlinePairTriplePlanner(_pt_tools())
+    ordered = planner.plan(["t3", "t0", "t2"]).ordered_ids
+    assert ordered == ("t0", "t2", "t3")
+
+
+def test_online_pair_triple_is_always_a_permutation():
+    planner = OnlinePairTriplePlanner(_pt_tools())
+    menu = ["t4", "t1", "t0", "t5"]
+    for _ in range(4):
+        ordered = planner.plan(menu).ordered_ids
+        assert sorted(ordered) == sorted(menu)
+        planner.observe(ordered)
+
+
+def test_online_pair_triple_prefers_a_partner_over_a_more_frequent_tool():
+    """Pair support must outrank presence, or the policy is just frequency."""
+    tools = _pt_tools()
+    planner = OnlinePairTriplePlanner(tools, use_triples=False)
+    for _ in range(5):
+        planner.observe(["t0"])
+    planner.observe(["t0", "t5"])
+    for _ in range(3):
+        planner.observe(["t1"])
+    # presence: t0=6, t1=3, t5=1 -> t0 leads. Then t1 is the more frequent
+    # candidate, but only t5 has ever co-occurred with t0.
+    assert planner.plan(["t0", "t1", "t5"]).ordered_ids == ("t0", "t5", "t1")
+
+    frequency = OnlineFrequencyPlanner(tools)
+    for _ in range(5):
+        frequency.observe(["t0"])
+    frequency.observe(["t0", "t5"])
+    for _ in range(3):
+        frequency.observe(["t1"])
+    # The same stream under a pure frequency counter orders t1 before t5.
+    assert frequency.plan(["t0", "t1", "t5"]).ordered_ids == ("t0", "t1", "t5")
+
+
+def test_online_pair_triple_counts_triples_only_when_enabled():
+    with_triples = OnlinePairTriplePlanner(_pt_tools(), use_triples=True)
+    without = OnlinePairTriplePlanner(_pt_tools(), use_triples=False)
+    for planner in (with_triples, without):
+        planner.observe(["t0", "t1", "t2"])
+    assert with_triples.snapshot()["triples_seen"] == 1
+    assert without.snapshot()["triples_seen"] == 0
+
+
+def test_online_pair_triple_rejects_duplicate_ids():
+    planner = OnlinePairTriplePlanner(_pt_tools())
+    with pytest.raises(ValueError):
+        planner.plan(["t0", "t0"])

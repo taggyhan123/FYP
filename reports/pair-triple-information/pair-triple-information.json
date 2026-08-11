@@ -1,0 +1,80 @@
+{
+  "audit": "pair-triple-information-content",
+  "conclusion": "On workloads listed as redundant, pair support is a deterministic function of presence counts, so no ordering built on pair or triple co-occurrence can differ from a frequency ordering. Q5 is not answerable there by construction, independently of any planner.",
+  "format_version": 1,
+  "generated_by": "scripts/audit_pair_triple_information.py",
+  "question": "brief §7 Q5 — additional benefit from pair/triple workflow structure",
+  "workloads": {
+    "bfcl-padded64": {
+      "distinct_pairs": 14490,
+      "distinct_tools": 262,
+      "menu_sizes": [
+        64
+      ],
+      "pair_equals_min_presence_fraction": 1.0,
+      "pair_support_is_a_function_of_presence": true,
+      "presence_signature_violations": 0,
+      "requests": 200,
+      "tools_in_every_request": 63,
+      "triples_skipped_menu_too_large": true
+    },
+    "toolret-bm25-k128": {
+      "distinct_pairs": 1237509,
+      "distinct_tools": 12353,
+      "menu_sizes": [
+        128
+      ],
+      "pair_equals_min_presence_fraction": 0.673372,
+      "pair_support_is_a_function_of_presence": false,
+      "presence_signature_violations": 208615,
+      "requests": 200,
+      "tools_in_every_request": 0,
+      "triples_skipped_menu_too_large": true
+    },
+    "toolret-bm25-k16": {
+      "distinct_pairs": 20592,
+      "distinct_tools": 2203,
+      "distinct_triples": 102554,
+      "menu_sizes": [
+        16
+      ],
+      "pair_equals_min_presence_fraction": 0.851641,
+      "pair_support_is_a_function_of_presence": false,
+      "presence_signature_violations": 2651,
+      "requests": 200,
+      "tools_in_every_request": 0,
+      "triple_equals_min_presence_fraction": 0.840455,
+      "triple_presence_signature_violations": 11291,
+      "triple_support_is_a_function_of_presence": false
+    },
+    "toolret-bm25-k64": {
+      "distinct_pairs": 323534,
+      "distinct_tools": 7325,
+      "menu_sizes": [
+        64
+      ],
+      "pair_equals_min_presence_fraction": 0.760986,
+      "pair_support_is_a_function_of_presence": false,
+      "presence_signature_violations": 50491,
+      "requests": 200,
+      "tools_in_every_request": 0,
+      "triples_skipped_menu_too_large": true
+    },
+    "toolret-padded64": {
+      "distinct_pairs": 12972,
+      "distinct_tools": 238,
+      "menu_sizes": [
+        64
+      ],
+      "pair_equals_min_presence_fraction": 0.99391,
+      "pair_support_is_a_function_of_presence": false,
+      "presence_signature_violations": 46,
+      "requests": 200,
+      "tools_in_every_request": 60,
+      "triples_skipped_menu_too_large": true
+    }
+  },
+  "workloads_where_pair_support_is_redundant_with_frequency": [
+    "bfcl-padded64"
+  ]
+}

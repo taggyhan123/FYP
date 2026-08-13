@@ -349,12 +349,6 @@ decides almost every choice, so the tie-break holding the weight is rarely
 reached. Only the empirical regime was predeclared: **1/1 predeclared run
 accepted, three further regimes added afterwards and also accepted.**
 
-**Why the trie has so little to exploit here.** A trie rewards shared prefixes
-across repeated sequences. Padded menus hold 63 of 64 tools fixed, so anything
-that finds that block wins without needing sequence structure; retrieved menus
-share 7.7% of membership in no consistent order, so there are barely any
-prefixes to share. Offline node compression never exceeds 36.88% on any
-ordering, which bounds the structure available.
 
 Sources: `reports/tooltrie-pressure/20260811-001032/`,
 `reports/tooltrie-weighted/20260811-144741/`.

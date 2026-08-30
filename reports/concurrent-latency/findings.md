@@ -239,10 +239,20 @@ One claim does not transfer: ContextPilot's flat latency *shape* is specific to
 Latency and reuse say nothing about whether the model still picks the right
 tool. On retrieved menus, often it does not.
 
-Accuracy is the share of requests where a called tool is one of the labelled
-correct tools, restricted to requests whose menu contains one. All arms hold the
-same menus, so the achievable maximum is identical across arms — checked, and it
-matched.
+**Accuracy here means: did the model call the right tool.** Each task has
+labelled correct tools. The model gets the menu and the question, and either
+emits a tool call or does not. Accuracy is the share that called a correct one,
+counting only requests where a correct tool was actually in the menu — otherwise
+the score would include the retriever's failures rather than the ordering's.
+
+Worked through for `k64` with no reordering: of 200 requests, 134 emitted a tool
+call at all, 151 had a correct tool present in the menu, and 56 of those 151
+called it — accuracy 37.09%. Every arm holds identical menus, so that 151 is the
+same for all of them and the comparison isolates ordering. That ceiling was
+checked across arms before the results were used, and it matched.
+
+So "ToolTrie −11.3pp at k64" means that of the same 151 answerable requests, no
+reordering got 56 right and ToolTrie's ordering got 39.
 
 ContextPilot here is the official-API arm at the paper's alpha (§Setup).
 

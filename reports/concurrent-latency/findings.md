@@ -4,6 +4,9 @@ Qwen3-0.6B on one RTX 3090 (plus a Qwen3-4B check), vLLM 0.26.0, prefix caching
 unmodified. 191 GPU runs. Raw outputs are in the git-ignored `cluster/results/`
 directories listed in the Appendix.
 
+This is the full record, with every control and validity check.
+[`README.md`](README.md) is the five-finding version.
+
 ---
 
 ## Summary
@@ -157,21 +160,12 @@ arm's falls. The ordered-vs-unordered gap at p50 widens from 31x to **68x**. Wha
 does not survive is ContextPilot's lead over ToolTrie: 8.97pp becomes 0.04pp, and
 the 22 ms median penalty becomes −0.5 ms in ToolTrie's favour.
 
-**Retrieved menus, same size** (2.8 of 64 tools shared)
-
-| arm | achieved | reuse | p50 | p95 | max |
-|---|---|---|---|---|---|
-| original | 2.6346 | 0.91% | 9667.9 | 24699.7 | 26820.4 |
-| alphabetical | 2.6252 | 1.22% | 9727.5 | 24854.3 | 27104.6 |
-| frequency | 2.6230 | 0.94% | 9760.9 | 25009.1 | 27161.5 |
-| tooltrie_v0 | 2.6286 | 1.90% | 9559.9 | 24825.6 | 27059.1 |
-| **ContextPilot** | 2.6934 | **4.78%** | **8565.4** | **22452.4** | **25432.4** |
-
 **Ordering is decisive on padded menus and nearly irrelevant on retrieved ones.**
-p50 spans **36x** across the padded arms and **1.14x** across the retrieved ones,
-at the same request size and the same offered rate. Every retrieved arm also
-saturates at ~2.6 req/s regardless of policy. §4 pursues this; it is the most
-important qualification in the report, so it appears here rather than only there.
+Run at the same request size and offered rate, p50 spans **36x** across the padded
+arms but only **1.14x** across BM25-retrieved ones (9559.9–9760.9 ms), and every
+retrieved arm saturates at ~2.6 req/s regardless of policy. §4.1 has the full
+retrieved comparison at four depths; it is the most important qualification in
+this report, which is why it is flagged here rather than only there.
 
 The rest of Part 1 uses padded menus, where the arms separate enough to study.
 
@@ -192,15 +186,10 @@ The rest of Part 1 uses padded menus, where the arms separate enough to study.
 | 4 | tooltrie_v0 | 4.0139 | 87.19% | 116.3 | 225.7 | 558.4 |
 | 4 | ContextPilot | 4.0143 | 96.16% | **92.7** | **129.0** | **300.2** |
 
-ToolTrie against the arms it replaces, padded:
-
-| rate | vs original | vs alphabetical |
-|---|---|---|
-| 1 | p50 −58.7%, p95 −62.4% | p50 −52.3%, p95 −55.5% |
-| 2 | p50 −59.8%, p95 −75.0% | p50 −53.5%, p95 −63.5% |
-| 4 | **p50 −96.5%, p95 −96.5%** | p50 −64.9%, p95 −78.7% |
-
-ContextPilot leads ToolTrie at every rate in this window. That lead is warm-up,
+Against the arms it replaces, ToolTrie's advantage grows with load: at rate 1 it
+cuts p50 58.7% against `original` and 52.3% against `alphabetical`; at rate 4,
+**96.5% and 64.9%**, with p95 cut 96.5% and 78.7%. ContextPilot leads ToolTrie at
+every rate in this window. That lead is warm-up,
 not ordering quality — see the two-window table above and §1.5 for why.
 
 ### 1.2 Three things serial testing could not show
@@ -427,21 +416,13 @@ whenever there is anything to select; on ToolTrie there almost never is.
 
 **A tradeoff is still achievable there — just not an intelligent one.** The
 `random` control on the same ToolTrie runs reordered 193 of 200 and produced the
-shape an adaptor is supposed to produce:
-
-| ToolTrie @ 16 req/s | p50 | p95 |
-|---|---|---|
-| fifo | 8814 | 13457 |
-| random | **6427 (−27.1%)** | **19665 (+46.1%)** |
-
-So a dispatcher can move latency around on ToolTrie. What it cannot do is move it
-around for a *reason*, because every signal it might use is flat:
-
-| signal | on padded ToolTrie | usable |
-|---|---|---|
-| prefix affinity | every candidate ~56 of 64 tools, spread 0.08 | no |
-| job size | every request ~5,570 tokens, CV 0.0038 | no |
-| none (random) | — | acts, but the gain is the saturation artifact of §4.3, not information |
+shape an adaptor is supposed to produce: at 16 req/s p50 falls 8814 → 6427 ms
+(−27.1%) while p95 rises 13457 → 19665 (+46.1%). So a dispatcher can move latency
+around on ToolTrie. What it cannot do is move it
+around for a *reason*, because every signal it might use is flat: prefix affinity
+gives every candidate ~56 of 64 tools (spread 0.08, tabulated below), and job size
+is uniform at ~5,570 tokens (CV 0.0038). Only `random` acts, and its gain is the
+saturation artifact of §4.3 rather than information.
 
 **ToolTrie has already made every request look alike, which is exactly why it is
 fast and exactly why no dispatcher can improve on it.** Where a real signal does

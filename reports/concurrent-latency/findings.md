@@ -324,6 +324,21 @@ skipped accumulate the 12-second tail.
 ToolTrie with and without the adaptor are the same run in all but name: the
 policy reordered nothing, so the 0.4 ms difference is noise.
 
+**That is inertness, not a broken policy** — checked by reconstructing the
+pending queue at every dispatch and recomputing what the policy was choosing
+between:
+
+| | ToolTrie @ 16 req/s | alphabetical @ 4 req/s |
+|---|---|---|
+| dispatches with 2+ candidates | 195 | 131 |
+| **all candidates tied** | **194** | 12 |
+| scores actually varied | **1** | **119** |
+| picked a top-scoring candidate | 1 of 1 | **118 of 119** |
+
+On ToolTrie the policy faced a genuine decision once in 195 opportunities and got
+it right. On `alphabetical` it faced 119 and got 118 right. It selects correctly
+whenever there is anything to select; on ToolTrie there almost never is.
+
 **The best the adaptor manages on a mediocre ordering is 6.7x worse than doing
 nothing on a good one.**
 

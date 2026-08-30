@@ -1,7 +1,7 @@
 # Tool ordering under concurrent load — key findings
 
 Qwen3-0.6B on one RTX 3090 (plus a Qwen3-4B check), vLLM 0.26.0, prefix caching
-unmodified. 191 GPU runs.
+unmodified. 195 GPU runs.
 
 This is the short version. Every number links to the section of
 [`findings.md`](findings.md) that derives it, with its runs and controls.
@@ -21,16 +21,19 @@ This is the short version. Every number links to the section of
 
 Serially, every arm sat within 1.25x on every statistic. Under load they span
 36x at p50. Reuse turns directly into admission capacity — sustained throughput
-at 64 req/s offered:
+at 64 req/s offered, shown for the 200-request window and for requests 201–600
+once the adaptive planners have converged:
 
-| arm | reuse | ceiling |
-|---|---|---|
-| `original` | 1.19% | **3.57 req/s** |
-| `alphabetical` | 38.13% | 4.74 |
-| `tooltrie_v0` | 87.19% | 11.24 |
-| **ContextPilot** | 96.16% | **16.83** |
+| arm | reuse 1–200 | ceiling 1–200 | reuse 201–600 | ceiling 201–600 |
+|---|---|---|---|---|
+| `original` | 1.19% | **3.57 req/s** | 0.70% | **3.72** |
+| `alphabetical` | 38.13% | 4.74 | 46.29% | 5.59 |
+| `tooltrie_v0` | 87.19% | 11.24 | 97.05% | **18.37** |
+| **ContextPilot** | 96.16% | **16.83** | 97.09% | **19.99** |
 
-Ordering alone is worth **4.7x the admission capacity**. ([§1.2](findings.md#12-three-things-serial-testing-could-not-show))
+Ordering alone is worth **4.7x the admission capacity**, rising to **5.4x** in
+steady state. And the ToolTrie–ContextPilot capacity gap is warm-up like the rest
+of the padded story: **1.50x** over the first 200 requests, **1.09x** after. ([§1.2](findings.md#12-three-things-serial-testing-could-not-show))
 
 ### 2. Most of that is the test workload, not the method
 

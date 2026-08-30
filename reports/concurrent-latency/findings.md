@@ -1,7 +1,7 @@
 # Tool ordering under concurrent load
 
 Qwen3-0.6B on one RTX 3090 (plus a Qwen3-4B check), vLLM 0.26.0, prefix caching
-unmodified. 191 GPU runs. Raw outputs are in the git-ignored `cluster/results/`
+unmodified. 195 GPU runs. Raw outputs are in the git-ignored `cluster/results/`
 directories listed in the Appendix.
 
 This is the full record, with every control and validity check.
@@ -25,7 +25,8 @@ Four questions, none previously run in this project.
 **Parallel load separates the orderings; serial testing hid this.** At 4 req/s
 ToolTrie cuts both p50 and p95 by 96.5% against unordered menus (a padded
 workload — see §1.5 and §4.1 for how much of that generalises), and
-sustains 11.24 req/s against 3.56 — 3.2x the capacity. Serially the same
+sustains 11.24 req/s against 3.56 — 3.2x the capacity, rising to 4.9x once it
+has converged (§1.2). Serially the same
 statistics were flat within 1.25x.
 
 **Most of that is the test workload, not the method.** The padded menus give
@@ -109,7 +110,7 @@ and two more at 1.19%, so replaying them would duplicate curves.
 **How runs were done.** 200 requests per run, replaying frozen orderings so every
 arm is a permutation of the same menus. Open-loop Poisson arrivals at a fixed
 rate, seed 42, cache cleared before each run, decode pinned to 48 tokens so
-decode-length variance cannot pollute the tails. 191 runs total.
+decode-length variance cannot pollute the tails. 195 runs total.
 
 **One naming note.** ContextPilot throughout is the official reordering API at
 the paper's `alpha=0.001`, ordering only — no annotations, de-duplication or
@@ -198,18 +199,28 @@ not ordering quality — see the two-window table above and §1.5 for why.
 At 4 req/s it spans 308 to 7476 ms — 24.3x. Max is dominated by queueing, which
 concurrency of 1 cannot produce.
 
-**Reuse becomes capacity.** Sustained throughput at 64 req/s offered:
+**Reuse becomes capacity.** Sustained throughput at 64 req/s offered, in the same
+two windows as §1.1 — the 200-request run, and requests 201–600 of a 600-request
+run at the same offered rate:
 
-| arm | reuse | ceiling |
-|---|---|---|
-| original | 1.19% | **3.57 req/s** |
-| alphabetical | 38.13% | 4.74 |
-| tooltrie_v0 | 87.19% | 11.24 |
-| **ContextPilot** | 96.16% | **16.83** |
+| arm | reuse 1–200 | ceiling 1–200 | reuse 201–600 | ceiling 201–600 |
+|---|---|---|---|---|
+| original | 1.19% | **3.57 req/s** | 0.70% | **3.72** |
+| alphabetical | 38.13% | 4.74 | 46.29% | 5.59 |
+| tooltrie_v0 | 87.19% | 11.24 | 97.05% | **18.37** |
+| **ContextPilot** | 96.16% | **16.83** | 97.09% | **19.99** |
 
-Ordering alone is worth **4.7x the admission capacity** end to end, and ToolTrie
-3.1x over no reordering. Reuse was identical at every rate from 1 to 64, so
-ordering sets reuse and load does not change it.
+Ordering alone is worth **4.7x the admission capacity** in the first window and
+**5.4x** in steady state; ToolTrie is worth 3.1x over no reordering, rising to
+**4.9x**. Reuse was identical at every rate from 1 to 64, so ordering sets reuse
+and load does not change it.
+
+**The capacity gap between ToolTrie and ContextPilot is warm-up too**, and it
+closes further than reuse alone predicts: 16.83/11.24 = **1.50x** over the first
+200 requests, 19.99/18.37 = **1.09x** in steady state. Every arm gains some
+capacity from excluding the cold start — `original`, which learns nothing, still
+gains 4% — so the ratio, not the absolute, is the number that isolates the
+policies.
 
 **The slow requests are different requests.** At rate 4 the five slowest are:
 
@@ -903,8 +914,9 @@ ContextPilot scheduling, so nothing here measures the full system.
 | Fairness audit: planner budget, arrival seeds | `tooltrie-uncapped-20260830-212728/` | 9 |
 | Steady state (600 req) and more arrival seeds | `steady-and-seeds-20260830-221902/` | 14 |
 | Steady state: the two reference arms | `steady-arms-20260830-234910/` | 4 |
+| Steady-state admission capacity (600 req @ 64/s) | `steady-capacity-20260831-004322/` | 4 |
 
-**191 runs.** All under the git-ignored `cluster/results/`.
+**195 runs.** All under the git-ignored `cluster/results/`.
 
 Driver `scripts/replay_vllm_concurrent.py`; also added
 `summarize_queuing_runs.py`, `build_canonical_ordering.py`,

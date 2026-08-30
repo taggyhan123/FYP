@@ -20,7 +20,8 @@ Four questions, none previously run in this project.
 ### What we found
 
 **Parallel load separates the orderings; serial testing hid this.** At 4 req/s
-ToolTrie cuts both p50 and p95 by 96.5% against unordered menus, and
+ToolTrie cuts both p50 and p95 by 96.5% against unordered menus (a padded
+workload — see §1.5 and §4.1 for how much of that generalises), and
 sustains 11.24 req/s against 3.56 — 3.2x the capacity. Serially the same
 statistics were flat within 1.25x.
 
@@ -39,8 +40,8 @@ compete for the front of the prompt.
 
 **ToolTrie places second.** It beats every simple heuristic — unordered,
 alphabetical, frequency — everywhere. ContextPilot beats it at all four retrieval
-depths, by 1.07x to 2.52x, widest at k64 — but that k64 margin is the best of
-three arrival orders and falls to 1.09x under another (A.6).
+depths, by 1.07x to 2.52x — but the k64 figure is the top of its range: over five
+arrival orders it spans 1.09x to 2.57x, the other four at 1.09-1.39x (A.6).
 
 ### What to be careful with
 
@@ -101,7 +102,7 @@ and two more at 1.19%, so replaying them would duplicate curves.
 **How runs were done.** 200 requests per run, replaying frozen orderings so every
 arm is a permutation of the same menus. Open-loop Poisson arrivals at a fixed
 rate, seed 42, cache cleared before each run, decode pinned to 48 tokens so
-decode-length variance cannot pollute the tails. 173 runs total.
+decode-length variance cannot pollute the tails. 187 runs total.
 
 **One naming note.** ContextPilot throughout is the official reordering API at
 the paper's `alpha=0.001`, ordering only — no annotations, de-duplication or
@@ -174,6 +175,8 @@ ToolTrie against the arms it replaces, padded:
 | 4 | **p50 −96.5%, p95 −96.5%** | p50 −64.9%, p95 −78.7% |
 
 ContextPilot leads ToolTrie at every rate; ToolTrie's median penalty is 18-25 ms.
+That lead is warm-up, not ordering quality: over a 600-request run the two are
+0.04pp apart in steady state (§1.5).
 
 ### 1.2 Three things serial testing could not show
 
@@ -287,6 +290,47 @@ leading prefix.** Padded menus hide it, because there "common" is 63 of 64 tools
 
 Caveat: a 0.6B model may be unusually sensitive to ordering. ContextPilot reports
 newer, larger models being nearly insensitive to it.
+
+---
+
+### 1.5 The padded gap between ToolTrie and ContextPilot is warm-up
+
+Every padded figure above comes from a 200-request run, and ToolTrie is still
+learning for most of it. Extending the workload to 600 requests by its own
+construction rule — the same 63-tool core in the same order, one fresh singleton
+per request — and differencing the 600-run against the 200-run of the same file
+(their first 200 records are byte-identical, both planners being causal):
+
+| requests | ToolTrie | ContextPilot | gap |
+|---|---|---|---|
+| 1–200 (every other table here) | 87.19% | 96.16% | **8.97pp** (1.103x) |
+| 1–600 | 93.76% | 96.78% | 3.02pp |
+| **201–600** | **97.05%** | **97.09%** | **0.04pp** (1.000x) |
+
+Uncached prefill over 201–600 is 2.95% against 2.91% — 1.01x the work, where
+over the first 200 it was 3.33x. p50 tracks it: 93.2 ms against 91.7 ms.
+
+The ordering explains it exactly. Measured as the position of the singleton,
+where 63 is optimal:
+
+| requests | ToolTrie | ContextPilot |
+|---|---|---|
+| 1–200 | 56.31 | 62.69 |
+| 201–400 | 62.90 | 63.00 |
+| 401–600 | **63.00** | **63.00** |
+
+ContextPilot is optimal from request 51; ToolTrie takes about 150. Both finish
+at the same place. **So ContextPilot's advantage on padded menus is cold-start
+speed, not ordering quality** — a real advantage for short or bursty workloads,
+but not the one §1.1 appears to report.
+
+This is forced once the orderings converge: on padded menus reuse *is* the
+singleton's position (§4.1), so two policies that both place it at 63 must tie.
+
+Two limits. The 400 added requests pair real tool schemas with borrowed queries,
+so they are valid for reuse and ordering but carry no accuracy signal. And this
+says nothing about retrieved menus, where there is no common core to converge to
+and the §4.1 ranking stands.
 
 ---
 
@@ -509,6 +553,24 @@ almost entirely different orderings (1 of 200 records shared). Padded menus
 cannot distinguish them: any consistent hoisting of the 63-tool core scores the
 same.
 
+**What padded menus actually measure.** 63 of the 64 tools are common to all 200
+requests, and in the `original` arm they appear in one fixed order with the
+remaining tool first. The shared prefix therefore runs until that one tool, which
+makes reuse arithmetically its position:
+
+| arm | the differing tool sits at | reuse |
+|---|---|---|
+| original | **0%** of the menu | 1.19% |
+| alphabetical | 36% | 38.13% |
+| tooltrie_v0 | 88% | 87.19% |
+| ContextPilot | 98% | 96.16% |
+
+r² = 0.9996, mean gap 1.47 points. So the 95-point reuse spread and 36x latency
+spread in Part 1 are a single quantity — how far down each policy pushes one
+tool — measured from a baseline that puts it first in every request. This is why
+§1.5's steady-state tie is forced rather than surprising: once two policies both
+place that tool last, they must score the same.
+
 **Is this a fair comparison?** Both are causal — neither sees future requests —
 and both run on identical menus with identical measurement. ContextPilot is run
 at the paper's alpha but **ordering-only**, without the annotations,
@@ -531,10 +593,11 @@ reimplementation, which beats ContextPilot only at k128.
 
 The ratios overstate the practical difference twice over. At k64 a 2.52x ratio
 is worth 2.88 points of prefill, and every arm lands within 2% on p50. It is
-also the best of three arrival orders: re-running k64 under two more permutations
-of the same 200 records gives 1.39x and 1.09x, because ContextPilot's reuse
-varies 2.63pp across them while ToolTrie's varies 0.18pp. ContextPilot still wins
-under all three, so the ranking holds and the magnitude does not (A.6).
+also the top of its own range: across five arrival permutations the k64 ratio
+spans 1.09-2.57x, with the other four at 1.09-1.39x. k128 is stable by contrast
+(1.65-2.15x over three, with 1.76x mid-range). ContextPilot wins every
+permutation at both depths, so the ranking holds and the k64 magnitude does not
+(A.6).
 
 **Putting frequently used tools first does not work.** The `frequency` arm is
 the worst at k4 and k16 and near-worst at k64 and k128.
@@ -657,7 +720,10 @@ points the exchange rate changes; if not, the line is closed.
 
 1. **Parts 1–3 describe a padded workload, not tool ordering in general.** §4.1
    is the check: reuse spread falls 94.97pp → 0.98pp, latency spread 36x → 1.02x.
-   The most important limit here.
+   The most important limit here. Two further properties of that workload were
+   measured late: reuse on it is arithmetically the position of the single tool
+   that differs between requests (r² = 0.9996), and the ToolTrie–ContextPilot gap
+   on it is warm-up that vanishes by request 200 (§1.5).
 2. **Accuracy is one model, one seed, two depths.** Absolute accuracy is low
    (11–28%), a 0.6B model may be unusually order-sensitive, and no arm used
    order annotations. The direction is consistent; the magnitudes are not
@@ -673,9 +739,12 @@ points the exchange rate changes; if not, the line is closed.
 6. **Two runs are n=199**, each losing one request to a client-side socket
    error, not a server fault.
 7. **One trial per cell, and one arrival order.** Reuse reproduced to the
-   digit across the order control, seven rates, three cache sizes and a
-   same-day re-run, which is the evidence for run-to-run stability. Stability
-   across *arrival permutations* is weaker and asymmetric — see A.6.
+   digit across the order control, seven rates, three cache sizes and same-day
+   re-runs, which is the evidence for run-to-run stability. Arrival permutation
+   is a separate and larger source of variation: eight cells were re-run under
+   3–5 permutations (A.6) and k64 moved 1.09–2.57x. Every other cell rests on
+   one permutation, so point estimates here should be read as draws, not
+   constants.
 8. **The §5 methods are single-configuration**, rejected on the accuracy
     exchange rate rather than an exhaustive sweep.
 
@@ -812,8 +881,9 @@ ContextPilot scheduling, so nothing here measures the full system.
 | Adaptor on frequency and ContextPilot | `adaptor-table-20260830-141733/` | 4 |
 | ContextPilot + baselines on padded | `cp-online-padded-20260830-115456/` | 15 |
 | Fairness audit: planner budget, arrival seeds | `tooltrie-uncapped-20260830-212728/` | 9 |
+| Steady state (600 req) and more arrival seeds | `steady-and-seeds-20260830-221902/` | 14 |
 
-**173 runs.** All under the git-ignored `cluster/results/`.
+**187 runs.** All under the git-ignored `cluster/results/`.
 
 Driver `scripts/replay_vllm_concurrent.py`; also added
 `summarize_queuing_runs.py`, `build_canonical_ordering.py`,
@@ -887,29 +957,41 @@ recent and long:
 | tooltrie uncapped | 91 | 36 | 3.56 |
 | ContextPilot | 92 | **55** | **9.31** |
 
-**Arrival order is the weaker control, and it favours ContextPilot.** Every
-result in this report uses one arrival permutation. Across three permutations of
-the same 200 k64 records, ToolTrie's ordering quality varies by 0.136 tools and
-ContextPilot's by 1.658 — and the permutation used throughout is ContextPilot's
-best of the three (3.990 against 2.332 and 2.563). Reuse follows the proxy:
+**Arrival order is the weaker control, and its effect depends on depth.** Every
+other result here uses one arrival permutation. Re-running k64 under five and
+k128 under three permutations of the same 200 records:
 
-| k64 arrival order | ToolTrie | ContextPilot | ratio |
+| k64 | ToolTrie | ContextPilot | ratio |
 |---|---|---|---|
 | seed 0 (used throughout this report) | 1.86% | **4.78%** | **2.57x** |
 | seed 1 | 1.80% | 2.51% | 1.39x |
 | seed 2 | 1.98% | 2.15% | 1.09x |
-| mean | 1.88% | 3.15% | 1.67x |
-| spread | **0.18pp** | **2.63pp** | |
+| seed 3 | 1.77% | 2.44% | 1.38x |
+| seed 4 | 1.68% | 2.17% | 1.29x |
+| mean | 1.82% | 2.81% | 1.54x |
+| spread | 0.30pp | **2.63pp** | |
 
-The ToolTrie column here uses the budget-lifted planner, legitimate because
-capped and uncapped are a measured null above; seed 0 against the capped arm is
-the 2.52x reported in §4.1.
+| k128 | ToolTrie | ContextPilot | ratio |
+|---|---|---|---|
+| seed 0 (used throughout this report) | 1.16% | 1.99% | 1.72x |
+| seed 1 | 1.10% | 1.81% | 1.65x |
+| seed 2 | 0.82% | 1.76% | 2.15x |
+| mean | 1.03% | 1.85% | 1.84x |
+| spread | 0.34pp | 0.23pp | |
 
-ContextPilot wins under all three, so the ranking holds. The *margin* does not:
-the 2.52x at k64 in §4.1 is the best of three draws, and one permutation puts the
-two within 9%. ToolTrie varies by 0.18pp across the same permutations,
-ContextPilot by 2.63pp — 15x more. Every other number in this report rests on
-seed 0 alone.
+The ToolTrie column uses the budget-lifted planner, legitimate because capped and
+uncapped are a measured null above; seed 0 against the capped arm is the 2.52x
+and 1.76x reported in §4.1.
+
+**k128 is stable and k64 is not.** At k128 the ratio stays in 1.65-2.15x and the
+published 1.76x sits mid-range, so that cell needs no qualification. At k64 the
+ratio spans 1.09-2.57x, and the published 2.52x is the top of it — the other four
+permutations cluster at 1.09-1.39x. ContextPilot wins all eight cells, so the
+ranking is now better evidenced than before; the k64 *magnitude* is not.
+
+The sensitivity does not belong to one method. At k64 ContextPilot varies 2.63pp
+against ToolTrie's 0.30pp; at k128 it is the other way round, 0.23pp against
+0.34pp. Every cell outside these eight still rests on seed 0 alone.
 
 **Two asymmetries stand.** ToolTrie is `v0` against a tuned published system,
 though sweeping its one ordering knob found the shipped value already optimal

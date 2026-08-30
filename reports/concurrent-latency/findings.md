@@ -38,8 +38,8 @@ tool is pushed. The cache wants the *common* tools first; the model wants the
 compete for the front of the prompt.
 
 **ToolTrie places second.** It beats every simple heuristic — unordered,
-alphabetical, frequency — everywhere. Correctly configured ContextPilot beats it
-at all four retrieval depths, by a margin growing from 1.07x to 2.63x.
+alphabetical, frequency — everywhere. ContextPilot beats it at all four retrieval
+depths, by 1.07x to 2.52x, widest at k64.
 
 ### What to be careful with
 
@@ -53,59 +53,60 @@ at all four retrieval depths, by a margin growing from 1.07x to 2.63x.
 
 ## Setup
 
-200 requests per run. Orderings are frozen emissions from
-`cluster/results/tooltrie-phase2-20260803-181133/`; runs only replay them, so
-every arm is a permutation of the same menus. Open-loop Poisson arrivals, seed
-42, cache reset before each run, decode pinned to 48 tokens so decode variance
-cannot pollute the tails.
+**Why tool order affects latency.** An agent request carries a menu of tool
+schemas — often thousands of tokens — before the user's question. vLLM caches
+the work done on a prompt and reuses it for any later prompt starting with the
+same tokens. That reuse only applies to a *leading* prefix, so if two requests
+share tools but list them in different orders, nothing is reused. Reordering the
+menu so shared tools come first is therefore worth latency, and that is what
+every arm below tries to do.
 
-Latency is time to first token, measured client-side from the first streamed
-chunk. Where a policy queues requests before sending them (§2, §4) the reported
-figure is **arrival to first token**, which includes that wait; time to first
-token alone starts after dispatch and would hide it.
+**Two workloads, and the difference matters more than any policy.**
 
-**Arms.** Fourteen frozen orderings exist; four were replayed, chosen to span
-the distinct reuse levels rather than duplicate them — five arms sit at an
-identical 39.69% and two more at 1.19%.
+| | how the menu is built | tools shared between any two requests |
+|---|---|---|
+| **padded-64** | each task's real tools, padded out to 64 from a fixed filler set | **63 of 64** |
+| **retrieved (k4–k128)** | BM25 retrieves the top *k* tools for that query | 0.06 (k4) to 8.3 (k128) |
 
-**Naming — there is only one ContextPilot here, and it appears only from §4.1.**
-Three arms have carried the ContextPilot name in this project. Only one is
-ContextPilot:
+Padded menus are nearly identical to each other, so there is a large shared
+prefix waiting to be exploited. Retrieved menus genuinely differ per query, so
+there is little to exploit. Parts 1–3 use padded menus; §4 repeats the
+comparison on retrieved ones, and that contrast is the report's main limit.
 
-| arm in this report | alpha | path | ContextPilot? |
-|---|---|---|---|
-| **ContextPilot (ordering)** | 0.001 | official `ContextPilot.reorder`, persistent index | **yes** |
-| static-refit (a=0.001) | 0.001 | `ContextIndex.fit_transform`, no persistent index | no |
-| static-refit (a=0.5) | **0.5** | `ContextIndex.fit_transform` | no |
+**The arms** — five ways of ordering the same menu:
 
-The paper sets **alpha = 0.001 across all its experiments**, inside a declared
-`[0.001, 0.01]`, so that "overlap count remains the dominant factor" — alpha is a
-tie-breaker on position, not a driver of the clustering. The 0.5 arm is 500x
-that, which inverts the intent: the overlap term is bounded in [0,1] while the
-positional term reaches 5-12 at 64 tools, so position decides the clustering
-instead of shared content.
+| arm | what it does |
+|---|---|
+| `original` | leaves the retriever's relevance ranking alone — the do-nothing baseline |
+| `alphabetical` | sorts by tool name |
+| `frequency` | most-used tools first |
+| `tooltrie_v0` | this project's method: a trie that grows a shared prefix across requests |
+| ContextPilot | clusters requests by which tools they share, then hoists the shared set |
 
-**Parts 1-3 use the a=0.5 arm**, because it is the only one with frozen orderings
-on the padded workload. Those sections therefore contain no ContextPilot, and the
-arm is named `static-refit (a=0.5)` there. Real ContextPilot enters at §4.1.
+Fourteen frozen orderings exist; four were replayed under load, chosen to span
+the distinct reuse levels — five of the unused arms sit at an identical 39.69%
+and two more at 1.19%, so replaying them would duplicate curves.
 
-The 0.5 value was an error, not a choice: the builder that produced it now
-defaults to 0.001 and requires an explicit override to reproduce the historical
-setting. **It makes no difference to the results.** alpha does change the ordering
-substantially — only 1 of 200 padded records is identical between 0.5 and 0.001,
-and the rest diverge from the first position. But the *outcome* is the same,
-because on padded menus any ordering that hoists the 63-tool core into a
-consistent leading block scores the same: measured at rates 1, 2 and 4, both
-alphas give 96.16% reuse with p50 within 4 ms. Which permutation of the core is
-chosen does not matter, only that all requests agree on one.
+**What is measured.**
 
-Verified at alpha=0.001: the padded rates 1-4. Not re-run at 0.001: the
-saturation sweep, capacity squeeze, 4B legs, section 3 and the order control.
-Those are driven by reuse, which is identical, so they are expected to reproduce
-- but that is inference, not measurement.
+- **Reuse** — the share of prompt tokens served from cache instead of recomputed.
+  This is what ordering controls directly.
+- **Latency** — time to first token, timed client-side from the first streamed
+  chunk. Where a policy holds requests in a queue before sending them (§2, §4),
+  the figure reported is **arrival to first token**, which includes that wait;
+  measuring from dispatch would hide the delay the policy itself causes.
+- **Accuracy** (§1.4) — whether the model still calls a correct tool afterwards.
 
-Even the official arm runs ordering only — no annotations, no de-duplication, no
-ContextPilot scheduling — so nothing here measures the full system.
+**How runs were done.** 200 requests per run, replaying frozen orderings so every
+arm is a permutation of the same menus. Open-loop Poisson arrivals at a fixed
+rate, seed 42, cache cleared before each run, decode pinned to 48 tokens so
+decode-length variance cannot pollute the tails. 137 runs total.
+
+**One naming caveat.** ContextPilot proper appears only from §4.1. Parts 1–3 use
+a project-built variant of its clustering, named `static-refit (a=0.5)` there,
+because that is the only version with frozen orderings on the padded workload.
+It changes no number — both give identical reuse on padded menus — but it is not
+ContextPilot and is not called that. Appendix A.4 has the detail.
 
 ---
 
@@ -339,13 +340,17 @@ four depths, with rates scaled to hold the offered token rate roughly constant:
 
 **Reuse**
 
-| workload | original | alphabetical | frequency | tooltrie_v0 | refit a=.001 | **ContextPilot** | spread |
-|---|---|---|---|---|---|---|---|
-| k4 | 15.87% | 15.28% | 14.62% | 17.48% | 18.42% | **18.72%** | 4.10pp |
-| k16 | 6.12% | 6.27% | 5.59% | 7.77% | 9.80% | **9.93%** | 4.34pp |
-| k64 | 0.91% | 1.22% | 0.94% | 1.90% | 4.01% | **4.78%** | 3.87pp |
-| k128 | 0.37% | 0.58% | 0.54% | 1.13% | **2.96%** | 1.99% | 2.59pp |
-| **padded-64** | 1.19% | 38.13% | 87.19% | 96.16% | 96.16% | 96.16% | **94.97pp** |
+| workload | original | alphabetical | frequency | tooltrie_v0 | **ContextPilot** | spread |
+|---|---|---|---|---|---|---|
+| k4 | 15.87% | 15.28% | 14.62% | 17.48% | **18.72%** | 4.10pp |
+| k16 | 6.12% | 6.27% | 5.59% | 7.77% | **9.93%** | 4.34pp |
+| k64 | 0.91% | 1.22% | 0.94% | 1.90% | **4.78%** | 3.87pp |
+| k128 | 0.37% | 0.58% | 0.54% | 1.13% | **1.99%** | 1.62pp |
+| **padded-64** | 1.19% | 38.13% | 87.19% | 96.16% | 96.16% | **94.97pp** |
+
+A reimplementation of ContextPilot's clustering without its persistent index
+(Appendix A.4) tracks it closely except at k128, where it reaches 2.96%. It is
+not a separate method and is excluded from the comparison.
 
 **Latency spread across arms**
 
@@ -368,16 +373,25 @@ almost entirely different orderings (1 of 200 records shared). Padded menus
 cannot distinguish them: any consistent hoisting of the 63-tool core scores the
 same.
 
-**ToolTrie is second.** It beats unordered, alphabetical and frequency at every
-depth — its cleanest sweep anywhere — but loses to ContextPilot at all four, by a
-margin that grows with menu size:
+**Is this a fair comparison?** Both are causal — neither sees future requests —
+and both run on identical menus with identical measurement. ContextPilot is run
+at the paper's alpha but **ordering-only**, without the annotations,
+de-duplication and scheduling its paper attributes roughly half its cache gain
+to. Its results here are therefore a floor rather than a ceiling.
 
-| depth | tooltrie_v0 | best CP-family arm | ratio |
+**ToolTrie is second.** It beats unordered, alphabetical and frequency at every
+depth — its cleanest sweep anywhere — but loses to ContextPilot at all four:
+
+| depth | tooltrie_v0 | ContextPilot | ratio |
 |---|---|---|---|
 | k4 | 17.48% | 18.72% | 1.07x |
 | k16 | 7.77% | 9.93% | 1.28x |
 | k64 | 1.90% | 4.78% | **2.52x** |
-| k128 | 1.13% | 2.96% | **2.63x** |
+| k128 | 1.13% | 1.99% | 1.76x |
+
+The gap widens with menu size up to k64 and then narrows. An earlier draft
+reported it growing monotonically to 2.63x; that used the static-refit
+reimplementation, which beats ContextPilot only at k128.
 
 The ratios overstate the practical difference: at k64 a 2.52x ratio is worth
 2.88 points of prefill, and every arm lands within 2% on p50.
@@ -446,13 +460,14 @@ Two ordering methods outside the four questions, recorded so they are not retrie
 frequency ranking — no index, no clustering, no parameters, one sort per
 request, against ContextPilot's O(N²) index build.
 
-| depth | tooltrie | canonical (deployable) | canonical (oracle) | best CP-family |
+| depth | tooltrie | canonical (deployable) | canonical (oracle) | ContextPilot |
 |---|---|---|---|---|
 | k64 | 1.90% | 2.75% | **4.28%** | 4.78% |
-| k128 | 1.13% | 1.99% | **2.87%** | 2.96% |
+| k128 | 1.13% | 1.99% | **2.87%** | 1.99% |
 
-It reaches 90–97% of ContextPilot's reuse with none of its machinery. The
-deployable version, which counts only earlier requests, reaches 58–67%.
+It reaches 90% of ContextPilot's reuse at k64 and exceeds it at k128, with none
+of its machinery. The deployable version, counting only earlier requests, reaches
+58-67%.
 
 **A trie inside ContextPilot.** ContextPilot leaves everything after its matched
 prefix in original order, so that portion can never be shared. Keeping its head
@@ -463,8 +478,7 @@ and reordering only the tail:
 | k64 | 4.78% | 4.17% | −12.7% |
 | k128 | 1.99% | **3.11%** | **+56.2%** |
 
-At k128 this was the best policy in the study on reuse, latency and throughput —
-the only arm anywhere to beat the strongest ContextPilot variant.
+At k128 this was the best policy in the study on reuse, latency and throughput.
 
 **Both were rejected on accuracy.**
 
@@ -593,7 +607,44 @@ References: [ContextPilot](https://arxiv.org/abs/2511.03475) ·
 [PARS](https://arxiv.org/html/2510.03243) ·
 [ReCache](https://arxiv.org/html/2608.19662)
 
-### A.4 Runs
+### A.4 The ContextPilot naming
+
+Three arms have carried the name. Only one is ContextPilot:
+
+| arm in this report | alpha | path | ContextPilot? |
+|---|---|---|---|
+| **ContextPilot (ordering)** | 0.001 | official `ContextPilot.reorder`, persistent index | **yes** |
+| static-refit (a=0.001) | 0.001 | `ContextIndex.fit_transform`, no persistent index | no |
+| static-refit (a=0.5) | **0.5** | `ContextIndex.fit_transform` | no |
+
+`alpha` weights positional alignment against tool overlap in ContextPilot's
+clustering distance. The paper sets it to **0.001 across all experiments**,
+inside a declared `[0.001, 0.01]`, so that "overlap count remains the dominant
+factor" — a tie-breaker, not a driver. The 0.5 arm is 500x that, which inverts
+the intent.
+
+"Static refit" means no persistent index: for request *n* the whole index is
+rebuilt from scratch over requests 0..*n*, used once, and discarded. ContextPilot
+instead maintains one index incrementally. Both are causal — neither sees future
+requests — but only the official path is ContextPilot's.
+
+The 0.5 value was an error rather than a choice; the builder that produced it now
+defaults to 0.001 and requires an explicit override to reproduce it. **It changes
+no result.** alpha does change the ordering substantially — only 1 of 200 padded
+records is identical between the two settings — but the outcome is the same,
+because on padded menus any ordering that hoists the 63-tool core into a
+consistent leading block scores alike: at rates 1, 2 and 4 both give 96.16% reuse
+with p50 within 4 ms.
+
+Verified at 0.001: the padded rates 1-4. Not re-run at 0.001: the saturation
+sweep, capacity squeeze, 4B legs, §3 and the order control. Those are driven by
+reuse, which is identical, so they are expected to reproduce — inference, not
+measurement.
+
+Even the official arm runs ordering only, with no annotations, de-duplication or
+ContextPilot scheduling, so nothing here measures the full system.
+
+### A.5 Runs
 
 | stage | directory | runs |
 |---|---|---|

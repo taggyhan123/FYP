@@ -1,7 +1,7 @@
 # Tool ordering under concurrent load
 
 Qwen3-0.6B on one RTX 3090 (plus a Qwen3-4B check), vLLM 0.26.0, prefix caching
-unmodified. 141 GPU runs. Raw outputs are in the git-ignored `cluster/results/`
+unmodified. 156 GPU runs. Raw outputs are in the git-ignored `cluster/results/`
 directories listed in the Appendix.
 
 ---
@@ -102,11 +102,12 @@ arm is a permutation of the same menus. Open-loop Poisson arrivals at a fixed
 rate, seed 42, cache cleared before each run, decode pinned to 48 tokens so
 decode-length variance cannot pollute the tails. 137 runs total.
 
-**One naming caveat.** ContextPilot proper appears only from §4.1. Parts 1–3 use
-a project-built variant of its clustering, named `static-refit (a=0.5)` there,
-because that is the only version with frozen orderings on the padded workload.
-It changes no number — both give identical reuse on padded menus — but it is not
-ContextPilot and is not called that. Appendix A.4 has the detail.
+**One naming note.** ContextPilot throughout is the official reordering API at
+the paper's `alpha=0.001`, ordering only — no annotations, de-duplication or
+scheduling, which its paper credits for roughly half its cache gain. Earlier
+drafts of this report used a project-built variant at `alpha=0.5`; those runs
+have been replaced. Two appendix tables (capacity, order control) still rest on
+it, noted where they appear. Appendix A.4 has the detail.
 
 ---
 
@@ -179,11 +180,18 @@ ContextPilot leads ToolTrie at every rate; ToolTrie's median penalty is 18-25 ms
 At 4 req/s it spans 308 to 7476 ms — 24.3x. Max is dominated by queueing, which
 concurrency of 1 cannot produce.
 
-**Reuse becomes capacity.** `original` is the only arm that could not keep up,
-managing 3.56 against a 4 req/s offer. Ceilings, from a sweep to 64 req/s:
-**16.4 req/s for the a=0.5 arm, 11.2 for ToolTrie**, against `original` below
-3.6. Reuse was identical at every rate from 1 to 64, so ordering sets reuse and
-load does not touch it.
+**Reuse becomes capacity.** Sustained throughput at 64 req/s offered:
+
+| arm | reuse | ceiling |
+|---|---|---|
+| original | 1.19% | **3.57 req/s** |
+| alphabetical | 38.13% | 4.74 |
+| tooltrie_v0 | 87.19% | 11.24 |
+| **ContextPilot** | 96.16% | **16.83** |
+
+Ordering alone is worth **4.7x the admission capacity** end to end, and ToolTrie
+3.1x over no reordering. Reuse was identical at every rate from 1 to 64, so
+ordering sets reuse and load does not change it.
 
 **The slow requests are different requests.** At rate 4 the five slowest are:
 
@@ -192,9 +200,9 @@ load does not touch it.
 | original | 198, 193, 197, 192, 196 | the *last* arrivals — the backlog grows without bound |
 | alphabetical | 53, 52, 50, 47, 51 | a bounded mid-run spike |
 | tooltrie_v0 | 3, 4, 2, 5, 46 | warm-up |
-| static-refit (a=0.5) | 2, 1, 0, 3, 4 | cold start only |
+| ContextPilot | 2, 1, 0, 3, 4 | cold start only |
 
-That arm's tail is a fixed startup cost, so its p99 moves 257.9 → 266.7 ms
+ContextPilot's tail is a fixed startup cost, so its p99 moves 257.9 → 266.7 ms
 across a 4x load increase while `original` goes 477.9 → 7205.0.
 
 ### 1.3 Larger model
@@ -214,9 +222,9 @@ Under load at 4B the ranking holds and widens sharply:
 
 | rate | a=0.5 arm p50 | ToolTrie p50 | ratio |
 |---|---|---|---|
-| 1 | 120.6 | 298.8 | 2.48x |
-| 2 | 134.1 | 304.7 | 2.27x |
-| 4 | **172.9** | **5301.8** | **30.67x** |
+| 1 | 121.7 | 298.8 | 2.45x |
+| 2 | 135.6 | 304.7 | 2.25x |
+| 4 | **174.3** | **5301.8** | **30.41x** |
 
 That 30x is a capacity effect, not a prefill effect: at 4 req/s ToolTrie's 12.81%
 uncached prefill pushes it just past its service ceiling (3.8405 of an offered 4)
@@ -329,19 +337,20 @@ it.
 
 Requests already in flight when the first one finishes:
 
-| offered req/s | tooltrie_v0 | static-refit (a=0.5) |
-|---|---|---|
-| 4 | 7 | 6 |
-| 8 | **37** | **17** |
-| 16 | **109** | **48** |
-| 32 | **200** | 124 |
+| offered req/s | original | tooltrie_v0 | ContextPilot |
+|---|---|---|---|
+| 4 | 29 | 7 | 6 |
+| 8 | 63 | **37** | **16** |
+| 16 | 113 | **109** | **55** |
+| 32 | **200** | **200** | 121 |
 
 At 32 req/s **every one of ToolTrie's 200 requests starts before any has
-finished** — the whole run is cold. The a=0.5 arm only reaches that at 64.
+finished** — the whole run is cold, as does the unordered baseline. ContextPilot
+never does, even at 64.
 
 This compounds: lower reuse means slower requests, which means more arrive
 before the first finishes, which means more redundant work. ToolTrie's pile-up
-is consistently twice that arm's, so a 9-point reuse gap becomes a 2x
+is consistently about twice ContextPilot's, so a 9-point reuse gap becomes a 2x
 difference in how many requests get no cache benefit at all.
 
 The same effect shows in warm-up. Mean latency by arrival position at rate 4:
@@ -349,11 +358,11 @@ The same effect shows in warm-up. Mean latency by arrival position at rate 4:
 | arm | reqs 0–3 | 3–6 | 6–10 | 50–200 |
 |---|---|---|---|---|
 | tooltrie_v0 | 303 | **451** | 135 | 113 |
-| static-refit (a=0.5) | 286 | 177 | 103 | 94 |
+| ContextPilot | 279 | 173 | 100 | 95 |
 
 ToolTrie's requests 3–5 are *slower* than requests 0–2 — they were sent before
 0–2 had stored anything, so three copies of the same prefix were computed at
-once. The a=0.5 arm settles after ~3 requests; ToolTrie needs 6–10.
+once. ContextPilot settles after ~3 requests; ToolTrie needs 6–10.
 
 **So the trie helps through exactly one mechanism**: raising reuse from 38% to
 87%, which shortens prefill and compounds under load into higher capacity. Its
@@ -552,14 +561,12 @@ points the exchange rate changes; if not, the line is closed.
    (1.2 ms wait, 0 of 200 reordered). That cell is untested, not null.
 6. **`max` is a single sample** and moved 269 → 710 ms between two runs of the
    same configuration. Use p95 and p99.
-7. **`original`'s saturation ceiling was never measured**, only bounded below
-   3.6 req/s.
-8. **Two runs are n=199**, each losing one request to a client-side socket
+7. **Two runs are n=199**, each losing one request to a client-side socket
    error, not a server fault.
-9. **One trial per cell.** Reuse reproduced to the digit across the order
+8. **One trial per cell.** Reuse reproduced to the digit across the order
    control, seven rates and three cache sizes, which is the evidence for
    stability.
-10. **The §5 methods are single-configuration**, rejected on the accuracy
+9. **The §5 methods are single-configuration**, rejected on the accuracy
     exchange rate rather than an exhaustive sweep.
 
 ---
@@ -691,8 +698,9 @@ ContextPilot scheduling, so nothing here measures the full system.
 | ContextPilot at alpha=0.001 | `alpha001-comparison-20260829-224719/` | 17 |
 | Canonical and hybrid ordering | `canonical-order-20260830-003615/` | 8 |
 | Accuracy | `accuracy-gate-20260830-011416/` | 10 |
+| ContextPilot + baselines on padded | `cp-online-padded-20260830-115456/` | 15 |
 
-**141 runs.** All under the git-ignored `cluster/results/`.
+**156 runs.** All under the git-ignored `cluster/results/`.
 
 Driver `scripts/replay_vllm_concurrent.py`; also added
 `summarize_queuing_runs.py`, `build_canonical_ordering.py`,

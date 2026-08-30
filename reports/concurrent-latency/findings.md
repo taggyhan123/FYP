@@ -91,11 +91,18 @@ arm is named `static-refit (a=0.5)` there. Real ContextPilot enters at §4.1.
 
 The 0.5 value was an error, not a choice: the builder that produced it now
 defaults to 0.001 and requires an explicit override to reproduce the historical
-setting. **It makes no difference to Parts 1-3.** §4.1 measures all three
-variants on padded menus at an identical 96.16% — with a near-constant tool core
-the overlap term does not vary between requests, so the clustering is invariant
-to alpha. Padded menus cannot tell alpha values apart, so those sections would
-reproduce unchanged at 0.001.
+setting. **It makes no difference to the results.** alpha does change the ordering
+substantially — only 1 of 200 padded records is identical between 0.5 and 0.001,
+and the rest diverge from the first position. But the *outcome* is the same,
+because on padded menus any ordering that hoists the 63-tool core into a
+consistent leading block scores the same: measured at rates 1, 2 and 4, both
+alphas give 96.16% reuse with p50 within 4 ms. Which permutation of the core is
+chosen does not matter, only that all requests agree on one.
+
+Verified at alpha=0.001: the padded rates 1-4. Not re-run at 0.001: the
+saturation sweep, capacity squeeze, 4B legs, section 3 and the order control.
+Those are driven by reuse, which is identical, so they are expected to reproduce
+- but that is inference, not measurement.
 
 Even the official arm runs ordering only — no annotations, no de-duplication, no
 ContextPilot scheduling — so nothing here measures the full system.
@@ -356,10 +363,10 @@ different set per query, so there is little shared structure for any ordering to
 exploit. On retrieved menus 95–98% of prefill is uncacheable whatever policy is
 used.
 
-All three ContextPilot variants score an identical 96.16% on padded menus:
-with a near-constant core the overlap term does not vary between requests, so
-the clustering is unaffected by `alpha`. Padded menus cannot tell `alpha` values
-apart at all.
+All three variants score an identical 96.16% on padded menus despite emitting
+almost entirely different orderings (1 of 200 records shared). Padded menus
+cannot distinguish them: any consistent hoisting of the 63-tool core scores the
+same.
 
 **ToolTrie is second.** It beats unordered, alphabetical and frequency at every
 depth — its cleanest sweep anywhere — but loses to ContextPilot at all four, by a

@@ -1,7 +1,7 @@
 # Tool ordering under concurrent load
 
 Qwen3-0.6B on one RTX 3090 (plus a Qwen3-4B check), vLLM 0.26.0, prefix caching
-unmodified. 137 GPU runs. Raw outputs are in the git-ignored `cluster/results/`
+unmodified. 141 GPU runs. Raw outputs are in the git-ignored `cluster/results/`
 directories listed in the Appendix.
 
 ---
@@ -114,24 +114,56 @@ ContextPilot and is not called that. Appendix A.4 has the detail.
 
 ### 1.1 Results
 
-Time to first token, ms, padded-64 menus, 188,688-token cache.
+Time to first token, ms. Both workloads at 4 req/s, and they are size-matched —
+6,903 tokens per request padded against 6,896 retrieved — so the only difference
+is whether the menus genuinely overlap.
+
+**Padded menus** (63 of 64 tools shared)
+
+| arm | achieved | reuse | p50 | p95 | p99 | max |
+|---|---|---|---|---|---|---|
+| original | 3.5645 | 1.19% | 3310.4 | 6498.6 | 7205.0 | 7476.0 |
+| alphabetical | 4.0081 | 38.13% | 331.8 | 1058.1 | 1406.8 | 1724.9 |
+| frequency | 4.0076 | 39.69% | 317.9 | 1028.9 | 1286.2 | 1521.4 |
+| tooltrie_v0 | 4.0139 | 87.19% | 116.3 | 225.7 | 382.7 | 558.4 |
+| **ContextPilot** | 4.0143 | **96.16%** | **92.7** | **129.0** | **260.9** | **300.2** |
+
+**Retrieved menus, same size** (2.8 of 64 tools shared)
+
+| arm | achieved | reuse | p50 | p95 | p99 | max |
+|---|---|---|---|---|---|---|
+| original | 2.6346 | 0.91% | 9667.9 | 24699.7 | 26490.8 | 26820.4 |
+| alphabetical | 2.6252 | 1.22% | 9727.5 | 24854.3 | 26781.7 | 27104.6 |
+| frequency | 2.6230 | 0.94% | 9760.9 | 25009.1 | 26842.3 | 27161.5 |
+| tooltrie_v0 | 2.6286 | 1.90% | 9559.9 | 24825.6 | 26691.0 | 27059.1 |
+| **ContextPilot** | 2.6934 | **4.78%** | **8565.4** | **22452.4** | **25163.5** | **25432.4** |
+
+**Ordering is decisive on padded menus and nearly irrelevant on retrieved ones.**
+p50 spans **36x** across the padded arms and **1.14x** across the retrieved ones,
+at the same request size and the same offered rate. Every retrieved arm also
+saturates at ~2.6 req/s regardless of policy. §4 pursues this; it is the most
+important qualification in the report, so it appears here rather than only there.
+
+The rest of Part 1 uses padded menus, where the arms separate enough to study.
+
+**Padded menus across load** — the same table at three rates:
 
 | rate | arm | achieved | reuse | p50 | p95 | p99 | max |
 |---|---|---|---|---|---|---|---|
 | 1 | original | 1.0066 | 1.19% | 266.4 | 431.5 | 477.9 | 622.4 |
 | 1 | alphabetical | 1.0071 | 38.13% | 230.7 | 364.4 | 414.9 | 493.5 |
 | 1 | tooltrie_v0 | 1.0075 | 87.19% | 110.1 | 162.1 | **244.9** | 343.8 |
-| 1 | static-refit (a=0.5) | 1.0075 | 96.16% | **88.0** | **107.6** | 257.9 | **269.1** |
+| 1 | ContextPilot | 1.0075 | 96.16% | **92.0** | **115.3** | 243.5 | 307.0 |
 | 2 | original | 2.0087 | 1.19% | 284.9 | 710.8 | 934.0 | 1208.2 |
 | 2 | alphabetical | 2.0106 | 38.13% | 246.5 | 486.7 | 792.5 | 896.0 |
 | 2 | tooltrie_v0 | 2.0124 | 87.19% | 114.6 | 177.5 | 327.1 | 363.7 |
-| 2 | static-refit (a=0.5) | 2.0124 | 96.16% | **91.4** | **122.1** | **265.5** | **281.5** |
+| 2 | ContextPilot | 2.0124 | 96.16% | **89.5** | **119.0** | **257.0** | **274.6** |
 | 4 | original | **3.5645** | 1.19% | 3310.4 | 6498.6 | 7205.0 | 7476.0 |
 | 4 | alphabetical | 4.0081 | 38.13% | 331.8 | 1058.1 | 1406.8 | 1724.9 |
 | 4 | tooltrie_v0 | 4.0139 | 87.19% | 116.3 | 225.7 | 382.7 | 558.4 |
-| 4 | static-refit (a=0.5) | 4.0142 | 96.16% | **91.8** | **132.5** | **266.7** | **308.2** |
+| 4 | ContextPilot | 4.0143 | 96.16% | **92.7** | **129.0** | **260.9** | **300.2** |
 
-ToolTrie against the arms it replaces:
+ToolTrie against the arms it replaces, padded:
 
 | rate | vs original | vs alphabetical |
 |---|---|---|
@@ -139,8 +171,7 @@ ToolTrie against the arms it replaces:
 | 2 | p50 −59.8%, p99 −65.0% | p50 −53.5%, p99 −58.7% |
 | 4 | **p50 −96.5%, p99 −94.7%** | p50 −65.0%, p99 −72.8% |
 
-The a=0.5 arm beats ToolTrie in 17 of 18 distribution cells; ToolTrie's median
-penalty is a stable +22 to +25 ms.
+ContextPilot leads ToolTrie at every rate; ToolTrie's median penalty is 18-25 ms.
 
 ### 1.2 Three things serial testing could not show
 
@@ -150,7 +181,7 @@ concurrency of 1 cannot produce.
 
 **Reuse becomes capacity.** `original` is the only arm that could not keep up,
 managing 3.56 against a 4 req/s offer. Ceilings, from a sweep to 64 req/s:
-**16.4 req/s for the a=0.5 arm, 11.3 for ToolTrie**, against `original` below
+**16.4 req/s for the a=0.5 arm, 11.2 for ToolTrie**, against `original` below
 3.6. Reuse was identical at every rate from 1 to 64, so ordering sets reuse and
 load does not touch it.
 
@@ -661,7 +692,7 @@ ContextPilot scheduling, so nothing here measures the full system.
 | Canonical and hybrid ordering | `canonical-order-20260830-003615/` | 8 |
 | Accuracy | `accuracy-gate-20260830-011416/` | 10 |
 
-**137 runs.** All under the git-ignored `cluster/results/`.
+**141 runs.** All under the git-ignored `cluster/results/`.
 
 Driver `scripts/replay_vllm_concurrent.py`; also added
 `summarize_queuing_runs.py`, `build_canonical_ordering.py`,

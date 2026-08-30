@@ -215,12 +215,12 @@ non-model explanations: `alphabetical` is the one capacity-sensitive arm and 4B
 has a smaller cache; the ToolTrie run lost one request to a client socket error.
 
 **The gap grows with model size**, so the 0.6B figures understate it. Against
-`alphabetical`, the a=0.5 arm's lead goes from 2.62x to 12.99x, because the fixed
-~16 ms client overhead is 18% of its latency at 0.6B but 3% at 4B.
+`alphabetical`, ContextPilot's lead goes from **2.51x to 12.86x**, because the
+fixed ~16 ms client overhead is 18% of its latency at 0.6B but 3% at 4B.
 
 Under load at 4B the ranking holds and widens sharply:
 
-| rate | a=0.5 arm p50 | ToolTrie p50 | ratio |
+| rate | ContextPilot p50 | ToolTrie p50 | ratio |
 |---|---|---|---|
 | 1 | 121.7 | 298.8 | 2.45x |
 | 2 | 135.6 | 304.7 | 2.25x |
@@ -228,11 +228,11 @@ Under load at 4B the ranking holds and widens sharply:
 
 That 30x is a capacity effect, not a prefill effect: at 4 req/s ToolTrie's 12.81%
 uncached prefill pushes it just past its service ceiling (3.8405 of an offered 4)
-while the a=0.5 arm's 3.84% keeps it just under (3.9755). A 9-point reuse gap
+while ContextPilot's 3.84% keeps it just under (3.9757). A 9-point reuse gap
 becomes the difference between coping and collapsing.
 
-One claim does not transfer: That arm's flat latency *shape* is specific to
-0.6B. At 4B its p99/p50 is 8.82, not ~2.9.
+One claim does not transfer: ContextPilot's flat latency *shape* is specific to
+0.6B. At 4B its p99/p50 is 8.62, not ~2.9.
 
 ### 1.4 What the reordering costs
 

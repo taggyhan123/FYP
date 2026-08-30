@@ -314,11 +314,15 @@ skipped accumulate the 12-second tail.
 
 ### 2.2 Not worth deploying
 
-| | p50 | max |
-|---|---|---|
-| `alphabetical`, plain fifo | 1046.0 | 3120.2 |
-| `alphabetical` + best adaptor setting | 827.2 | 3302.6 |
-| `tooltrie_v0`, **no adaptor at all** | **122.8** | **915.6** |
+| | p50 | max | reordered |
+|---|---|---|---|
+| `alphabetical`, plain fifo | 1046.0 | 3120.2 | — |
+| `alphabetical` + best adaptor setting | 827.2 | 3302.6 | 104/200 |
+| `tooltrie_v0` + adaptor | 123.2 | 890.0 | **0/200** |
+| `tooltrie_v0`, **no adaptor at all** | **122.8** | **915.6** | — |
+
+ToolTrie with and without the adaptor are the same run in all but name: the
+policy reordered nothing, so the 0.4 ms difference is noise.
 
 **The best the adaptor manages on a mediocre ordering is 6.7x worse than doing
 nothing on a good one.**
@@ -545,6 +549,15 @@ and reordering only the tail:
 | k128 | 1.99% | **3.11%** | **+56.2%** |
 
 At k128 this was the best policy in the study on reuse, latency and throughput.
+
+**It cannot work on padded menus, and needs no run to show it.** There,
+ContextPilot's causal head already covers 62.69 of 64 tools, leaving a 1.31-tool
+tail that sits *behind* the shared prefix, so reordering it cannot change what
+the cache matches. Constructing the hybrid on padded menus produces orderings
+**identical to ContextPilot in 199 of 200 records** — the one exception being the
+first request, which has no predecessor and so no head. The idea has room to act
+only where ContextPilot's head is short, which is precisely the retrieved menus
+measured above (head 0.36 tools at k128).
 
 **Both were rejected on accuracy.**
 

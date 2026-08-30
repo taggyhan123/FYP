@@ -373,16 +373,28 @@ variance in affinity, not affinity**, and it is inert at both ends of the range.
 It picks the first candidate with a strictly longer shared prefix, so when
 candidates tie it falls back to arrival order:
 
-| arm | mean prefix score | spread among candidates | windows where all tie | reordered |
-|---|---|---|---|---|
-| original | 0.3 | 0.33 | **99.5%** | **0/200** |
-| tooltrie_v0 | **56.4** | **0.08** | **99.5%** | **0/200** |
-| alphabetical | 15.5 | **13.23** | 27.2% | 110/200 |
+| arm | reuse | mean prefix score | spread among candidates | all-tied windows | usable |
+|---|---|---|---|---|---|
+| original | 1.19% | 0.3 | 0.33 | **99.5%** | no |
+| alphabetical | 38.13% | 15.5 | **13.23** | 27.2% | **yes** |
+| frequency | 39.69% | 16.7 | **12.77** | 27.7% | **yes** |
+| tooltrie_v0 | 87.19% | 56.4 | 0.08 | **99.5%** | no |
+| ContextPilot | 96.16% | 62.7 | **0.01** | **99.5%** | no |
 
-On `original` — the arm that most needs help — every candidate scores 0. On
-ToolTrie every candidate scores about 56 with a spread of 0.08: the shared prefix
-is so uniformly long that there is nothing to choose between. Only `alphabetical`
-has prefix lengths that vary.
+**Usability is an inverted U in ordering quality.** On `original` every candidate
+scores 0. On ToolTrie and ContextPilot every candidate scores 56 and 63
+respectively, with spreads of 0.08 and 0.01 — the shared prefix is so uniformly
+long there is nothing to choose between. Only the two mid-table arms have prefix
+lengths that vary, and they sit at ~39% reuse, less than half of what ToolTrie
+reaches. **The adaptor is usable only on orderings that would not be deployed.**
+
+The reason generalises beyond prefix affinity. A good ordering makes every request
+share a long prefix, which makes requests interchangeable from the cache's point
+of view, and interchangeable requests give a dispatcher nothing to decide. On
+padded ToolTrie every dispatcher signal is flat: affinity spread 0.08, job-size
+CV 0.0038, and shortest-uncached-suffix reduces to tokens x (1 - 56/64), again
+near-constant. **Ordering and dispatch scheduling are substitutes rather than
+complements, and ordering wins by 6.7x.**
 
 This was checked directly rather than inferred. ToolTrie was re-run at 16 req/s,
 above its 11.24 ceiling, forcing an 8.8-second client queue — and the adaptor

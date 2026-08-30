@@ -12,7 +12,7 @@ Four questions, none previously run in this project.
 
 | # | Question | Answer | Where |
 |---|---|---|---|
-| 1 | Latency at p95 / p99 / max under parallel load | Ordering matters far more than it did serially — but only on padded menus | §1 |
+| 1 | Tail latency under parallel load | Ordering matters far more than it did serially — but only on padded menus | §1 |
 | 2 | An adaptor trading mean against max | Works; not worth deploying. Ordering is worth 6.7x more | §2 |
 | 3 | How the trie reduces parallel latency | By raising cache reuse, which compounds under load into higher capacity | §3 |
 | 4 | Cutting tail latency by smart queuing | No. It cuts the median and *raises* the tail | §4 |
@@ -20,7 +20,7 @@ Four questions, none previously run in this project.
 ### What we found
 
 **Parallel load separates the orderings; serial testing hid this.** At 4 req/s
-ToolTrie cuts p50 by 96.5% and p99 by 94.7% against unordered menus, and
+ToolTrie cuts both p50 and p95 by 96.5% against unordered menus, and
 sustains 11.24 req/s against 3.56 — 3.2x the capacity. Serially the same
 statistics were flat within 1.25x.
 
@@ -47,7 +47,7 @@ depths, by 1.07x to 2.52x, widest at k64.
   most important limit in this report.
 - One model, one seed, one trial per cell.
 - `max` is a single sample at n=200 and moved 269 → 710 ms between two runs of
-  the same configuration. Use p95 and p99.
+  the same configuration. Use p50 and p95.
 
 ---
 
@@ -121,23 +121,23 @@ is whether the menus genuinely overlap.
 
 **Padded menus** (63 of 64 tools shared)
 
-| arm | achieved | reuse | p50 | p95 | p99 | max |
-|---|---|---|---|---|---|---|
-| original | 3.5645 | 1.19% | 3310.4 | 6498.6 | 7205.0 | 7476.0 |
-| alphabetical | 4.0081 | 38.13% | 331.8 | 1058.1 | 1406.8 | 1724.9 |
-| frequency | 4.0076 | 39.69% | 317.9 | 1028.9 | 1286.2 | 1521.4 |
-| tooltrie_v0 | 4.0139 | 87.19% | 116.3 | 225.7 | 382.7 | 558.4 |
-| **ContextPilot** | 4.0143 | **96.16%** | **92.7** | **129.0** | **260.9** | **300.2** |
+| arm | achieved | reuse | p50 | p95 | max |
+|---|---|---|---|---|---|
+| original | 3.5645 | 1.19% | 3310.4 | 6498.6 | 7476.0 |
+| alphabetical | 4.0081 | 38.13% | 331.8 | 1058.1 | 1724.9 |
+| frequency | 4.0076 | 39.69% | 317.9 | 1028.9 | 1521.4 |
+| tooltrie_v0 | 4.0139 | 87.19% | 116.3 | 225.7 | 558.4 |
+| **ContextPilot** | 4.0143 | **96.16%** | **92.7** | **129.0** | **300.2** |
 
 **Retrieved menus, same size** (2.8 of 64 tools shared)
 
-| arm | achieved | reuse | p50 | p95 | p99 | max |
-|---|---|---|---|---|---|---|
-| original | 2.6346 | 0.91% | 9667.9 | 24699.7 | 26490.8 | 26820.4 |
-| alphabetical | 2.6252 | 1.22% | 9727.5 | 24854.3 | 26781.7 | 27104.6 |
-| frequency | 2.6230 | 0.94% | 9760.9 | 25009.1 | 26842.3 | 27161.5 |
-| tooltrie_v0 | 2.6286 | 1.90% | 9559.9 | 24825.6 | 26691.0 | 27059.1 |
-| **ContextPilot** | 2.6934 | **4.78%** | **8565.4** | **22452.4** | **25163.5** | **25432.4** |
+| arm | achieved | reuse | p50 | p95 | max |
+|---|---|---|---|---|---|
+| original | 2.6346 | 0.91% | 9667.9 | 24699.7 | 26820.4 |
+| alphabetical | 2.6252 | 1.22% | 9727.5 | 24854.3 | 27104.6 |
+| frequency | 2.6230 | 0.94% | 9760.9 | 25009.1 | 27161.5 |
+| tooltrie_v0 | 2.6286 | 1.90% | 9559.9 | 24825.6 | 27059.1 |
+| **ContextPilot** | 2.6934 | **4.78%** | **8565.4** | **22452.4** | **25432.4** |
 
 **Ordering is decisive on padded menus and nearly irrelevant on retrieved ones.**
 p50 spans **36x** across the padded arms and **1.14x** across the retrieved ones,
@@ -168,9 +168,9 @@ ToolTrie against the arms it replaces, padded:
 
 | rate | vs original | vs alphabetical |
 |---|---|---|
-| 1 | p50 −58.7%, p99 −48.7% | p50 −52.3%, p99 −41.0% |
-| 2 | p50 −59.8%, p99 −65.0% | p50 −53.5%, p99 −58.7% |
-| 4 | **p50 −96.5%, p99 −94.7%** | p50 −65.0%, p99 −72.8% |
+| 1 | p50 −58.7%, p95 −62.4% | p50 −52.3%, p95 −55.5% |
+| 2 | p50 −59.8%, p95 −75.0% | p50 −53.5%, p95 −63.5% |
+| 4 | **p50 −96.5%, p95 −96.5%** | p50 −64.9%, p95 −78.7% |
 
 ContextPilot leads ToolTrie at every rate; ToolTrie's median penalty is 18-25 ms.
 
@@ -202,8 +202,8 @@ ordering sets reuse and load does not change it.
 | tooltrie_v0 | 3, 4, 2, 5, 46 | warm-up |
 | ContextPilot | 2, 1, 0, 3, 4 | cold start only |
 
-ContextPilot's tail is a fixed startup cost, so its p99 moves 257.9 → 266.7 ms
-across a 4x load increase while `original` goes 477.9 → 7205.0.
+ContextPilot's tail is a fixed startup cost, so its p95 moves 115.3 → 129.0 ms
+across a 4x load increase while `original` goes 431.5 → 6498.6.
 
 ### 1.3 Larger model
 
@@ -232,7 +232,9 @@ while ContextPilot's 3.84% keeps it just under (3.9757). A 9-point reuse gap
 becomes the difference between coping and collapsing.
 
 One claim does not transfer: ContextPilot's flat latency *shape* is specific to
-0.6B. At 4B its p99/p50 is 8.62, not ~2.9.
+0.6B. At 4B the last 1% of requests break away — p99/p50 is 8.62 against ~2.9 at
+0.6B — while p95/p50 stays at 1.34. The blow-up is a handful of requests, which
+is why the tables above stop at p95.
 
 ### 1.4 What the reordering costs
 
@@ -357,10 +359,10 @@ whenever there is anything to select; on ToolTrie there almost never is.
 `random` control on the same ToolTrie runs reordered 193 of 200 and produced the
 shape an adaptor is supposed to produce:
 
-| ToolTrie @ 16 req/s | p50 | p99 |
+| ToolTrie @ 16 req/s | p50 | p95 |
 |---|---|---|
-| fifo | 8814 | 13910 |
-| random | **6427 (−27.1%)** | **23298 (+67.5%)** |
+| fifo | 8814 | 13457 |
+| random | **6427 (−27.1%)** | **19665 (+46.1%)** |
 
 So a dispatcher can move latency around on ToolTrie. What it cannot do is move it
 around for a *reason*, because every signal it might use is flat:
@@ -542,25 +544,27 @@ arrival because prefill dominates. Three policies were added: `sjf` by job size,
 
 **It does not reduce the tail.** k64 at 4 req/s, arrival to first token, ms:
 
-| policy | mean | p50 | p99 |
-|---|---|---|---|
-| `fifo` | 13156 | 11227 | 28842 |
-| `sjf` | 8944 (−32%) | **1628 (−85.5%)** | **60932 (+111%)** |
-| `sjf` + aging 2000 | 12735 (−3.2%) | 10766 | 28522 (−1.1%) |
+| policy | mean | p50 | p95 | max |
+|---|---|---|---|---|
+| `fifo` | 13156 | 11227 | 26647 | 29251 |
+| `sjf` | 8944 (−32%) | **1628 (−85.5%)** | **41271 (+54.9%)** | **66490 (+127%)** |
+| `sjf` + aging 2000 | 12735 (−3.2%) | 10766 | 26724 (+0.3%) | 31387 (+7.3%) |
 
-k128 behaves the same: p50 −87.6%, p99 +59.9%.
+k128 behaves the same: p50 −87.6%, p95 +25.8%, max +67.4%.
 
 The fairness knob traces a frontier, and **no point on it improves both**:
 
-| aging | mean | p50 | p99 |
-|---|---|---|---|
-| 0 | −32.0% | −85.5% | **+111.3%** |
-| **250** | **−24.6%** | **−47.3%** | **+19.7%** |
-| 1000 | −7.9% | −6.4% | +12.0% |
-| 2000 | −3.2% | −4.1% | −1.1% |
+| aging | mean | p50 | p95 | max |
+|---|---|---|---|---|
+| 0 | −32.0% | −85.5% | **+54.9%** | **+127.3%** |
+| **250** | **−24.6%** | **−47.3%** | **+17.6%** | **+45.6%** |
+| 1000 | −7.9% | −6.4% | −3.4% | +17.8% |
+| 2000 | −3.2% | −4.1% | +0.3% | +7.3% |
 
-At aging 250 you keep most of the median gain for a contained +19.7% tail. At
-2000 the tail is safe but the policy has become fifo.
+At aging 250 you keep most of the median gain for a contained +17.6% tail. At
+2000 the tail is safe but the policy has become fifo. Aging 1000 is the one
+point where p95 improves (−3.4%) while `max` still degrades 17.8% — the jobs SJF
+starves are too few to reach p95, which is why `max` is shown here.
 
 **A control was needed, and it changed the number.** On padded menus — where
 every request is the same size, so the sort key carries no information — `sjf`
@@ -660,7 +664,7 @@ points the exchange rate changes; if not, the line is closed.
    was deeply backlogged. Preemptive policies, and any policy inside the engine
    rather than in front of it, are untested.
 5. **`max` is a single sample** and moved 269 → 710 ms between two runs of the
-   same configuration. Use p95 and p99.
+   same configuration. Use p50 and p95.
 6. **Two runs are n=199**, each losing one request to a client-side socket
    error, not a server fault.
 7. **One trial per cell.** Reuse reproduced to the digit across the order

@@ -39,7 +39,8 @@ compete for the front of the prompt.
 
 **ToolTrie places second.** It beats every simple heuristic — unordered,
 alphabetical, frequency — everywhere. ContextPilot beats it at all four retrieval
-depths, by 1.07x to 2.52x, widest at k64.
+depths, by 1.07x to 2.52x, widest at k64 — but that k64 margin is the best of
+three arrival orders and falls to 1.09x under another (A.6).
 
 ### What to be careful with
 
@@ -100,7 +101,7 @@ and two more at 1.19%, so replaying them would duplicate curves.
 **How runs were done.** 200 requests per run, replaying frozen orderings so every
 arm is a permutation of the same menus. Open-loop Poisson arrivals at a fixed
 rate, seed 42, cache cleared before each run, decode pinned to 48 tokens so
-decode-length variance cannot pollute the tails. 137 runs total.
+decode-length variance cannot pollute the tails. 173 runs total.
 
 **One naming note.** ContextPilot throughout is the official reordering API at
 the paper's `alpha=0.001`, ordering only — no annotations, de-duplication or
@@ -528,8 +529,12 @@ The gap widens with menu size up to k64 and then narrows. An earlier draft
 reported it growing monotonically to 2.63x; that used the static-refit
 reimplementation, which beats ContextPilot only at k128.
 
-The ratios overstate the practical difference: at k64 a 2.52x ratio is worth
-2.88 points of prefill, and every arm lands within 2% on p50.
+The ratios overstate the practical difference twice over. At k64 a 2.52x ratio
+is worth 2.88 points of prefill, and every arm lands within 2% on p50. It is
+also the best of three arrival orders: re-running k64 under two more permutations
+of the same 200 records gives 1.39x and 1.09x, because ContextPilot's reuse
+varies 2.63pp across them while ToolTrie's varies 0.18pp. ContextPilot still wins
+under all three, so the ranking holds and the magnitude does not (A.6).
 
 **Putting frequently used tools first does not work.** The `frequency` arm is
 the worst at k4 and k16 and near-worst at k64 and k128.
@@ -667,9 +672,10 @@ points the exchange rate changes; if not, the line is closed.
    same configuration. Use p50 and p95.
 6. **Two runs are n=199**, each losing one request to a client-side socket
    error, not a server fault.
-7. **One trial per cell.** Reuse reproduced to the digit across the order
-   control, seven rates and three cache sizes, which is the evidence for
-   stability.
+7. **One trial per cell, and one arrival order.** Reuse reproduced to the
+   digit across the order control, seven rates, three cache sizes and a
+   same-day re-run, which is the evidence for run-to-run stability. Stability
+   across *arrival permutations* is weaker and asymmetric — see A.6.
 8. **The §5 methods are single-configuration**, rejected on the accuracy
     exchange rate rather than an exhaustive sweep.
 
@@ -803,10 +809,11 @@ ContextPilot scheduling, so nothing here measures the full system.
 | Canonical and hybrid ordering | `canonical-order-20260830-003615/` | 8 |
 | Accuracy | `accuracy-gate-20260830-011416/` | 10 |
 | Adaptor on ToolTrie under a forced queue | `tooltrie-adaptor-20260830-121234/` | 4 |
-| Adaptor on frequency and ContextPilot | `adaptor-table-20260830-124724/` | 4 |
+| Adaptor on frequency and ContextPilot | `adaptor-table-20260830-141733/` | 4 |
 | ContextPilot + baselines on padded | `cp-online-padded-20260830-115456/` | 15 |
+| Fairness audit: planner budget, arrival seeds | `tooltrie-uncapped-20260830-212728/` | 9 |
 
-**164 runs.** All under the git-ignored `cluster/results/`.
+**173 runs.** All under the git-ignored `cluster/results/`.
 
 Driver `scripts/replay_vllm_concurrent.py`; also added
 `summarize_queuing_runs.py`, `build_canonical_ordering.py`,
@@ -822,3 +829,95 @@ No results were affected. Scripts written before the fix still contain it.
 A quarantine directory in the first run holds six contaminated files from an
 aborted attempt where two drivers ran at once. They are excluded from everything
 above and must not be cited.
+
+---
+
+### A.6 Is the ToolTrie-vs-ContextPilot comparison fair?
+
+Audited rather than asserted. Both planners are **causal**: ToolTrie calls
+`plan()` before `observe()` on every request in arrival order; ContextPilot uses
+its persistent online `reorder` API with an index that grows as requests arrive.
+Neither sees the future, neither gets training data, and the shipped ToolTrie
+orderings reproduce **200/200** from their recorded parameters, with eviction
+and node counts matching exactly.
+
+| | ToolTrie v0 | ContextPilot |
+|---|---|---|
+| information regime | causal | causal |
+| training data | none | none |
+| menu membership | unchanged | unchanged |
+| tuning | `v0` defaults | authors' defaults (α=0.001) |
+| planner memory | 190,896-token budget, LRU | unbounded |
+| planning cost, padded | 3.62 ms/req | 1.97 ms/req |
+| planning cost, k128 | 0.20 ms/req | 1.94 ms/req |
+
+**Planning cost is not a differentiator.** It is at most 3.1% of the fastest
+arm's p50 and 0.006% at k128. ToolTrie's apparent 9.5x advantage at k128 is a
+symptom, not a saving: its cost tracks how deep the trie walk gets, so a cheap
+plan means it matched nothing (56.08 tools matched and 3.62 ms on padded menus
+against 1.50 tools and 0.20 ms at k128). ContextPilot runs the same clustering
+either way. The O(N²) distance matrix belongs to its offline `fit_transform`,
+not the online API used here.
+
+**The memory asymmetry is real but immaterial.** ToolTrie's budget bound hard on
+retrieved menus — 10,886 evictions at k64, 23,648 at k128 — while ContextPilot's
+index had no bound. Lifting it to 8M tokens removes every eviction and raises
+the mean shared leading prefix 35–46%. Reuse does not follow:
+
+| | evictions | shared prefix | reuse |
+|---|---|---|---|
+| k64 capped | 10,886 | 1.402 | **1.90%** |
+| k64 uncapped | 0 | 1.899 (+35%) | 1.86% |
+| k128 capped | 23,648 | 2.523 | **1.13%** |
+| k128 uncapped | 0 | 3.673 (+46%) | 1.16% |
+
+The budget is not a handicap; it is a model of the cache. At 189,728 KV tokens
+the server holds ~27 requests at k64 and ~14 at k128, and ToolTrie's best matches
+already sit a median 25–28 requests back. Extra planner memory buys hints the
+cache cannot honour, and it trades away ones it can: matches *inside* the
+residency horizon fall from 42 to 36 at k64 and 24 to 22 at k128 as the greedy
+walk chases older, longer paths.
+
+That horizon is also where ContextPilot's lead comes from. Its matches are both
+recent and long:
+
+| k64, cache holds ~27.5 requests | matches | within horizon | mean prefix within |
+|---|---|---|---|
+| tooltrie capped | 86 | 42 | 3.48 |
+| tooltrie uncapped | 91 | 36 | 3.56 |
+| ContextPilot | 92 | **55** | **9.31** |
+
+**Arrival order is the weaker control, and it favours ContextPilot.** Every
+result in this report uses one arrival permutation. Across three permutations of
+the same 200 k64 records, ToolTrie's ordering quality varies by 0.136 tools and
+ContextPilot's by 1.658 — and the permutation used throughout is ContextPilot's
+best of the three (3.990 against 2.332 and 2.563). Reuse follows the proxy:
+
+| k64 arrival order | ToolTrie | ContextPilot | ratio |
+|---|---|---|---|
+| seed 0 (used throughout this report) | 1.86% | **4.78%** | **2.57x** |
+| seed 1 | 1.80% | 2.51% | 1.39x |
+| seed 2 | 1.98% | 2.15% | 1.09x |
+| mean | 1.88% | 3.15% | 1.67x |
+| spread | **0.18pp** | **2.63pp** | |
+
+The ToolTrie column here uses the budget-lifted planner, legitimate because
+capped and uncapped are a measured null above; seed 0 against the capped arm is
+the 2.52x reported in §4.1.
+
+ContextPilot wins under all three, so the ranking holds. The *margin* does not:
+the 2.52x at k64 in §4.1 is the best of three draws, and one permutation puts the
+two within 9%. ToolTrie varies by 0.18pp across the same permutations,
+ContextPilot by 2.63pp — 15x more. Every other number in this report rests on
+seed 0 alone.
+
+**Two asymmetries stand.** ToolTrie is `v0` against a tuned published system,
+though sweeping its one ordering knob found the shipped value already optimal
+(`recency_window` 32/128/512/2048/none → 1.43/1.90/1.90/1.90/1.90 at k64) and
+`tooltrie_v1.py` has never entered any comparison. And the workload favours
+ContextPilot by construction: 63 of 64 padded tools are common to all 200
+requests, so its root cluster alone is the answer, while a trie must discover the
+same block through prefix agreement.
+
+The comparison's best guarantee is structural: ToolTrie is this project's method,
+ContextPilot is the baseline, and ContextPilot wins.

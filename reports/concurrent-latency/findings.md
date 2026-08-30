@@ -68,14 +68,37 @@ token alone starts after dispatch and would hide it.
 the distinct reuse levels rather than duplicate them — five arms sit at an
 identical 39.69% and two more at 1.19%.
 
-**A naming correction.** The arm stored as `contextpilot_causal` is not
-ContextPilot. In the paper (arXiv:2511.03475) `alpha` weights positional
-alignment against tool overlap in the clustering distance, and is set to
-**0.001** within a declared `[0.001, 0.01]` so that "overlap count remains the
-dominant factor" — a tie-breaker, not a driver. This arm uses **0.5**, 500x
-that, which inverts the intent. Read it as *ContextPilot static-refit causal
-adaptation (alpha=0.5; ordering only)*. Correctly configured `alpha=0.001` arms,
-including the official online API, are measured in §4.1.
+**Naming — there is only one ContextPilot here, and it appears only from §4.1.**
+Three arms have carried the ContextPilot name in this project. Only one is
+ContextPilot:
+
+| arm in this report | alpha | path | ContextPilot? |
+|---|---|---|---|
+| **ContextPilot (ordering)** | 0.001 | official `ContextPilot.reorder`, persistent index | **yes** |
+| static-refit (a=0.001) | 0.001 | `ContextIndex.fit_transform`, no persistent index | no |
+| static-refit (a=0.5) | **0.5** | `ContextIndex.fit_transform` | no |
+
+The paper sets **alpha = 0.001 across all its experiments**, inside a declared
+`[0.001, 0.01]`, so that "overlap count remains the dominant factor" — alpha is a
+tie-breaker on position, not a driver of the clustering. The 0.5 arm is 500x
+that, which inverts the intent: the overlap term is bounded in [0,1] while the
+positional term reaches 5-12 at 64 tools, so position decides the clustering
+instead of shared content.
+
+**Parts 1-3 use the a=0.5 arm**, because it is the only one with frozen orderings
+on the padded workload. Those sections therefore contain no ContextPilot, and the
+arm is named `static-refit (a=0.5)` there. Real ContextPilot enters at §4.1.
+
+The 0.5 value was an error, not a choice: the builder that produced it now
+defaults to 0.001 and requires an explicit override to reproduce the historical
+setting. **It makes no difference to Parts 1-3.** §4.1 measures all three
+variants on padded menus at an identical 96.16% — with a near-constant tool core
+the overlap term does not vary between requests, so the clustering is invariant
+to alpha. Padded menus cannot tell alpha values apart, so those sections would
+reproduce unchanged at 0.001.
+
+Even the official arm runs ordering only — no annotations, no de-duplication, no
+ContextPilot scheduling — so nothing here measures the full system.
 
 ---
 
@@ -90,15 +113,15 @@ Time to first token, ms, padded-64 menus, 188,688-token cache.
 | 1 | original | 1.0066 | 1.19% | 266.4 | 431.5 | 477.9 | 622.4 |
 | 1 | alphabetical | 1.0071 | 38.13% | 230.7 | 364.4 | 414.9 | 493.5 |
 | 1 | tooltrie_v0 | 1.0075 | 87.19% | 110.1 | 162.1 | **244.9** | 343.8 |
-| 1 | contextpilot_causal | 1.0075 | 96.16% | **88.0** | **107.6** | 257.9 | **269.1** |
+| 1 | static-refit (a=0.5) | 1.0075 | 96.16% | **88.0** | **107.6** | 257.9 | **269.1** |
 | 2 | original | 2.0087 | 1.19% | 284.9 | 710.8 | 934.0 | 1208.2 |
 | 2 | alphabetical | 2.0106 | 38.13% | 246.5 | 486.7 | 792.5 | 896.0 |
 | 2 | tooltrie_v0 | 2.0124 | 87.19% | 114.6 | 177.5 | 327.1 | 363.7 |
-| 2 | contextpilot_causal | 2.0124 | 96.16% | **91.4** | **122.1** | **265.5** | **281.5** |
+| 2 | static-refit (a=0.5) | 2.0124 | 96.16% | **91.4** | **122.1** | **265.5** | **281.5** |
 | 4 | original | **3.5645** | 1.19% | 3310.4 | 6498.6 | 7205.0 | 7476.0 |
 | 4 | alphabetical | 4.0081 | 38.13% | 331.8 | 1058.1 | 1406.8 | 1724.9 |
 | 4 | tooltrie_v0 | 4.0139 | 87.19% | 116.3 | 225.7 | 382.7 | 558.4 |
-| 4 | contextpilot_causal | 4.0142 | 96.16% | **91.8** | **132.5** | **266.7** | **308.2** |
+| 4 | static-refit (a=0.5) | 4.0142 | 96.16% | **91.8** | **132.5** | **266.7** | **308.2** |
 
 ToolTrie against the arms it replaces:
 
@@ -108,7 +131,7 @@ ToolTrie against the arms it replaces:
 | 2 | p50 −59.8%, p99 −65.0% | p50 −53.5%, p99 −58.7% |
 | 4 | **p50 −96.5%, p99 −94.7%** | p50 −65.0%, p99 −72.8% |
 
-ContextPilot beats ToolTrie in 17 of 18 distribution cells; ToolTrie's median
+The a=0.5 arm beats ToolTrie in 17 of 18 distribution cells; ToolTrie's median
 penalty is a stable +22 to +25 ms.
 
 ### 1.2 Three things serial testing could not show
@@ -119,7 +142,7 @@ concurrency of 1 cannot produce.
 
 **Reuse becomes capacity.** `original` is the only arm that could not keep up,
 managing 3.56 against a 4 req/s offer. Ceilings, from a sweep to 64 req/s:
-**16.4 req/s for ContextPilot, 11.3 for ToolTrie**, against `original` below
+**16.4 req/s for the a=0.5 arm, 11.3 for ToolTrie**, against `original` below
 3.6. Reuse was identical at every rate from 1 to 64, so ordering sets reuse and
 load does not touch it.
 
@@ -130,9 +153,9 @@ load does not touch it.
 | original | 198, 193, 197, 192, 196 | the *last* arrivals — the backlog grows without bound |
 | alphabetical | 53, 52, 50, 47, 51 | a bounded mid-run spike |
 | tooltrie_v0 | 3, 4, 2, 5, 46 | warm-up |
-| contextpilot_causal | 2, 1, 0, 3, 4 | cold start only |
+| static-refit (a=0.5) | 2, 1, 0, 3, 4 | cold start only |
 
-ContextPilot's tail is a fixed startup cost, so its p99 moves 257.9 → 266.7 ms
+That arm's tail is a fixed startup cost, so its p99 moves 257.9 → 266.7 ms
 across a 4x load increase while `original` goes 477.9 → 7205.0.
 
 ### 1.3 Larger model
@@ -145,12 +168,12 @@ non-model explanations: `alphabetical` is the one capacity-sensitive arm and 4B
 has a smaller cache; the ToolTrie run lost one request to a client socket error.
 
 **The gap grows with model size**, so the 0.6B figures understate it. Against
-`alphabetical`, ContextPilot's lead goes from 2.62x to 12.99x, because the fixed
+`alphabetical`, the a=0.5 arm's lead goes from 2.62x to 12.99x, because the fixed
 ~16 ms client overhead is 18% of its latency at 0.6B but 3% at 4B.
 
 Under load at 4B the ranking holds and widens sharply:
 
-| rate | ContextPilot p50 | ToolTrie p50 | ratio |
+| rate | a=0.5 arm p50 | ToolTrie p50 | ratio |
 |---|---|---|---|
 | 1 | 120.6 | 298.8 | 2.48x |
 | 2 | 134.1 | 304.7 | 2.27x |
@@ -158,10 +181,10 @@ Under load at 4B the ranking holds and widens sharply:
 
 That 30x is a capacity effect, not a prefill effect: at 4 req/s ToolTrie's 12.81%
 uncached prefill pushes it just past its service ceiling (3.8405 of an offered 4)
-while ContextPilot's 3.84% keeps it just under (3.9755). A 9-point reuse gap
+while the a=0.5 arm's 3.84% keeps it just under (3.9755). A 9-point reuse gap
 becomes the difference between coping and collapsing.
 
-One claim does not transfer: ContextPilot's flat latency *shape* is specific to
+One claim does not transfer: That arm's flat latency *shape* is specific to
 0.6B. At 4B its p99/p50 is 8.82, not ~2.9.
 
 ### 1.4 What the reordering costs
@@ -173,6 +196,8 @@ Accuracy is the share of requests where a called tool is one of the labelled
 correct tools, restricted to requests whose menu contains one. All arms hold the
 same menus, so the achievable maximum is identical across arms — checked, and it
 matched.
+
+ContextPilot here is the official-API arm at the paper's alpha (§Setup).
 
 | depth | arm | reuse | accuracy | vs original | mean position of correct tool |
 |---|---|---|---|---|---|
@@ -245,7 +270,7 @@ The structural problem is worse than the arithmetic. The adaptor needs requests
 that share leading tool prefixes — the property good orderings create and bad
 ones lack. On `original`, the arm that most needs help, only 1 request pair in
 5,872 shares any prefix, so it reduces to fifo and reordered 0 of 200. On
-ToolTrie and ContextPilot the affinity exists but they never build a queue.
+ToolTrie and the a=0.5 arm the affinity exists but they never build a queue.
 **It is inert where it is needed and unnecessary where it would work.**
 
 This null is also weak evidence. The design is a poor version of a standard
@@ -265,7 +290,7 @@ it.
 
 Requests already in flight when the first one finishes:
 
-| offered req/s | tooltrie_v0 | contextpilot_causal |
+| offered req/s | tooltrie_v0 | static-refit (a=0.5) |
 |---|---|---|
 | 4 | 7 | 6 |
 | 8 | **37** | **17** |
@@ -273,11 +298,11 @@ Requests already in flight when the first one finishes:
 | 32 | **200** | 124 |
 
 At 32 req/s **every one of ToolTrie's 200 requests starts before any has
-finished** — the whole run is cold. ContextPilot only reaches that at 64.
+finished** — the whole run is cold. The a=0.5 arm only reaches that at 64.
 
 This compounds: lower reuse means slower requests, which means more arrive
 before the first finishes, which means more redundant work. ToolTrie's pile-up
-is consistently twice ContextPilot's, so a 9-point reuse gap becomes a 2x
+is consistently twice that arm's, so a 9-point reuse gap becomes a 2x
 difference in how many requests get no cache benefit at all.
 
 The same effect shows in warm-up. Mean latency by arrival position at rate 4:
@@ -285,11 +310,11 @@ The same effect shows in warm-up. Mean latency by arrival position at rate 4:
 | arm | reqs 0–3 | 3–6 | 6–10 | 50–200 |
 |---|---|---|---|---|
 | tooltrie_v0 | 303 | **451** | 135 | 113 |
-| contextpilot_causal | 286 | 177 | 103 | 94 |
+| static-refit (a=0.5) | 286 | 177 | 103 | 94 |
 
 ToolTrie's requests 3–5 are *slower* than requests 0–2 — they were sent before
 0–2 had stored anything, so three copies of the same prefix were computed at
-once. ContextPilot settles after ~3 requests; ToolTrie needs 6–10.
+once. The a=0.5 arm settles after ~3 requests; ToolTrie needs 6–10.
 
 **So the trie helps through exactly one mechanism**: raising reuse from 38% to
 87%, which shortens prefill and compounds under load into higher capacity. Its
@@ -307,7 +332,7 @@ four depths, with rates scaled to hold the offered token rate roughly constant:
 
 **Reuse**
 
-| workload | original | alphabetical | frequency | tooltrie_v0 | CP refit | CP online | spread |
+| workload | original | alphabetical | frequency | tooltrie_v0 | refit a=.001 | **ContextPilot** | spread |
 |---|---|---|---|---|---|---|---|
 | k4 | 15.87% | 15.28% | 14.62% | 17.48% | 18.42% | **18.72%** | 4.10pp |
 | k16 | 6.12% | 6.27% | 5.59% | 7.77% | 9.80% | **9.93%** | 4.34pp |
@@ -340,7 +365,7 @@ apart at all.
 depth — its cleanest sweep anywhere — but loses to ContextPilot at all four, by a
 margin that grows with menu size:
 
-| depth | tooltrie_v0 | best ContextPilot | ratio |
+| depth | tooltrie_v0 | best CP-family arm | ratio |
 |---|---|---|---|
 | k4 | 17.48% | 18.72% | 1.07x |
 | k16 | 7.77% | 9.93% | 1.28x |
@@ -414,7 +439,7 @@ Two ordering methods outside the four questions, recorded so they are not retrie
 frequency ranking — no index, no clustering, no parameters, one sort per
 request, against ContextPilot's O(N²) index build.
 
-| depth | tooltrie | canonical (deployable) | canonical (oracle) | best CP |
+| depth | tooltrie | canonical (deployable) | canonical (oracle) | best CP-family |
 |---|---|---|---|---|
 | k64 | 1.90% | 2.75% | **4.28%** | 4.78% |
 | k128 | 1.13% | 1.99% | **2.87%** | 2.96% |
@@ -426,7 +451,7 @@ deployable version, which counts only earlier requests, reaches 58–67%.
 prefix in original order, so that portion can never be shared. Keeping its head
 and reordering only the tail:
 
-| depth | CP online | hybrid | vs CP |
+| depth | ContextPilot | hybrid | vs ContextPilot |
 |---|---|---|---|
 | k64 | 4.78% | 4.17% | −12.7% |
 | k128 | 1.99% | **3.11%** | **+56.2%** |

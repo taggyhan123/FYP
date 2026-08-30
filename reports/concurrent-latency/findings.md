@@ -1,7 +1,7 @@
 # Tool ordering under concurrent load
 
 Qwen3-0.6B on one RTX 3090 (plus a Qwen3-4B check), vLLM 0.26.0, prefix caching
-unmodified. 156 GPU runs. Raw outputs are in the git-ignored `cluster/results/`
+unmodified. 160 GPU runs. Raw outputs are in the git-ignored `cluster/results/`
 directories listed in the Appendix.
 
 ---
@@ -313,12 +313,28 @@ skipped accumulate the 12-second tail.
 **The best the adaptor manages on a mediocre ordering is 6.7x worse than doing
 nothing on a good one.**
 
-The structural problem is worse than the arithmetic. The adaptor needs requests
-that share leading tool prefixes — the property good orderings create and bad
-ones lack. On `original`, the arm that most needs help, only 1 request pair in
-5,872 shares any prefix, so it reduces to fifo and reordered 0 of 200. On
-ToolTrie and the a=0.5 arm the affinity exists but they never build a queue.
-**It is inert where it is needed and unnecessary where it would work.**
+The structural problem is worse than the arithmetic. **The adaptor needs
+variance in affinity, not affinity**, and it is inert at both ends of the range.
+It picks the first candidate with a strictly longer shared prefix, so when
+candidates tie it falls back to arrival order:
+
+| arm | mean prefix score | spread among candidates | windows where all tie | reordered |
+|---|---|---|---|---|
+| original | 0.3 | 0.33 | **99.5%** | **0/200** |
+| tooltrie_v0 | **56.4** | **0.08** | **99.5%** | **0/200** |
+| alphabetical | 15.5 | **13.23** | 27.2% | 110/200 |
+
+On `original` — the arm that most needs help — every candidate scores 0. On
+ToolTrie every candidate scores about 56 with a spread of 0.08: the shared prefix
+is so uniformly long that there is nothing to choose between. Only `alphabetical`
+has prefix lengths that vary.
+
+This was checked directly rather than inferred. ToolTrie was re-run at 16 req/s,
+above its 11.24 ceiling, forcing an 8.8-second client queue — and the adaptor
+still reordered **0 of 200**, while a `random` control on the same runs reordered
+193 of 200. The queue was real; the policy simply had no basis to act on.
+
+**So it is inert where it is needed and inert where it would appear to fit.**
 
 This null is also weak evidence. The design is a poor version of a standard
 algorithm (longest prefix match), and it was tested on a single replica with a
@@ -480,8 +496,8 @@ position. A `random` policy measures that baseline:
 | k64 (variable sizes) | median −27.4% | **mean −29.2%** |
 | padded-64 (uniform sizes) | median −27.5% | mean −3.7% |
 
-The artifact is nearly identical in both (−27.4% vs −27.5%), confirming the
-mechanism. Subtracting it, the real size-aware gain is 29.2 points against 3.7 —
+The artifact is nearly identical in both (−27.4% vs −27.5%), and reproduced a
+third time on ToolTrie at 16 req/s (−27.1%), confirming the mechanism. Subtracting it, the real size-aware gain is 29.2 points against 3.7 —
 an 8x separation tracking the 87x difference in size variance. **Without this
 control the headline would have been "SJF cuts median latency 6.9x", crediting
 the policy for something a coin flip partly reproduces.**
@@ -557,16 +573,14 @@ points the exchange rate changes; if not, the line is closed.
 4. **Queuing was tested only under saturation at one in-flight cap.** Every run
    was deeply backlogged. Preemptive policies, and any policy inside the engine
    rather than in front of it, are untested.
-5. **The adaptor was never exercised on ToolTrie** — it never built a queue
-   (1.2 ms wait, 0 of 200 reordered). That cell is untested, not null.
-6. **`max` is a single sample** and moved 269 → 710 ms between two runs of the
+5. **`max` is a single sample** and moved 269 → 710 ms between two runs of the
    same configuration. Use p95 and p99.
-7. **Two runs are n=199**, each losing one request to a client-side socket
+6. **Two runs are n=199**, each losing one request to a client-side socket
    error, not a server fault.
-8. **One trial per cell.** Reuse reproduced to the digit across the order
+7. **One trial per cell.** Reuse reproduced to the digit across the order
    control, seven rates and three cache sizes, which is the evidence for
    stability.
-9. **The §5 methods are single-configuration**, rejected on the accuracy
+8. **The §5 methods are single-configuration**, rejected on the accuracy
     exchange rate rather than an exhaustive sweep.
 
 ---
@@ -698,9 +712,10 @@ ContextPilot scheduling, so nothing here measures the full system.
 | ContextPilot at alpha=0.001 | `alpha001-comparison-20260829-224719/` | 17 |
 | Canonical and hybrid ordering | `canonical-order-20260830-003615/` | 8 |
 | Accuracy | `accuracy-gate-20260830-011416/` | 10 |
+| Adaptor on ToolTrie under a forced queue | `tooltrie-adaptor-20260830-121234/` | 4 |
 | ContextPilot + baselines on padded | `cp-online-padded-20260830-115456/` | 15 |
 
-**156 runs.** All under the git-ignored `cluster/results/`.
+**160 runs.** All under the git-ignored `cluster/results/`.
 
 Driver `scripts/replay_vllm_concurrent.py`; also added
 `summarize_queuing_runs.py`, `build_canonical_ordering.py`,

@@ -339,6 +339,31 @@ On ToolTrie the policy faced a genuine decision once in 195 opportunities and go
 it right. On `alphabetical` it faced 119 and got 118 right. It selects correctly
 whenever there is anything to select; on ToolTrie there almost never is.
 
+**A tradeoff is still achievable there — just not an intelligent one.** The
+`random` control on the same ToolTrie runs reordered 193 of 200 and produced the
+shape an adaptor is supposed to produce:
+
+| ToolTrie @ 16 req/s | p50 | p99 |
+|---|---|---|
+| fifo | 8814 | 13910 |
+| random | **6427 (−27.1%)** | **23298 (+67.5%)** |
+
+So a dispatcher can move latency around on ToolTrie. What it cannot do is move it
+around for a *reason*, because every signal it might use is flat:
+
+| signal | on padded ToolTrie | usable |
+|---|---|---|
+| prefix affinity | every candidate ~56 of 64 tools, spread 0.08 | no |
+| job size | every request ~5,570 tokens, CV 0.0038 | no |
+| none (random) | — | acts, but the gain is the saturation artifact of §4.3, not information |
+
+**ToolTrie has already made every request look alike, which is exactly why it is
+fast and exactly why no dispatcher can improve on it.** Where a real signal does
+exist — retrieved menus, where job sizes vary 5.3x — size-aware queuing does work,
+and §4.3 measures it: median −85.5%, of which 29.2 points survive subtracting the
+random baseline. But it buys the median at the tail's expense, and no setting
+improves both.
+
 **The best the adaptor manages on a mediocre ordering is 6.7x worse than doing
 nothing on a good one.**
 

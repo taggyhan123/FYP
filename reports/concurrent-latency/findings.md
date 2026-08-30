@@ -1,7 +1,7 @@
 # Tool ordering under concurrent load
 
 Qwen3-0.6B on one RTX 3090 (plus a Qwen3-4B check), vLLM 0.26.0, prefix caching
-unmodified. 187 GPU runs. Raw outputs are in the git-ignored `cluster/results/`
+unmodified. 191 GPU runs. Raw outputs are in the git-ignored `cluster/results/`
 directories listed in the Appendix.
 
 ---
@@ -106,7 +106,7 @@ and two more at 1.19%, so replaying them would duplicate curves.
 **How runs were done.** 200 requests per run, replaying frozen orderings so every
 arm is a permutation of the same menus. Open-loop Poisson arrivals at a fixed
 rate, seed 42, cache cleared before each run, decode pinned to 48 tokens so
-decode-length variance cannot pollute the tails. 187 runs total.
+decode-length variance cannot pollute the tails. 191 runs total.
 
 **One naming note.** ContextPilot throughout is the official reordering API at
 the paper's `alpha=0.001`, ordering only — no annotations, de-duplication or
@@ -125,15 +125,37 @@ Time to first token, ms. Both workloads at 4 req/s, and they are size-matched �
 6,903 tokens per request padded against 6,896 retrieved — so the only difference
 is whether the menus genuinely overlap.
 
-**Padded menus** (63 of 64 tools shared)
+**Padded menus** (63 of 64 tools shared), in two windows of the same run.
+Requests 1–200 is the condition every other table in this report uses. Requests
+201–600 is the same workload extended by its own construction rule, after both
+adaptive planners have converged; it is obtained by differencing a 600-request
+run against the 200-request run of the same file.
 
-| arm | achieved | reuse | p50 | p95 | max |
-|---|---|---|---|---|---|
-| original | 3.5645 | 1.19% | 3310.4 | 6498.6 | 7476.0 |
-| alphabetical | 4.0081 | 38.13% | 331.8 | 1058.1 | 1724.9 |
-| frequency | 4.0076 | 39.69% | 317.9 | 1028.9 | 1521.4 |
-| tooltrie_v0 | 4.0139 | 87.19% | 116.3 | 225.7 | 558.4 |
-| **ContextPilot** | 4.0143 | **96.16%** | **92.7** | **129.0** | **300.2** |
+| arm | adapts | reuse 1–200 | reuse 201–600 | p50 1–200 | p50 201–600 | p95 201–600 |
+|---|---|---|---|---|---|---|
+| original | no | 1.19% | 0.70% | 3622.8 | 6239.7 | 15175.0 |
+| alphabetical | no | 38.13% | 46.29% | 335.2 | 271.3 | 586.6 |
+| frequency | no | 39.69% | — | 317.9 | — | — |
+| tooltrie_v0 | **yes** | 87.19% | **97.05%** | 116.0 | **91.2** | **122.5** |
+| **ContextPilot** | **yes** | **96.16%** | **97.09%** | **93.9** | 91.7 | 123.7 |
+
+All four 1–200 reuse figures reproduce the published values to the digit on a
+fresh server. `frequency` is not extended: it is a *fitted* baseline needing a
+disjoint training split, so it is the one arm carrying training data the others
+lack. §1.5 explains the two windows.
+
+The 1–200 latencies here are a fresh measurement, so they differ slightly from
+the across-load table below, which is the original stage: 3622.8 against 3310.4
+for `original`, 116.0 against 116.3 for ToolTrie. Reuse is deterministic and
+reproduces exactly; p50 does not, and the variation is concentrated in
+`original`, the one arm that saturates.
+
+**Both conclusions survive the longer run, and one reverses.** Ordering still
+dominates — and by more: `original` cannot improve, and under sustained load its
+backlog keeps growing, so its p50 *rises* 3622.8 → 6239.7 ms while every ordered
+arm's falls. The ordered-vs-unordered gap at p50 widens from 31x to **68x**. What
+does not survive is ContextPilot's lead over ToolTrie: 8.97pp becomes 0.04pp, and
+the 22 ms median penalty becomes −0.5 ms in ToolTrie's favour.
 
 **Retrieved menus, same size** (2.8 of 64 tools shared)
 
@@ -178,10 +200,8 @@ ToolTrie against the arms it replaces, padded:
 | 2 | p50 −59.8%, p95 −75.0% | p50 −53.5%, p95 −63.5% |
 | 4 | **p50 −96.5%, p95 −96.5%** | p50 −64.9%, p95 −78.7% |
 
-ContextPilot leads ToolTrie at every rate here, and ToolTrie's median penalty is
-18-25 ms. That lead is warm-up, not ordering quality: over a 600-request run the
-two are 0.04pp apart in reuse once ToolTrie has converged, and the latency
-penalty reverses to −0.5 ms (§1.5).
+ContextPilot leads ToolTrie at every rate in this window. That lead is warm-up,
+not ordering quality — see the two-window table above and §1.5 for why.
 
 ### 1.2 Three things serial testing could not show
 
@@ -298,55 +318,44 @@ newer, larger models being nearly insensitive to it.
 
 ---
 
-### 1.5 The padded gap between ToolTrie and ContextPilot is warm-up
+### 1.5 Why the two windows differ: warm-up
 
-Every padded figure above comes from a 200-request run, and ToolTrie is still
-learning for most of it. Extending the workload to 600 requests by its own
-construction rule — the same 63-tool core in the same order, one fresh singleton
-per request — and differencing the 600-run against the 200-run of the same file
-(their first 200 records are byte-identical, both planners being causal):
+The 200-request window is short enough that ToolTrie spends most of it learning.
+The workload was extended to 600 requests by its own construction rule — the same
+63-tool core, one fresh singleton per request — and the 600-run differenced
+against the 200-run of the same file, whose first 200 records are byte-identical.
 
-| requests | ToolTrie | ContextPilot | gap |
+On padded menus reuse *is* the position of the single tool that differs between
+requests (§4.1, r² = 0.9996): the shared prefix runs until that tool, so pushing
+it later is the entire mechanism. 63 is optimal.
+
+| singleton position | req 1–200 | 201–400 | 401–600 |
 |---|---|---|---|
-| 1–200 (every other table here) | 87.19% | 96.16% | **8.97pp** (1.103x) |
-| 1–600 | 93.76% | 96.78% | 3.02pp |
-| **201–600** | **97.05%** | **97.09%** | **0.04pp** (1.000x) |
+| original | 0.00 | 0.00 | 0.00 |
+| alphabetical | 23.09 | 26.27 | 30.90 |
+| tooltrie_v0 | 56.31 | 62.90 | **63.00** |
+| ContextPilot | 62.69 | 63.00 | **63.00** |
 
-Uncached prefill over 201–600 is 2.95% against 2.91% — 1.01x the work, where
-over the first 200 it was 3.33x. Latency follows, and the residual penalty
-reverses:
+ContextPilot is optimal from request ~51; ToolTrie takes about 150. Both finish
+in the same place, and once they do the tie is forced — two policies that both
+put the singleton at 63 cannot differ. **ContextPilot's advantage on padded menus
+is cold-start speed, not ordering quality.** That is a real advantage for short
+or bursty workloads; it is not the ordering-quality gap §1.1's first window
+appears to report.
 
-| padded @4, TTFT ms | ToolTrie | ContextPilot |
-|---|---|---|
-| p50, requests 1–200 | 116.0 | **93.9** |
-| p50, requests 201–600 | **91.2** | 91.7 |
-| p95, requests 201–600 | **122.5** | 123.7 |
-| max, requests 201–600 | **141.9** | 151.1 |
+**One caveat on the extension, and it matters.** `alphabetical` has no state and
+still gains 5.5 positions between the windows, because the added requests carry
+tool names that sort later. The extension is therefore slightly easier for any
+name-ordered rule, and part of ToolTrie's +9.86pp rides on that rather than on
+learning. What does not: ToolTrie ends at 62.95 of a possible 63. Composition
+alone cannot deliver that — `alphabetical` moves only 23.09 → 28.58 and stays at
+46% reuse. The tie is a ceiling effect, not an artifact of how the extension was
+built.
 
-Measured over all 600 requests ToolTrie's p50 is 93.2 ms, still carrying its own
-warm-up; the 201–600 window is the one that answers the question.
-
-The ordering explains it exactly. Measured as the position of the singleton,
-where 63 is optimal:
-
-| requests | ToolTrie | ContextPilot |
-|---|---|---|
-| 1–200 | 56.31 | 62.69 |
-| 201–400 | 62.90 | 63.00 |
-| 401–600 | **63.00** | **63.00** |
-
-ContextPilot is optimal from request 51; ToolTrie takes about 150. Both finish
-at the same place. **So ContextPilot's advantage on padded menus is cold-start
-speed, not ordering quality** — a real advantage for short or bursty workloads,
-but not the one §1.1 appears to report.
-
-This is forced once the orderings converge: on padded menus reuse *is* the
-singleton's position (§4.1), so two policies that both place it at 63 must tie.
-
-Two limits. The 400 added requests pair real tool schemas with borrowed queries,
-so they are valid for reuse and ordering but carry no accuracy signal. And this
-says nothing about retrieved menus, where there is no common core to converge to
-and the §4.1 ranking stands.
+Two further limits. The 400 added requests pair real tool schemas with borrowed
+queries, so they carry reuse and ordering signal but no accuracy signal. And none
+of this touches retrieved menus, where there is no common core to converge to and
+the §4.1 ranking stands.
 
 ---
 
@@ -912,8 +921,9 @@ ContextPilot scheduling, so nothing here measures the full system.
 | ContextPilot + baselines on padded | `cp-online-padded-20260830-115456/` | 15 |
 | Fairness audit: planner budget, arrival seeds | `tooltrie-uncapped-20260830-212728/` | 9 |
 | Steady state (600 req) and more arrival seeds | `steady-and-seeds-20260830-221902/` | 14 |
+| Steady state: the two reference arms | `steady-arms-20260830-234910/` | 4 |
 
-**187 runs.** All under the git-ignored `cluster/results/`.
+**191 runs.** All under the git-ignored `cluster/results/`.
 
 Driver `scripts/replay_vllm_concurrent.py`; also added
 `summarize_queuing_runs.py`, `build_canonical_ordering.py`,

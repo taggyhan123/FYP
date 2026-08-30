@@ -346,7 +346,7 @@ four depths, with rates scaled to hold the offered token rate roughly constant:
 | k16 | 6.12% | 6.27% | 5.59% | 7.77% | **9.93%** | 4.34pp |
 | k64 | 0.91% | 1.22% | 0.94% | 1.90% | **4.78%** | 3.87pp |
 | k128 | 0.37% | 0.58% | 0.54% | 1.13% | **1.99%** | 1.62pp |
-| **padded-64** | 1.19% | 38.13% | 87.19% | 96.16% | 96.16% | **94.97pp** |
+| **padded-64** | 1.19% | 38.13% | 39.69% | 87.19% | **96.16%** | **94.97pp** |
 
 A reimplementation of ContextPilot's clustering without its persistent index
 (Appendix A.4) tracks it closely except at k128, where it reaches 2.96%. It is

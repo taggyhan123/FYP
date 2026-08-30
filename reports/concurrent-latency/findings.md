@@ -16,32 +16,25 @@ All numbers are Qwen3-0.6B on one RTX 3090 (with a Qwen3-4B transfer test in
 under the git-ignored `cluster/results/` directories named in **Provenance**;
 this file is the compact summary.
 
-**Naming.** The arm identified in the data as `contextpilot_causal` is **not
-ContextPilot**. Verified against the paper (Jiang, Huang et al., *ContextPilot:
-Fast Long-Context Inference via Context Reuse*, MLSys 2026, arXiv:2511.03475):
+**Naming.** The arm stored as `contextpilot_causal` is **not ContextPilot**. In
+the paper (Jiang, Huang et al., MLSys 2026, arXiv:2511.03475) `alpha` weights the
+positional term of the context distance function against the overlap term:
 
-- **`alpha` is the weight on the positional-alignment term** of ContextPilot's
-  context distance function (Eq. 1), which scores two contexts by shared
-  context blocks *plus* how similarly those blocks are positioned:
-  `d_ij = 1 - |S_ij|/max(|C_i|,|C_j|) + alpha * mean_k |p_i(k) - p_j(k)|`.
-  The paper states `alpha in [0.001, 0.01]` "ensures overlap count remains the
-  dominant factor", and sets **`alpha = 0.001` across all experiments**.
-- This arm uses **`alpha = 0.5`** — 500x the paper's value, 50x the top of the
-  declared range. The overlap term is bounded in [0,1]; at 64 tools the
-  positional term becomes ~5-12, so it **swamps the overlap term entirely** and
-  the clustering is driven by position rather than shared content. This is not a
-  mis-tuned ContextPilot; the equation's intended dominant signal is inverted.
-- It is also **ordering only**: no context annotations, no de-duplication, and
-  no ContextPilot scheduling, and it refits `ContextIndex.fit_transform` rather
-  than using the persistent online API. The paper's own ablation (Fig. 7)
-  attributes roughly half its cache gain to the scheduling component this arm
-  omits (SGLang 8.49% -> 20.56% aligning -> 33.97% + scheduling).
+`d_ij = 1 - |S_ij|/max(|C_i|,|C_j|) + alpha * mean_k |p_i(k) - p_j(k)|`
 
-Attribution to online ContextPilot is **withdrawn** by
-`reports/tooltrie-phase2/findings.md`; read it as **ContextPilot static-refit
-causal adaptation (alpha=0.5; ordering only)** — a reference arm built in this
-project, not an external state-of-the-art baseline. The file-level identifier is
-kept because it names the result files.
+The paper sets **`alpha = 0.001`**, inside a declared range of `[0.001, 0.01]`,
+explicitly so that "overlap count remains the dominant factor while
+incorporating positional alignment". **`alpha` is intended as a tie-breaker on
+position, not a driver of the clustering.**
+
+This arm uses **`alpha = 0.5`** — 500x that value — which inverts the intent: the
+overlap term is bounded in [0,1] while the positional term reaches ~5-12 at 64
+tools, so position decides the clustering instead of shared content. It is also
+ordering-only, with no annotations, de-duplication or scheduling. Attribution to
+online ContextPilot is **withdrawn** by `reports/tooltrie-phase2/findings.md`;
+read it as **ContextPilot static-refit causal adaptation (alpha=0.5; ordering
+only)**. Correctly configured `alpha=0.001` arms — both the static refit and the
+official online API — are measured against it in §4.1.
 
 **Headline — ToolTrie-v0 under parallel load.** Against the baselines it
 replaces on padded-64, and the margin *grows* with load:
@@ -58,10 +51,10 @@ rate 1 and 118x at rate 2**, where `alphabetical` collapses (§1.8). Serially
 none of this was visible: max was flat within 1.25x and the project's earlier
 latency claims were deliberately weak.
 
-**On genuinely retrieved menus ToolTrie-v0 is the best arm tested, and its
-margin grows with tool-set size** — 1.10x the next-best at k4, 1.24x at k16,
-1.55x at k64, **1.93x at k128** (§4.1). The static-refit arm has no arm on those
-workloads, so it is untested there rather than ahead.
+**On genuinely retrieved menus the separation almost vanishes** — the between-arm
+reuse spread falls from 94.97pp to 0.98pp and the p50 spread from 36x to 1.02x
+(§4.1). ToolTrie beats every simple heuristic there but loses to
+correctly-configured ContextPilot at all four depths.
 
 **Where ToolTrie loses.** On padded-64 the static-refit arm beats it in 17 of 18
 distribution cells (p50 1.25-1.27x). On retrieved menus, correctly-configured
@@ -328,8 +321,6 @@ The ranking survives saturation and widens. TTFT (ms):
 **Reuse is invariant across the entire 64x load range** — 96.16% and 87.19% at
 every one of the seven rates, to the digit, including deep in saturation.
 Ordering determines reuse; load does not touch it.
-
----
 
 ---
 
@@ -763,7 +754,8 @@ replaying the BM25-retrieved workloads under load, at four retrieval depths.
 against padded-64's 6,903 — the same prompt volume, real retrieval instead of
 padding. Rates were scaled to hold the offered *token* rate roughly constant
 (k4@16, k16@8, k64@4, k128@2) so load is comparable across depths rather than
-confounded by menu size. These workloads carry no ContextPilot arm.
+confounded by menu size. ContextPilot was added to these workloads at the
+paper's `alpha=0.001`, in both the static-refit and official online-API forms.
 
 **Reuse:**
 
@@ -1064,8 +1056,7 @@ reopens; if they do not, it is closed.
    spread falls from 94.97pp to 0.98pp and the p50 spread from 36.06x to 1.02x.
    Padding supplies a nearly fixed tool core that ordering can align; real
    retrieval does not. This is the single most important scope bound in the
-   report. `contextpilot_causal` has no arm in the retrieved workloads, so it is
-   untested rather than refuted there.
+   report.
 2. **Model size is only partly controlled (§1.8).** Reuse was confirmed
    model-size invariant at Qwen3-4B and the ordering advantage was shown to
    *grow* (2.62x -> 12.99x against `alphabetical`), so the 0.6B ratios are

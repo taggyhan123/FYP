@@ -1,7 +1,7 @@
 # Tool ordering under concurrent load
 
 Qwen3-0.6B on one RTX 3090 (plus a Qwen3-4B check), vLLM 0.26.0, prefix caching
-unmodified. 160 GPU runs. Raw outputs are in the git-ignored `cluster/results/`
+unmodified. 164 GPU runs. Raw outputs are in the git-ignored `cluster/results/`
 directories listed in the Appendix.
 
 ---
@@ -149,20 +149,20 @@ The rest of Part 1 uses padded menus, where the arms separate enough to study.
 
 **Padded menus across load** — the same table at three rates:
 
-| rate | arm | achieved | reuse | p50 | p95 | p99 | max |
-|---|---|---|---|---|---|---|---|
-| 1 | original | 1.0066 | 1.19% | 266.4 | 431.5 | 477.9 | 622.4 |
-| 1 | alphabetical | 1.0071 | 38.13% | 230.7 | 364.4 | 414.9 | 493.5 |
-| 1 | tooltrie_v0 | 1.0075 | 87.19% | 110.1 | 162.1 | **244.9** | 343.8 |
-| 1 | ContextPilot | 1.0075 | 96.16% | **92.0** | **115.3** | 243.5 | 307.0 |
-| 2 | original | 2.0087 | 1.19% | 284.9 | 710.8 | 934.0 | 1208.2 |
-| 2 | alphabetical | 2.0106 | 38.13% | 246.5 | 486.7 | 792.5 | 896.0 |
-| 2 | tooltrie_v0 | 2.0124 | 87.19% | 114.6 | 177.5 | 327.1 | 363.7 |
-| 2 | ContextPilot | 2.0124 | 96.16% | **89.5** | **119.0** | **257.0** | **274.6** |
-| 4 | original | **3.5645** | 1.19% | 3310.4 | 6498.6 | 7205.0 | 7476.0 |
-| 4 | alphabetical | 4.0081 | 38.13% | 331.8 | 1058.1 | 1406.8 | 1724.9 |
-| 4 | tooltrie_v0 | 4.0139 | 87.19% | 116.3 | 225.7 | 382.7 | 558.4 |
-| 4 | ContextPilot | 4.0143 | 96.16% | **92.7** | **129.0** | **260.9** | **300.2** |
+| rate | arm | achieved | reuse | p50 | p95 | max |
+|---|---|---|---|---|---|---|
+| 1 | original | 1.0066 | 1.19% | 266.4 | 431.5 | 622.4 |
+| 1 | alphabetical | 1.0071 | 38.13% | 230.7 | 364.4 | 493.5 |
+| 1 | tooltrie_v0 | 1.0075 | 87.19% | 110.1 | 162.1 | 343.8 |
+| 1 | ContextPilot | 1.0075 | 96.16% | **92.0** | **115.3** | 307.0 |
+| 2 | original | 2.0087 | 1.19% | 284.9 | 710.8 | 1208.2 |
+| 2 | alphabetical | 2.0106 | 38.13% | 246.5 | 486.7 | 896.0 |
+| 2 | tooltrie_v0 | 2.0124 | 87.19% | 114.6 | 177.5 | 363.7 |
+| 2 | ContextPilot | 2.0124 | 96.16% | **89.5** | **119.0** | **274.6** |
+| 4 | original | **3.5645** | 1.19% | 3310.4 | 6498.6 | 7476.0 |
+| 4 | alphabetical | 4.0081 | 38.13% | 331.8 | 1058.1 | 1724.9 |
+| 4 | tooltrie_v0 | 4.0139 | 87.19% | 116.3 | 225.7 | 558.4 |
+| 4 | ContextPilot | 4.0143 | 96.16% | **92.7** | **129.0** | **300.2** |
 
 ToolTrie against the arms it replaces, padded:
 
@@ -314,16 +314,29 @@ skipped accumulate the 12-second tail.
 
 ### 2.2 Not worth deploying
 
-| | p50 | max |
-|---|---|---|
-| `alphabetical`, plain fifo | 1046.0 | 3120.2 |
-| `alphabetical` + best adaptor setting | 827.2 | 3302.6 |
-| `tooltrie_v0` | **122.8** | **915.6** |
+All at 4 req/s behind an in-flight cap of 4. Arrival to first token, ms.
 
-ToolTrie appears once because the adaptor makes no difference to it: the policy
-reordered **0 of 200** requests, so it issues the identical dispatch sequence
-FIFO would. Running it produced 123.2 ms against 122.8 — two samples of the same
-thing.
+| policy | p50 | max | reordered |
+|---|---|---|---|
+| `frequency` | 825.2 | 2640.3 | — |
+| `frequency` + adaptor | **685.2** (−17.0%) | **2961.4** (+12.2%) | 105/200 |
+| `alphabetical` | 1046.0 | 3120.2 | — |
+| `alphabetical` + adaptor | **827.2** (−20.9%) | **3302.6** (+5.8%) | 104/200 |
+| `tooltrie_v0` | **122.8** | **915.6** | — |
+| `ContextPilot` | **94.2** | **452.6** | — |
+
+The adaptor works on both orderings where it can act, and with the same shape:
+median down, worst case up. It reordered around half the requests in each.
+
+**ToolTrie and ContextPilot are shown without it because it cannot act on them** —
+0 of 200 reordered in both cases, so running it issues the identical dispatch
+sequence FIFO does. Adding it to ContextPilot gave 94.4 ms against 94.2, two
+samples of the same thing.
+
+**And the comparison that settles it: the best the adaptor achieves anywhere is
+685.2 ms, against 122.8 for ToolTrie and 94.2 for ContextPilot, neither of which
+uses it.** Fixing the ordering is worth 5.6x to 7.3x more than fixing the
+dispatch order.
 
 **That is inertness, not a broken policy** — checked by reconstructing the
 pending queue at every dispatch and recomputing what the policy was choosing
@@ -364,9 +377,6 @@ exist — retrieved menus, where job sizes vary 5.3x — size-aware queuing does
 and §4.3 measures it: median −85.5%, of which 29.2 points survive subtracting the
 random baseline. But it buys the median at the tail's expense, and no setting
 improves both.
-
-**The best the adaptor manages on a mediocre ordering is 6.7x worse than doing
-nothing on a good one.**
 
 The structural problem is worse than the arithmetic. **The adaptor needs
 variance in affinity, not affinity**, and it is inert at both ends of the range.
@@ -789,9 +799,10 @@ ContextPilot scheduling, so nothing here measures the full system.
 | Canonical and hybrid ordering | `canonical-order-20260830-003615/` | 8 |
 | Accuracy | `accuracy-gate-20260830-011416/` | 10 |
 | Adaptor on ToolTrie under a forced queue | `tooltrie-adaptor-20260830-121234/` | 4 |
+| Adaptor on frequency and ContextPilot | `adaptor-table-20260830-124724/` | 4 |
 | ContextPilot + baselines on padded | `cp-online-padded-20260830-115456/` | 15 |
 
-**160 runs.** All under the git-ignored `cluster/results/`.
+**164 runs.** All under the git-ignored `cluster/results/`.
 
 Driver `scripts/replay_vllm_concurrent.py`; also added
 `summarize_queuing_runs.py`, `build_canonical_ordering.py`,

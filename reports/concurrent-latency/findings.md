@@ -314,15 +314,16 @@ skipped accumulate the 12-second tail.
 
 ### 2.2 Not worth deploying
 
-| | p50 | max | reordered |
-|---|---|---|---|
-| `alphabetical`, plain fifo | 1046.0 | 3120.2 | — |
-| `alphabetical` + best adaptor setting | 827.2 | 3302.6 | 104/200 |
-| `tooltrie_v0` + adaptor | 123.2 | 890.0 | **0/200** |
-| `tooltrie_v0`, **no adaptor at all** | **122.8** | **915.6** | — |
+| | p50 | max |
+|---|---|---|
+| `alphabetical`, plain fifo | 1046.0 | 3120.2 |
+| `alphabetical` + best adaptor setting | 827.2 | 3302.6 |
+| `tooltrie_v0` | **122.8** | **915.6** |
 
-ToolTrie with and without the adaptor are the same run in all but name: the
-policy reordered nothing, so the 0.4 ms difference is noise.
+ToolTrie appears once because the adaptor makes no difference to it: the policy
+reordered **0 of 200** requests, so it issues the identical dispatch sequence
+FIFO would. Running it produced 123.2 ms against 122.8 — two samples of the same
+thing.
 
 **That is inertness, not a broken policy** — checked by reconstructing the
 pending queue at every dispatch and recomputing what the policy was choosing

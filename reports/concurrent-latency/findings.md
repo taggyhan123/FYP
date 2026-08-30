@@ -1,7 +1,7 @@
 # Tool ordering under concurrent load
 
 Qwen3-0.6B on one RTX 3090 (plus a Qwen3-4B check), vLLM 0.26.0, prefix caching
-unmodified. 164 GPU runs. Raw outputs are in the git-ignored `cluster/results/`
+unmodified. 187 GPU runs. Raw outputs are in the git-ignored `cluster/results/`
 directories listed in the Appendix.
 
 ---
@@ -38,16 +38,20 @@ tool is pushed. The cache wants the *common* tools first; the model wants the
 *relevant* tools first; prefix caching only reuses a leading prefix. Both
 compete for the front of the prompt.
 
-**ToolTrie places second.** It beats every simple heuristic — unordered,
-alphabetical, frequency — everywhere. ContextPilot beats it at all four retrieval
-depths, by 1.07x to 2.52x — but the k64 figure is the top of its range: over five
-arrival orders it spans 1.09x to 2.57x, the other four at 1.09-1.39x (A.6).
+**ToolTrie places second on retrieved menus and ties on padded ones.** It beats
+every simple heuristic — unordered, alphabetical, frequency — everywhere.
+ContextPilot beats it at all four retrieval depths, by 1.07x to 2.52x — but the
+k64 figure is the top of its range: over five arrival orders it spans 1.09x to
+2.57x, the other four at 1.09-1.39x (A.6). On padded menus its 9-point deficit is
+warm-up: by request 200 the two are 0.04pp apart and ToolTrie is marginally
+faster (§1.5).
 
 ### What to be careful with
 
 - Parts 1–3 describe a padded workload. §4 is the check on that, and it is the
   most important limit in this report.
-- One model, one seed, one trial per cell.
+- One model, one trial per cell. Eight cells were re-run under 3–5 arrival
+  permutations (A.6); every other cell rests on one.
 - `max` is a single sample at n=200 and moved 269 → 710 ms between two runs of
   the same configuration. Use p50 and p95.
 
@@ -174,9 +178,10 @@ ToolTrie against the arms it replaces, padded:
 | 2 | p50 −59.8%, p95 −75.0% | p50 −53.5%, p95 −63.5% |
 | 4 | **p50 −96.5%, p95 −96.5%** | p50 −64.9%, p95 −78.7% |
 
-ContextPilot leads ToolTrie at every rate; ToolTrie's median penalty is 18-25 ms.
-That lead is warm-up, not ordering quality: over a 600-request run the two are
-0.04pp apart in steady state (§1.5).
+ContextPilot leads ToolTrie at every rate here, and ToolTrie's median penalty is
+18-25 ms. That lead is warm-up, not ordering quality: over a 600-request run the
+two are 0.04pp apart in reuse once ToolTrie has converged, and the latency
+penalty reverses to −0.5 ms (§1.5).
 
 ### 1.2 Three things serial testing could not show
 
@@ -308,7 +313,18 @@ per request — and differencing the 600-run against the 200-run of the same fil
 | **201–600** | **97.05%** | **97.09%** | **0.04pp** (1.000x) |
 
 Uncached prefill over 201–600 is 2.95% against 2.91% — 1.01x the work, where
-over the first 200 it was 3.33x. p50 tracks it: 93.2 ms against 91.7 ms.
+over the first 200 it was 3.33x. Latency follows, and the residual penalty
+reverses:
+
+| padded @4, TTFT ms | ToolTrie | ContextPilot |
+|---|---|---|
+| p50, requests 1–200 | 116.0 | **93.9** |
+| p50, requests 201–600 | **91.2** | 91.7 |
+| p95, requests 201–600 | **122.5** | 123.7 |
+| max, requests 201–600 | **141.9** | 151.1 |
+
+Measured over all 600 requests ToolTrie's p50 is 93.2 ms, still carrying its own
+warm-up; the 201–600 window is the one that answers the question.
 
 The ordering explains it exactly. Measured as the position of the singleton,
 where 63 is optimal:
@@ -531,6 +547,20 @@ four depths, with rates scaled to hold the offered token rate roughly constant:
 A reimplementation of ContextPilot's clustering without its persistent index
 (Appendix A.4) tracks it closely except at k128, where it reaches 2.96%. It is
 not a separate method and is excluded from the comparison.
+
+**The same cells under the two fairness controls.** Every figure above is one
+arrival permutation of a 200-request run, and both of those turn out to matter
+(§1.5, A.6). Values are ToolTrie / ContextPilot:
+
+| workload | as measured above | under the control | control applied |
+|---|---|---|---|
+| k64 | 1.90% / 4.78% — **2.52x** | 1.82% / 2.81% — **1.54x** | mean of 5 arrival orders |
+| k128 | 1.13% / 1.99% — **1.76x** | 1.03% / 1.85% — **1.80x** | mean of 3 arrival orders |
+| padded-64 | 87.19% / 96.16% — **1.10x** | 97.05% / 97.09% — **1.00x** | steady state, req 201–600 |
+
+ContextPilot still wins every retrieved cell. k128's margin is unchanged and k64's
+falls by a third; the padded margin disappears entirely. k4 and k16 remain
+single-permutation and are not corrected.
 
 **Latency spread across arms**
 
@@ -979,6 +1009,10 @@ k128 under three permutations of the same 200 records:
 | mean | 1.03% | 1.85% | 1.84x |
 | spread | 0.34pp | 0.23pp | |
 
+The `mean` ratios are the mean of the per-seed ratios. Taking the ratio of the
+column means instead gives 1.55x at k64 (identical) and 1.80x at k128, which is
+the figure §4.1 quotes beside those means.
+
 The ToolTrie column uses the budget-lifted planner, legitimate because capped and
 uncapped are a measured null above; seed 0 against the capped arm is the 2.52x
 and 1.76x reported in §4.1.
@@ -988,6 +1022,15 @@ published 1.76x sits mid-range, so that cell needs no qualification. At k64 the
 ratio spans 1.09-2.57x, and the published 2.52x is the top of it — the other four
 permutations cluster at 1.09-1.39x. ContextPilot wins all eight cells, so the
 ranking is now better evidenced than before; the k64 *magnitude* is not.
+
+**Why seed 0 is the outlier, and why it is not a fluke.** The benchmark's
+natural order is blocked by source: 101 `toolret:apibank` requests followed by 99
+`toolret:apigen`, with 198 of 199 consecutive pairs sharing a source. Adjacent
+requests overlap 3.40 tools in that order against 1.43 shuffled — 2.4x the
+locality. ContextPilot's set-overlap clustering converts that into reuse;
+ToolTrie's exact-prefix walk cannot. Seed 0 is therefore the *ordered* case, not
+a lucky draw, and which column applies depends on whether the served traffic
+arrives in blocks of similar requests. Shuffled is the conservative assumption.
 
 The sensitivity does not belong to one method. At k64 ContextPilot varies 2.63pp
 against ToolTrie's 0.30pp; at k128 it is the other way round, 0.23pp against

@@ -848,12 +848,18 @@ The exchange rate goes from **8.3 to 1.1** accuracy points per point of reuse,
 and at 4B the hybrid's penalty is a fifth of a standard error — **not
 distinguishable from zero**, while it still carries 56% more reuse.
 
-Two cautions before reading that as vindication. With n=161 answerable requests
-the standard error on a difference is 5.44pp, so 4B cannot rule out a penalty as
-large as ~5pp; the 0.6B result was detectable only because 9.32pp exceeded that
-floor. And this is one model, one seed. **The line is reopened, not won** — it
-needs more samples to settle, and it is the one experiment in §5 now worth
-running again.
+**But it probably cannot be settled on this benchmark.** With n=161 answerable
+requests the standard error on a difference is 5.39pp, so 4B cannot rule out a
+penalty as large as ~5pp; the 0.6B result was detectable only because 9.32pp
+exceeded that floor. Decoding is greedy (`temperature 0, seed 0`), so repeating a
+run reproduces the same answers exactly — more samples means more *tasks*, and
+confirming a 1.25pp effect at 2 SE would need about **74x the evaluation data,
+~15,000 tasks against the 200 here**. At k64, where the gap is 2.64pp, it is 19x
+and ~3,500 tasks.
+
+**The line is reopened, not won**, and the honest form of that is: the 0.6B
+penalty was real and the 4B one is below the benchmark's resolution. A larger
+evaluation set is the only way past it — re-running is a no-op.
 
 **What would settle it.** More samples at 4B, and ContextPilot's order
 annotations, which no arm here used. They exist to decouple relevance from

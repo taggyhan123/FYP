@@ -251,11 +251,16 @@ between any two policies. ([A.6](findings.md#a6-is-the-tooltrie-vs-contextpilot-
   exists between. A workload at 30–70% overlap is where a trie could earn its
   keep rather than tie at a ceiling or lose in the noise.
 - **The hybrid ordering rejected in [§5](findings.md#5-explored-and-rejected) is
-  reopened, not settled.** Its accuracy penalty against ContextPilot is 9.32pp at
-  0.6B (2.2 SE) but 1.25pp at 4B (0.2 SE) — indistinguishable from zero, while it
-  still carries 56% more reuse. With n=161 that cannot rule out a ~5pp penalty,
-  so it needs more samples. This is the one experiment here now worth re-running.
+  reopened, and probably not settleable on this benchmark.** Its accuracy penalty
+  against ContextPilot is 9.32pp at 0.6B (2.2 SE) but 1.25pp at 4B (0.2 SE),
+  while it carries 56% more reuse. Decoding is greedy (`temperature 0, seed 0`),
+  so re-running reproduces the same answers — more samples means more *tasks*,
+  and confirming a 1.25pp effect at 2 SE needs roughly **75x the evaluation data,
+  about 15,000 tasks against the 200 these workloads carry**. What is resolvable
+  is that the 0.6B penalty was real and the 4B one is not detectable; that is the
+  finding, and a bigger benchmark is the only way past it.
 - **No arm used ContextPilot's order annotations**, which exist to decouple
   relevance from position and would help the displaced orderings most.
-- **One model for most cells, one trial per cell.** Eight cells were re-run under
-  3–5 arrival permutations; the rest are single draws.
+- **Coverage is uneven.** Accuracy has two models at both depths; converged
+  capacity has three replicates per arm; eight reuse cells were re-run under 3–5
+  arrival permutations. Everything else is a single draw at one model.

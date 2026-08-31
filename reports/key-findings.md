@@ -37,6 +37,18 @@ convention used in every policy-comparison table below.
 | ContextPilot-derived, static refit † | 96.16% | 2.23% |
 | Online frequency counter | **96.27%** | **2.33%** |
 
+> **Later correction (concurrent-latency phase).** Table 1's padded column is a
+> 200-request measurement, which is inside ToolTrie-v0's learning phase — it
+> reaches an optimal ordering only at request 222, where ContextPilot reaches one
+> at request 2. Extended to 600 requests, the padded gap closes: 97.05% against
+> 97.09%, and every timing metric ties within noise. **ContextPilot's advantage on
+> padded menus is cold-start speed, not ordering quality.** The retrieved column
+> is unaffected — there is no common core to converge to, and ContextPilot leads
+> at every depth. The "zero spread across trials" above measures determinism
+> (the orderings are frozen files), not robustness; arrival order is the axis that
+> actually moves these numbers. See
+> [`concurrent-latency/findings.md`](concurrent-latency/findings.md) §1.5 and A.6–A.7.
+
 **Table 2 — function-calling accuracy.** A separate experiment: one n=800 BFCL
 replay per condition, 640 relevance cases and 160 irrelevance cases. No reuse is
 involved.

@@ -1,7 +1,7 @@
 # Tool ordering under concurrent load
 
 Qwen3-0.6B on one RTX 3090 (plus a Qwen3-4B check), vLLM 0.26.0, prefix caching
-unmodified. 233 GPU runs. Raw outputs are in the git-ignored `cluster/results/`
+unmodified. 248 GPU runs. Raw outputs are in the git-ignored `cluster/results/`
 directories listed in the Appendix.
 
 This is the full record, with every control and validity check.
@@ -43,7 +43,13 @@ tool is pushed. The cache wants the *common* tools first; the model wants the
 *relevant* tools first; prefix caching only reuses a leading prefix. Both
 compete for the front of the prompt.
 
-**ToolTrie places second on retrieved menus and ties on padded ones.** It beats
+**ToolTrie-v1 is the one arm that beats ContextPilot.** Changing a single
+component of v0 — unmatched tools keep the order they arrived in rather than
+being sorted alphabetically — wins reuse at all four retrieved depths and all
+five arrival permutations, at equal or better accuracy in every cell (§5). It
+loses only on `padded-64`, whose input ordering is adversarial by construction.
+
+**ToolTrie-v0 places second on retrieved menus and ties on padded ones.** It beats
 every simple heuristic — unordered, alphabetical, frequency — everywhere.
 ContextPilot beats it at all four retrieval depths, by 1.07x to 2.52x — but the
 k64 figure is the top of its range: over five arrival orders it spans 1.09x to
@@ -112,7 +118,7 @@ and two more at 1.19%, so replaying them would duplicate curves.
 **How runs were done.** 200 requests per run, replaying frozen orderings so every
 arm is a permutation of the same menus. Open-loop Poisson arrivals at a fixed
 rate, seed 42, cache cleared before each run, decode pinned to 48 tokens so
-decode-length variance cannot pollute the tails. 233 runs total.
+decode-length variance cannot pollute the tails. 248 runs total.
 
 **One naming note.** ContextPilot throughout is the official reordering API at
 the paper's `alpha=0.001`, ordering only — no annotations, de-duplication or
@@ -730,7 +736,7 @@ permutation at both depths, so the ranking holds and the k64 magnitude does not
 what it is: a *frozen training-only* baseline, ranked on a separate corpus. Its
 counts do not match what actually arrives. Counting frequency on the live stream
 instead is a different and much stronger ordering — prefix 2.40 against 0.91 at
-k64, and the two agree on 0 of 200 records (§5). The claim holds for the fitted
+k64, and the two agree on 0 of 200 records (§6). The claim holds for the fitted
 variant tested, not for frequency ordering in general.
 
 ### 4.2 Smart queuing trades the tail for the median
@@ -825,12 +831,80 @@ frequency, so its tie-break falls through to each request's own position index
 and every request emits the core differently. Breaking ties on `tool_id` instead
 takes it from 0.94 to **32.01 of 32** — matching ContextPilot from a global sort
 with no index. That defect also costs it on the real retrieved menus, where the
-fixed tie-break lifts its prefix 8.50 → 10.51 at k128 (+24%), so §5's canonical
+fixed tie-break lifts its prefix 8.50 → 10.51 at k128 (+24%), so §6's canonical
 and hybrid arms are measured on an implementation that is one line short.
 
 ---
 
-## 5. Explored and rejected
+## 5. ToolTrie-v1: reorder only what the trie matched
+
+The accuracy gate above rejects three orderings, and §4.3 shows ToolTrie-v0
+losing to ContextPilot at every overlap level. Both have the same cause, and it
+is one line of v0.
+
+**The diagnosis.** v0 sorts the tools its trie cannot match *alphabetically* —
+and that fallback governs ~93% of every menu, because the trie itself matches
+only 1.19 of 64 tools at k64. Measured against the retriever's own ordering:
+
+| k128 | tools displaced | mean move | gold depth | reuse | positions per point of reuse |
+|---|---|---|---|---|---|
+| tooltrie_v0 | 99.1% | 41.9 | 62.8 | 1.13% | **37.1** |
+| ContextPilot | 85.3% | 15.9 | 27.8 | 1.99% | 8.0 |
+
+Tool name correlates with neither relevance nor commonality, so v0's permutation
+is information-free: it pays the full accuracy cost of displacing the correct
+tool and creates almost no cross-request agreement.
+
+**The change.** Unmatched tools keep the order they arrived in. The trie still
+places whatever prefix it matched; everything else stays put. At k128 that means
+placing **2.55 tools of 128** and leaving **120 of 200 requests byte-identical**
+to their input — 1.1 positions of movement against v0's 41.9.
+
+**Reuse, against every arm at every depth:**
+
+| depth | original | tooltrie_v0 | ContextPilot | **tooltrie_v1** |
+|---|---|---|---|---|
+| k4 | 15.87% | 17.48% | 18.72% | **19.47%** |
+| k16 | 6.12% | 7.77% | 9.93% | **11.31%** |
+| k64 | 0.91% | 1.90% | 4.78% | **4.96%** |
+| k128 | 0.37% | 1.13% | 1.99% | **2.21%** |
+
+It beats ContextPilot at **4 of 4 retrieved depths**, and at **5 of 5 arrival
+permutations** at k64 — mean 3.51% against 2.81%, sign test p = 0.031. Seed 0,
+used everywhere else in this report, is ContextPilot's best draw and v1's
+narrowest margin; on the other four the margin is 3–7x larger.
+
+**Accuracy, both models, both depths:**
+
+| | original | tooltrie_v0 | ContextPilot | **tooltrie_v1** |
+|---|---|---|---|---|
+| k64 @ 0.6B | **37.09%** | 25.83% | 27.15% | 33.11% |
+| k128 @ 0.6B | **22.98%** | 16.15% | 22.98% | 22.36% |
+| k64 @ 4B | **44.37%** | 39.74% | 42.38% | 42.38% |
+| k128 @ 4B | **44.72%** | 32.30% | 37.27% | **44.72%** |
+
+Equal or better than ContextPilot in all four cells. At 4B/k128 it matches the
+unordered baseline **exactly** while carrying 6x its reuse — the property
+ContextPilot was credited with before §1.4 showed that credit was a floor
+effect. No single accuracy margin clears 2 SE (the k128/4B gap is 1.35); what
+carries the result is that reuse is exact and wins 5/5 seeds, and that accuracy
+points the same way in every cell.
+
+**The boundary condition, and it is real.** v1 never overrides its input, so an
+adversarial input ordering defeats it. On `padded-64`, whose `original` arm puts
+the one differing tool at position 0 of *every* request, v1 preserves exactly
+that and scores **1.19% against v0's 87.19%**.
+
+That is the construction, not the overlap level. On the §4.3 menus — 25/50/75%
+shared, neutral input order — v1 reaches 12.39 / 27.16 / 45.43 of shared prefix
+against ContextPilot's 15.92 / 31.84 / 47.79, or 78–95% of it, and 3.6x v0's.
+**Use v1 where the input ordering carries relevance information.** A retriever's
+ranking does; `padded-64` does not, and the research brief never asks for it —
+it frames the problem as "different requests may retrieve different tool sets".
+
+---
+
+## 6. Explored and rejected
 
 Two ordering methods outside the four questions, recorded so they are not retried.
 
@@ -990,7 +1064,7 @@ gain most.
    3–5 permutations (A.6) and k64 moved 1.09–2.57x. Every other cell rests on
    one permutation, so point estimates here should be read as draws, not
    constants.
-8. **The §5 methods are single-configuration**, rejected on the accuracy
+8. **The §6 methods are single-configuration**, rejected on the accuracy
     exchange rate rather than an exhaustive sweep.
 
 ---
@@ -1057,7 +1131,7 @@ noise floor overturned:
 | ContextPilot wins under saturation, 1.42x | window not time-separated at 64 req/s | a tie (§1.5) |
 | ToolTrie's pile-up is 2x ContextPilot's | learning ToolTrie vs converged ContextPilot | 218 vs 216 (§3) |
 | the gap grows with model size | all 4B runs are 200 requests | cold-start cost grows (§1.3) |
-| model size does not reopen §5 | compared against `original`, not ContextPilot | it reopens (§5) |
+| model size does not reopen §6 | compared against `original`, not ContextPilot | it reopens (§6) |
 | ContextPilot at k128 is accuracy-free | 0.6B baseline floor-limited | −7.45pp at 4B (§1.4) |
 | retrieved p50 spread is 1.02x | table omitted ContextPilot | 1.14x (§4.1) |
 
@@ -1148,11 +1222,12 @@ ContextPilot scheduling, so nothing here measures the full system.
 | Steady state (600 req) and more arrival seeds | `steady-and-seeds-20260830-221902/` | 14 |
 | Steady state: the two reference arms | `steady-arms-20260830-234910/` | 4 |
 | Steady-state capacity, converged workload, replicates | `steady-capacity-20260831-004322/` | 16 |
+| ToolTrie-v1 (reuse, accuracy, 5 seeds, 4B) | `tooltrie-keeporder-20260901-001832/` | 15 |
 | Middle-overlap sweep (25/50/75%) | `overlap-sweep-20260831-232237/` | 12 |
 | ToolTrie frequency fallback | `tooltrie-v1-fallback-20260901-233750/` | 4 |
 | Accuracy at Qwen3-4B (k128, k64) | `accuracy-4b-20260831-204740/` | 10 |
 
-**233 runs.** All under the git-ignored `cluster/results/`.
+**248 runs.** All under the git-ignored `cluster/results/`.
 
 Driver `scripts/replay_vllm_concurrent.py`; also added
 `summarize_queuing_runs.py`, `build_canonical_ordering.py`,

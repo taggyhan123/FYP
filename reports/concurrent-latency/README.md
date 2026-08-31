@@ -1,7 +1,7 @@
 # Tool ordering under concurrent load — key findings
 
 Qwen3-0.6B on one RTX 3090 (plus a Qwen3-4B check), vLLM 0.26.0, prefix caching
-unmodified. 233 GPU runs.
+unmodified. 248 GPU runs.
 
 This is the short version. Every number links to the section of
 [`findings.md`](findings.md) that derives it, with its runs and controls.
@@ -206,8 +206,9 @@ ContextPilot's index grows without limit, also measured immaterial at this scale
 | accuracy @ k128 | −7.45pp cost vs ToolTrie's −12.42pp (4B) |
 | accuracy @ k64 | −1.99pp vs −4.63pp (4B) |
 
-**ToolTrie beats every simple heuristic — unordered, alphabetical, frequency —
-everywhere. It never beats ContextPilot on a primary metric anywhere.**
+**ToolTrie-v0 beats every simple heuristic — unordered, alphabetical, frequency —
+everywhere, and never beats ContextPilot on a primary metric anywhere.
+ToolTrie-v1 does, on both.**
 
 The one tie needs reading carefully, because two things make it uninformative
 rather than encouraging:
@@ -224,6 +225,38 @@ rather than encouraging:
 
 So the tie is where the workload stops measuring, not where the methods converge
 in quality.
+
+### ToolTrie-v1 changes this
+
+v0 sorts the tools its trie cannot match **alphabetically**, and that fallback
+orders ~93% of every menu. Tool name correlates with neither relevance nor
+commonality, so the permutation is information-free: at k128 it displaces 99.1%
+of the menu by a mean of 41.9 positions for 1.13% reuse — **37 positions per
+point of reuse against ContextPilot's 8**.
+
+v1 keeps unmatched tools in the order they arrived. At k128 it places **2.55
+tools of 128** and leaves **120 of 200 requests byte-identical** to their input.
+
+| depth | original | tooltrie_v0 | ContextPilot | **tooltrie_v1** |
+|---|---|---|---|---|
+| k4 | 15.87% | 17.48% | 18.72% | **19.47%** |
+| k16 | 6.12% | 7.77% | 9.93% | **11.31%** |
+| k64 | 0.91% | 1.90% | 4.78% | **4.96%** |
+| k128 | 0.37% | 1.13% | 1.99% | **2.21%** |
+
+**4 of 4 retrieved depths, and 5 of 5 arrival permutations at k64** (p = 0.031;
+reuse is deterministic, so each paired comparison is exact). Accuracy is equal or
+better than ContextPilot in all four model×depth cells — at 4B/k128 it matches
+the *unordered baseline exactly* (44.72%) while carrying 6x its reuse.
+
+**It loses on `padded-64`, badly and for a knowable reason.** That workload's
+`original` arm puts the one differing tool at position 0 of every request; v1
+never overrides its input, so it preserves the worst possible layout and scores
+1.19% against v0's 87.19%. That is the construction, not the overlap level — at
+25/50/75% shared tools with a neutral input order v1 reaches 78–95% of
+ContextPilot's shared prefix. Use it where the input ordering carries relevance
+information, which is the regime the research brief describes.
+([§5](findings.md#5-tooltrie-v1-reorder-only-what-the-trie-matched))
 
 ---
 
@@ -252,7 +285,7 @@ between any two policies. ([A.6](findings.md#a6-is-the-tooltrie-vs-contextpilot-
   inverted U in overlap — 1.5–1.8x on retrieved menus, **3.2–4.1x in the middle**,
   a tie on padded ones. This band was the trie's best prospect and is where it
   does worst ([§4.3](findings.md#43-the-middle-of-the-overlap-range)).
-- **The hybrid ordering rejected in [§5](findings.md#5-explored-and-rejected) is
+- **The hybrid ordering rejected in [§6](findings.md#6-explored-and-rejected) is
   reopened, and probably not settleable on this benchmark.** Its accuracy penalty
   against ContextPilot is 9.32pp at 0.6B (2.2 SE) but 1.25pp at 4B (0.2 SE),
   while it carries 56% more reuse. Decoding is greedy (`temperature 0, seed 0`),
@@ -262,13 +295,13 @@ between any two policies. ([A.6](findings.md#a6-is-the-tooltrie-vs-contextpilot-
   is that the 0.6B penalty was real and the 4B one is not detectable; that is the
   finding, and a bigger benchmark is the only way past it.
 - **No arm used ContextPilot's order annotations**, which exist to decouple
-  relevance from position and would help the displaced orderings most. This is now
-  the only untried idea that could change the accuracy gate, and three separate
-  methods have died on that gate.
+  relevance from position and would help the displaced orderings most.
+- **ToolTrie-v1 has no accuracy baseline at k4/k16**, and no latency-under-load
+  numbers. Its reuse and accuracy at k64/k128 are measured; the rest is not.
 - **`canonical` and `hybrid` were measured one line short.** Their tie-break falls
   through to each request's own position index, so identical-frequency tools come
   out in a different order per request. Fixing it lifts the k128 prefix 24%. Their
-  §5 numbers understate them.
+  §6 numbers understate them.
 - **Coverage is uneven.** Accuracy has two models at both depths; converged
   capacity has three replicates per arm; eight reuse cells were re-run under 3–5
   arrival permutations. Everything else is a single draw at one model.

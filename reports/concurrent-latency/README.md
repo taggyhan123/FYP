@@ -39,7 +39,7 @@ padded story: **1.50x** over the first 200 requests, and a tie afterwards. ([§1
 
 Padded menus give every request 63 of the same 64 tools. On genuinely retrieved
 menus the effect nearly vanishes — reuse spread 94.97pp → 0.98pp, p50 spread
-36x → 1.02x, and 95–98% of prefill is uncacheable whatever policy is used.
+36x → 1.14x, and 95–98% of prefill is uncacheable whatever policy is used.
 
 **This is the report's most important limit.** ([§4.1](findings.md#41-on-real-retrieved-menus-ordering-barely-matters))
 

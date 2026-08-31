@@ -31,7 +31,7 @@ statistics were flat within 1.25x.
 
 **Most of that is the test workload, not the method.** The padded menus give
 every request 63 of the same 64 tools. On real BM25-retrieved menus the gap
-between arms collapses: reuse spread 94.97pp → 0.98pp, p50 spread 36x → 1.02x.
+between arms collapses: reuse spread 94.97pp → 0.98pp, p50 spread 36x → 1.14x.
 
 **Reordering costs accuracy.** On retrieved menus ToolTrie loses 6.8 points of
 tool-selection accuracy at k128 and 11.3 at k64. ContextPilot at k128 is the one
@@ -163,7 +163,7 @@ the 22 ms median penalty falls to 0.5 ms — a tie rather than a reversal (§1.5
 
 **Ordering is decisive on padded menus and nearly irrelevant on retrieved ones.**
 Run at the same request size and offered rate, p50 spans **36x** across the padded
-arms but only **1.14x** across BM25-retrieved ones (9559.9–9760.9 ms), and every
+arms but only **1.14x** across BM25-retrieved ones (8565.4–9760.9 ms), and every
 retrieved arm saturates at ~2.6 req/s regardless of policy. §4.1 has the full
 retrieved comparison at four depths; it is the most important qualification in
 this report, which is why it is flagged here rather than only there.
@@ -595,13 +595,18 @@ single-permutation and are not corrected.
 
 | workload | achieved (range) | p50 range (ms) | spread |
 |---|---|---|---|
-| k4 | 15.907 – 15.924 | 47.6 – 52.3 | 1.10x |
-| k64 | 2.623 – 2.635 | 9559.9 – 9760.9 | **1.02x** |
-| k128 | 1.004 – 1.007 | 35192.4 – 35852.7 | **1.02x** |
+| k4 | 15.907 – 15.931 | 46.3 – 52.3 | 1.13x |
+| k16 | 7.998 – 8.001 | 98.2 – 101.7 | **1.04x** |
+| k64 | 2.623 – 2.693 | 8565.4 – 9760.9 | **1.14x** |
+| k128 | 1.004 – 1.013 | 34731.1 – 35852.7 | **1.03x** |
 | **padded-64** | 3.564 – 4.014 | 91.8 – 3310.4 | **36.06x** |
 
+All five arms are included. An earlier version of this table omitted
+ContextPilot, which is the fastest arm at every depth, and so understated the
+retrieved spreads as 1.02–1.10x.
+
 **The 95-point reuse spread that drives Parts 1–3 becomes under 3 points, and
-the 36x latency spread becomes 1.02x.** Padding gives every request the same
+the 36x latency spread becomes at most 1.14x.** Padding gives every request the same
 63-tool core, which ordering can pull to the front. Real retrieval returns a
 different set per query, so there is little shared structure for any ordering to
 exploit. On retrieved menus 95–98% of prefill is uncacheable whatever policy is
@@ -778,7 +783,7 @@ points the exchange rate changes; if not, the line is closed.
 ## Limitations
 
 1. **Parts 1–3 describe a padded workload, not tool ordering in general.** §4.1
-   is the check: reuse spread falls 94.97pp → 0.98pp, latency spread 36x → 1.02x.
+   is the check: reuse spread falls 94.97pp → 0.98pp, latency spread 36x → 1.14x.
    The most important limit here. Two further properties of that workload were
    measured late: reuse on it is arithmetically the position of the single tool
    that differs between requests (r² = 0.9996), and the ToolTrie–ContextPilot gap

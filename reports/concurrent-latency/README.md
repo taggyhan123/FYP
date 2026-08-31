@@ -1,7 +1,7 @@
 # Tool ordering under concurrent load — key findings
 
 Qwen3-0.6B on one RTX 3090 (plus a Qwen3-4B check), vLLM 0.26.0, prefix caching
-unmodified. 217 GPU runs.
+unmodified. 233 GPU runs.
 
 This is the short version. Every number links to the section of
 [`findings.md`](findings.md) that derives it, with its runs and controls.
@@ -246,10 +246,12 @@ between any two policies. ([A.6](findings.md#a6-is-the-tooltrie-vs-contextpilot-
 
 ## What is not settled
 
-- **The interesting middle is unmeasured.** Padded menus share 98.4% of tools;
-  retrieved ones share 0% and overlap 21–33% with their best partner. Nothing
-  exists between. A workload at 30–70% overlap is where a trie could earn its
-  keep rather than tie at a ceiling or lose in the noise.
+- ~~The interesting middle is unmeasured.~~ **Measured, and it went the other
+  way.** At 25/50/75% shared tools ContextPilot reaches the ceiling every time
+  (28.8 / 49.9 / 74.0%) and ToolTrie reaches about 30% of it. Its advantage is an
+  inverted U in overlap — 1.5–1.8x on retrieved menus, **3.2–4.1x in the middle**,
+  a tie on padded ones. This band was the trie's best prospect and is where it
+  does worst ([§4.3](findings.md#43-the-middle-of-the-overlap-range)).
 - **The hybrid ordering rejected in [§5](findings.md#5-explored-and-rejected) is
   reopened, and probably not settleable on this benchmark.** Its accuracy penalty
   against ContextPilot is 9.32pp at 0.6B (2.2 SE) but 1.25pp at 4B (0.2 SE),
@@ -260,7 +262,13 @@ between any two policies. ([A.6](findings.md#a6-is-the-tooltrie-vs-contextpilot-
   is that the 0.6B penalty was real and the 4B one is not detectable; that is the
   finding, and a bigger benchmark is the only way past it.
 - **No arm used ContextPilot's order annotations**, which exist to decouple
-  relevance from position and would help the displaced orderings most.
+  relevance from position and would help the displaced orderings most. This is now
+  the only untried idea that could change the accuracy gate, and three separate
+  methods have died on that gate.
+- **`canonical` and `hybrid` were measured one line short.** Their tie-break falls
+  through to each request's own position index, so identical-frequency tools come
+  out in a different order per request. Fixing it lifts the k128 prefix 24%. Their
+  §5 numbers understate them.
 - **Coverage is uneven.** Accuracy has two models at both depths; converged
   capacity has three replicates per arm; eight reuse cells were re-run under 3–5
   arrival permutations. Everything else is a single draw at one model.

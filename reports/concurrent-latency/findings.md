@@ -1,7 +1,7 @@
 # Tool ordering under concurrent load
 
 Qwen3-0.6B on one RTX 3090 (plus a Qwen3-4B check), vLLM 0.26.0, prefix caching
-unmodified. 217 GPU runs. Raw outputs are in the git-ignored `cluster/results/`
+unmodified. 233 GPU runs. Raw outputs are in the git-ignored `cluster/results/`
 directories listed in the Appendix.
 
 This is the full record, with every control and validity check.
@@ -112,7 +112,7 @@ and two more at 1.19%, so replaying them would duplicate curves.
 **How runs were done.** 200 requests per run, replaying frozen orderings so every
 arm is a permutation of the same menus. Open-loop Poisson arrivals at a fixed
 rate, seed 42, cache cleared before each run, decode pinned to 48 tokens so
-decode-length variance cannot pollute the tails. 217 runs total.
+decode-length variance cannot pollute the tails. 233 runs total.
 
 **One naming note.** ContextPilot throughout is the official reordering API at
 the paper's `alpha=0.001`, ordering only — no annotations, de-duplication or
@@ -725,8 +725,13 @@ spans 1.09-2.57x, with the other four at 1.09-1.39x. k128 is stable by contrast
 permutation at both depths, so the ranking holds and the k64 magnitude does not
 (A.6).
 
-**Putting frequently used tools first does not work.** The `frequency` arm is
-the worst at k4 and k16 and near-worst at k64 and k128.
+**Putting frequently used tools first does not work — as fitted here.** The
+`frequency` arm is the worst at k4 and k16 and near-worst at k64 and k128. Note
+what it is: a *frozen training-only* baseline, ranked on a separate corpus. Its
+counts do not match what actually arrives. Counting frequency on the live stream
+instead is a different and much stronger ordering — prefix 2.40 against 0.91 at
+k64, and the two agree on 0 of 200 records (§5). The claim holds for the fitted
+variant tested, not for frequency ordering in general.
 
 ### 4.2 Smart queuing trades the tail for the median
 
@@ -781,6 +786,48 @@ the policy for something a coin flip partly reproduces.**
 workloads is 0.4–2%, so the uncached portion is ~99% of every request and the
 cache-aware term has nothing to work with.
 
+### 4.3 The middle of the overlap range
+
+Every workload above sits at an extreme: padded menus share **98.4%** of their
+tools between any two requests, retrieved ones share **0%**. This fills the band,
+holding menu size at 64 and prompt length at ~5,550 tokens and varying only how
+many tools every request shares. Reuse at 4 req/s, against the ceiling that
+hoisting the shared core would give:
+
+| tools shared by all | ceiling | original | alphabetical | tooltrie_v0 | **ContextPilot** |
+|---|---|---|---|---|---|
+| 25% | 25% | 0.75% | 0.72% | 7.01% | **28.80%** |
+| 50% | 50% | 0.96% | 2.74% | 15.08% | **49.87%** |
+| 75% | 75% | 1.08% | 6.60% | 23.49% | **73.98%** |
+
+**ContextPilot reaches the ceiling at every level; ToolTrie reaches about 30% of
+it.** This band was the trie's best remaining prospect and is instead where it
+does worst: ContextPilot's advantage is an inverted U in overlap — 1.5–1.8x on
+retrieved menus, **3.2–4.1x here**, and a tie on padded menus, where the problem
+is easy enough that anything eventually solves it.
+
+**Why, measured rather than argued.** A long shared prefix needs two things, and
+only one arm has both:
+
+| arm | hoists the core? | emits it in the same order? | prefix (of 32) |
+|---|---|---|---|
+| alphabetical | no — position 31.9/64 | yes | 0.82 |
+| tooltrie_v0 | no — position 31.1/64 | yes | 7.85 |
+| canonical_oracle | **yes** — 15.5/64 | no — 200 variants | 0.94 |
+| **ContextPilot** | **yes** — 15.6/64 | **yes** | **31.84** |
+
+ContextPilot computes a set intersection, which *is* the core, and emits it in a
+canonical order. ToolTrie only matches sequences and has no notion of which tools
+are common, so it never hoists them.
+
+`canonical_oracle` fails for a smaller reason: every core tool has identical
+frequency, so its tie-break falls through to each request's own position index
+and every request emits the core differently. Breaking ties on `tool_id` instead
+takes it from 0.94 to **32.01 of 32** — matching ContextPilot from a global sort
+with no index. That defect also costs it on the real retrieved menus, where the
+fixed tie-break lifts its prefix 8.50 → 10.51 at k128 (+24%), so §5's canonical
+and hybrid arms are measured on an implementation that is one line short.
+
 ---
 
 ## 5. Explored and rejected
@@ -820,7 +867,46 @@ first request, which has no predecessor and so no head. The idea has room to act
 only where ContextPilot's head is short, which is precisely the retrieved menus
 measured above (head 0.36 tools at k128).
 
-**Both were rejected on accuracy.**
+**A frequency fallback for ToolTrie.** ToolTrie-v0 orders the tools it cannot
+match against its trie *alphabetically*. That fallback governs ~93% of every
+menu — the trie itself matches only 1.19 of 64 tools at k64 — and alphabetical
+order scatters commonly-occurring tools, so the first ordering it emits has a
+short usable prefix and, since the trie can only match orderings it has already
+produced, every later request inherits that layout. Replacing it with frequency
+counted on strictly earlier requests, tie-broken on `tool_id`, is one line and
+stays causal.
+
+It is a large reuse win, and the trie is doing much of the work — it roughly
+doubles what the same frequency sort achieves with no trie (k128 prefix 10.59
+against 4.74), reaching what an *oracle* frequency sort gets without using future
+information:
+
+| depth | tooltrie_v0 | ContextPilot | freq fallback | vs ContextPilot |
+|---|---|---|---|---|
+| k64 | 1.90% | 4.78% | **6.09%** | **1.27x** |
+| k128 | 1.13% | 1.99% | **4.71%** | **2.37x** |
+
+**And it fails the same accuracy gate, harder than its depth predicts.**
+
+| k64 | gold depth | reuse | accuracy |
+|---|---|---|---|
+| original | 6.1 | 0.91% | **37.09%** |
+| ContextPilot | 12.5 | 4.78% | 27.15% |
+| freq fallback | 18.0 | **6.09%** | 20.53% |
+| tooltrie_v0 | 31.5 | 1.90% | 25.83% |
+
+It sits *shallower* than ToolTrie-v0 and still scores lower — 18.0 against 31.5
+on depth, 20.53% against 25.83% on accuracy — which breaks the depth-tracks-
+accuracy relation the rest of this report relies on. The likely reason, untested:
+depth is not the only thing that matters, and a frequency fallback front-loads
+the globally most common tools, which are the most confusable wrong answers.
+Alphabetical order is at least uncorrelated with plausibility.
+
+Against ContextPilot the exchange is **5.1 accuracy points per point of reuse at
+k64 and 4.8 at k128** — the same order as the canonical and hybrid arms above.
+The reuse result is real; it is not worth having.
+
+**All three were rejected on accuracy.**
 
 | depth | arm | reuse | accuracy | mean position of correct tool |
 |---|---|---|---|---|
@@ -1062,9 +1148,11 @@ ContextPilot scheduling, so nothing here measures the full system.
 | Steady state (600 req) and more arrival seeds | `steady-and-seeds-20260830-221902/` | 14 |
 | Steady state: the two reference arms | `steady-arms-20260830-234910/` | 4 |
 | Steady-state capacity, converged workload, replicates | `steady-capacity-20260831-004322/` | 16 |
+| Middle-overlap sweep (25/50/75%) | `overlap-sweep-20260831-232237/` | 12 |
+| ToolTrie frequency fallback | `tooltrie-v1-fallback-20260901-233750/` | 4 |
 | Accuracy at Qwen3-4B (k128, k64) | `accuracy-4b-20260831-204740/` | 10 |
 
-**217 runs.** All under the git-ignored `cluster/results/`.
+**233 runs.** All under the git-ignored `cluster/results/`.
 
 Driver `scripts/replay_vllm_concurrent.py`; also added
 `summarize_queuing_runs.py`, `build_canonical_ordering.py`,

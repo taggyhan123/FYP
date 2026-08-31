@@ -341,12 +341,15 @@ it later is the entire mechanism. 63 is optimal.
 | tooltrie_v0 | 56.31 | 62.90 | **63.00** |
 | ContextPilot | 62.69 | 63.00 | **63.00** |
 
-ContextPilot is optimal from request ~51; ToolTrie takes about 150. Both finish
-in the same place, and once they do the tie is forced — two policies that both
-put the singleton at 63 cannot differ. **ContextPilot's advantage on padded menus
-is cold-start speed, not ordering quality.** That is a real advantage for short
-or bursty workloads; it is not the ordering-quality gap §1.1's first window
-appears to report.
+**ContextPilot never really warms up: it is optimal from its second request and
+never drops below optimal again. ToolTrie takes 222.** Over the first 50 requests
+their singleton positions are 61.74 and 49.32. Both finish in the same place, and
+once they do the tie is forced — two policies that both put the singleton at 63
+cannot differ. **So ContextPilot's advantage on padded menus is cold-start speed,
+not ordering quality**, and that advantage is far larger than "~150 requests"
+suggests: it is the difference between request 2 and request 222. It is a real
+advantage for short, bursty, or churning workloads; it is not the
+ordering-quality gap §1.1's first window appears to report.
 
 **One caveat on the extension, and it matters.** `alphabetical` has no state and
 still gains 5.5 positions between the windows, because the added requests carry

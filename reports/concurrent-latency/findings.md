@@ -1,7 +1,7 @@
 # Tool ordering under concurrent load
 
 Qwen3-0.6B on one RTX 3090 (plus a Qwen3-4B check), vLLM 0.26.0, prefix caching
-unmodified. 210 GPU runs. Raw outputs are in the git-ignored `cluster/results/`
+unmodified. 217 GPU runs. Raw outputs are in the git-ignored `cluster/results/`
 directories listed in the Appendix.
 
 This is the full record, with every control and validity check.
@@ -33,10 +33,10 @@ statistics were flat within 1.25x.
 every request 63 of the same 64 tools. On real BM25-retrieved menus the gap
 between arms collapses: reuse spread 94.97pp → 0.98pp, p50 spread 36x → 1.14x.
 
-**Reordering costs accuracy.** On retrieved menus ToolTrie loses 6.8 points of
-tool-selection accuracy at k128 and 11.3 at k64. ContextPilot at k128 is the one
-policy that gains reuse at zero accuracy cost at 0.6B — though that turns out to
-be a floor effect, and at 4B it costs 7.45pp like everything else (§1.4).
+**Reordering costs accuracy.** On retrieved menus ToolTrie loses 6.8 points at
+k128 and 11.3 at k64 on Qwen3-0.6B, and 12.4 and 4.6 on Qwen3-4B. ContextPilot is
+cheapest at both depths but not free: its apparent zero cost at 0.6B/k128 is a
+floor effect, and at 4B it costs 7.45pp there and 1.99pp at k64 (§1.4).
 
 **The reason is position.** Accuracy tracks how far down the menu the correct
 tool is pushed. The cache wants the *common* tools first; the model wants the
@@ -48,8 +48,9 @@ every simple heuristic — unordered, alphabetical, frequency — everywhere.
 ContextPilot beats it at all four retrieval depths, by 1.07x to 2.52x — but the
 k64 figure is the top of its range: over five arrival orders it spans 1.09x to
 2.57x, the other four at 1.09-1.39x (A.6). On padded menus its 9-point deficit is
-warm-up: by request 200 the two are 0.04pp apart and ToolTrie is marginally
-faster (§1.5).
+warm-up: from request 222 both place the odd tool identically and every timing
+metric ties within noise. That tie is a ceiling effect, not parity — the workload
+stops discriminating once both are optimal (§1.5, A.7).
 
 ### What to be careful with
 
@@ -111,7 +112,7 @@ and two more at 1.19%, so replaying them would duplicate curves.
 **How runs were done.** 200 requests per run, replaying frozen orderings so every
 arm is a permutation of the same menus. Open-loop Poisson arrivals at a fixed
 rate, seed 42, cache cleared before each run, decode pinned to 48 tokens so
-decode-length variance cannot pollute the tails. 210 runs total.
+decode-length variance cannot pollute the tails. 217 runs total.
 
 **One naming note.** ContextPilot throughout is the official reordering API at
 the paper's `alpha=0.001`, ordering only — no annotations, de-duplication or
@@ -309,32 +310,47 @@ ContextPilot here is the official-API arm at the paper's alpha (§Setup).
 | k64 | ContextPilot | 4.78% | 27.15% | −10.0pp | 12.5 |
 | k64 | tooltrie_v0 | 1.90% | 25.83% | **−11.3pp** | 31.5 |
 
-**ToolTrie's reuse is paid for in accuracy** — 6.8 points at k128, 11.3 at k64.
-The project's earlier quality work is all on padded menus; this appears to be
-the first measurement on retrieved ones.
+**ToolTrie's reuse is paid for in accuracy** — at 0.6B, 6.8 points at k128 and
+11.3 at k64; at 4B, 12.4 and 4.6. The project's earlier quality work is all on
+padded menus; this appears to be the first measurement on retrieved ones.
 
 **At 0.6B, ContextPilot at k128 appears free**: 5.4x the reuse of no reordering
-at zero accuracy cost. **That does not survive a larger model.** Repeating k128
-on Qwen3-4B — same frozen workloads, same serial protocol, `ceiling` identical at
-0.805 so the arms stay comparable:
+at zero accuracy cost. **That does not survive a larger model.** Both depths were
+repeated on Qwen3-4B — same frozen workloads, same serial protocol, `ceiling`
+identical at 0.755 and 0.805 so the arms stay comparable:
 
-| k128 | gold position | reuse | 0.6B | 4B |
-|---|---|---|---|---|
-| original | 11.5 | 0.37% | 22.98% | **44.72%** |
-| ContextPilot | 27.8 | 1.99% | 22.98% (**0.00pp**) | 37.27% (**−7.45pp**) |
-| canonical_oracle | 56.5 | 2.87% | 14.29% (−8.69pp) | 34.78% (−9.94pp) |
-| hybrid_oracle | 57.7 | 3.11% | 13.66% (−9.32pp) | 36.02% (−8.70pp) |
-| tooltrie_v0 | 62.8 | 1.13% | 16.15% (−6.83pp) | 32.30% (−12.42pp) |
+| depth | arm | gold position | reuse | 0.6B | 4B |
+|---|---|---|---|---|---|
+| k64 | original | 6.1 | 0.91% | 37.09% | **44.37%** |
+| k64 | ContextPilot | 12.5 | 4.78% | 27.15% (−9.94pp) | 42.38% (**−1.99pp**) |
+| k64 | canonical_oracle | 23.9 | 4.28% | — | 41.06% (−3.31pp) |
+| k64 | hybrid_oracle | 24.1 | 4.17% | — | 39.07% (−5.30pp) |
+| k64 | tooltrie_v0 | 31.5 | 1.90% | 25.83% (−11.26pp) | 39.74% (**−4.63pp**) |
+| k128 | original | 11.5 | 0.37% | 22.98% | **44.72%** |
+| k128 | ContextPilot | 27.8 | 1.99% | 22.98% (**0.00pp**) | 37.27% (**−7.45pp**) |
+| k128 | canonical_oracle | 56.5 | 2.87% | 14.29% (−8.69pp) | 34.78% (−9.94pp) |
+| k128 | hybrid_oracle | 57.7 | 3.11% | 13.66% (−9.32pp) | 36.02% (−8.70pp) |
+| k128 | tooltrie_v0 | 62.8 | 1.13% | 16.15% (−6.83pp) | 32.30% (−12.42pp) |
 
-**The 0.6B measurement was floor-limited.** At 22.98% the model was failing most
-answerable requests anyway, so moving the gold tool from depth 11.5 to 27.8 did
-not register. With real headroom at 4B it does, and accuracy then tracks depth
-almost monotonically down the table. The 4B column is the better measurement of
-this effect, not merely a second one.
+**Scale halves the depth penalty, and the 0.6B k128 column understates it.**
+Fitting accuracy against gold-tool position across all arms in each cell:
 
-Absolute accuracy nearly doubles while the depth *slope* barely moves — 0.202 to
-**0.188 pp lost per position**, a 7% flattening for 6.7x the parameters. Scale
-buys capability, not positional robustness, and this cost is made of the slope.
+| slope, pp lost per position | 0.6B | 4B |
+|---|---|---|
+| k64 | **0.359** | 0.191 |
+| k128 | 0.190 | 0.191 |
+
+The 4B slope is **0.191 at both depths** — a stable property of the model, not of
+the menu size. The 0.6B slope only matches it at k128 because that cell is
+floor-limited: a 22.98% baseline leaves little room to fall, which compresses the
+measured slope. Where 0.6B has headroom, at k64, the slope is nearly twice as
+steep. So a larger model is genuinely more robust to depth — roughly half as
+sensitive — and the k128 0.6B figures are the least reliable in this table.
+
+**ContextPilot's apparent free lunch was the same floor effect.** At 0.6B/k128 it
+scored exactly the baseline; at 4B, with headroom, its shallower displacement
+costs 1.99pp at k64 and 7.45pp at k128. It remains the cheapest reordering at
+both depths, but it is not free.
 
 **Accuracy tracks position, not policy.** The further down the menu the correct
 tool is pushed, the worse the model does — the lost-in-the-middle effect
@@ -813,10 +829,10 @@ measured above (head 0.36 tools at k128).
 | k128 | canonical | 2.87% | 14.29% | 56.5 |
 | k128 | hybrid | **3.11%** | **13.66%** | 57.7 |
 
-The hybrid's k128 win costs **9.3 points of accuracy for 1.12 points of reuse** —
-8.3 points of accuracy per point of reuse. Sorting by global frequency can send
-a request's own top-ranked tool to position 56 of 128; ContextPilot moves only
-tools inside a matched cluster and leaves the rest in relevance order.
+At 0.6B the hybrid's k128 win costs **9.3 points of accuracy for 1.12 points of
+reuse** — 8.3 points of accuracy per point of reuse. Sorting by global frequency
+can send a request's own top-ranked tool to position 56 of 128; ContextPilot moves
+only tools inside a matched cluster and leaves the rest in relevance order.
 
 **A larger model reopens the hybrid.** The obvious objection to this rejection
 was that a 0.6B model is unusually sensitive to how deep the correct tool sits.
@@ -856,17 +872,18 @@ gain most.
    that differs between requests (r² = 0.9996), and the ToolTrie–ContextPilot gap
    on it is warm-up that vanishes by request 200 (§1.5).
 2. **Accuracy is two models, one seed, two depths.** The 0.6B-fragility
-   objection was tested and does not hold: at 4B absolute accuracy nearly
-   doubles while the depth penalty moves under a point (§1.4). No arm used order
-   annotations, and the depth slope is fitted through few points.
-3. **Model size is controlled on the two things that depend on it.** Reuse is
-   unchanged at 4B (§1.3) and the accuracy penalty is a slope that scale barely
-   flattens, 0.202 → 0.188 pp per position for 6.7x the parameters (§1.4). What
-   *does* grow at 4B is the cold-start cost, not the converged ordering gap.
-   8B untested, and the 0.6B→4B trend argues it would move nothing: extrapolating
-   that slope, 2x more parameters buys roughly 0.2pp of an 8.70pp penalty. One
-   claim was falsified by the 4B run — ContextPilot's flat latency shape is
-   0.6B-specific.
+   objection was tested and partly holds: at 4B the depth slope is 0.191 pp per
+   position at both depths against 0.359 at 0.6B/k64, so a larger model is about
+   half as depth-sensitive, and the 0.6B k128 cell is floor-limited (§1.4). No arm
+   used order annotations. Slopes are fitted through 3–5 arms per cell, and with
+   n=161–151 answerable requests the standard error on a difference is ~5.4pp.
+3. **Model size is controlled on the things that depend on it.** Reuse is
+   unchanged at 4B (§1.3). The accuracy penalty is a slope that scale roughly
+   halves — 0.359 pp per position at 0.6B/k64 against 0.191 at 4B, which holds at
+   both depths (§1.4). What *does* grow at 4B is the cold-start cost, not the
+   converged ordering gap. 8B untested. Two claims were overturned by the 4B run:
+   ContextPilot's flat latency shape is 0.6B-specific, and its "zero accuracy
+   cost" at k128 was a floor effect.
 4. **Queuing was tested only under saturation at one in-flight cap.** Every run
    was deeply backlogged. Preemptive policies, and any policy inside the engine
    rather than in front of it, are untested.
@@ -919,7 +936,7 @@ unchanged (0.00pp reuse change). Only `alphabetical` degraded. There was no
 eviction pressure at this size, which is why §2's caching mechanism had nothing
 to exploit.
 
-### A.2 Two corrections made during the work
+### A.2 Corrections made during the work
 
 **Time to first token was the wrong metric for §2 and §4.** It starts at
 dispatch, so it cannot see delay a queuing policy imposes. Measured that way the
@@ -936,6 +953,25 @@ Two policy configurations were also flagged as having reordered nothing, so
 their nulls are mechanical rather than real. The check that catches this —
 comparing dispatch order against the baseline — is built into the summariser,
 because the same failure had already produced two false nulls earlier.
+
+**Later corrections, once the 600-request and 4B runs existed.** Every one of
+these was a claim about ToolTrie against ContextPilot that a wider window or a
+noise floor overturned:
+
+| claim | why it was wrong | now |
+|---|---|---|
+| padded gap is ordering quality | 200-request window; ToolTrie converges at 222 | warm-up (§1.5) |
+| ToolTrie wins the converged distribution | margins inside measurement noise | a tie (A.7) |
+| ContextPilot wins under saturation, 1.42x | window not time-separated at 64 req/s | a tie (§1.5) |
+| ToolTrie's pile-up is 2x ContextPilot's | learning ToolTrie vs converged ContextPilot | 218 vs 216 (§3) |
+| the gap grows with model size | all 4B runs are 200 requests | cold-start cost grows (§1.3) |
+| model size does not reopen §5 | compared against `original`, not ContextPilot | it reopens (§5) |
+| ContextPilot at k128 is accuracy-free | 0.6B baseline floor-limited | −7.45pp at 4B (§1.4) |
+| retrieved p50 spread is 1.02x | table omitted ContextPilot | 1.14x (§4.1) |
+
+The pattern is one mistake repeated: **measuring a learning planner inside its
+learning phase, or reading a margin without a noise floor.** A.7 states the floor
+so it can be checked rather than assumed.
 
 ### A.3 How this is normally done
 
@@ -1020,10 +1056,9 @@ ContextPilot scheduling, so nothing here measures the full system.
 | Steady state (600 req) and more arrival seeds | `steady-and-seeds-20260830-221902/` | 14 |
 | Steady state: the two reference arms | `steady-arms-20260830-234910/` | 4 |
 | Steady-state capacity, converged workload, replicates | `steady-capacity-20260831-004322/` | 16 |
-| Accuracy at Qwen3-4B (k128, k64) | `accuracy-4b-20260831-204740/` | 3 |
+| Accuracy at Qwen3-4B (k128, k64) | `accuracy-4b-20260831-204740/` | 10 |
 
-**210 runs.** All under the git-ignored `cluster/results/`. The 4B accuracy
-stage is still running; its row will grow to 10.
+**217 runs.** All under the git-ignored `cluster/results/`.
 
 Driver `scripts/replay_vllm_concurrent.py`; also added
 `summarize_queuing_runs.py`, `build_canonical_ordering.py`,

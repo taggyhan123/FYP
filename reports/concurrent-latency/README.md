@@ -1,7 +1,7 @@
 # Tool ordering under concurrent load — key findings
 
 Qwen3-0.6B on one RTX 3090 (plus a Qwen3-4B check), vLLM 0.26.0, prefix caching
-unmodified. 210 GPU runs.
+unmodified. 217 GPU runs.
 
 This is the short version. Every number links to the section of
 [`findings.md`](findings.md) that derives it, with its runs and controls.
@@ -17,8 +17,12 @@ Padded menus at 4 req/s, time to first token in ms, on **converged** requests
 |---|---|---|---|---|
 | `original` | 6239.7 | 15175.0 | 15659.5 | 16108.6 |
 | `alphabetical` | 271.3 | 586.6 | 820.6 | 960.4 |
-| `tooltrie_v0` | **91.2** | **122.5** | **133.1** | **141.9** |
-| **ContextPilot** | 91.7 | 123.7 | 134.3 | 151.1 |
+| `tooltrie_v0` | 91.2 | 122.5 | 133.1 | 141.9 |
+| ContextPilot | 91.7 | 123.7 | 134.3 | 151.1 |
+
+The bottom two rows are a **tie**, not a ToolTrie win — every gap there is inside
+measurement noise, and from request 222 both arms place the odd tool identically.
+See the ToolTrie-vs-ContextPilot section below.
 
 **Ordering is worth 68x at p50 and 113–124x across the tail.** Serial testing hid
 all of it — at concurrency 1 every arm sat within 1.25x on every statistic and
@@ -47,7 +51,7 @@ every other section uses and the only one with a `frequency` arm:
 tools are shared; on genuinely retrieved menus the spread collapses to at most
 1.14x and 95–98% of prefill is uncacheable whatever policy is used. And the
 ToolTrie-vs-ContextPilot difference in the second table is **warm-up only** — it
-vanishes in the first (finding 5).
+vanishes in the first, and in the converged table above.
 ([§1.1](findings.md#11-results), [§4.1](findings.md#41-on-real-retrieved-menus-ordering-barely-matters))
 
 ---
@@ -87,12 +91,14 @@ which compounds under load into admission capacity.** Sustained throughput at
 
 | arm | ceiling, first 200 | ceiling, converged |
 |---|---|---|
-| `original` | **3.57 req/s** | **3.49** |
+| `original` | 3.57 req/s | 3.49 |
 | `alphabetical` | 4.74 | 5.18 |
-| `tooltrie_v0` | 11.24 | **16.79** |
-| **ContextPilot** | **16.83** | 16.16 |
+| `tooltrie_v0` | 11.24 | 16.79 |
+| ContextPilot | **16.83** | 16.16 |
 
 Ordering alone is worth **4.7x the admission capacity**, and 4.8x once converged.
+The converged column's top two rows are a tie (within a 0.96 within-arm spread);
+ContextPilot's first-200 lead is warm-up.
 
 The parallel-specific part is that **prefix caching is sequential**: a request
 can only reuse what an earlier one already stored, so requests in flight together
@@ -144,30 +150,28 @@ latency 6.9x", crediting the policy for something a coin flip reproduces.
 
 Reuse is bought with accuracy, and the mechanism is position:
 
-| depth | arm | reuse | accuracy | mean position of correct tool |
-|---|---|---|---|---|
-| k64 | `original` | 0.91% | **37.09%** | **6.1** |
-| k64 | ContextPilot | 4.78% | 27.15% | 12.5 |
-| k64 | `tooltrie_v0` | 1.90% | 25.83% | 31.5 |
-| k128 | `original` | 0.37% | **22.98%** | **11.5** |
-| k128 | ContextPilot | 1.99% | **22.98%** | 27.8 |
-| k128 | `tooltrie_v0` | 1.13% | 16.15% | 62.8 |
+| depth | arm | gold position | reuse | 0.6B | 4B |
+|---|---|---|---|---|---|
+| k64 | `original` | 6.1 | 0.91% | **37.09%** | **44.37%** |
+| k64 | ContextPilot | 12.5 | 4.78% | 27.15% | 42.38% |
+| k64 | `tooltrie_v0` | 31.5 | 1.90% | 25.83% | 39.74% |
+| k128 | `original` | 11.5 | 0.37% | **22.98%** | **44.72%** |
+| k128 | ContextPilot | 27.8 | 1.99% | **22.98%** | 37.27% |
+| k128 | `tooltrie_v0` | 62.8 | 1.13% | 16.15% | 32.30% |
 
 The cache wants the *common* tools first; the model wants the *relevant* tools
 first; prefix caching only reuses a leading prefix. Both compete for the front of
-the prompt. ContextPilot at k128 is the one policy that gains reuse at zero
-accuracy cost.
+the prompt.
 
-**The depth effect is not a small-model artefact — but one claim above is.** At
-Qwen3-4B baseline accuracy nearly doubles (22.98% → 44.72%) while the depth
-*slope* barely moves, 0.202 → **0.188 pp lost per position**. Scale lifts the
-intercept, not the slope.
+**A larger model is about half as depth-sensitive.** Fitting accuracy against
+gold position across all arms in each cell gives a slope of **0.191 pp lost per
+position at 4B, at both depths** — against 0.359 at 0.6B/k64. The 0.6B k128 cell
+matches 4B only because it is floor-limited: a 22.98% baseline leaves little room
+to fall, which compresses the slope.
 
-What does not survive is ContextPilot's free lunch: its k128 cost is 0.00pp at
-0.6B but **−7.45pp at 4B**. The 0.6B baseline was low enough that the model was
-failing most requests anyway, so a shallower displacement did not register. At 4B
-accuracy tracks depth almost monotonically, which makes it the better measurement
-of this effect rather than merely a second one.
+**ContextPilot's "free lunch" at k128 was that same floor effect.** It cost
+0.00pp at 0.6B and **−7.45pp at 4B**. It is still the cheapest reordering at both
+depths — 1.99pp at k64 — but it is not free.
 ([§1.4](findings.md#14-what-the-reordering-costs))
 
 ---
@@ -199,7 +203,8 @@ ContextPilot's index grows without limit, also measured immaterial at this scale
 | padded, before convergence | optimal at request **2** vs **222** |
 | retrieved k4 / k16 | 1.07x / 1.28x reuse |
 | retrieved k64 / k128 | **1.54x** / **1.80x** (5- and 3-seed means) |
-| accuracy @ k128 | 0.0pp cost vs ToolTrie's −6.8pp |
+| accuracy @ k128 | −7.45pp cost vs ToolTrie's −12.42pp (4B) |
+| accuracy @ k64 | −1.99pp vs −4.63pp (4B) |
 
 **ToolTrie beats every simple heuristic — unordered, alphabetical, frequency —
 everywhere. It never beats ContextPilot on a primary metric anywhere.**
@@ -222,7 +227,7 @@ in quality.
 
 ---
 
-## 5. Two things that changed how the numbers should be read
+## Two things that changed how the numbers should be read
 
 **ContextPilot's padded lead is warm-up.** Over a 600-request run the 8.97pp
 reuse gap becomes 0.04pp and ToolTrie's 22 ms median penalty falls to 0.5 ms —

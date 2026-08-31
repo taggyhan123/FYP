@@ -196,9 +196,23 @@ ContextPilot's index grows without limit, also measured immaterial at this scale
 | accuracy @ k128 | 0.0pp cost vs ToolTrie's −6.8pp |
 
 **ToolTrie beats every simple heuristic — unordered, alphabetical, frequency —
-everywhere, and matches ContextPilot only where the workload has run out of
-ability to separate them.** Both then place the odd tool optimally, so the tie is
-forced by the ceiling rather than earned.
+everywhere. It never beats ContextPilot on a primary metric anywhere.**
+
+The one tie needs reading carefully, because two things make it uninformative
+rather than encouraging:
+
+- **The measurement has a ceiling.** On padded menus reuse is set by where the
+  one odd tool sits, and position 63 is the maximum. From request 222 onward both
+  arms place it at 63 on *every* request — the orderings are identical in the only
+  respect that affects reuse, so the same score is forced. Two students both
+  scoring 100% tells you the test was too easy, not that they are equally able.
+- **The window is a favourable selection.** Requests 201–600 exclude 1–221, which
+  is the whole of ToolTrie's disadvantage on padded menus. Even the residual
+  0.04pp reuse gap comes entirely from requests 201–221, where ToolTrie is still
+  below 63 in all 21 of them.
+
+So the tie is where the workload stops measuring, not where the methods converge
+in quality.
 
 ---
 

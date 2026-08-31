@@ -101,6 +101,47 @@ would have been "SJF cuts median latency 6.9x". ([§4.2](findings.md#42-smart-qu
 
 ---
 
+## Where ToolTrie stands against ContextPilot
+
+Stated plainly, because it is easy to read the tie in finding 4 as parity.
+
+**Where ToolTrie ties.** On padded menus after it has converged, every timing
+metric is inside measurement noise — verified with three replicates per arm on
+byte-identical orderings:
+
+| | ToolTrie | ContextPilot | within-arm spread | |
+|---|---|---|---|---|
+| throughput (req/s) | 16.14 | 15.91 | 0.96 | tie |
+| p50 (ms) | 8794 | 8960 | 632 | tie |
+| p95 (ms) | 14827 | 15158 | 1417 | tie |
+| reuse | 97.05% | 97.09% | **0.00** | ContextPilot, by 0.04pp |
+
+Reuse is the only resolvable difference, because reuse is exactly reproducible
+and timing is not ([A.7](findings.md#a7-what-counts-as-a-difference)).
+
+**Where ToolTrie wins.** One thing, and it is secondary: planning cost on
+retrieved menus, **0.20 ms/request against 1.94 ms** — roughly 10x cheaper. It
+did not matter here (1.94 ms against a 9-second p50 is 0.02%) and would only
+matter where planning is the bottleneck. ToolTrie also bounds its own memory by
+construction where ContextPilot's index grows without limit, though that too was
+measured immaterial at this scale.
+
+**Where ContextPilot wins.**
+
+| regime | margin |
+|---|---|
+| padded, before convergence | optimal at request **2** vs **222** |
+| retrieved k4 / k16 | 1.07x / 1.28x reuse |
+| retrieved k64 / k128 | **1.54x** / **1.80x** (5- and 3-seed means) |
+| accuracy @ k128 | 0.0pp cost vs ToolTrie's −6.8pp |
+
+**The honest summary: ToolTrie beats every simple heuristic — unordered,
+alphabetical, frequency — everywhere, and matches ContextPilot only where the
+workload has run out of ability to separate them.** Both then place the odd tool
+optimally, so the tie is forced by the ceiling rather than earned.
+
+---
+
 ## Two things that changed how the numbers should be read
 
 **Arrival order matters more than policy choice.** The benchmark's natural order

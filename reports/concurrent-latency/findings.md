@@ -1,7 +1,7 @@
 # Tool ordering under concurrent load
 
 Qwen3-0.6B on one RTX 3090 (plus a Qwen3-4B check), vLLM 0.26.0, prefix caching
-unmodified. 207 GPU runs. Raw outputs are in the git-ignored `cluster/results/`
+unmodified. 210 GPU runs. Raw outputs are in the git-ignored `cluster/results/`
 directories listed in the Appendix.
 
 This is the full record, with every control and validity check.
@@ -110,7 +110,7 @@ and two more at 1.19%, so replaying them would duplicate curves.
 **How runs were done.** 200 requests per run, replaying frozen orderings so every
 arm is a permutation of the same menus. Open-loop Poisson arrivals at a fixed
 rate, seed 42, cache cleared before each run, decode pinned to 48 tokens so
-decode-length variance cannot pollute the tails. 207 runs total.
+decode-length variance cannot pollute the tails. 210 runs total.
 
 **One naming note.** ContextPilot throughout is the official reordering API at
 the paper's `alpha=0.001`, ordering only — no annotations, de-duplication or
@@ -308,6 +308,21 @@ the first measurement on retrieved ones.
 **ContextPilot at k128 is the exception**: 5.4x the reuse of no reordering, at
 zero accuracy cost, and without the order annotations its paper adds for this
 purpose.
+
+**The penalty is not a small-model artefact.** Repeating k128 on Qwen3-4B — same
+frozen workloads, same serial protocol, `ceiling` identical at 0.805 — nearly
+doubles absolute accuracy and leaves the cost of reordering almost unchanged:
+
+| k128 | gold position | 0.6B | 4B |
+|---|---|---|---|
+| original | 11.5 | 22.98% | **44.72%** |
+| canonical_oracle | 56.5 | 14.29% (−8.69pp) | 34.78% (−9.94pp) |
+| hybrid_oracle | 57.7 | 13.66% (−9.32pp) | 36.02% (−8.70pp) |
+
+A 6.7x larger model lifts the intercept 95% and moves the penalty by under a
+point. Expressed as a slope, accuracy lost per position of depth goes 0.202 to
+**0.188 pp** — a 7% flattening for 6.7x the parameters. Scale buys capability,
+not positional robustness, which is what this cost is made of.
 
 **Accuracy tracks position, not policy.** The further down the menu the correct
 tool is pushed, the worse the model does — the lost-in-the-middle effect
@@ -775,11 +790,19 @@ The hybrid's k128 win costs **9.3 points of accuracy for 1.12 points of reuse** 
 a request's own top-ranked tool to position 56 of 128; ContextPilot moves only
 tools inside a matched cluster and leaves the rest in relevance order.
 
-**What would revive them.** No arm here used ContextPilot's order annotations,
-which exist to decouple relevance from position and which its paper reports can
-lift accuracy above the unordered baseline. Canonical and hybrid displace the
-correct tool most, so they would gain most. If annotations recover those 9.3
-points the exchange rate changes; if not, the line is closed.
+**Model size does not revive them.** The obvious objection to this rejection was
+that a 0.6B model is unusually sensitive to how deep the correct tool sits. It
+was tested: at Qwen3-4B the hybrid's k128 penalty is 8.70pp against 0.6B's
+9.32pp, and canonical's *grows* from 8.69 to 9.94pp, while baseline accuracy
+nearly doubles (§1.4). The exchange rate moves from 8.3 to about 7.8 accuracy
+points per point of reuse — still prohibitive. Reuse is model-invariant, so the
+other side of the trade does not move either.
+
+**What would still revive them.** No arm here used ContextPilot's order
+annotations, which exist to decouple relevance from position and which its paper
+reports can lift accuracy above the unordered baseline. Canonical and hybrid
+displace the correct tool most, so they would gain most. If annotations recover
+those points the exchange rate changes; if not, the line is closed.
 
 ---
 
@@ -791,10 +814,10 @@ points the exchange rate changes; if not, the line is closed.
    measured late: reuse on it is arithmetically the position of the single tool
    that differs between requests (r² = 0.9996), and the ToolTrie–ContextPilot gap
    on it is warm-up that vanishes by request 200 (§1.5).
-2. **Accuracy is one model, one seed, two depths.** Absolute accuracy is low
-   (11–28%), a 0.6B model may be unusually order-sensitive, and no arm used
-   order annotations. The direction is consistent; the magnitudes are not
-   transferable.
+2. **Accuracy is two models, one seed, two depths.** The 0.6B-fragility
+   objection was tested and does not hold: at 4B absolute accuracy nearly
+   doubles while the depth penalty moves under a point (§1.4). No arm used order
+   annotations, and the depth slope is fitted through few points.
 3. **Model size is only partly controlled.** Reuse was confirmed unchanged at
    4B and the ordering gap grows there. 8B untested. One claim was falsified by
    the 4B run — ContextPilot's flat latency shape is 0.6B-specific.
@@ -951,8 +974,10 @@ ContextPilot scheduling, so nothing here measures the full system.
 | Steady state (600 req) and more arrival seeds | `steady-and-seeds-20260830-221902/` | 14 |
 | Steady state: the two reference arms | `steady-arms-20260830-234910/` | 4 |
 | Steady-state capacity, converged workload, replicates | `steady-capacity-20260831-004322/` | 16 |
+| Accuracy at Qwen3-4B (k128, k64) | `accuracy-4b-20260831-204740/` | 3 |
 
-**207 runs.** All under the git-ignored `cluster/results/`.
+**210 runs.** All under the git-ignored `cluster/results/`. The 4B accuracy
+stage is still running; its row will grow to 10.
 
 Driver `scripts/replay_vllm_concurrent.py`; also added
 `summarize_queuing_runs.py`, `build_canonical_ordering.py`,

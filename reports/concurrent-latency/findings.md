@@ -239,20 +239,24 @@ inflates both adaptive arms (18.37 and 19.99) and is not used.
 ContextPilot's tail is a fixed startup cost, so its p95 moves 115.3 → 129.0 ms
 across a 4x load increase while `original` goes 431.5 → 6498.6.
 
-### 1.3 Larger model
+### 1.3 Larger model: what cold start costs at scale
 
 Qwen3-4B, same frozen orderings, native cache 96,400 tokens.
 
-Reuse is unchanged by model size — 1.19 / 37.99 / 87.21 / 96.16% against
-1.19 / 38.13 / 87.19 / 96.16% at 0.6B. The two small differences have
-non-model explanations: `alphabetical` is the one capacity-sensitive arm and 4B
-has a smaller cache; the ToolTrie run lost one request to a client socket error.
+**Reuse is unchanged by model size** — 1.19 / 37.99 / 87.21 / 96.16% against
+1.19 / 38.13 / 87.19 / 96.16% at 0.6B. The two small differences have non-model
+explanations: `alphabetical` is the one capacity-sensitive arm and 4B has a
+smaller cache; the ToolTrie run lost one request to a client socket error. This
+is why the rest of the report is not re-run at 4B: ordering sets reuse, and reuse
+is arithmetic about token positions that the model cannot change.
 
-**The gap grows with model size**, so the 0.6B figures understate it. Against
-`alphabetical`, ContextPilot's lead goes from **2.51x to 12.86x**, because the
-fixed ~16 ms client overhead is 18% of its latency at 0.6B but 3% at 4B.
+Against `alphabetical`, ContextPilot's lead goes from **2.51x to 12.86x**,
+because the fixed ~16 ms client overhead is 18% of its latency at 0.6B but 3% at
+4B. That one is a measurement-overhead effect, not a model effect.
 
-Under load at 4B the ranking holds and widens sharply:
+**Every 4B run here is 200 requests, and ToolTrie converges at request 222
+(§1.5). So this section measures the cold-start gap, not the ordering gap.**
+Read that way it is a real and sharper finding rather than a duplicate of §1.1:
 
 | rate | ContextPilot p50 | ToolTrie p50 | ratio |
 |---|---|---|---|
@@ -260,10 +264,13 @@ Under load at 4B the ranking holds and widens sharply:
 | 2 | 135.6 | 304.7 | 2.25x |
 | 4 | **174.3** | **5301.8** | **30.41x** |
 
-That 30x is a capacity effect, not a prefill effect: at 4 req/s ToolTrie's 12.81%
-uncached prefill pushes it just past its service ceiling (3.8405 of an offered 4)
-while ContextPilot's 3.84% keeps it just under (3.9757). A 9-point reuse gap
-becomes the difference between coping and collapsing.
+The 30x is a capacity cliff: during warm-up ToolTrie's uncached prefill is 12.81%,
+which pushes it just past its service ceiling (3.8405 of an offered 4) while
+ContextPilot's 3.84% keeps it just under (3.9757). **A bigger model makes cold
+start far more expensive** — the same 9-point warm-up reuse gap is worth 2.5x at
+0.6B and 30x at 4B, because a slower model has less headroom to absorb the extra
+prefill before it saturates. It does not show that the converged ordering gap
+grows; §1.5 shows that gap closes to zero.
 
 One claim does not transfer: ContextPilot's flat latency *shape* is specific to
 0.6B. At 4B the last 1% of requests break away — p99/p50 is 8.62 against ~2.9 at
@@ -818,9 +825,14 @@ those points the exchange rate changes; if not, the line is closed.
    objection was tested and does not hold: at 4B absolute accuracy nearly
    doubles while the depth penalty moves under a point (§1.4). No arm used order
    annotations, and the depth slope is fitted through few points.
-3. **Model size is only partly controlled.** Reuse was confirmed unchanged at
-   4B and the ordering gap grows there. 8B untested. One claim was falsified by
-   the 4B run — ContextPilot's flat latency shape is 0.6B-specific.
+3. **Model size is controlled on the two things that depend on it.** Reuse is
+   unchanged at 4B (§1.3) and the accuracy penalty is a slope that scale barely
+   flattens, 0.202 → 0.188 pp per position for 6.7x the parameters (§1.4). What
+   *does* grow at 4B is the cold-start cost, not the converged ordering gap.
+   8B untested, and the 0.6B→4B trend argues it would move nothing: extrapolating
+   that slope, 2x more parameters buys roughly 0.2pp of an 8.70pp penalty. One
+   claim was falsified by the 4B run — ContextPilot's flat latency shape is
+   0.6B-specific.
 4. **Queuing was tested only under saturation at one in-flight cap.** Every run
    was deeply backlogged. Preemptive policies, and any policy inside the engine
    rather than in front of it, are untested.

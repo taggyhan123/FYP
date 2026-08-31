@@ -96,9 +96,21 @@ Ordering alone is worth **4.7x the admission capacity**, and 4.8x once converged
 
 The parallel-specific part is that **prefix caching is sequential**: a request
 can only reuse what an earlier one already stored, so requests in flight together
-all miss the same cold prefix. At 4 req/s, 29 requests are already in flight when
-the first finishes for `original`, against 7 for ToolTrie and 6 for ContextPilot.
-At 32 req/s every one of ToolTrie's 200 requests starts before any has finished.
+all miss the same cold prefix. Measured as how many requests are already
+dispatched when the first one completes, on converged records at 64 req/s:
+
+| arm | reuse | pile-up |
+|---|---|---|
+| `original` | 0.69% | **400 / 400** |
+| `alphabetical` | 46.08% | **400 / 400** |
+| `tooltrie_v0` | 96.81% | 218 / 400 |
+| ContextPilot | 96.85% | 216 / 400 |
+
+**Pile-up tracks reuse, not policy.** Below ~50% reuse every request in the run
+starts cold; at ~97% barely half do, and the two high-reuse arms are
+indistinguishable. An earlier version of this reported ToolTrie's pile-up as
+twice ContextPilot's — that compared a still-learning ToolTrie against a
+converged ContextPilot.
 ([§3](findings.md#3-how-the-trie-reduces-parallel-latency))
 
 ---

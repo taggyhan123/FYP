@@ -559,9 +559,24 @@ finished** — the whole run is cold, as does the unordered baseline. ContextPil
 never does, even at 64.
 
 This compounds: lower reuse means slower requests, which means more arrive
-before the first finishes, which means more redundant work. ToolTrie's pile-up
-is consistently about twice ContextPilot's, so a 9-point reuse gap becomes a 2x
-difference in how many requests get no cache benefit at all.
+before the first finishes, which means more redundant work.
+
+**The 2x pile-up gap between ToolTrie and ContextPilot is warm-up, like the rest
+of the padded comparison.** Repeating the measurement on the 400 converged
+records at 64 req/s, where neither arm is still learning:
+
+| arm | reuse | pile-up |
+|---|---|---|
+| original | 0.69% | **400 / 400** |
+| alphabetical | 46.08% | **400 / 400** |
+| tooltrie_v0 | 96.81% | 218 / 400 |
+| ContextPilot | 96.85% | 216 / 400 |
+
+Converged, the two are indistinguishable — 218 against 216. **What pile-up
+actually tracks is reuse, not policy**: below ~50% reuse every request in the run
+starts cold, and at ~97% barely half do. That is a cleaner statement of the
+mechanism than the 2x figure it replaces, which compared a learning ToolTrie
+against a converged ContextPilot.
 
 The same effect shows in warm-up. Mean latency by arrival position at rate 4:
 
@@ -576,8 +591,9 @@ once. ContextPilot settles after ~3 requests; ToolTrie needs 6–10.
 
 **So the trie helps through exactly one mechanism**: raising reuse from 38% to
 87%, which shortens prefill and compounds under load into higher capacity. Its
-parallel-specific weakness is the longer warm-up, which explains its tail but
-not its median — the first 10 of 200 requests are only 9–11% of total latency.
+parallel-specific weakness is the longer warm-up — and §1.5 shows that weakness
+is the whole of its gap to ContextPilot on padded menus, not a side-effect of
+one.
 
 ---
 

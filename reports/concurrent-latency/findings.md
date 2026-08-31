@@ -1,7 +1,7 @@
 # Tool ordering under concurrent load
 
 Qwen3-0.6B on one RTX 3090 (plus a Qwen3-4B check), vLLM 0.26.0, prefix caching
-unmodified. 195 GPU runs. Raw outputs are in the git-ignored `cluster/results/`
+unmodified. 207 GPU runs. Raw outputs are in the git-ignored `cluster/results/`
 directories listed in the Appendix.
 
 This is the full record, with every control and validity check.
@@ -110,7 +110,7 @@ and two more at 1.19%, so replaying them would duplicate curves.
 **How runs were done.** 200 requests per run, replaying frozen orderings so every
 arm is a permutation of the same menus. Open-loop Poisson arrivals at a fixed
 rate, seed 42, cache cleared before each run, decode pinned to 48 tokens so
-decode-length variance cannot pollute the tails. 195 runs total.
+decode-length variance cannot pollute the tails. 207 runs total.
 
 **One naming note.** ContextPilot throughout is the official reordering API at
 the paper's `alpha=0.001`, ordering only — no annotations, de-duplication or
@@ -203,24 +203,29 @@ concurrency of 1 cannot produce.
 two windows as §1.1 — the 200-request run, and requests 201–600 of a 600-request
 run at the same offered rate:
 
-| arm | reuse 1–200 | ceiling 1–200 | reuse 201–600 | ceiling 201–600 |
-|---|---|---|---|---|
-| original | 1.19% | **3.57 req/s** | 0.70% | **3.72** |
-| alphabetical | 38.13% | 4.74 | 46.29% | 5.59 |
-| tooltrie_v0 | 87.19% | 11.24 | 97.05% | **18.37** |
-| **ContextPilot** | 96.16% | **16.83** | 97.09% | **19.99** |
+| arm | reuse (converged) | ceiling, first 200 | ceiling, converged |
+|---|---|---|---|
+| original | 0.69% | **3.57 req/s** | **3.49** |
+| alphabetical | 46.08% | 4.74 | 5.18 |
+| tooltrie_v0 | 96.81% | 11.24 | **16.79** |
+| **ContextPilot** | 96.85% | **16.83** | 16.16 |
 
 Ordering alone is worth **4.7x the admission capacity** in the first window and
-**5.4x** in steady state; ToolTrie is worth 3.1x over no reordering, rising to
-**4.9x**. Reuse was identical at every rate from 1 to 64, so ordering sets reuse
-and load does not change it.
+**4.8x** once converged. Reuse was identical at every rate from 1 to 64, so
+ordering sets reuse and load does not change it.
 
-**The capacity gap between ToolTrie and ContextPilot is warm-up too**, and it
-closes further than reuse alone predicts: 16.83/11.24 = **1.50x** over the first
-200 requests, 19.99/18.37 = **1.09x** in steady state. Every arm gains some
-capacity from excluding the cold start — `original`, which learns nothing, still
-gains 4% — so the ratio, not the absolute, is the number that isolates the
-policies.
+**The capacity gap between ToolTrie and ContextPilot is warm-up as well**:
+16.83/11.24 = **1.50x** over the first 200 requests, and a tie once both have
+converged. Three replicates of each arm put ToolTrie at 16.14 req/s and
+ContextPilot at 15.91, against a within-arm spread of 0.96 — not a resolvable
+difference (A.7).
+
+**The converged column needs its own workload, not a window.** At 64 req/s all
+600 requests arrive within 9.6 s while completions span 35.8 s, so a
+"requests 201–600" slice is not time-separated: the learning-phase orderings are
+still in flight competing for the same cache. These figures replay the 400
+converged records as a standalone workload. Differencing the window instead
+inflates both adaptive arms (18.37 and 19.99) and is not used.
 
 **The slow requests are different requests.** At rate 4 the five slowest are:
 
@@ -368,10 +373,12 @@ marginally resolvable and that from n=2. The result is that the 22 ms penalty
 vanishes, not that the sign flipped — and since both arms place the singleton at
 63.00 here, a tie is forced by construction and the residual is measurement.
 
-**The tie also does not hold under saturation.** At 64 req/s offered over the
-same window ContextPilot leads 15,799 to 22,382 ms at p50 — **1.42x** — because
-its 9% capacity edge compounds into queue depth (§1.2). ToolTrie catches up at
-moderate load, not at the ceiling.
+**The tie holds under saturation too.** An earlier draft reported ContextPilot
+leading 1.42x at p50 at 64 req/s; that came from the contaminated window
+described in §1.2 and does not survive a clean measurement. Replaying the 400
+converged records on their own, three replicates per arm, every timing metric is
+inside the within-arm spread — throughput 16.14 against 15.91 with a spread of
+0.96, p50 8794 against 8960 with a spread of 632 (A.7).
 
 Two further limits. The 400 added requests pair real tool schemas with borrowed
 queries, so they carry reuse and ordering signal but no accuracy signal. And none
@@ -935,9 +942,9 @@ ContextPilot scheduling, so nothing here measures the full system.
 | Fairness audit: planner budget, arrival seeds | `tooltrie-uncapped-20260830-212728/` | 9 |
 | Steady state (600 req) and more arrival seeds | `steady-and-seeds-20260830-221902/` | 14 |
 | Steady state: the two reference arms | `steady-arms-20260830-234910/` | 4 |
-| Steady-state admission capacity (600 req @ 64/s) | `steady-capacity-20260831-004322/` | 4 |
+| Steady-state capacity, converged workload, replicates | `steady-capacity-20260831-004322/` | 16 |
 
-**195 runs.** All under the git-ignored `cluster/results/`.
+**207 runs.** All under the git-ignored `cluster/results/`.
 
 Driver `scripts/replay_vllm_concurrent.py`; also added
 `summarize_queuing_runs.py`, `build_canonical_ordering.py`,
@@ -1070,3 +1077,54 @@ same block through prefix agreement.
 
 The comparison's best guarantee is structural: ToolTrie is this project's method,
 ContextPilot is the baseline, and ContextPilot wins.
+
+---
+
+### A.7 What counts as a difference
+
+Two claims in earlier drafts — that ToolTrie beat ContextPilot on the converged
+distribution, and that ContextPilot won under saturation by 1.42x — were both
+read off single runs whose margins were never checked against measurement noise.
+Neither survived. This is the noise floor those claims needed.
+
+Three replicates per arm, replaying byte-identical frozen orderings on one server
+instance, 400 converged padded records at 64 req/s:
+
+| | ToolTrie spread | ContextPilot spread |
+|---|---|---|
+| **reuse** | **0.00%** (96.81 three times) | **0.00%** (96.85 three times) |
+| throughput | 5.92% | 0.44% |
+| p50 | 7.19% | 1.13% |
+| p95 | 9.56% | 0.87% |
+| p99 | 7.73% | 0.66% |
+
+**Reuse is exactly reproducible and timing is not.** The orderings are
+precomputed files, so the prompts and the cache behaviour are identical every
+run; throughput and TTFT depend on scheduler batching and GPU state, which are
+not. This is why reuse figures reproduce to the digit across stages weeks apart
+while latency does not, and it is the reason reuse carries the conclusions here.
+
+Against that floor:
+
+| metric | ToolTrie − ContextPilot | within-arm spread | resolvable? |
+|---|---|---|---|
+| throughput | +0.24 | 0.96 | no |
+| p50 | −165.8 | 632.3 | no |
+| p95 | −331.3 | 1417.3 | no |
+| p99 | −298.1 | 1334.3 | no |
+| max | −269.0 | 1277.3 | no |
+| reuse | −0.04pp | **0.00** | yes, and negligible |
+
+Every timing comparison between the two converged arms is a tie. Only reuse
+separates them, by 0.04pp.
+
+One observation left unexplained: **ToolTrie's latency is markedly less
+reproducible than ContextPilot's** — 5.92% throughput spread against 0.44% — on
+identical orderings producing identical reuse. Three runs are not enough to
+attribute a mechanism, so none is offered.
+
+**A window is not always a workload.** At 4 req/s the 600 requests span 150 s and
+a "requests 201–600" slice is genuinely time-separated. At 64 req/s they all
+arrive within 9.6 s while completions span 35.8 s, so the same slice still
+contains the learning-phase orderings competing for cache. Steady-state figures
+at saturation therefore replay the converged records as their own workload.

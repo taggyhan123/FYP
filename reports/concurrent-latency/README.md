@@ -21,19 +21,19 @@ This is the short version. Every number links to the section of
 
 Serially, every arm sat within 1.25x on every statistic. Under load they span
 36x at p50. Reuse turns directly into admission capacity — sustained throughput
-at 64 req/s offered, shown for the 200-request window and for requests 201–600
-once the adaptive planners have converged:
+at 64 req/s offered, for the first 200 requests and for the 400 converged
+records replayed as their own workload:
 
-| arm | reuse 1–200 | ceiling 1–200 | reuse 201–600 | ceiling 201–600 |
+| arm | reuse 1–200 | ceiling, first 200 | reuse converged | ceiling converged |
 |---|---|---|---|---|
-| `original` | 1.19% | **3.57 req/s** | 0.70% | **3.72** |
-| `alphabetical` | 38.13% | 4.74 | 46.29% | 5.59 |
-| `tooltrie_v0` | 87.19% | 11.24 | 97.05% | **18.37** |
-| **ContextPilot** | 96.16% | **16.83** | 97.09% | **19.99** |
+| `original` | 1.19% | **3.57 req/s** | 0.69% | **3.49** |
+| `alphabetical` | 38.13% | 4.74 | 46.08% | 5.18 |
+| `tooltrie_v0` | 87.19% | 11.24 | 96.81% | **16.79** |
+| **ContextPilot** | 96.16% | **16.83** | 96.85% | 16.16 |
 
-Ordering alone is worth **4.7x the admission capacity**, rising to **5.4x** in
-steady state. And the ToolTrie–ContextPilot capacity gap is warm-up like the rest
-of the padded story: **1.50x** over the first 200 requests, **1.09x** after. ([§1.2](findings.md#12-three-things-serial-testing-could-not-show))
+Ordering alone is worth **4.7x the admission capacity**, and **4.8x** once
+converged. The ToolTrie–ContextPilot capacity gap is warm-up like the rest of the
+padded story: **1.50x** over the first 200 requests, and a tie afterwards. ([§1.2](findings.md#12-three-things-serial-testing-could-not-show))
 
 ### 2. Most of that is the test workload, not the method
 
@@ -75,8 +75,9 @@ An 8.97pp gap becomes 0.04pp and ToolTrie's 22 ms median penalty falls to 0.5 ms
 Read that as a tie, not a reversal: at p95/p99/max the remaining gaps are smaller
 than ToolTrie's own run-to-run spread. Both planners converge to placing the odd
 tool last, so the tie is forced by construction. ContextPilot's real advantage on
-padded menus is **cold-start speed** — and it still wins under saturation, 1.42x
-at p50 even in this window.
+padded menus is **cold-start speed**. Once ToolTrie converges the two are
+indistinguishable at every load tested — but the tie is a ceiling effect, since
+both then place the odd tool optimally and the workload cannot separate them.
 
 Ordering-vs-no-ordering meanwhile *strengthens*: `original` has nothing to learn
 and its backlog keeps growing, so its p50 rises while every ordered arm's falls —

@@ -35,7 +35,8 @@ between arms collapses: reuse spread 94.97pp → 0.98pp, p50 spread 36x → 1.14
 
 **Reordering costs accuracy.** On retrieved menus ToolTrie loses 6.8 points of
 tool-selection accuracy at k128 and 11.3 at k64. ContextPilot at k128 is the one
-policy that gains reuse at zero accuracy cost.
+policy that gains reuse at zero accuracy cost at 0.6B — though that turns out to
+be a floor effect, and at 4B it costs 7.45pp like everything else (§1.4).
 
 **The reason is position.** Accuracy tracks how far down the menu the correct
 tool is pushed. The cache wants the *common* tools first; the model wants the
@@ -312,24 +313,28 @@ ContextPilot here is the official-API arm at the paper's alpha (§Setup).
 The project's earlier quality work is all on padded menus; this appears to be
 the first measurement on retrieved ones.
 
-**ContextPilot at k128 is the exception**: 5.4x the reuse of no reordering, at
-zero accuracy cost, and without the order annotations its paper adds for this
-purpose.
+**At 0.6B, ContextPilot at k128 appears free**: 5.4x the reuse of no reordering
+at zero accuracy cost. **That does not survive a larger model.** Repeating k128
+on Qwen3-4B — same frozen workloads, same serial protocol, `ceiling` identical at
+0.805 so the arms stay comparable:
 
-**The penalty is not a small-model artefact.** Repeating k128 on Qwen3-4B — same
-frozen workloads, same serial protocol, `ceiling` identical at 0.805 — nearly
-doubles absolute accuracy and leaves the cost of reordering almost unchanged:
+| k128 | gold position | reuse | 0.6B | 4B |
+|---|---|---|---|---|
+| original | 11.5 | 0.37% | 22.98% | **44.72%** |
+| ContextPilot | 27.8 | 1.99% | 22.98% (**0.00pp**) | 37.27% (**−7.45pp**) |
+| canonical_oracle | 56.5 | 2.87% | 14.29% (−8.69pp) | 34.78% (−9.94pp) |
+| hybrid_oracle | 57.7 | 3.11% | 13.66% (−9.32pp) | 36.02% (−8.70pp) |
+| tooltrie_v0 | 62.8 | 1.13% | 16.15% (−6.83pp) | 32.30% (−12.42pp) |
 
-| k128 | gold position | 0.6B | 4B |
-|---|---|---|---|
-| original | 11.5 | 22.98% | **44.72%** |
-| canonical_oracle | 56.5 | 14.29% (−8.69pp) | 34.78% (−9.94pp) |
-| hybrid_oracle | 57.7 | 13.66% (−9.32pp) | 36.02% (−8.70pp) |
+**The 0.6B measurement was floor-limited.** At 22.98% the model was failing most
+answerable requests anyway, so moving the gold tool from depth 11.5 to 27.8 did
+not register. With real headroom at 4B it does, and accuracy then tracks depth
+almost monotonically down the table. The 4B column is the better measurement of
+this effect, not merely a second one.
 
-A 6.7x larger model lifts the intercept 95% and moves the penalty by under a
-point. Expressed as a slope, accuracy lost per position of depth goes 0.202 to
-**0.188 pp** — a 7% flattening for 6.7x the parameters. Scale buys capability,
-not positional robustness, which is what this cost is made of.
+Absolute accuracy nearly doubles while the depth *slope* barely moves — 0.202 to
+**0.188 pp lost per position**, a 7% flattening for 6.7x the parameters. Scale
+buys capability, not positional robustness, and this cost is made of the slope.
 
 **Accuracy tracks position, not policy.** The further down the menu the correct
 tool is pushed, the worse the model does — the lost-in-the-middle effect
@@ -813,19 +818,32 @@ The hybrid's k128 win costs **9.3 points of accuracy for 1.12 points of reuse** 
 a request's own top-ranked tool to position 56 of 128; ContextPilot moves only
 tools inside a matched cluster and leaves the rest in relevance order.
 
-**Model size does not revive them.** The obvious objection to this rejection was
-that a 0.6B model is unusually sensitive to how deep the correct tool sits. It
-was tested: at Qwen3-4B the hybrid's k128 penalty is 8.70pp against 0.6B's
-9.32pp, and canonical's *grows* from 8.69 to 9.94pp, while baseline accuracy
-nearly doubles (§1.4). The exchange rate moves from 8.3 to about 7.8 accuracy
-points per point of reuse — still prohibitive. Reuse is model-invariant, so the
-other side of the trade does not move either.
+**A larger model reopens the hybrid.** The obvious objection to this rejection
+was that a 0.6B model is unusually sensitive to how deep the correct tool sits.
+Tested at Qwen3-4B, the rejection does not survive — because ContextPilot, the
+arm the hybrid is measured against, loses 7.45pp of its own at 4B (§1.4):
 
-**What would still revive them.** No arm here used ContextPilot's order
-annotations, which exist to decouple relevance from position and which its paper
-reports can lift accuracy above the unordered baseline. Canonical and hybrid
-displace the correct tool most, so they would gain most. If annotations recover
-those points the exchange rate changes; if not, the line is closed.
+| against ContextPilot, k128 | reuse | 0.6B accuracy | 4B accuracy |
+|---|---|---|---|
+| canonical_oracle | +0.88pp | −8.69pp (2.0 SE) | −2.49pp (0.5 SE) |
+| hybrid_oracle | +1.12pp | −9.32pp (2.2 SE) | **−1.25pp (0.2 SE)** |
+
+The exchange rate goes from **8.3 to 1.1** accuracy points per point of reuse,
+and at 4B the hybrid's penalty is a fifth of a standard error — **not
+distinguishable from zero**, while it still carries 56% more reuse.
+
+Two cautions before reading that as vindication. With n=161 answerable requests
+the standard error on a difference is 5.44pp, so 4B cannot rule out a penalty as
+large as ~5pp; the 0.6B result was detectable only because 9.32pp exceeded that
+floor. And this is one model, one seed. **The line is reopened, not won** — it
+needs more samples to settle, and it is the one experiment in §5 now worth
+running again.
+
+**What would settle it.** More samples at 4B, and ContextPilot's order
+annotations, which no arm here used. They exist to decouple relevance from
+position and their paper reports they can lift accuracy above the unordered
+baseline. Canonical and hybrid displace the correct tool most, so they would
+gain most.
 
 ---
 

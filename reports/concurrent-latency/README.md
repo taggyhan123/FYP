@@ -158,10 +158,16 @@ first; prefix caching only reuses a leading prefix. Both compete for the front o
 the prompt. ContextPilot at k128 is the one policy that gains reuse at zero
 accuracy cost.
 
-**This is not a small-model artefact.** At Qwen3-4B baseline accuracy nearly
-doubles (22.98% → 44.72%) while the penalty barely moves — as a slope, accuracy
-lost per position of depth goes 0.202 → **0.188 pp**, a 7% flattening for 6.7x
-the parameters. Scale lifts the intercept, not the slope.
+**The depth effect is not a small-model artefact — but one claim above is.** At
+Qwen3-4B baseline accuracy nearly doubles (22.98% → 44.72%) while the depth
+*slope* barely moves, 0.202 → **0.188 pp lost per position**. Scale lifts the
+intercept, not the slope.
+
+What does not survive is ContextPilot's free lunch: its k128 cost is 0.00pp at
+0.6B but **−7.45pp at 4B**. The 0.6B baseline was low enough that the model was
+failing most requests anyway, so a shallower displacement did not register. At 4B
+accuracy tracks depth almost monotonically, which makes it the better measurement
+of this effect rather than merely a second one.
 ([§1.4](findings.md#14-what-the-reordering-costs))
 
 ---
@@ -239,9 +245,12 @@ between any two policies. ([A.6](findings.md#a6-is-the-tooltrie-vs-contextpilot-
   retrieved ones share 0% and overlap 21–33% with their best partner. Nothing
   exists between. A workload at 30–70% overlap is where a trie could earn its
   keep rather than tie at a ceiling or lose in the noise.
+- **The hybrid ordering rejected in [§5](findings.md#5-explored-and-rejected) is
+  reopened, not settled.** Its accuracy penalty against ContextPilot is 9.32pp at
+  0.6B (2.2 SE) but 1.25pp at 4B (0.2 SE) — indistinguishable from zero, while it
+  still carries 56% more reuse. With n=161 that cannot rule out a ~5pp penalty,
+  so it needs more samples. This is the one experiment here now worth re-running.
 - **No arm used ContextPilot's order annotations**, which exist to decouple
-  relevance from position and are the one thing that could reopen the rejected
-  methods in [§5](findings.md#5-explored-and-rejected). Model size was tested and
-  does not reopen them.
+  relevance from position and would help the displaced orderings most.
 - **One model for most cells, one trial per cell.** Eight cells were re-run under
   3–5 arrival permutations; the rest are single draws.

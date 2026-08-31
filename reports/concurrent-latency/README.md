@@ -10,7 +10,30 @@ This is the short version. Every number links to the section of
 
 ## 1. Parallel requests → latency distribution at p95 / p99 / max
 
-Padded menus at 4 req/s, time to first token in ms:
+Padded menus at 4 req/s, time to first token in ms, on **converged** requests
+(201–600) so no arm is still learning:
+
+| arm | p50 | p95 | p99 | max |
+|---|---|---|---|---|
+| `original` | 6239.7 | 15175.0 | 15659.5 | 16108.6 |
+| `alphabetical` | 271.3 | 586.6 | 820.6 | 960.4 |
+| `tooltrie_v0` | **91.2** | **122.5** | **133.1** | **141.9** |
+| **ContextPilot** | 91.7 | 123.7 | 134.3 | 151.1 |
+
+**Ordering is worth 68x at p50 and 113–124x across the tail.** Serial testing hid
+all of it — at concurrency 1 every arm sat within 1.25x on every statistic and
+`max` was flat at ~270 ms. Under load `max` is dominated by queueing, which
+one-at-a-time testing cannot produce.
+
+**The real answer is that a badly ordered arm has no fixed distribution.**
+`original` cannot keep up at 4 req/s (it sustains 3.51), so its backlog grows and
+its latency grows with run length: p50 3310 ms over 200 requests, 6240 over 600.
+The ordered arms are stable and converge to a fixed distribution. So the ratio
+depends on how long you run — 36x at 200 requests, 68x at 600 — and that
+divergence, not any single number, is the finding.
+
+For reference, the same table over the first 200 requests, which is the window
+every other section uses and the only one with a `frequency` arm:
 
 | arm | reuse | p50 | p95 | p99 | max |
 |---|---|---|---|---|---|
@@ -20,15 +43,11 @@ Padded menus at 4 req/s, time to first token in ms:
 | `tooltrie_v0` | 87.19% | 116.3 | 225.7 | 382.7 | 558.4 |
 | **ContextPilot** | **96.16%** | **92.7** | **129.0** | **260.9** | **300.2** |
 
-**Ordering is worth 36x at p50 and 25x at max.** Serial testing hid all of it —
-at concurrency 1 every arm sat within 1.25x on every statistic, and `max` was
-flat at ~270 ms. Under load `max` spans 300 to 7476 ms, because it is dominated
-by queueing, which one-at-a-time testing cannot produce.
-
 **Two qualifications, both important.** This is a padded workload where 63 of 64
 tools are shared; on genuinely retrieved menus the spread collapses to at most
 1.14x and 95–98% of prefill is uncacheable whatever policy is used. And the
-ToolTrie-vs-ContextPilot part of this table is **warm-up** — see finding 5.
+ToolTrie-vs-ContextPilot difference in the second table is **warm-up only** — it
+vanishes in the first (finding 5).
 ([§1.1](findings.md#11-results), [§4.1](findings.md#41-on-real-retrieved-menus-ordering-barely-matters))
 
 ---

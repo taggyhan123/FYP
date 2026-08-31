@@ -249,7 +249,7 @@ reuse is deterministic, so each paired comparison is exact). Accuracy is equal o
 better than ContextPilot in all four model×depth cells — at 4B/k128 it matches
 the *unordered baseline exactly* (44.72%) while carrying 6x its reuse. It is also
 the fastest arm at every retrieved depth on p50, p95, p99 and max, which widens
-question 2's retrieved spread from 1.14x to **1.26x** at k64.
+the retrieved spread quoted in question 1 from 1.14x to **1.26x** at k64.
 
 **Audited for fairness, not assumed.** Causal (trie updated only after planning);
 menu membership unchanged 200/200; matched prefix at the front 200/200; tail

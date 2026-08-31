@@ -31,7 +31,7 @@ statistics were flat within 1.25x.
 
 **Most of that is the test workload, not the method.** The padded menus give
 every request 63 of the same 64 tools. On real BM25-retrieved menus the gap
-between arms collapses: reuse spread 94.97pp → 0.98pp, p50 spread 36x → 1.14x.
+between arms collapses: reuse spread 94.97pp → 1.84pp, p50 spread 36x → 1.26x.
 
 **Reordering costs accuracy.** On retrieved menus ToolTrie loses 6.8 points at
 k128 and 11.3 at k64 on Qwen3-0.6B, and 12.4 and 4.6 on Qwen3-4B. ContextPilot is
@@ -171,7 +171,7 @@ the 22 ms median penalty falls to 0.5 ms — a tie rather than a reversal (§1.5
 
 **Ordering is decisive on padded menus and nearly irrelevant on retrieved ones.**
 Run at the same request size and offered rate, p50 spans **36x** across the padded
-arms but only **1.14x** across BM25-retrieved ones (8565.4–9760.9 ms), and every
+arms but only **1.26x** across BM25-retrieved ones (7739.7–9760.9 ms), and every
 retrieved arm saturates at ~2.6 req/s regardless of policy. §4.1 has the full
 retrieved comparison at four depths; it is the most important qualification in
 this report, which is why it is flagged here rather than only there.
@@ -633,13 +633,17 @@ four depths, with rates scaled to hold the offered token rate roughly constant:
 
 **Reuse**
 
-| workload | original | alphabetical | frequency | tooltrie_v0 | **ContextPilot** | spread |
-|---|---|---|---|---|---|---|
-| k4 | 15.87% | 15.28% | 14.62% | 17.48% | **18.72%** | 4.10pp |
-| k16 | 6.12% | 6.27% | 5.59% | 7.77% | **9.93%** | 4.34pp |
-| k64 | 0.91% | 1.22% | 0.94% | 1.90% | **4.78%** | 3.87pp |
-| k128 | 0.37% | 0.58% | 0.54% | 1.13% | **1.99%** | 1.62pp |
-| **padded-64** | 1.19% | 38.13% | 39.69% | 87.19% | **96.16%** | **94.97pp** |
+| workload | original | alphabetical | frequency | tooltrie_v0 | ContextPilot | **tooltrie_v1** | spread |
+|---|---|---|---|---|---|---|---|
+| k4 | 15.87% | 15.28% | 14.62% | 17.48% | 18.72% | **19.47%** | 4.85pp |
+| k16 | 6.12% | 6.27% | 5.59% | 7.77% | 9.93% | **11.31%** | 5.72pp |
+| k64 | 0.91% | 1.22% | 0.94% | 1.90% | 4.78% | **4.96%** | 4.05pp |
+| k128 | 0.37% | 0.58% | 0.54% | 1.13% | 1.99% | **2.21%** | 1.84pp |
+| **padded-64** | 1.19% | 38.13% | 39.69% | 87.19% | **96.16%** | 1.19% | **94.97pp** |
+
+ToolTrie-v1 (§5) leads every retrieved depth and is last on padded menus, where
+its rule — keep the input ordering for unmatched tools — preserves an input that
+puts the differing tool first in every request.
 
 A reimplementation of ContextPilot's clustering without its persistent index
 (Appendix A.4) tracks it closely except at k128, where it reaches 2.96%. It is
@@ -663,18 +667,19 @@ single-permutation and are not corrected.
 
 | workload | achieved (range) | p50 range (ms) | spread |
 |---|---|---|---|
-| k4 | 15.907 – 15.931 | 46.3 – 52.3 | 1.13x |
-| k16 | 7.998 – 8.001 | 98.2 – 101.7 | **1.04x** |
-| k64 | 2.623 – 2.693 | 8565.4 – 9760.9 | **1.14x** |
-| k128 | 1.004 – 1.013 | 34731.1 – 35852.7 | **1.03x** |
+| k4 | 15.907 – 15.931 | 46.1 – 52.3 | 1.14x |
+| k16 | 7.998 – 8.001 | 92.1 – 101.7 | **1.10x** |
+| k64 | 2.623 – 2.736 | 7739.7 – 9760.9 | **1.26x** |
+| k128 | 1.004 – 1.014 | 34234.1 – 35852.7 | **1.05x** |
 | **padded-64** | 3.564 – 4.014 | 91.8 – 3310.4 | **36.06x** |
 
-All five arms are included. An earlier version of this table omitted
-ContextPilot, which is the fastest arm at every depth, and so understated the
-retrieved spreads as 1.02–1.10x.
+All six arms are included, ToolTrie-v1 among them (§5) — it is the fastest at
+every depth on p50, p95, p99 and max, which is what widens k64 from 1.14x. Two
+earlier versions of this table understated these spreads: the first omitted
+ContextPilot, the second omitted v1.
 
 **The 95-point reuse spread that drives Parts 1–3 becomes under 3 points, and
-the 36x latency spread becomes at most 1.14x.** Padding gives every request the same
+the 36x latency spread becomes at most 1.26x.** Padding gives every request the same
 63-tool core, which ordering can pull to the front. Real retrieval returns a
 different set per query, so there is little shared structure for any ordering to
 exploit. On retrieved menus 95–98% of prefill is uncacheable whatever policy is
@@ -890,6 +895,49 @@ effect. No single accuracy margin clears 2 SE (the k128/4B gap is 1.35); what
 carries the result is that reuse is exact and wins 5/5 seeds, and that accuracy
 points the same way in every cell.
 
+**Latency follows reuse.** v1 is the fastest arm at every retrieved depth on
+every statistic — time to first token, ms:
+
+| depth | arm | p50 | p95 | p99 | max |
+|---|---|---|---|---|---|
+| k64 | original | 9667.9 | 24699.7 | 26490.8 | 26820.4 |
+| k64 | tooltrie_v0 | 9559.8 | 24825.6 | 26691.0 | 27059.1 |
+| k64 | ContextPilot | 8565.4 | 22452.4 | 25163.5 | 25432.4 |
+| k64 | **tooltrie_v1** | **7739.7** | **21219.8** | **23824.2** | **24177.4** |
+| k128 | original | 35852.7 | 94865.4 | 99499.4 | 101560.2 |
+| k128 | tooltrie_v0 | 35192.4 | 94251.2 | 98861.9 | 100921.6 |
+| k128 | ContextPilot | 34731.1 | 93292.2 | 97936.5 | 99994.1 |
+| k128 | **tooltrie_v1** | **34234.1** | **92943.1** | **97486.8** | **99613.2** |
+
+This is the one place v1 changes an answer elsewhere in the report: it widens
+§4.1's retrieved p50 spread from 1.14x to **1.26x** at k64. "Ordering barely
+matters on retrieved menus" survives that, but by less than reported.
+
+**Is the comparison fair?** Audited rather than assumed. v1 is causal — the trie
+is updated only after a request is planned. Menu membership is unchanged in
+200/200 records at both depths, the matched prefix sits at the front in 200/200,
+and the tail is exactly the input order restricted to the leftover tools in
+200/200. Rates, seed 42, in-flight cap, decode settings and cache reset all match
+the arms it is compared against.
+
+The substantive question is whether v1 uses information the others do not.
+Measuring how much of the retriever's pairwise ordering each arm preserves —
+1.00 is identical to the input, 0.50 is uncorrelated:
+
+| arm | ordering preserved |
+|---|---|
+| alphabetical | 0.510 |
+| tooltrie_v0 | 0.511 |
+| ContextPilot | 0.860 |
+| tooltrie_v1 | 0.991 |
+
+**ContextPilot already preserves the input ordering.** It hoists a matched
+cluster and leaves the rest alone; v1 does the same thing more conservatively.
+They are the same family of design, differing in what evidence they hoist on — a
+trie of served sequences against a cluster intersection. `tooltrie_v0` is the
+outlier that discards the ordering entirely. So v1's advantage is not an
+information asymmetry; it is the same signal ContextPilot uses, used more.
+
 **The boundary condition, and it is real.** v1 never overrides its input, so an
 adversarial input ordering defeats it. On `padded-64`, whose `original` arm puts
 the one differing tool at position 0 of *every* request, v1 preserves exactly
@@ -1032,7 +1080,7 @@ gain most.
 ## Limitations
 
 1. **Parts 1–3 describe a padded workload, not tool ordering in general.** §4.1
-   is the check: reuse spread falls 94.97pp → 0.98pp, latency spread 36x → 1.14x.
+   is the check: reuse spread falls 94.97pp → 1.84pp, latency spread 36x → 1.26x.
    The most important limit here. Two further properties of that workload were
    measured late: reuse on it is arithmetically the position of the single tool
    that differs between requests (r² = 0.9996), and the ToolTrie–ContextPilot gap
@@ -1133,7 +1181,7 @@ noise floor overturned:
 | the gap grows with model size | all 4B runs are 200 requests | cold-start cost grows (§1.3) |
 | model size does not reopen §6 | compared against `original`, not ContextPilot | it reopens (§6) |
 | ContextPilot at k128 is accuracy-free | 0.6B baseline floor-limited | −7.45pp at 4B (§1.4) |
-| retrieved p50 spread is 1.02x | table omitted ContextPilot | 1.14x (§4.1) |
+| retrieved p50 spread is 1.02x | table omitted ContextPilot, then v1 | 1.26x (§4.1) |
 
 The pattern is one mistake repeated: **measuring a learning planner inside its
 learning phase, or reading a margin without a noise floor.** A.7 states the floor

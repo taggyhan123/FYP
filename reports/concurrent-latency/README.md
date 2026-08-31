@@ -49,7 +49,7 @@ every other section uses and the only one with a `frequency` arm:
 
 **Two qualifications, both important.** This is a padded workload where 63 of 64
 tools are shared; on genuinely retrieved menus the spread collapses to at most
-1.14x and 95–98% of prefill is uncacheable whatever policy is used. And the
+1.26x and 95–98% of prefill is uncacheable whatever policy is used. And the
 ToolTrie-vs-ContextPilot difference in the second table is **warm-up only** — it
 vanishes in the first, and in the converged table above.
 ([§1.1](findings.md#11-results), [§4.1](findings.md#41-on-real-retrieved-menus-ordering-barely-matters))
@@ -247,7 +247,19 @@ tools of 128** and leaves **120 of 200 requests byte-identical** to their input.
 **4 of 4 retrieved depths, and 5 of 5 arrival permutations at k64** (p = 0.031;
 reuse is deterministic, so each paired comparison is exact). Accuracy is equal or
 better than ContextPilot in all four model×depth cells — at 4B/k128 it matches
-the *unordered baseline exactly* (44.72%) while carrying 6x its reuse.
+the *unordered baseline exactly* (44.72%) while carrying 6x its reuse. It is also
+the fastest arm at every retrieved depth on p50, p95, p99 and max, which widens
+question 2's retrieved spread from 1.14x to **1.26x** at k64.
+
+**Audited for fairness, not assumed.** Causal (trie updated only after planning);
+menu membership unchanged 200/200; matched prefix at the front 200/200; tail
+exactly the input order 200/200; same rates, seed, cap and decode settings as the
+arms it is compared against. On whether it uses privileged information: measuring
+how much of the retriever's pairwise ordering each arm keeps (1.00 = identical,
+0.50 = uncorrelated) gives alphabetical 0.510, tooltrie_v0 0.511, **ContextPilot
+0.860**, tooltrie_v1 0.991. ContextPilot already preserves the input ordering —
+v1 is the same family of design, more conservatively applied. v0 is the outlier
+that throws it away.
 
 **It loses on `padded-64`, badly and for a knowable reason.** That workload's
 `original` arm puts the one differing tool at position 0 of every request; v1

@@ -71,9 +71,12 @@ Two windows of the same 600-request run:
 | `tooltrie_v0` | **yes** | 87.19% | **97.05%** | 116.0 | **91.2** |
 | **ContextPilot** | **yes** | **96.16%** | **97.09%** | **93.9** | 91.7 |
 
-An 8.97pp gap becomes 0.04pp; ToolTrie's 22 ms median penalty becomes −0.5 ms in
-its favour. Both planners converge to placing the odd tool last, so the tie is
-forced. ContextPilot's real advantage on padded menus is **cold-start speed**.
+An 8.97pp gap becomes 0.04pp and ToolTrie's 22 ms median penalty falls to 0.5 ms.
+Read that as a tie, not a reversal: at p95/p99/max the remaining gaps are smaller
+than ToolTrie's own run-to-run spread. Both planners converge to placing the odd
+tool last, so the tie is forced by construction. ContextPilot's real advantage on
+padded menus is **cold-start speed** — and it still wins under saturation, 1.42x
+at p50 even in this window.
 
 Ordering-vs-no-ordering meanwhile *strengthens*: `original` has nothing to learn
 and its backlog keeps growing, so its p50 rises while every ordered arm's falls —

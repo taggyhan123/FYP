@@ -154,12 +154,12 @@ for `original`, 116.0 against 116.3 for ToolTrie. Reuse is deterministic and
 reproduces exactly; p50 does not, and the variation is concentrated in
 `original`, the one arm that saturates.
 
-**Both conclusions survive the longer run, and one reverses.** Ordering still
+**Both conclusions survive the longer run, and one disappears.** Ordering still
 dominates — and by more: `original` cannot improve, and under sustained load its
 backlog keeps growing, so its p50 *rises* 3622.8 → 6239.7 ms while every ordered
 arm's falls. The ordered-vs-unordered gap at p50 widens from 31x to **68x**. What
 does not survive is ContextPilot's lead over ToolTrie: 8.97pp becomes 0.04pp, and
-the 22 ms median penalty becomes −0.5 ms in ToolTrie's favour.
+the 22 ms median penalty falls to 0.5 ms — a tie rather than a reversal (§1.5).
 
 **Ordering is decisive on padded menus and nearly irrelevant on retrieved ones.**
 Run at the same request size and offered rate, p50 spans **36x** across the padded
@@ -351,6 +351,27 @@ learning. What does not: ToolTrie ends at 62.95 of a possible 63. Composition
 alone cannot deliver that — `alphabetical` moves only 23.09 → 28.58 and stays at
 46% reuse. The tie is a ceiling effect, not an artifact of how the extension was
 built.
+
+**The converged window is a tie, and must not be read as ToolTrie winning.**
+Latency over requests 201–600, against the spread between two runs of ToolTrie
+on the *identical* configuration:
+
+| padded @4, TTFT ms | ToolTrie | ContextPilot | gap | ToolTrie's own noise |
+|---|---|---|---|---|
+| p50 | 91.2 | 91.7 | 0.55 | 0.28 |
+| p95 | 122.5 | 123.7 | 1.24 | **7.44** |
+| p99 | 133.1 | 134.3 | 1.20 | **10.69** |
+| max | 141.9 | 151.1 | 9.26 | **12.74** |
+
+At p95, p99 and max the gap is smaller than the noise, so only p50 is even
+marginally resolvable and that from n=2. The result is that the 22 ms penalty
+vanishes, not that the sign flipped — and since both arms place the singleton at
+63.00 here, a tie is forced by construction and the residual is measurement.
+
+**The tie also does not hold under saturation.** At 64 req/s offered over the
+same window ContextPilot leads 15,799 to 22,382 ms at p50 — **1.42x** — because
+its 9% capacity edge compounds into queue depth (§1.2). ToolTrie catches up at
+moderate load, not at the ceiling.
 
 Two further limits. The 400 added requests pair real tool schemas with borrowed
 queries, so they carry reuse and ordering signal but no accuracy signal. And none

@@ -263,6 +263,15 @@ how much of the retriever's pairwise ordering each arm keeps (1.00 = identical,
 v1 is the same family of design, more conservatively applied. v0 is the outlier
 that throws it away.
 
+**Three caveats the mechanical checks miss.** ContextPilot runs *ordering only*
+here, without the annotations, de-duplication and scheduling its paper credits
+for roughly half its cache gain — so this beats its ordering component, not the
+system. v1 was **designed while looking at k64 and k128**, with no held-out set;
+k4, k16, four of five arrival seeds and both 4B accuracy cells came after the
+rule was fixed and it leads on all of them, but it was not preregistered. And the
+case for discounting padded menus was assembled *after* v1 failed on them, though
+its evidence — zero mentions of padding in the research brief — is objective.
+
 **It loses on `padded-64`, badly and for a knowable reason.** That workload's
 `original` arm puts the one differing tool at position 0 of every request; v1
 never overrides its input, so it preserves the worst possible layout and scores

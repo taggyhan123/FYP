@@ -942,6 +942,31 @@ trie of served sequences against a cluster intersection. `tooltrie_v0` is the
 outlier that discards the ordering entirely. So v1's advantage is not an
 information asymmetry; it is the same signal ContextPilot uses, used more.
 
+**Three things the mechanical checks above do not cover, and they matter more.**
+
+*ContextPilot is running at partial capability.* Every arm here is ordering only —
+no order annotations, no de-duplication, no ContextPilot scheduling — and its
+paper credits those for roughly half its cache gain (A.4). So "v1 beats
+ContextPilot" means it beats ContextPilot's ordering component. The full system
+is not measured, here or anywhere in this report, and would plausibly close some
+or all of a 1.04–1.14x reuse margin.
+
+*v1 was designed while looking at these workloads.* The diagnosis — that v0's
+alphabetical fallback displaces 99.1% of a menu for no benefit — was made on k64
+and k128, and the fix was then evaluated on k64 and k128. There is no held-out
+set. What is effectively out-of-sample: k4 and k16, four of the five arrival
+permutations, both 4B accuracy cells, and the §4.3 overlap menus were all built
+or replayed *after* the rule was fixed and were not used to choose it, and v1
+leads on all of them. The rule also has no fitted parameter. But it was not
+preregistered, and ContextPilot's authors did not see this workload.
+
+*The argument for discounting padded menus was made after seeing v1 fail on
+them.* The evidence for it is objective — the research brief contains zero
+mentions of padding and frames the problem as "different requests may retrieve
+different tool sets", and BFCL is designated there for constructing *controlled*
+workloads. But the argument was assembled in that order, and a reader should
+weigh it knowing that.
+
 **The boundary condition, and it is real.** v1 never overrides its input, so an
 adversarial input ordering defeats it. On `padded-64`, whose `original` arm puts
 the one differing tool at position 0 of *every* request, v1 preserves exactly

@@ -1,7 +1,7 @@
 # Tool ordering under concurrent load
 
 Qwen3-0.6B on one RTX 3090 (plus a Qwen3-4B check), vLLM 0.26.0, prefix caching
-unmodified. 251 GPU runs. Raw outputs are in the git-ignored `cluster/results/`
+unmodified. 268 GPU runs. Raw outputs are in the git-ignored `cluster/results/`
 directories listed in the Appendix.
 
 This is the full record, with every control and validity check.
@@ -118,7 +118,7 @@ and two more at 1.19%, so replaying them would duplicate curves.
 **How runs were done.** 200 requests per run, replaying frozen orderings so every
 arm is a permutation of the same menus. Open-loop Poisson arrivals at a fixed
 rate, seed 42, cache cleared before each run, decode pinned to 48 tokens so
-decode-length variance cannot pollute the tails. 251 runs total.
+decode-length variance cannot pollute the tails. 268 runs total.
 
 **One naming note.** ContextPilot throughout is the official reordering API at
 the paper's `alpha=0.001`, ordering only — no annotations, de-duplication or
@@ -217,6 +217,12 @@ run at the same offered rate:
 | alphabetical | 46.08% | 4.74 | 5.18 |
 | tooltrie_v0 | 96.81% | 11.24 | **16.79** |
 | **ContextPilot** | 96.85% | **16.83** | 16.16 |
+| tooltrie_v1 | 1.19% | 3.53 | — |
+
+ToolTrie-v1 sits at `original`'s ceiling on padded menus, for the reason §5
+gives: it preserves an input ordering that puts the differing tool first. The
+mechanism claim is unaffected — capacity still tracks reuse, and v1 is simply at
+the bottom of the reuse range here rather than the top.
 
 Ordering alone is worth **4.7x the admission capacity** in the first window and
 **4.8x** once converged. Reuse was identical at every rate from 1 to 64, so
@@ -337,6 +343,26 @@ identical at 0.755 and 0.805 so the arms stay comparable:
 | k128 | canonical_oracle | 56.5 | 2.87% | 14.29% (−8.69pp) | 34.78% (−9.94pp) |
 | k128 | hybrid_oracle | 57.7 | 3.11% | 13.66% (−9.32pp) | 36.02% (−8.70pp) |
 | k128 | tooltrie_v0 | 62.8 | 1.13% | 16.15% (−6.83pp) | 32.30% (−12.42pp) |
+
+The shallow depths, added later so ToolTrie-v1 had a baseline to be read against
+(0.6B only):
+
+| depth | arm | reuse | accuracy |
+|---|---|---|---|
+| k4 | original | 15.87% | 47.57% |
+| k4 | ContextPilot | 18.72% | 47.57% |
+| k4 | tooltrie_v0 | 17.48% | **49.51%** |
+| k4 | tooltrie_v1 | **19.47%** | 47.57% |
+| k16 | original | 6.12% | **42.75%** |
+| k16 | ContextPilot | 9.93% | 41.22% |
+| k16 | tooltrie_v0 | 7.77% | 41.22% |
+| k16 | tooltrie_v1 | **11.31%** | 40.46% |
+
+At k4 every arm lands on 47.57% except v0's 49.51%, and at k16 they span 2.3
+points — with 4 and 16 tools there is barely any depth to displace the gold tool
+into, so the accuracy tension that dominates k64 and k128 has no room to act.
+ToolTrie-v1 leads reuse at both and is last on accuracy at k16 by 0.76pp, which
+is 0.2 SE.
 
 **Scale halves the depth penalty, and the 0.6B k128 column understates it.**
 Fitting accuracy against gold-tool position across all arms in each cell:
@@ -474,16 +500,25 @@ All at 4 req/s behind an in-flight cap of 4. Arrival to first token, ms.
 | `frequency` + adaptor | **685.2** (−17.0%) | **2961.4** (+12.2%) | 105/200 |
 | `alphabetical` | 1046.0 | 3120.2 | — |
 | `alphabetical` + adaptor | **827.2** (−20.9%) | **3302.6** (+5.8%) | 104/200 |
-| `tooltrie_v0` | **122.8** | **915.6** | — |
-| `ContextPilot` | **94.2** | **452.6** | — |
+| `tooltrie_v0` | **122.8** | **915.6** | 0/200 |
+| `ContextPilot` | **94.2** | **452.6** | 0/200 |
+| `tooltrie_v1` | 5052.9 | 10159.5 | — |
+| `tooltrie_v1` + adaptor | 5726.1 | 11110.7 | 0/200 |
 
 The adaptor works on both orderings where it can act, and with the same shape:
 median down, worst case up. It reordered around half the requests in each.
 
-**ToolTrie and ContextPilot are shown without it because it cannot act on them** —
-0 of 200 reordered in both cases, so running it issues the identical dispatch
-sequence FIFO does. Adding it to ContextPilot gave 94.4 ms against 94.2, two
-samples of the same thing.
+**It cannot act on ToolTrie-v0, ContextPilot or ToolTrie-v1** — 0 of 200
+reordered in all three, so running it issues the dispatch sequence FIFO already
+would. Adding it to ContextPilot gave 94.4 ms against 94.2, two samples of the
+same thing.
+
+ToolTrie-v1 is inert for the *opposite* reason to the other two, which is the
+inverted U below seen from both ends. v0 and ContextPilot tie because every
+candidate scores 56–63; v1 on padded menus ties because every candidate scores
+near 0 — it preserves an input ordering worth only 1.19% reuse here (§5), which
+also makes it the slowest arm in the table. The adaptor has nothing to choose
+between at either extreme.
 
 **And the comparison that settles it: the best the adaptor achieves anywhere is
 685.2 ms, against 122.8 for ToolTrie and 94.2 for ContextPilot, neither of which
@@ -796,6 +831,21 @@ the policy for something a coin flip partly reproduces.**
 `suffix` was indistinguishable from `sjf`, as predicted: reuse on these
 workloads is 0.4–2%, so the uncached portion is ~99% of every request and the
 cache-aware term has nothing to work with.
+
+**The verdict is ordering-independent, and this is measured rather than argued.**
+SJF sorts by job size, a property of the menu invariant under any permutation of
+it, so the result should not depend on which ordering it dispatches. Repeating
+`sjf` against `fifo` on all five orderings at k64:
+
+| ordering it dispatches | p50 | p95 | max |
+|---|---|---|---|
+| `tooltrie_v0` | −85.5% | +54.9% | +127.3% |
+| `alphabetical` | −84.8% | +52.7% | +124.3% |
+| `frequency` | −86.1% | +50.8% | +121.5% |
+| ContextPilot | −84.0% | +55.7% | +129.9% |
+| `tooltrie_v1` | −84.1% | +55.6% | +128.4% |
+
+Median down 84–86%, tail up 121–130%, on every one.
 
 ### 4.3 The middle of the overlap range
 
@@ -1347,12 +1397,13 @@ ContextPilot scheduling, so nothing here measures the full system.
 | Steady state (600 req) and more arrival seeds | `steady-and-seeds-20260830-221902/` | 14 |
 | Steady state: the two reference arms | `steady-arms-20260830-234910/` | 4 |
 | Steady-state capacity, converged workload, replicates | `steady-capacity-20260831-004322/` | 16 |
+| Four questions across all six arms | `four-questions-arms-20260902-002142/` | 17 |
 | ToolTrie-v1 (reuse, accuracy, 5 seeds, 4B) | `tooltrie-keeporder-20260901-001832/` | 15 |
 | Middle-overlap sweep (25/50/75%) | `overlap-sweep-20260831-232237/` | 15 |
 | ToolTrie frequency fallback | `tooltrie-v1-fallback-20260901-233750/` | 4 |
 | Accuracy at Qwen3-4B (k128, k64) | `accuracy-4b-20260831-204740/` | 10 |
 
-**251 runs.** All under the git-ignored `cluster/results/`.
+**268 runs.** All under the git-ignored `cluster/results/`.
 
 Driver `scripts/replay_vllm_concurrent.py`; also added
 `summarize_queuing_runs.py`, `build_canonical_ordering.py`,

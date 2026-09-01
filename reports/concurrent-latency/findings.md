@@ -950,7 +950,31 @@ information asymmetry; it is the same signal ContextPilot uses, used more.
 
 **Three things the mechanical checks above do not cover, and they matter more.**
 
-*ContextPilot is running at partial capability.* Every arm here is ordering only —
+*ContextPilot is being tested far outside its own evaluation regime.* Its paper
+evaluates on QASPER, MultihopRAG and NarrativeQA with a dense retriever
+(gte-Qwen2-7B + FAISS) plus MT-RAG with BM25, at top-k 3–20 and primarily k=15,
+over multi-session and multi-turn workloads where **~40% of retrieved documents
+in a turn overlap earlier ones** and 49–79% of questions draw from the top 20% of
+documents. This project uses BM25 only, at k = 4/16/64/128, with independent
+requests and no sessions:
+
+| | ContextPilot's paper | here |
+|---|---|---|
+| retriever | dense for 3 of 4 datasets | BM25 only |
+| k | 3–20, primarily 15 | 4, 16, **64, 128** |
+| adjacent-request overlap | **~40%** | **1.6 / 3.6 / 5.3 / 7.7%** |
+| structure | multi-session, multi-turn | independent requests |
+
+So ContextPilot is measured at 5–25x below its design overlap, at up to 8x its k
+range, without the session structure its index exploits. That cuts both ways:
+v1's wins come on the ToolRet menus, where ContextPilot is furthest off-design,
+and its losses come on the §4.3 overlap menus, which are closest to
+ContextPilot's own regime. The report's problem — a large tool catalogue with
+per-request retrieval — is genuinely this low-overlap one, so the comparison is
+legitimate; but "v1 beats ContextPilot" should be read as "on a workload
+ContextPilot was not built for".
+
+*ContextPilot is also running at partial capability.* Every arm here is ordering only —
 no order annotations, no de-duplication, no ContextPilot scheduling — and its
 paper credits those for roughly half its cache gain (A.4). So "v1 beats
 ContextPilot" means it beats ContextPilot's ordering component. The full system

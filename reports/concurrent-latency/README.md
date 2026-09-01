@@ -263,7 +263,13 @@ how much of the retriever's pairwise ordering each arm keeps (1.00 = identical,
 v1 is the same family of design, more conservatively applied. v0 is the outlier
 that throws it away.
 
-**Three caveats the mechanical checks miss.** ContextPilot runs *ordering only*
+**Four caveats the mechanical checks miss.** ContextPilot is measured far outside
+its own evaluation regime: its paper uses a dense retriever on 3 of 4 datasets at
+k=3–20 (primarily 15), over multi-turn workloads with **~40% overlap between a
+turn and earlier ones**. Here it sees BM25 only, k=4–128, independent requests,
+and **1.6–7.7% adjacent overlap**. v1's wins are on those low-overlap menus where
+ContextPilot is furthest off-design; its losses are on the §4.3 menus, closest to
+ContextPilot's own regime. ContextPilot also runs *ordering only*
 here, without the annotations, de-duplication and scheduling its paper credits
 for roughly half its cache gain — so this beats its ordering component, not the
 system. v1 was **designed while looking at k64 and k128**, with no held-out set;

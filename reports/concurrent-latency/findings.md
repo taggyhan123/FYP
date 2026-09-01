@@ -1478,7 +1478,9 @@ against ToolTrie's 0.30pp; at k128 it is the other way round, 0.23pp against
 **Two asymmetries stand.** ToolTrie is `v0` against a tuned published system,
 though sweeping its one ordering knob found the shipped value already optimal
 (`recency_window` 32/128/512/2048/none → 1.43/1.90/1.90/1.90/1.90 at k64) and
-`tooltrie_v1.py` has never entered any comparison. And the workload favours
+the visit-weighted variant (now `tooltrie_weighted.py`) has never entered *this*
+comparison, though brief Q3 measured it across four locality regimes and found it
+identical to v0 to five decimals. And the workload favours
 ContextPilot by construction: 63 of 64 padded tools are common to all 200
 requests, so its root cluster alone is the answer, while a trie must discover the
 same block through prefix agreement.

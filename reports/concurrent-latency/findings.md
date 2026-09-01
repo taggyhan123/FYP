@@ -944,12 +944,25 @@ narrowest margin; on the other four the margin is 3–7x larger.
 | k64 @ 4B | **44.37%** | 39.74% | 42.38% | 42.38% |
 | k128 @ 4B | **44.72%** | 32.30% | 37.27% | **44.72%** |
 
-Equal or better than ContextPilot in all four cells. At 4B/k128 it matches the
-unordered baseline **exactly** while carrying 6x its reuse — the property
-ContextPilot was credited with before §1.4 showed that credit was a floor
-effect. No single accuracy margin clears 2 SE (the k128/4B gap is 1.35); what
-carries the result is that reuse is exact and wins 5/5 seeds, and that accuracy
-points the same way in every cell.
+**Accuracy against ContextPilot is a wash, not a win.** Across all six cells
+measured — k4, k16, k64, k128 at 0.6B plus k64 and k128 at 4B — it is 2 wins, 2
+losses and 2 ties, and *every* margin is under 1.6 SE:
+
+| cell | v1 | ContextPilot | delta | SE |
+|---|---|---|---|---|
+| k4 @ 0.6B | 47.57% | 47.57% | +0.00 | 5.75 |
+| k16 @ 0.6B | 40.46% | 41.22% | −0.76 | 6.07 |
+| k64 @ 0.6B | **33.11%** | 27.15% | **+5.96** | 5.27 |
+| k128 @ 0.6B | 22.36% | 22.98% | −0.62 | 4.67 |
+| k64 @ 4B | 42.38% | 42.38% | +0.00 | 5.69 |
+| k128 @ 4B | **44.72%** | 37.27% | **+7.45** | 5.47 |
+
+So the defensible claim is **more reuse at no measurable accuracy cost**, not
+better accuracy. At 4B/k128 v1 matches the unordered baseline exactly while
+carrying 6x its reuse — the property ContextPilot was credited with before §1.4
+showed that credit was a floor effect. What carries the result is reuse, which is
+exact and wins 4/4 depths and 5/5 arrival seeds; accuracy establishes only that
+the reuse is not bought with it.
 
 **Latency follows reuse, at the deeper menus.** Against ContextPilot across
 reuse, p50, p95, p99, max and achieved rate at four depths, v1 wins **21 of 24**

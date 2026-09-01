@@ -253,9 +253,11 @@ tools of 128** and leaves **120 of 200 requests byte-identical** to their input.
 | k128 | 0.37% | 1.13% | 1.99% | **2.21%** |
 
 **4 of 4 retrieved depths, and 5 of 5 arrival permutations at k64** (p = 0.031;
-reuse is deterministic, so each paired comparison is exact). Accuracy is equal or
-better than ContextPilot in all four model×depth cells — at 4B/k128 it matches
-the *unordered baseline exactly* (44.72%) while carrying 6x its reuse. It is also
+reuse is deterministic, so each paired comparison is exact). Accuracy against
+ContextPilot is a **wash** — across all six cells measured it is 2 wins, 2 losses
+and 2 ties, every margin under 1.6 SE — so the claim is *more reuse at no
+measurable accuracy cost*, not better accuracy. At 4B/k128 it matches the
+*unordered baseline exactly* (44.72%) while carrying 6x its reuse. It is also
 faster than ContextPilot on 21 of 24 metric-cells across the four retrieved
 depths — every cell at k64 and k128 — which widens the retrieved spread quoted in
 question 1 from 1.14x to **1.26x** at k64. The three it loses (`max` at k4, `p95`

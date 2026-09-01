@@ -674,9 +674,9 @@ single-permutation and are not corrected.
 | **padded-64** | 3.564 – 4.014 | 91.8 – 3310.4 | **36.06x** |
 
 All six arms are included, ToolTrie-v1 among them (§5) — it is the fastest at
-every depth on p50, p95, p99 and max, which is what widens k64 from 1.14x. Two
-earlier versions of this table understated these spreads: the first omitted
-ContextPilot, the second omitted v1.
+every depth on p50, and fastest on every statistic at k64 and k128, which is
+what widens k64 from 1.14x. Two earlier versions of this table understated these
+spreads: the first omitted ContextPilot, the second omitted v1.
 
 **The 95-point reuse spread that drives Parts 1–3 becomes under 3 points, and
 the 36x latency spread becomes at most 1.26x.** Padding gives every request the same
@@ -895,8 +895,12 @@ effect. No single accuracy margin clears 2 SE (the k128/4B gap is 1.35); what
 carries the result is that reuse is exact and wins 5/5 seeds, and that accuracy
 points the same way in every cell.
 
-**Latency follows reuse.** v1 is the fastest arm at every retrieved depth on
-every statistic — time to first token, ms:
+**Latency follows reuse, at the deeper menus.** Against ContextPilot across
+reuse, p50, p95, p99, max and achieved rate at four depths, v1 wins **21 of 24**
+cells: every one at k64 and k128, losing `max` at k4 (93.0 against 90.0), `p95`
+at k16 (210.5 against 207.6) and tying on achieved rate at k4. Those three sit
+where absolute latency is 46–210 ms and the gaps are a millisecond or two.
+Time to first token, ms:
 
 | depth | arm | p50 | p95 | p99 | max |
 |---|---|---|---|---|---|

@@ -58,7 +58,7 @@ to update.
 | `analysis.py` | offline corpus analysis: locality, co-occurrence, analytical trie |
 | `retrieval.py` | BM25 retrieval over tool documents |
 | `tooltrie.py` | **ToolTrie-v0 planner** — causal recent-path ordering |
-| `tooltrie_v1.py` | reorders only what the trie matched; unmatched tools keep their incoming order |
+| `tooltrie_v1.py` | reorders only what the trie matched; unmatched tools keep their incoming order ([design note](notes/tooltrie-v1-design.md)) |
 | `tooltrie_weighted.py` | visit-weighted variant answering brief Q3; measured across four locality regimes and identical to v0 to five decimals |
 | `baselines.py` | ordering baselines: CacheWeaver, fitted policies, online frequency |
 | `contextpilot_adapter.py` | validation and materialization for ContextPilot orderings |

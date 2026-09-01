@@ -6,6 +6,25 @@ unmodified. 268 GPU runs.
 This is the short version. Every number links to the section of
 [`findings.md`](findings.md) that derives it, with its runs and controls.
 
+**How the method works:** [`ToolTrie-v0`](../../notes/tooltrie-v0-design.md) ·
+[`ToolTrie-v1`](../../notes/tooltrie-v1-design.md) — v1 changes exactly one line
+of v0, the order given to tools the trie could not match.
+
+| | v0 | **v1** |
+|---|---|---|
+| trie, walk, selection, budget, causality | — | identical |
+| tools the trie **matched** | placed at the front | placed at the front |
+| tools it **could not** match | sorted **alphabetically** | **left in arrival order** |
+| menu displaced | 99.1% | **13%** |
+| mean tool movement | 41.9 positions | **1.1** |
+| requests left untouched | 0 / 200 | **120 / 200** |
+
+The fallback decides ~93% of every ordering, because the trie matches only 1.19
+of 64 tools at k64. Tool name correlates with neither relevance nor commonality,
+so v0 permuted almost the whole menu on no information — displacing the correct
+tool to position 62.8 of 128 and returning 1.13% reuse for it. v1 keeps what the
+retriever produced and reorders only what the trie has evidence for.
+
 ---
 
 ## 1. Parallel requests → latency distribution at p95 / p99 / max

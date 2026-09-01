@@ -1,7 +1,7 @@
 # Tool ordering under concurrent load — key findings
 
 Qwen3-0.6B on one RTX 3090 (plus a Qwen3-4B check), vLLM 0.26.0, prefix caching
-unmodified. 251 GPU runs.
+unmodified. 268 GPU runs.
 
 This is the short version. Every number links to the section of
 [`findings.md`](findings.md) that derives it, with its runs and controls.
@@ -67,18 +67,21 @@ not worth deploying. Arrival to first token, ms:
 | `frequency` + adaptor | **685.2** (−17.0%) | 2961.4 (+12.2%) | 105/200 |
 | `alphabetical` | 1046.0 | 3120.2 | — |
 | `alphabetical` + adaptor | **827.2** (−20.9%) | 3302.6 (+5.8%) | 104/200 |
-| `tooltrie_v0` | **122.8** | **915.6** | — |
-| **ContextPilot** | **94.2** | **452.6** | — |
+| `tooltrie_v0` | **122.8** | **915.6** | 0/200 |
+| **ContextPilot** | **94.2** | **452.6** | 0/200 |
+| `tooltrie_v1` | 5052.9 | 10159.5 | 0/200 |
 
 The shape is right — median down, worst case up, about half the requests moved.
 **The problem is that the best the adaptor achieves anywhere is 685 ms, against
 123 for ToolTrie and 94 for ContextPilot, neither of which uses it.** Fixing the
 ordering is worth 5.6–7.3x more than fixing the dispatch order.
 
-It also **cannot act on the good orderings at all**: 0 of 200 reordered on both
-ToolTrie and ContextPilot, because the adaptor needs *variance* in prefix
-affinity and those arms have made every request look alike (spread 0.08 and
-0.01). Usability is an inverted U — it only works on mid-quality orderings.
+It also **cannot act on three of the six arms at all**: 0 of 200 reordered on
+`tooltrie_v0`, ContextPilot and `tooltrie_v1`, because the adaptor needs
+*variance* in prefix affinity. Usability is an inverted U and those three sit at
+its two ends — v0 and ContextPilot because every candidate scores 56–63 and ties,
+v1 because on padded menus every candidate scores near 0 and ties. It works only
+on mid-quality orderings.
 ([§2](findings.md#2-the-mean-versus-max-adaptor))
 
 ---
@@ -142,7 +145,12 @@ including on padded menus where every request is the same size and the sort key
 carries no information. Subtracting that, the real size-aware gain is 29.2 points
 against 3.7. Without the control the headline would have been "SJF cuts median
 latency 6.9x", crediting the policy for something a coin flip reproduces.
-([§4.2](findings.md#42-smart-queuing-trades-the-tail-for-the-median))
+
+**And the verdict does not depend on the ordering underneath it** — measured on
+all five. p50 falls 84–86% and `max` rises 121–130% whether SJF dispatches
+`tooltrie_v0`, `alphabetical`, `frequency`, ContextPilot or `tooltrie_v1`,
+because SJF sorts by job size and job size is invariant under any permutation of
+a menu. ([§4.2](findings.md#42-smart-queuing-trades-the-tail-for-the-median))
 
 ---
 

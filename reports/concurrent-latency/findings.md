@@ -935,6 +935,30 @@ permutations** at k64 — mean 3.51% against 2.81%, sign test p = 0.031. Seed 0,
 used everywhere else in this report, is ContextPilot's best draw and v1's
 narrowest margin; on the other four the margin is 3–7x larger.
 
+**But the size of the win depends entirely on who it is measured against, and
+the ContextPilot margin is the small one:**
+
+| v1 versus | k4 | k16 | k64 | k128 |
+|---|---|---|---|---|
+| original | 1.23x | 1.85x | **5.45x** | **5.97x** |
+| alphabetical | 1.27x | 1.80x | 4.07x | 3.81x |
+| frequency | 1.33x | 2.02x | 5.28x | 4.09x |
+| tooltrie_v0 | 1.11x | 1.46x | **2.61x** | 1.96x |
+| **ContextPilot** | **1.04x** | **1.14x** | **1.04x** | **1.11x** |
+
+Against ContextPilot it is 4–14%, which at k64 is **+0.18pp of reuse on a
+workload where 95% of prefill is uncacheable whichever arm is chosen**. Latency
+moves more than that implies — p50 7739.7 against 8565.4 ms at k64, 9.6% faster,
+with 1.9% higher sustained throughput — but nobody should expect swapping
+ContextPilot for v1 to be transformative.
+
+**The finding that matters is the v0 column.** A one-line change to the fallback
+recovers 1.11–2.61x of ToolTrie's own reuse. ToolTrie-v0 was leaving most of its
+value unclaimed through how it ordered tools it could not match, not because a
+trie is the wrong structure. The ContextPilot comparison mainly establishes that
+v1 has caught up with the published baseline on this regime, not that it has
+meaningfully passed it.
+
 **Accuracy, both models, both depths:**
 
 | | original | tooltrie_v0 | ContextPilot | **tooltrie_v1** |

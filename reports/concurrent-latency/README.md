@@ -253,7 +253,14 @@ tools of 128** and leaves **120 of 200 requests byte-identical** to their input.
 | k128 | 0.37% | 1.13% | 1.99% | **2.21%** |
 
 **4 of 4 retrieved depths, and 5 of 5 arrival permutations at k64** (p = 0.031;
-reuse is deterministic, so each paired comparison is exact). Accuracy against
+reuse is deterministic, so each paired comparison is exact). **But read the
+margins by comparator** — against ContextPilot it is 1.04–1.14x, which at k64 is
++0.18pp of reuse where 95% of prefill is uncacheable either way; against
+`tooltrie_v0` it is 1.11–2.61x, and against no reordering up to 5.97x. The
+finding that matters is the v0 column: one line of fallback ordering was costing
+ToolTrie most of its own reuse. The ContextPilot comparison establishes that v1
+has *caught up* with the published baseline, not that it has passed it
+meaningfully. Accuracy against
 ContextPilot is a **wash** — across all six cells measured it is 2 wins, 2 losses
 and 2 ties, every margin under 1.6 SE — so the claim is *more reuse at no
 measurable accuracy cost*, not better accuracy. At 4B/k128 it matches the

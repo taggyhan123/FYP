@@ -976,8 +976,13 @@ That is the construction, not the overlap level. On the §4.3 menus — 25/50/75
 shared, neutral input order — v1 reaches 12.39 / 27.16 / 45.43 of shared prefix
 against ContextPilot's 15.92 / 31.84 / 47.79, or 78–95% of it, and 3.6x v0's.
 **Use v1 where the input ordering carries relevance information.** A retriever's
-ranking does; `padded-64` does not, and the research brief never asks for it —
-it frames the problem as "different requests may retrieve different tool sets".
+ranking does; `padded-64` does not. The brief does sanction it, but as a
+*control*: §4.2 designates BFCL for correctness evaluation and for "constructing
+controlled tool-menu workloads", while §4.1 makes ToolRet the dataset for tool
+catalogues and retrieval. So padded-64 is a legitimate control that isolates a
+mechanism, and the retrieved menus are the regime the problem statement
+describes — "different requests may retrieve different tool sets". Neither is a
+production trace, and §4.5 of the brief says so of every dataset it lists.
 
 ---
 

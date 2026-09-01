@@ -270,7 +270,9 @@ system. v1 was **designed while looking at k64 and k128**, with no held-out set;
 k4, k16, four of five arrival seeds and both 4B accuracy cells came after the
 rule was fixed and it leads on all of them, but it was not preregistered. And the
 case for discounting padded menus was assembled *after* v1 failed on them, though
-its evidence — zero mentions of padding in the research brief — is objective.
+its evidence is only partly objective: the brief never uses the word, but §4.2
+does designate BFCL for "constructing controlled tool-menu workloads", which is
+what padded-64 is. It is a sanctioned control, not an unsanctioned workload.
 
 **It loses on `padded-64`, badly and for a knowable reason.** That workload's
 `original` arm puts the one differing tool at position 0 of every request; v1

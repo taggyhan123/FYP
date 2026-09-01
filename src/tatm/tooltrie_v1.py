@@ -33,8 +33,10 @@ preserves that layout and scores 1.19% against v0's 87.19%. This is a property
 of that construction rather than of high overlap: on menus sharing 25/50/75% of
 their tools with a neutral input order, v1 reaches 78–95% of ContextPilot's
 shared prefix and 3.6x v0's. Use v1 where the input ordering carries relevance
-information, which is the regime the research brief describes; a retriever's
-ranking does, and `padded-64` does not.
+information; a retriever's ranking does, and `padded-64` does not. That workload
+is a legitimate control -- the research brief designates BFCL for "constructing
+controlled tool-menu workloads" -- so this is v1 measured outside its regime
+rather than an unfair test.
 """
 
 from __future__ import annotations

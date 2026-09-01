@@ -1,7 +1,7 @@
 # Tool ordering under concurrent load
 
 Qwen3-0.6B on one RTX 3090 (plus a Qwen3-4B check), vLLM 0.26.0, prefix caching
-unmodified. 248 GPU runs. Raw outputs are in the git-ignored `cluster/results/`
+unmodified. 251 GPU runs. Raw outputs are in the git-ignored `cluster/results/`
 directories listed in the Appendix.
 
 This is the full record, with every control and validity check.
@@ -118,7 +118,7 @@ and two more at 1.19%, so replaying them would duplicate curves.
 **How runs were done.** 200 requests per run, replaying frozen orderings so every
 arm is a permutation of the same menus. Open-loop Poisson arrivals at a fixed
 rate, seed 42, cache cleared before each run, decode pinned to 48 tokens so
-decode-length variance cannot pollute the tails. 248 runs total.
+decode-length variance cannot pollute the tails. 251 runs total.
 
 **One naming note.** ContextPilot throughout is the official reordering API at
 the paper's `alpha=0.001`, ordering only — no annotations, de-duplication or
@@ -805,11 +805,17 @@ holding menu size at 64 and prompt length at ~5,550 tokens and varying only how
 many tools every request shares. Reuse at 4 req/s, against the ceiling that
 hoisting the shared core would give:
 
-| tools shared by all | ceiling | original | alphabetical | tooltrie_v0 | **ContextPilot** |
-|---|---|---|---|---|---|
-| 25% | 25% | 0.75% | 0.72% | 7.01% | **28.80%** |
-| 50% | 50% | 0.96% | 2.74% | 15.08% | **49.87%** |
-| 75% | 75% | 1.08% | 6.60% | 23.49% | **73.98%** |
+| tools shared by all | ceiling | original | alphabetical | tooltrie_v0 | tooltrie_v1 | **ContextPilot** |
+|---|---|---|---|---|---|---|
+| 25% | 25% | 0.75% | 0.72% | 7.01% | 23.03% | **28.80%** |
+| 50% | 50% | 0.96% | 2.74% | 15.08% | 42.55% | **49.87%** |
+| 75% | 75% | 1.08% | 6.60% | 23.49% | 70.62% | **73.98%** |
+
+These menus carry a **shuffled** input ordering, deliberately, so that the input
+conveys nothing. ToolTrie-v1 (§5) therefore has no relevance signal to preserve
+and reaches 80–95% of ContextPilot — losing here while beating it on every
+BM25-ordered menu. It still beats v0 by 3.0–3.3x, so the v1 rule helps in both
+regimes; it only wins outright in one.
 
 **ContextPilot reaches the ceiling at every level; ToolTrie reaches about 30% of
 it.** This band was the trie's best remaining prospect and is instead where it
@@ -972,9 +978,22 @@ adversarial input ordering defeats it. On `padded-64`, whose `original` arm puts
 the one differing tool at position 0 of *every* request, v1 preserves exactly
 that and scores **1.19% against v0's 87.19%**.
 
-That is the construction, not the overlap level. On the §4.3 menus — 25/50/75%
-shared, neutral input order — v1 reaches 12.39 / 27.16 / 45.43 of shared prefix
-against ContextPilot's 15.92 / 31.84 / 47.79, or 78–95% of it, and 3.6x v0's.
+That is the construction, not the overlap level — but a neutral input ordering
+is enough to cost v1 the win. Measured on the §4.3 menus, whose input order is
+shuffled, v1 reaches **23.03 / 42.55 / 70.62% reuse against ContextPilot's
+28.80 / 49.87 / 73.98%** — 80–95% of it, losing at every level while still
+beating v0 by 3.0–3.3x. So v1's advantage is a joint property of the method and
+the retriever:
+
+| input ordering | vs ContextPilot | vs tooltrie_v0 |
+|---|---|---|
+| BM25 relevance (k4–k128) | **wins 4/4** | wins 4/4 |
+| shuffled (§4.3, 25–75% shared) | loses, 0.80–0.95x | wins, ~3x |
+| adversarial (padded-64) | loses, 0.01x | loses, 0.01x |
+
+ContextPilot overrides its input when its clustering disagrees; v1 essentially
+never does. That is why v1 converts a good input ordering into more reuse than
+ContextPilot can, and cannot rescue a bad one.
 **Use v1 where the input ordering carries relevance information.** A retriever's
 ranking does; `padded-64` does not. The brief does sanction it, but as a
 *control*: §4.2 designates BFCL for correctness evaluation and for "constructing
@@ -1305,11 +1324,11 @@ ContextPilot scheduling, so nothing here measures the full system.
 | Steady state: the two reference arms | `steady-arms-20260830-234910/` | 4 |
 | Steady-state capacity, converged workload, replicates | `steady-capacity-20260831-004322/` | 16 |
 | ToolTrie-v1 (reuse, accuracy, 5 seeds, 4B) | `tooltrie-keeporder-20260901-001832/` | 15 |
-| Middle-overlap sweep (25/50/75%) | `overlap-sweep-20260831-232237/` | 12 |
+| Middle-overlap sweep (25/50/75%) | `overlap-sweep-20260831-232237/` | 15 |
 | ToolTrie frequency fallback | `tooltrie-v1-fallback-20260901-233750/` | 4 |
 | Accuracy at Qwen3-4B (k128, k64) | `accuracy-4b-20260831-204740/` | 10 |
 
-**248 runs.** All under the git-ignored `cluster/results/`.
+**251 runs.** All under the git-ignored `cluster/results/`.
 
 Driver `scripts/replay_vllm_concurrent.py`; also added
 `summarize_queuing_runs.py`, `build_canonical_ordering.py`,

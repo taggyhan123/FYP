@@ -1,7 +1,7 @@
 # Tool ordering under concurrent load — key findings
 
 Qwen3-0.6B on one RTX 3090 (plus a Qwen3-4B check), vLLM 0.26.0, prefix caching
-unmodified. 248 GPU runs.
+unmodified. 251 GPU runs.
 
 This is the short version. Every number links to the section of
 [`findings.md`](findings.md) that derives it, with its runs and controls.
@@ -278,9 +278,20 @@ what padded-64 is. It is a sanctioned control, not an unsanctioned workload.
 `original` arm puts the one differing tool at position 0 of every request; v1
 never overrides its input, so it preserves the worst possible layout and scores
 1.19% against v0's 87.19%. That is the construction, not the overlap level — at
-25/50/75% shared tools with a neutral input order v1 reaches 78–95% of
-ContextPilot's shared prefix. Use it where the input ordering carries relevance
-information, which is the regime the research brief describes.
+25/50/75% shared tools with a *shuffled* input order v1 reaches 23.03 / 42.55 /
+70.62% reuse against ContextPilot's 28.80 / 49.87 / 73.98% — it loses there too,
+while still beating v0 by ~3x. So v1's advantage is a joint property of the
+method and the retriever:
+
+| input ordering | vs ContextPilot | vs tooltrie_v0 |
+|---|---|---|
+| BM25 relevance | **wins 4/4** | wins 4/4 |
+| shuffled | loses, 0.80–0.95x | wins, ~3x |
+| adversarial (padded-64) | loses, 0.01x | loses, 0.01x |
+
+ContextPilot overrides its input when its clustering disagrees; v1 essentially
+never does. Use v1 where the retriever's ranking is meaningful — the deployed
+case — and not as a general-purpose ordering.
 ([§5](findings.md#5-tooltrie-v1-reorder-only-what-the-trie-matched))
 
 ---

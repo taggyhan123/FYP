@@ -338,20 +338,3 @@ ContextPilot from 2.15% to 4.78% at k64 — larger than the gap between any two
 policies.
 
 ---
-
-## What is not settled
-
-- **No arm used ContextPilot's order annotations**, which exist to decouple
-  relevance from position. Three methods have now died on the accuracy gate, and
-  this is the only untried mechanism that could move it.
-- **The hybrid ordering rejected in [§6](findings.md#6-explored-and-rejected) is
-  reopened, and probably not settleable here.** Its accuracy penalty against
-  ContextPilot is 9.32pp at 0.6B (2.2 SE) but 1.25pp at 4B (0.2 SE). Decoding is
-  greedy, so re-running reproduces the same answers — confirming a 1.25pp effect
-  at 2 SE needs ~75x the evaluation data, about 15,000 tasks against 200.
-- **No representative chronological trace.** The brief's own §4.5 warns that no
-  listed dataset provides one, and arrival locality turned out to move reuse more
-  than any policy does. Every number here inherits that.
-- **Coverage is uneven.** Accuracy has two models at k64/k128; converged capacity
-  has three replicates per arm; eight reuse cells have 3–5 arrival permutations.
-  Everything else is a single draw at one model.

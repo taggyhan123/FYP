@@ -1,7 +1,7 @@
 # Tool ordering under concurrent load
 
 Qwen3-0.6B on one RTX 3090 (plus a Qwen3-4B check), vLLM 0.26.0, prefix caching
-unmodified. 294 GPU runs. Raw outputs are in the git-ignored `cluster/results/`
+unmodified. 310 GPU runs. Raw outputs are in the git-ignored `cluster/results/`
 directories listed in the Appendix.
 
 This is the full record, with every control and validity check.
@@ -1014,8 +1014,34 @@ On BM25 ContextPilot held the gold tool *shallower* than v1 (12.5 against 18.0
 at k64). On dense that reverses: v1 sits at `original`'s position while
 ContextPilot pushes gold nearly twice as deep. Lower overlap means the trie
 matches fewer tools, so v1 barely moves its input -- which is the design working
-as specified. **This predicts an accuracy result rather than measuring one**;
-no dense accuracy runs have been done.
+as specified.
+
+**And the accuracy follows the position.** `gold_hit_ceil`, same serial driver,
+settings and metric as §1.4 (`--max-tokens 128 --tool-choice auto
+--disable-thinking --reset-before`). The ceiling is identical across arms within
+each depth -- 0.815 at k64, 0.855 at k128 -- so the arms are comparable:
+
+| cell | `original` | `tooltrie_v0` | ContextPilot | **`tooltrie_v1`** | v1 − CP | SE | sigma |
+|---|---|---|---|---|---|---|---|
+| k64 @ 0.6B | 29.45 | 19.02 | 24.54 | **31.29** | +6.75 | 4.95 | 1.36 |
+| k128 @ 0.6B | 29.24 | 13.45 | 18.13 | **28.65** | **+10.52** | 4.54 | **2.32** |
+| k64 @ 4B | 39.26 | 34.97 | 38.04 | **39.88** | +1.84 | 5.40 | 0.34 |
+| k128 @ 4B | 39.18 | 33.92 | 36.26 | **40.35** | +4.09 | 5.25 | 0.78 |
+
+**v1 wins all four cells**, against 2 wins / 2 losses / 2 ties on BM25. Only
+k128 @ 0.6B clears 2 SE individually; the other three are 0.34-1.36 SE, so the
+strength of the result is the *consistency* -- four of four in the same
+direction, which is p = 0.0625 one-tailed under a sign test -- together with the
+position mechanism that predicted it in advance.
+
+**The sharper claim is against `original`.** v1 is within noise of the
+no-reordering baseline at every cell, and above it at three of four (+1.84,
+−0.59, +0.62, +1.17 pp). On dense menus v1's reuse is therefore **free**: 2.09x
+ContextPilot's cache reuse at k64 and 3.09x at k128 while matching the accuracy
+of not reordering at all. On BM25 the equivalent claim was only "no measurable
+cost". `tooltrie_v0` remains the counterexample that fixes the mechanism -- worst
+in all four cells (13.45-34.97), which is what a gold position of 32.5/66.3
+buys. Runs: `cluster/results/dense-accuracy-20260903-002742/`.
 
 **What this does and does not settle.** It removes the single largest external
 validity threat to §5: v1 was demonstrated on lexical retrieval only, and the
@@ -1567,8 +1593,9 @@ ContextPilot scheduling, so nothing here measures the full system.
 | Four questions across all six arms | `four-questions-arms-20260902-002142/` | 17 |
 | ToolTrie-v1 at 600 requests (padded) | `q1-single-table-20260902-172342/` | 2 |
 | Dense retrieval, six arms x four depths | `dense-retrieval-20260902-234630/` | 24 |
+| Dense accuracy, two models x two depths | `dense-accuracy-20260903-002742/` | 16 |
 
-**294 runs.** All under the git-ignored `cluster/results/`.
+**310 runs.** All under the git-ignored `cluster/results/`.
 
 Driver `scripts/replay_vllm_concurrent.py`; also added
 `summarize_queuing_runs.py`, `build_canonical_ordering.py`,

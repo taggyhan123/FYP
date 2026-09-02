@@ -1,7 +1,7 @@
 # Tool ordering under concurrent load — key findings
 
 Qwen3-0.6B on one RTX 3090 (plus a Qwen3-4B check), vLLM 0.26.0, prefix caching
-unmodified. 294 GPU runs.
+unmodified. 310 GPU runs.
 
 The short version. Every number links to the section of
 [`findings.md`](findings.md) that derives it, with its runs and controls.
@@ -72,6 +72,22 @@ though dense menus share half as many tools. Dense also retrieves better
 substantially from hub tools — its top tool lands in 66 of 200 menus against
 dense's 21. **Some of the reuse measured on BM25 menus is retrieval error that
 happens to be cache-friendly.**
+
+**On dense the accuracy stops being a wash and the reuse becomes free.**
+`gold_hit_ceil`, ceiling identical across arms within each depth:
+
+| cell | `original` | ContextPilot | **`tooltrie_v1`** | v1 − CP |
+|---|---|---|---|---|
+| k64 @ 0.6B | 29.45 | 24.54 | **31.29** | +6.75 |
+| k128 @ 0.6B | 29.24 | 18.13 | **28.65** | **+10.52** (2.3 SE) |
+| k64 @ 4B | 39.26 | 38.04 | **39.88** | +1.84 |
+| k128 @ 4B | 39.18 | 36.26 | **40.35** | +4.09 |
+
+v1 beats ContextPilot in **all four cells** (BM25 was 2 wins, 2 losses, 2 ties)
+and is within noise of *not reordering at all* in every cell — so it buys 2.09x
+ContextPilot's reuse at k64 and 3.09x at k128 at no accuracy cost. Only one cell
+clears 2 SE alone; the result rests on four-of-four consistency plus the gold
+position that predicted it (7.3 against ContextPilot's 13.7 at k64).
 
 Accuracy against ContextPilot is a **wash** — the six cells measured are four
 depths at 0.6B plus k64 and k128 repeated at 4B:

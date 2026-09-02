@@ -146,15 +146,25 @@ run against the 200-request run of the same file.
 | arm | adapts | reuse 1–200 | reuse 201–600 | p50 1–200 | p50 201–600 | p95 201–600 |
 |---|---|---|---|---|---|---|
 | original | no | 1.19% | 0.70% | 3622.8 | 6239.7 | 15175.0 |
+| tooltrie_v1 | **yes** | 1.19% | 0.70% | 3539.8 | 4389.5 | 10493.9 |
 | alphabetical | no | 38.13% | 46.29% | 335.2 | 271.3 | 586.6 |
 | frequency | no | 39.69% | — | 317.9 | — | — |
 | tooltrie_v0 | **yes** | 87.19% | **97.05%** | 116.0 | **91.2** | **122.5** |
 | **ContextPilot** | **yes** | **96.16%** | **97.09%** | **93.9** | 91.7 | 123.7 |
 
-All four 1–200 reuse figures reproduce the published values to the digit on a
-fresh server. `frequency` is not extended: it is a *fitted* baseline needing a
-disjoint training split, so it is the one arm carrying training data the others
-lack. §1.5 explains the two windows.
+Every 1–200 reuse figure reproduces the published value to the digit on a fresh
+server. `frequency` is not extended: it is a *fitted* baseline whose training
+corpus is not recorded recoverably, so extending it would mean guessing what it
+was fitted on. §1.5 explains the two windows.
+
+**ToolTrie-v1 sits at `original`'s reuse here, and that is its design working as
+specified rather than failing.** Its rule is to keep unmatched tools in the order
+they arrived; on padded menus that ordering places the one differing tool at
+position 0 of *every* request, so preserving it preserves the worst possible
+layout. It is still 1.4x faster than `original` at p50 in the converged window on
+identical reuse, because the trie's matched prefix does some work even when the
+fallback has nothing worth preserving. On BM25-retrieved menus — where the input
+ordering carries relevance information — v1 leads every arm in this table (§5).
 
 The 1–200 latencies here are a fresh measurement, so they differ slightly from
 the across-load table below, which is the original stage: 3622.8 against 3310.4
@@ -176,7 +186,15 @@ retrieved arm saturates at ~2.6 req/s regardless of policy. §4.1 has the full
 retrieved comparison at four depths; it is the most important qualification in
 this report, which is why it is flagged here rather than only there.
 
-The rest of Part 1 uses padded menus, where the arms separate enough to study.
+**Why Part 1 uses padded menus at all**, given that qualification: they are the
+only workload where the arms separate enough to study a *mechanism*. A 36x p50
+spread makes it possible to see how ordering turns into reuse, reuse into
+capacity, and capacity into tail latency. At 1.26x on retrieved menus those
+chains are invisible — not absent, just below the resolution of the measurement.
+So Parts 1–3 use padded menus to isolate the mechanism and §4 asks how much of it
+survives contact with real retrieval. Read in that order, padded is a control,
+which is also the role the research brief assigns it (§4.2 of the brief
+designates BFCL for "constructing controlled tool-menu workloads").
 
 **Padded menus across load** — the same table at three rates:
 

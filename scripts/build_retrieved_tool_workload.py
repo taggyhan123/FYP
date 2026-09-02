@@ -22,6 +22,7 @@ from tatm.analysis import deduplicated_existing_ids, load_processed
 from tatm.io import write_json, write_jsonl
 from tatm.models import TaskRecord
 from tatm.prompting import order_tool_ids, workload_record
+from tatm.dense_retrieval import DenseToolRetriever
 from tatm.retrieval import (
     BM25ToolRetriever,
     aggregate_retrieval_metrics,
@@ -69,6 +70,22 @@ def main() -> None:
         help="Applied after BM25 selects the menu; original preserves BM25 rank.",
     )
     parser.add_argument("--random-seed", type=int, default=42)
+    parser.add_argument(
+        "--retriever",
+        choices=("bm25", "dense"),
+        default="bm25",
+        help=(
+            "Selection method. bm25 is the lexical baseline used by every "
+            "retrieved workload so far; dense embeds the same tool fields and "
+            "ranks by cosine similarity, which is what most production tool "
+            "routers and ContextPilot's own paper use."
+        ),
+    )
+    parser.add_argument(
+        "--dense-model",
+        default="BAAI/bge-small-en-v1.5",
+        help="Sentence encoder for --retriever dense.",
+    )
     parser.add_argument("--bm25-k1", type=float, default=1.5)
     parser.add_argument("--bm25-b", type=float, default=0.75)
     parser.add_argument(
@@ -132,7 +149,12 @@ def main() -> None:
     for task in support_tasks:
         support.update(deduplicated_existing_ids(task, corpus))
 
-    retriever = BM25ToolRetriever(corpus, k1=args.bm25_k1, b=args.bm25_b)
+    if args.retriever == "dense":
+        retriever = DenseToolRetriever(corpus, model_name=args.dense_model)
+        retriever_name = f"dense_{args.dense_model.split('/')[-1]}_v1"
+    else:
+        retriever = BM25ToolRetriever(corpus, k1=args.bm25_k1, b=args.bm25_b)
+        retriever_name = "bm25_canonical_tools_v1"
     records = []
     metric_rows = []
     report_cutoffs = sorted(set((*args.report_k, args.menu_size)))
@@ -185,7 +207,7 @@ def main() -> None:
         )
         record.update(
             {
-                "retriever": "bm25_canonical_tools_v1",
+                "retriever": retriever_name,
                 "retrieval_rank_tool_ids": list(menu_ids),
                 "retrieval_scores": list(menu_scores),
                 "retrieval_scored_candidates": result.scored_candidates,
@@ -216,21 +238,37 @@ def main() -> None:
         "workload": args.output.as_posix(),
         "selection_mode": "retrieved_menu",
         "gold_labels_used_for_selection": False,
-        "retriever": {
-            "name": "bm25_canonical_tools_v1",
-            "k1": args.bm25_k1,
-            "b": args.bm25_b,
-            "document_fields": [
-                "function_name_x3",
-                "description",
-                "parameter_names_and_descriptions",
-            ],
-            "corpus_tools": retriever.corpus_size,
-            "vocabulary_terms": retriever.vocabulary_size,
-            "average_document_terms": round(
-                retriever.average_document_length, 4
-            ),
-        },
+        "retriever": (
+            {
+                "name": retriever_name,
+                "model": args.dense_model,
+                "similarity": "cosine",
+                "pooling": "cls",
+                "document_fields": [
+                    "function_name",
+                    "description",
+                    "parameter_names_and_values",
+                ],
+                "corpus_tools": retriever.corpus_size,
+                "embedding_dim": retriever.embedding_dim,
+            }
+            if args.retriever == "dense"
+            else {
+                "name": retriever_name,
+                "k1": args.bm25_k1,
+                "b": args.bm25_b,
+                "document_fields": [
+                    "function_name_x3",
+                    "description",
+                    "parameter_names_and_descriptions",
+                ],
+                "corpus_tools": retriever.corpus_size,
+                "vocabulary_terms": retriever.vocabulary_size,
+                "average_document_terms": round(
+                    retriever.average_document_length, 4
+                ),
+            }
+        ),
         "evaluation": {
             "offset": args.offset,
             "queries": count,

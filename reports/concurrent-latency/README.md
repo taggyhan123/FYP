@@ -230,7 +230,10 @@ below the offered rate, so these are real ceilings:
 | ContextPilot | 4.78% | 2.693 |
 | **`tooltrie_v1`** | **4.96%** | **2.736** |
 
-**1.046x spread against padded's 4.8x.** The mechanism survives in direction —
+**1.046x spread against padded's 4.8x.** The two tables are at different offered
+rates (64 vs 4 req/s), so the absolute ceilings are not comparable — only the
+spread within each, which is what this claim rests on. The mechanism survives in
+direction —
 the two arms above 4.7% reuse are the two fastest — but the four below 2% sit
 inside 0.4% of each other, which is within run-to-run noise. Ordering still buys
 admission capacity on real retrieved menus; it buys 4.6% of it.

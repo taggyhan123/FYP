@@ -1,7 +1,7 @@
 # Tool ordering under concurrent load — key findings
 
 Qwen3-0.6B on one RTX 3090 (plus a Qwen3-4B check), vLLM 0.26.0, prefix caching
-unmodified. 270 GPU runs.
+unmodified. 294 GPU runs.
 
 The short version. Every number links to the section of
 [`findings.md`](findings.md) that derives it, with its runs and controls.
@@ -54,6 +54,25 @@ Wins **4 of 4 retrieved depths** and **5 of 5 arrival permutations** at k64
 (p = 0.031; reuse is deterministic, so each paired comparison is exact), and 21
 of 24 latency cells.
 
+**And it holds on the retriever most deployments actually use.** Every result
+above is BM25, a lexical matcher; the brief never specified one. Repeating the
+whole comparison with a dense retriever (§4.4) *widens* the margin at the deep
+menus rather than closing it:
+
+| depth | v1 vs ContextPilot, dense | on BM25 |
+|---|---|---|
+| k4 | 0.99x (loses by 0.19pp) | 1.04x |
+| k16 | 1.14x | 1.14x |
+| k64 | **2.09x** | 1.04x |
+| k128 | **3.09x** | 1.11x |
+
+ContextPilot gets *worse* on dense at k64/k128 while v1 gets *better*, even
+though dense menus share half as many tools. Dense also retrieves better
+(hit 0.815 vs 0.755 at k64) and overlaps less, because BM25's overlap comes
+substantially from hub tools — its top tool lands in 66 of 200 menus against
+dense's 21. **Some of the reuse measured on BM25 menus is retrieval error that
+happens to be cache-friendly.**
+
 Accuracy against ContextPilot is a **wash** — the six cells measured are four
 depths at 0.6B plus k64 and k128 repeated at 4B:
 
@@ -83,7 +102,8 @@ not passed it meaningfully.
 
 | input ordering | vs ContextPilot | vs `tooltrie_v0` |
 |---|---|---|
-| BM25 relevance (k4–k128) | **wins 4/4** | wins 4/4 |
+| **dense relevance (k4–k128)** | **wins 3/4, by 1.14–3.09x** | wins 4/4 |
+| BM25 relevance (k4–k128) | wins 4/4, by 1.04–1.14x | wins 4/4 |
 | shuffled (§4.3, 25–75% shared) | loses, 0.80–0.95x | wins, ~3x |
 | adversarial (`padded-64`) | loses, 0.01x | loses, 0.01x |
 

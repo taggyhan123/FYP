@@ -1,7 +1,7 @@
 # Tool ordering under concurrent load
 
 Qwen3-0.6B on one RTX 3090 (plus a Qwen3-4B check), vLLM 0.26.0, prefix caching
-unmodified. 270 GPU runs. Raw outputs are in the git-ignored `cluster/results/`
+unmodified. 294 GPU runs. Raw outputs are in the git-ignored `cluster/results/`
 directories listed in the Appendix.
 
 This is the full record, with every control and validity check.
@@ -919,6 +919,114 @@ and hybrid arms are measured on an implementation that is one line short.
 
 ---
 
+### 4.4 The other retriever: dense instead of BM25
+
+Every retrieved result above uses BM25, a lexical matcher. The brief never
+specifies a retriever -- it names ToolRet as the corpus and leaves selection
+open -- so this was a starting choice that was never revisited. Most production
+tool routers select tools by embedding similarity, and ContextPilot's own paper
+uses a dense retriever on three of its four datasets, so every "retrieved menu"
+number here rested on the one retriever type no baseline was designed for.
+
+This repeats the whole comparison with `DenseToolRetriever` (bge-small-en-v1.5,
+CLS pooling, cosine over the same tool fields BM25 reads). Same six arms, same
+four depths, same token-matched rates, same server capacity (11,858 blocks).
+Within each depth all six arms replay **identical menus** -- verified equal to
+the token: 1,586,211 prompt tokens at k64 across every arm -- so only the
+ordering differs.
+
+**Dense retrieves better and overlaps less.** This is the finding that drives
+everything below:
+
+| k | retriever | recall | hit rate | MRR | mean shared tools |
+|---|---|---|---|---|---|
+| 64 | dense | 0.656 | **0.815** | **0.446** | **0.81** |
+| 64 | bm25 | 0.642 | 0.755 | 0.406 | 1.61 |
+| 128 | dense | 0.695 | **0.855** | **0.446** | **2.07** |
+| 128 | bm25 | 0.675 | 0.805 | 0.407 | 4.95 |
+
+The mechanism is **hub tools**. BM25's most-retrieved tool appears in 66 of 200
+menus at k64; dense's appears in 21. Lexical matching drags the same generic
+tools into unrelated queries, and those hubs are what manufacture cross-request
+overlap. So a real share of the cacheable prefix measured on BM25 menus is
+powered by *retrieval error that happens to be cache-friendly*: improve the
+retrieval and the free reuse goes away. Dense menus are also ~7% smaller in
+tokens (6,396 against 6,896 at k64), because BM25's length bias favours
+verbose documents -- so cross-*retriever* latency is not directly comparable,
+while within-retriever arm comparisons are exact.
+
+**Reuse, dense (BM25 in parentheses):**
+
+| arm | k4 | k16 | k64 | k128 |
+|---|---|---|---|---|
+| `original` | 14.35 (15.87) | 4.11 (6.12) | 0.82 (0.91) | 0.36 (0.37) |
+| `alphabetical` | 13.94 (15.28) | 5.34 (6.27) | 1.52 (1.22) | 0.43 (0.58) |
+| `frequency` | 15.84 (14.62) | 6.29 (5.59) | 1.39 (0.94) | 0.47 (0.54) |
+| `tooltrie_v0` | 15.67 (17.48) | 7.32 (7.77) | 2.40 (1.90) | 0.91 (1.13) |
+| ContextPilot | **18.16** (18.72) | 11.58 (9.93) | 2.98 (4.78) | 1.21 (1.99) |
+| **`tooltrie_v1`** | 17.97 (19.47) | **13.18** (11.31) | **6.22** (4.96) | **3.74** (2.21) |
+
+**v1's margin over ContextPilot grows with depth, and is much larger than on
+BM25.** It loses k4 by 0.19pp and wins the other three:
+
+| depth | v1 vs CP, dense | v1 vs CP, BM25 |
+|---|---|---|
+| k4 | 0.99x (loss) | 1.04x |
+| k16 | 1.14x | 1.14x |
+| k64 | **2.09x** | 1.04x |
+| k128 | **3.09x** | 1.11x |
+
+The two arms move in opposite directions. **ContextPilot gets worse** on dense
+at the deep menus (4.78 -> 2.98 at k64, 1.99 -> 1.21 at k128) while **v1 gets
+better** (4.96 -> 6.22, 2.21 -> 3.74) -- despite dense menus sharing *half* as
+many tools. The reading: dense ranks similar queries similarly, so when two
+menus do share leading tools they tend to share them in the same order. v1
+preserves that agreement; ContextPilot overrides it with a clustering that now
+has less set overlap to work from, and pays for the override without the gain.
+
+**Latency follows, at k64 (4 req/s) and k128 (2 req/s), TTFT ms:**
+
+| depth | arm | reuse | p50 | p95 | p99 | max |
+|---|---|---|---|---|---|---|
+| k64 | `original` | 0.82% | 10773.5 | 20726.8 | 21743.5 | 22085.0 |
+| k64 | `tooltrie_v0` | 2.40% | 10524.8 | 20156.9 | 21566.7 | 21786.8 |
+| k64 | ContextPilot | 2.98% | 10308.3 | 19741.6 | 21047.8 | 21331.3 |
+| k64 | **`tooltrie_v1`** | **6.22%** | **9162.8** | **18554.6** | **19666.7** | **20011.3** |
+| k128 | `original` | 0.36% | 41678.5 | 84530.3 | 86930.6 | 87383.6 |
+| k128 | `tooltrie_v0` | 0.91% | 41632.4 | 84493.4 | 86902.5 | 87386.4 |
+| k128 | ContextPilot | 1.21% | 41230.9 | 83963.8 | 86367.4 | 86789.1 |
+| k128 | **`tooltrie_v1`** | **3.74%** | **38815.1** | **81572.8** | **84128.5** | **84610.8** |
+
+v1 is fastest on every statistic at both depths: 11.1% below ContextPilot's p50
+at k64 and 5.9% at k128, with 2.0% and 1.2% more admission capacity.
+
+**And the accuracy mechanism moves in v1's favour too.** Mean position of the
+first gold tool, where lower is better:
+
+| arm | k64 dense | k64 bm25 | k128 dense | k128 bm25 |
+|---|---|---|---|---|
+| `original` | 7.6 | 6.1 | 11.7 | 11.5 |
+| **`tooltrie_v1`** | **7.3** | 18.0 | **11.6** | 46.6 |
+| ContextPilot | 13.7 | 12.5 | 22.3 | 27.8 |
+| `tooltrie_v0` | 32.5 | 31.5 | 66.3 | 62.8 |
+
+On BM25 ContextPilot held the gold tool *shallower* than v1 (12.5 against 18.0
+at k64). On dense that reverses: v1 sits at `original`'s position while
+ContextPilot pushes gold nearly twice as deep. Lower overlap means the trie
+matches fewer tools, so v1 barely moves its input -- which is the design working
+as specified. **This predicts an accuracy result rather than measuring one**;
+no dense accuracy runs have been done.
+
+**What this does and does not settle.** It removes the single largest external
+validity threat to §5: v1 was demonstrated on lexical retrieval only, and the
+retriever most deployments use turns out to favour it more, not less. It also
+partly answers caveat 1 of A.6 -- ContextPilot now sees its own retriever type
+and still loses at k64/k128, so its losses are no longer attributable to being
+off-design on the retriever axis. It does **not** address the other three
+caveats (ordering-only, no held-out set, padded menus), and it is one embedding
+model on one corpus with 200 tasks per cell. Runs:
+`cluster/results/dense-retrieval-20260902-234630/`.
+
 ## 5. ToolTrie-v1: reorder only what the trie matched
 
 The accuracy gate above rejects three orderings, and §4.3 shows ToolTrie-v0
@@ -1458,8 +1566,9 @@ ContextPilot scheduling, so nothing here measures the full system.
 | ToolTrie frequency fallback | `tooltrie-v1-fallback-20260901-233750/` | 4 |
 | Four questions across all six arms | `four-questions-arms-20260902-002142/` | 17 |
 | ToolTrie-v1 at 600 requests (padded) | `q1-single-table-20260902-172342/` | 2 |
+| Dense retrieval, six arms x four depths | `dense-retrieval-20260902-234630/` | 24 |
 
-**270 runs.** All under the git-ignored `cluster/results/`.
+**294 runs.** All under the git-ignored `cluster/results/`.
 
 Driver `scripts/replay_vllm_concurrent.py`; also added
 `summarize_queuing_runs.py`, `build_canonical_ordering.py`,

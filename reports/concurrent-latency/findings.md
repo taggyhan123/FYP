@@ -619,6 +619,11 @@ references in Appendix A.3.
 
 ## 3. How the trie reduces parallel latency
 
+**All of Part 3 is measured on padded menus.** The retrieved counterpart is
+§4.1: the same mechanism moves the capacity ceiling from 2.623 to 2.736 req/s
+across arms at k64, a 1.046x spread against 4.8x here, ordered by reuse in the
+same direction but with the four arms below 2% reuse inside 0.4% of each other.
+
 **Prefix caching is sequential.** A request can only reuse a prefix that an
 earlier request has already computed and stored. Requests overlapping in time
 cannot help each other — they all miss the same cold prefix and each recomputes

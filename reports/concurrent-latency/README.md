@@ -21,12 +21,12 @@ and retrieved menus say how much of that survives real retrieval. Questions 1–
 below are answered on whichever workload can answer them; where only padded can,
 it says so.
 
-| # | Question | Answer |
-|---|---|---|
-| 1 | Latency distribution at p95 / p99 / max under parallel load | Ordering is worth 68x at p50 on padded menus and 1.26x on retrieved ones |
-| 2 | An adaptor trading mean against max | Works, not worth deploying. Ordering is worth 5.6–7.3x more, and it cannot act on the good orderings at all |
-| 3 | How the trie reduces parallel latency | One mechanism: it raises reuse, which compounds under load into admission capacity |
-| 4 | Cutting tail latency by smart queuing | **No.** It cuts the median ~85% and raises the tail ~125%, on every ordering |
+| # | Question | Answer | on |
+|---|---|---|---|
+| 1 | Latency distribution at p95 / p99 / max under parallel load | Ordering is worth 68x at p50 on padded menus and 1.26x on retrieved ones | both |
+| 2 | An adaptor trading mean against max | Works, not worth deploying. Ordering is worth 5.6–7.3x more, and it cannot act on the good orderings at all | padded |
+| 3 | How the trie reduces parallel latency | One mechanism: it raises reuse, which compounds under load into admission capacity — worth 4.8x padded, 1.05x retrieved | both |
+| 4 | Cutting tail latency by smart queuing | **No.** It cuts the median ~85% and raises the tail ~125%, on every ordering | retrieved |
 
 ---
 
@@ -164,6 +164,11 @@ recoverably; over the first 200 it scores 39.69% reuse and 317.9 ms p50, trackin
 
 ## 2. An adaptor trading mean against max
 
+**Measured on padded menus only.** The adaptor dispatches to maximise shared
+prefix with what is already resident, so it needs a workload with prefix to be
+affine to; at 1–5% reuse on retrieved menus it has almost nothing to act on.
+Question 4 covers dispatch on retrieved menus with a stronger policy.
+
 It works, and `D` — how long a request may be held back — is the knob. Arrival to
 first token, ms, at 4 req/s behind an in-flight cap of 4:
 
@@ -180,7 +185,13 @@ first token, ms, at 4 req/s behind an in-flight cap of 4:
 The shape is right — median down, worst case up, about half the requests moved.
 **But the best it achieves anywhere is 685 ms, against 123 for ToolTrie and 94
 for ContextPilot, neither of which uses it.** Fixing the ordering is worth
-5.6–7.3x more than fixing the dispatch order.
+5.6–7.3x more than fixing the dispatch order — **on padded menus.** That exchange
+rate does not transfer: ordering is worth 68x here and 1.26x on retrieved menus,
+where §4 finds SJF cutting the median 85%. The resolution is in §4 — most of that
+median gain is a deep-queue artifact any non-arrival order reproduces, and the
+tail rises 127%. So ordering dominates dispatch where menus overlap; where they
+do not, neither lever is worth much and the one that moves the median pays for it
+in the tail.
 
 **It cannot act on three of six arms at all.** Usability is an inverted U and
 those three sit at its ends: `tooltrie_v0` and ContextPilot because every
@@ -205,6 +216,24 @@ load into admission capacity.** Sustained throughput at 64 req/s offered:
 
 Ordering alone is worth **4.7x the admission capacity**, 4.8x once converged. The
 converged column's top two rows are a tie within a 0.96 within-arm spread.
+
+**On retrieved menus the same mechanism is worth 4.6% instead of 380%.**
+Capacity ceiling at k64, 4 req/s offered, same six arms — every one saturates
+below the offered rate, so these are real ceilings:
+
+| arm | reuse | ceiling |
+|---|---|---|
+| `frequency` | 0.94% | 2.623 req/s |
+| `alphabetical` | 1.22% | 2.625 |
+| `tooltrie_v0` | 1.90% | 2.629 |
+| `original` | 0.91% | 2.635 |
+| ContextPilot | 4.78% | 2.693 |
+| **`tooltrie_v1`** | **4.96%** | **2.736** |
+
+**1.046x spread against padded's 4.8x.** The mechanism survives in direction —
+the two arms above 4.7% reuse are the two fastest — but the four below 2% sit
+inside 0.4% of each other, which is within run-to-run noise. Ordering still buys
+admission capacity on real retrieved menus; it buys 4.6% of it.
 
 The parallel-specific part is that **prefix caching is sequential** — a request
 can only reuse what an earlier one already stored, so requests in flight together

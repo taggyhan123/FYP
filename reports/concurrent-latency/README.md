@@ -1,7 +1,7 @@
 # Tool ordering under concurrent load — key findings
 
 Qwen3-0.6B on one RTX 3090 (plus a Qwen3-4B check), vLLM 0.26.0, prefix caching
-unmodified. 268 GPU runs.
+unmodified. 270 GPU runs.
 
 This is the short version. Every number links to the section of
 [`findings.md`](findings.md) that derives it, with its runs and controls.
@@ -63,31 +63,35 @@ are where v1 is measured in its own regime.
 
 ## 1. Parallel requests → latency distribution at p95 / p99 / max
 
-Padded menus at 4 req/s, time to first token in ms, on **converged** requests
-(201–600) so no arm is still learning:
+Padded menus at 4 req/s, time to first token in ms, over **converged** requests
+(201–600) so no arm is still learning. One table, one window:
 
-| arm | p50 | p95 | p99 | max |
-|---|---|---|---|---|
-| `original` | 6239.7 | 15175.0 | 15659.5 | 16108.6 |
-| `alphabetical` | 271.3 | 586.6 | 820.6 | 960.4 |
-| `tooltrie_v0` | 91.2 | 122.5 | 133.1 | 141.9 |
-| ContextPilot | 91.7 | 123.7 | 134.3 | 151.1 |
+| arm | reuse | p50 | p95 | p99 | max |
+|---|---|---|---|---|---|
+| `original` | 0.70% | 6239.7 | 15175.0 | 15659.5 | 16108.6 |
+| `tooltrie_v1` | 0.70% | 4389.5 | 10493.9 | 11045.5 | 11564.3 |
+| `alphabetical` | 46.29% | 271.3 | 586.6 | 820.6 | 960.4 |
+| `tooltrie_v0` | 97.05% | **91.2** | **122.5** | **133.1** | **141.9** |
+| ContextPilot | 97.09% | 91.7 | 123.7 | 134.3 | 151.1 |
 
-The bottom two rows are a **tie**, not a ToolTrie win — every gap there is inside
-measurement noise, and from request 222 both arms place the odd tool identically.
-See the ToolTrie-vs-ContextPilot section below.
-
-**`tooltrie_v1` is absent from this table and present in the next one**, because
-the 600-request extension predates it. It appears below at `original`'s level:
-this is the padded workload, whose input ordering puts the differing tool first
-in every request, and v1's rule is to preserve the input ordering. It is the one
-workload where v1 is the wrong choice, and it is included so that boundary is
-visible rather than implied.
+`frequency` is the one arm missing: it is a *fitted* baseline and the training
+corpus it was frozen on is not recorded recoverably, so extending it to 600
+requests would mean guessing what it was fitted on. Over the first 200 requests
+it scores 39.69% reuse and a 317.9 ms p50 — within 1.6pp and 14 ms of
+`alphabetical`, which it tracks closely throughout.
 
 **Ordering is worth 68x at p50 and 113–124x across the tail.** Serial testing hid
 all of it — at concurrency 1 every arm sat within 1.25x on every statistic and
 `max` was flat at ~270 ms. Under load `max` is dominated by queueing, which
 one-at-a-time testing cannot produce.
+
+The bottom two rows are a **tie**, not a ToolTrie win — every gap is inside
+measurement noise, and from request 222 both arms place the odd tool identically.
+And `tooltrie_v1` sits near the bottom because this is padded: its rule is to
+preserve the input ordering, and here that ordering puts the differing tool first
+in every request. It is still 1.4x faster than `original` at p50 on the same
+0.70% reuse, because the trie's matched prefix does some work even when the
+fallback has nothing to preserve.
 
 **The real answer is that a badly ordered arm has no fixed distribution.**
 `original` cannot keep up at 4 req/s (it sustains 3.51), so its backlog grows and
@@ -96,24 +100,11 @@ The ordered arms are stable and converge to a fixed distribution. So the ratio
 depends on how long you run — 36x at 200 requests, 68x at 600 — and that
 divergence, not any single number, is the finding.
 
-For reference, the same table over the first 200 requests, which is the window
-every other section uses and the only one carrying `frequency` and
-`tooltrie_v1`:
-
-| arm | reuse | p50 | p95 | p99 | max |
-|---|---|---|---|---|---|
-| `original` | 1.19% | 3310.4 | 6498.6 | 7205.0 | 7476.0 |
-| `tooltrie_v1` | 1.19% | 3083.3 | 6108.9 | 6794.7 | 7065.2 |
-| `alphabetical` | 38.13% | 331.8 | 1058.1 | 1406.8 | 1724.9 |
-| `frequency` | 39.69% | 317.9 | 1028.9 | 1286.2 | 1521.4 |
-| `tooltrie_v0` | 87.19% | 116.3 | 225.7 | 382.7 | 558.4 |
-| **ContextPilot** | **96.16%** | **92.7** | **129.0** | **260.9** | **300.2** |
-
 **Two qualifications, both important.** This is a padded workload where 63 of 64
 tools are shared; on genuinely retrieved menus the spread collapses to at most
-1.26x and 95–98% of prefill is uncacheable whatever policy is used. And the
-ToolTrie-vs-ContextPilot difference in the second table is **warm-up only** — it
-vanishes in the first, and in the converged table above.
+1.26x and 95–98% of prefill is uncacheable whatever policy is used. And over the
+first 200 requests ContextPilot leads ToolTrie-v0 here by 8.97pp of reuse and
+22 ms of p50 — that gap is **warm-up only**, and it is gone by the window above.
 ([§1.1](findings.md#11-results), [§4.1](findings.md#41-on-real-retrieved-menus-ordering-barely-matters))
 
 ---

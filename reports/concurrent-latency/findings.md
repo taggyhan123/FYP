@@ -1,7 +1,7 @@
 # Tool ordering under concurrent load
 
 Qwen3-0.6B on one RTX 3090 (plus a Qwen3-4B check), vLLM 0.26.0, prefix caching
-unmodified. 268 GPU runs. Raw outputs are in the git-ignored `cluster/results/`
+unmodified. 270 GPU runs. Raw outputs are in the git-ignored `cluster/results/`
 directories listed in the Appendix.
 
 This is the full record, with every control and validity check.
@@ -118,7 +118,7 @@ and two more at 1.19%, so replaying them would duplicate curves.
 **How runs were done.** 200 requests per run, replaying frozen orderings so every
 arm is a permutation of the same menus. Open-loop Poisson arrivals at a fixed
 rate, seed 42, cache cleared before each run, decode pinned to 48 tokens so
-decode-length variance cannot pollute the tails. 268 runs total.
+decode-length variance cannot pollute the tails. 270 runs total.
 
 **One naming note.** ContextPilot throughout is the official reordering API at
 the paper's `alpha=0.001`, ordering only — no annotations, de-duplication or
@@ -1434,13 +1434,14 @@ ContextPilot scheduling, so nothing here measures the full system.
 | Steady state (600 req) and more arrival seeds | `steady-and-seeds-20260830-221902/` | 14 |
 | Steady state: the two reference arms | `steady-arms-20260830-234910/` | 4 |
 | Steady-state capacity, converged workload, replicates | `steady-capacity-20260831-004322/` | 16 |
+| ToolTrie-v1 at 600 requests (padded) | `q1-single-table-20260902-172342/` | 2 |
 | Four questions across all six arms | `four-questions-arms-20260902-002142/` | 17 |
 | ToolTrie-v1 (reuse, accuracy, 5 seeds, 4B) | `tooltrie-keeporder-20260901-001832/` | 15 |
 | Middle-overlap sweep (25/50/75%) | `overlap-sweep-20260831-232237/` | 15 |
 | ToolTrie frequency fallback | `tooltrie-v1-fallback-20260901-233750/` | 4 |
 | Accuracy at Qwen3-4B (k128, k64) | `accuracy-4b-20260831-204740/` | 10 |
 
-**268 runs.** All under the git-ignored `cluster/results/`.
+**270 runs.** All under the git-ignored `cluster/results/`.
 
 Driver `scripts/replay_vllm_concurrent.py`; also added
 `summarize_queuing_runs.py`, `build_canonical_ordering.py`,

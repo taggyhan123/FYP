@@ -43,6 +43,13 @@ The bottom two rows are a **tie**, not a ToolTrie win — every gap there is ins
 measurement noise, and from request 222 both arms place the odd tool identically.
 See the ToolTrie-vs-ContextPilot section below.
 
+**`tooltrie_v1` is absent from this table and present in the next one**, because
+the 600-request extension predates it. It appears below at `original`'s level:
+this is the padded workload, whose input ordering puts the differing tool first
+in every request, and v1's rule is to preserve the input ordering. It is the one
+workload where v1 is the wrong choice, and it is included so that boundary is
+visible rather than implied.
+
 **Ordering is worth 68x at p50 and 113–124x across the tail.** Serial testing hid
 all of it — at concurrency 1 every arm sat within 1.25x on every statistic and
 `max` was flat at ~270 ms. Under load `max` is dominated by queueing, which
@@ -56,11 +63,13 @@ depends on how long you run — 36x at 200 requests, 68x at 600 — and that
 divergence, not any single number, is the finding.
 
 For reference, the same table over the first 200 requests, which is the window
-every other section uses and the only one with a `frequency` arm:
+every other section uses and the only one carrying `frequency` and
+`tooltrie_v1`:
 
 | arm | reuse | p50 | p95 | p99 | max |
 |---|---|---|---|---|---|
 | `original` | 1.19% | 3310.4 | 6498.6 | 7205.0 | 7476.0 |
+| `tooltrie_v1` | 1.19% | 3083.3 | 6108.9 | 6794.7 | 7065.2 |
 | `alphabetical` | 38.13% | 331.8 | 1058.1 | 1406.8 | 1724.9 |
 | `frequency` | 39.69% | 317.9 | 1028.9 | 1286.2 | 1521.4 |
 | `tooltrie_v0` | 87.19% | 116.3 | 225.7 | 382.7 | 558.4 |

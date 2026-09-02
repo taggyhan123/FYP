@@ -37,9 +37,23 @@ displacement per point of reuse, against ContextPilot's 8.**
 
 Wins **4 of 4 retrieved depths** and **5 of 5 arrival permutations** at k64
 (p = 0.031; reuse is deterministic, so each paired comparison is exact), and 21
-of 24 latency cells. Accuracy against ContextPilot is a **wash** — 2 wins, 2
-losses, 2 ties over six cells, every margin under 1.6 SE — so the claim is *more
-reuse at no measurable accuracy cost*.
+of 24 latency cells.
+
+Accuracy against ContextPilot is a **wash** — the six cells measured are four
+depths at 0.6B plus k64 and k128 repeated at 4B:
+
+| cell | `tooltrie_v1` | ContextPilot | delta | SE | |
+|---|---|---|---|---|---|
+| k4 @ 0.6B | 47.57% | 47.57% | +0.00 | 5.75 | tie |
+| k16 @ 0.6B | 40.46% | 41.22% | −0.76 | 6.07 | loss |
+| k64 @ 0.6B | **33.11%** | 27.15% | **+5.96** | 5.27 | win |
+| k128 @ 0.6B | 22.36% | 22.98% | −0.62 | 4.67 | loss |
+| k64 @ 4B | 42.38% | 42.38% | +0.00 | 5.69 | tie |
+| k128 @ 4B | **44.72%** | 37.27% | **+7.45** | 5.47 | win |
+
+2 wins, 2 losses, 2 ties, and **every margin is under 1.6 SE** — the largest is
+1.35, the two losses are 0.13 and 0.16. So the claim is *more reuse at no
+measurable accuracy cost*, not better accuracy.
 
 **Read the margins by comparator.** Against ContextPilot it is 1.04–1.14x, which
 at k64 is +0.18pp of reuse on a workload where 95% of prefill is uncacheable

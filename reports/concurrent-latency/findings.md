@@ -84,7 +84,7 @@ every arm below tries to do.
 | | how the menu is built | tools shared between any two requests |
 |---|---|---|
 | **padded-64** | each task's real tools, padded out to 64 from a fixed filler set | **63 of 64** |
-| **retrieved (k4–k128)** | BM25 retrieves the top *k* tools for that query | 0.06 (k4) to 8.3 (k128) |
+| **retrieved (k4–k128)** | BM25 retrieves the top *k* tools for that query | 0.03 (k4), 0.27 (k16), 1.61 (k64), 4.95 (k128) |
 
 Padded menus are nearly identical to each other, so there is a large shared
 prefix waiting to be exploited. Retrieved menus genuinely differ per query, so
@@ -1356,6 +1356,7 @@ noise floor overturned:
 | ToolTrie's pile-up is 2x ContextPilot's | learning ToolTrie vs converged ContextPilot | 218 vs 216 (§3) |
 | the gap grows with model size | all 4B runs are 200 requests | cold-start cost grows (§1.3) |
 | model size does not reopen §6 | compared against `original`, not ContextPilot | it reopens (§6) |
+| retrieved overlap 0.06 (k4) to 8.3 (k128) | not reproducible under any definition | 0.03/0.27/1.61/4.95, mean over all pairs, identical across every arm and seed copy of each workload |
 | ContextPilot at k128 is accuracy-free | 0.6B baseline floor-limited | −7.45pp at 4B (§1.4) |
 | retrieved p50 spread is 1.02x | table omitted ContextPilot, then v1 | 1.26x (§4.1) |
 

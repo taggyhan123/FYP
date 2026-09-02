@@ -6,9 +6,24 @@ unmodified. 270 GPU runs.
 The short version. Every number links to the section of
 [`findings.md`](findings.md) that derives it, with its runs and controls.
 
+**Two workloads, and which one a number comes from decides what it means.**
+
+| | padded-64 | retrieved (BM25, k4–k128) |
+|---|---|---|
+| tools shared between two requests | **63 of 64** | 0.03 (k4) to 4.95 (k128) |
+| what it is for | the **instrument** — a 36–68x p50 spread makes the mechanism visible | the **deployment case** the brief describes |
+| input ordering | adversarial by construction: the one differing tool is first in every request | a relevance ranking worth preserving |
+| best arm | ContextPilot / `tooltrie_v0` | **`tooltrie_v1`** |
+
+Arms swap places between them, and that is the point rather than a
+contradiction: padded menus isolate how ordering becomes reuse becomes capacity,
+and retrieved menus say how much of that survives real retrieval. Questions 1–4
+below are answered on whichever workload can answer them; where only padded can,
+it says so.
+
 | # | Question | Answer |
 |---|---|---|
-| 1 | Latency distribution at p95 / p99 / max under parallel load | Ordering is worth 68x at p50 and 113–124x across the tail — but mostly on padded menus |
+| 1 | Latency distribution at p95 / p99 / max under parallel load | Ordering is worth 68x at p50 on padded menus and 1.26x on retrieved ones |
 | 2 | An adaptor trading mean against max | Works, not worth deploying. Ordering is worth 5.6–7.3x more, and it cannot act on the good orderings at all |
 | 3 | How the trie reduces parallel latency | One mechanism: it raises reuse, which compounds under load into admission capacity |
 | 4 | Cutting tail latency by smart queuing | **No.** It cuts the median ~85% and raises the tail ~125%, on every ordering |
@@ -74,16 +89,22 @@ not passed it meaningfully.
 
 ContextPilot overrides its input when its clustering disagrees; v1 essentially
 never does. So v1 turns a good input ordering into more reuse than ContextPilot
-can, and cannot rescue a bad one. **Questions 1–3 below use padded menus — the
-one workload where v1 is the wrong choice** — so it appears there at `original`'s
-level, and that is the documented boundary rather than its general performance.
+can, and cannot rescue a bad one — which is why it is the best arm on retrieved
+menus and near the bottom on padded ones. Both appear below.
 
 ---
 
 ## 1. Latency distribution at p95 / p99 / max
 
-Padded menus at 4 req/s, time to first token in ms, over **converged** requests
-(201–600) so no arm is still learning:
+This question has two answers, because it has two workloads. **Padded menus are
+the instrument; retrieved menus are the deployment.** Both at 4 req/s and
+size-matched — 6,903 tokens per request against 6,896 — so the only difference is
+whether the menus genuinely overlap. All figures are time to first token in ms;
+these runs are uncapped, so no client-side queue forms and arrival-to-first-token
+is within 2.2 ms of every number below.
+
+**Padded menus** (63 of 64 tools shared), converged requests 201–600. This is the
+control that makes the mechanism visible:
 
 | arm | reuse | p50 | p95 | p99 | max |
 |---|---|---|---|---|---|
@@ -93,26 +114,51 @@ Padded menus at 4 req/s, time to first token in ms, over **converged** requests
 | `tooltrie_v0` | 97.05% | **91.2** | **122.5** | **133.1** | **141.9** |
 | ContextPilot | 97.09% | 91.7 | 123.7 | 134.3 | 151.1 |
 
-`frequency` cannot join: it is a *fitted* baseline whose training corpus is not
-recorded recoverably, so extending it to 600 requests would mean guessing. Over
-the first 200 it scores 39.69% reuse and 317.9 ms p50 — within 1.6pp and 14 ms of
-`alphabetical`, which it tracks throughout.
+**Retrieved menus** (k64, 1.61 of 64 shared), the regime the brief describes and
+the one v1 is built for:
+
+| arm | reuse | p50 | p95 | p99 | max |
+|---|---|---|---|---|---|
+| `original` | 0.91% | 9667.9 | 24699.7 | 26490.8 | 26820.4 |
+| `alphabetical` | 1.22% | 9727.5 | 24854.3 | 26781.7 | 27104.6 |
+| `frequency` | 0.94% | 9760.9 | 25009.1 | 26842.3 | 27161.5 |
+| `tooltrie_v0` | 1.90% | 9559.8 | 24825.6 | 26691.0 | 27059.1 |
+| ContextPilot | 4.78% | 8565.4 | 22452.4 | 25163.5 | 25432.4 |
+| **`tooltrie_v1`** | **4.96%** | **7739.7** | **21219.8** | **23824.2** | **24177.4** |
+
+**Ordering is worth 68x at p50 on padded menus and 1.26x on retrieved ones.**
+That collapse is the single most important qualification in this report — 95–98%
+of prefill on retrieved menus is uncacheable whatever policy is used, so there is
+far less for any ordering to win.
+
+**The two tables answer different halves of the question, and the arms swap
+places between them.** On padded menus `tooltrie_v1` is second-worst: its rule is
+to preserve the input ordering, and padded's input puts the differing tool at
+position 0 of every request, so it preserves the worst possible layout. On
+retrieved menus, where the input is a BM25 relevance ranking worth preserving,
+the same rule makes it the **fastest arm on every statistic**. That is not a
+contradiction — it is the boundary condition measured from both sides, and it is
+why padded is the mechanism control rather than the deployment case.
 
 **Serial testing hid all of this.** At concurrency 1 every arm sat within 1.25x
 on every statistic and `max` was flat at ~270 ms. Under load `max` is dominated
 by queueing, which one-at-a-time testing cannot produce.
 
-**The real answer is that a badly ordered arm has no fixed distribution.**
-`original` sustains only 3.51 of an offered 4 req/s, so its backlog grows and its
-latency grows with run length — p50 3310 ms over 200 requests, 6240 over 600. The
-ordered arms are stable. So the ratio depends on how long you run (36x at 200,
-68x at 600), and that divergence is the finding, not any single number.
+**And a badly ordered arm has no fixed distribution.** `original` sustains only
+3.51 of an offered 4 req/s on padded menus, so its backlog grows and its latency
+grows with run length — p50 3310 ms over 200 requests, 6240 over 600. The ordered
+arms are stable. So the ratio depends on how long you run (36x at 200, 68x at
+600), and that divergence is the finding, not any single number.
 
-The bottom two rows are a **tie** — every gap is inside measurement noise, and
-from request 222 both arms place the odd tool identically. Over the first 200
-requests ContextPilot leads v0 by 8.97pp of reuse and 22 ms of p50; that gap is
-**warm-up only** and is gone by the window above.
-([§1.1](findings.md#11-results) · [§1.5](findings.md#15-why-the-two-windows-differ-warm-up))
+On padded menus the bottom two rows are a **tie** — every gap is inside
+measurement noise, and from request 222 both arms place the odd tool identically.
+Over the first 200 requests ContextPilot leads v0 by 8.97pp of reuse and 22 ms of
+p50; that gap is **warm-up only**. `frequency` is absent from the converged table
+because it is a *fitted* baseline whose training corpus is not recorded
+recoverably; over the first 200 it scores 39.69% reuse and 317.9 ms p50, tracking
+`alphabetical` within 1.6pp and 14 ms.
+([§1.1](findings.md#11-results) · [§1.5](findings.md#15-why-the-two-windows-differ-warm-up) ·
+[§4.1](findings.md#41-on-real-retrieved-menus-ordering-barely-matters))
 
 ---
 

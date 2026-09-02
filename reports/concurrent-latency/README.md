@@ -27,6 +27,40 @@ retriever produced and reorders only what the trie has evidence for.
 
 ---
 
+## The headline: that one line was worth 1.11–2.61x
+
+On BM25-retrieved menus — the regime the [research
+brief](../../initial-research-brief.md) describes, "different requests may
+retrieve different tool sets":
+
+| reuse | k4 | k16 | k64 | k128 |
+|---|---|---|---|---|
+| `original` | 15.87% | 6.12% | 0.91% | 0.37% |
+| `tooltrie_v0` | 17.48% | 7.77% | 1.90% | 1.13% |
+| ContextPilot | 18.72% | 9.93% | 4.78% | 1.99% |
+| **`tooltrie_v1`** | **19.47%** | **11.31%** | **4.96%** | **2.21%** |
+
+**v1 beats v0 by 1.11–2.61x and ContextPilot at all four depths**, plus 5 of 5
+arrival permutations at k64 (p = 0.031; reuse is deterministic, so each paired
+comparison is exact). Latency follows — 21 of 24 metric-cells, and 20% off p50 at
+k64. Accuracy against ContextPilot is a **wash**: 2 wins, 2 losses, 2 ties across
+six cells, every margin under 1.6 SE, so the claim is *more reuse at no
+measurable accuracy cost*.
+
+The margin over ContextPilot is small — 1.04–1.14x, or +0.18pp of reuse at k64 on
+a workload where 95% of prefill is uncacheable either way. **The finding is the
+v0 column**: ToolTrie was leaving most of its own value unclaimed through one
+line of fallback ordering, not because a trie is the wrong structure.
+
+**Read questions 1–3 below with this in mind.** They use *padded* menus, the one
+workload where v1 is the wrong choice — its input ordering puts the differing
+tool first in every request, and v1's rule is to preserve the input ordering. So
+v1 appears there at `original`'s level, and that is the documented boundary
+rather than its general performance. Question 4 and the retrieved-menu sections
+are where v1 is measured in its own regime.
+
+---
+
 ## 1. Parallel requests → latency distribution at p95 / p99 / max
 
 Padded menus at 4 req/s, time to first token in ms, on **converged** requests

@@ -313,56 +313,55 @@ reordering got 56 right and ToolTrie's ordering got 39.
 
 ContextPilot here is the official-API arm at the paper's alpha (§Setup).
 
-| depth | arm | reuse | accuracy | vs original | mean position of correct tool |
-|---|---|---|---|---|---|
-| k128 | original | 0.37% | **22.98%** | — | **11.5** |
-| k128 | ContextPilot | 1.99% | **22.98%** | **0.0pp** | 27.8 |
-| k128 | tooltrie_v0 | 1.13% | 16.15% | **−6.8pp** | 62.8 |
-| k64 | original | 0.91% | **37.09%** | — | **6.1** |
-| k64 | ContextPilot | 4.78% | 27.15% | −10.0pp | 12.5 |
-| k64 | tooltrie_v0 | 1.90% | 25.83% | **−11.3pp** | 31.5 |
+One table, every depth and arm measured, sorted by how deep each ordering puts
+the correct tool. `ceiling` — the share of requests whose menu contains a gold
+tool — is identical across arms within a depth, so the arms are comparable.
 
-**ToolTrie's reuse is paid for in accuracy** — at 0.6B, 6.8 points at k128 and
-11.3 at k64; at 4B, 12.4 and 4.6. The project's earlier quality work is all on
-padded menus; this appears to be the first measurement on retrieved ones.
+| depth | arm | gold position | reuse | accuracy 0.6B | accuracy 4B |
+|---|---|---|---|---|---|
+| k4 | original | — | 15.87% | 47.57% | — |
+| k4 | ContextPilot | — | 18.72% | 47.57% | — |
+| k4 | tooltrie_v1 | — | **19.47%** | 47.57% | — |
+| k4 | tooltrie_v0 | — | 17.48% | **49.51%** | — |
+| k16 | original | — | 6.12% | **42.75%** | — |
+| k16 | ContextPilot | — | 9.93% | 41.22% | — |
+| k16 | tooltrie_v1 | — | **11.31%** | 40.46% | — |
+| k16 | tooltrie_v0 | — | 7.77% | 41.22% | — |
+| k64 | original | 6.1 | 0.91% | **37.09%** | **44.37%** |
+| k64 | ContextPilot | 12.5 | 4.78% | 27.15% (−9.94) | 42.38% (−1.99) |
+| k64 | **tooltrie_v1** | 18.0 | **4.96%** | 33.11% (−3.98) | 42.38% (−1.99) |
+| k64 | canonical_oracle | 23.9 | 4.28% | — | 41.06% (−3.31) |
+| k64 | hybrid_oracle | 24.1 | 4.17% | — | 39.07% (−5.30) |
+| k64 | tooltrie_v0 | 31.5 | 1.90% | 25.83% (−11.26) | 39.74% (−4.63) |
+| k128 | original | 11.5 | 0.37% | **22.98%** | **44.72%** |
+| k128 | ContextPilot | 27.8 | 1.99% | 22.98% (0.00) | 37.27% (−7.45) |
+| k128 | **tooltrie_v1** | 46.6 | **2.21%** | 22.36% (−0.62) | **44.72% (0.00)** |
+| k128 | canonical_oracle | 56.5 | 2.87% | 14.29% (−8.69) | 34.78% (−9.94) |
+| k128 | hybrid_oracle | 57.7 | 3.11% | 13.66% (−9.32) | 36.02% (−8.70) |
+| k128 | tooltrie_v0 | 62.8 | 1.13% | 16.15% (−6.83) | 32.30% (−12.42) |
+
+Parenthesised figures are the loss against `original` at the same depth and
+model.
+
+**Accuracy tracks depth, and ToolTrie-v0 pays the most because it displaces the
+most.** At k128 it puts the correct tool at position 62.8 of 128 — deeper than
+any other arm, including the ones that deliberately sort by frequency — and loses
+6.8 points at 0.6B and 12.4 at 4B for it.
 
 **At 0.6B, ContextPilot at k128 appears free**: 5.4x the reuse of no reordering
-at zero accuracy cost. **That does not survive a larger model.** Both depths were
-repeated on Qwen3-4B — same frozen workloads, same serial protocol, `ceiling`
-identical at 0.755 and 0.805 so the arms stay comparable:
+at zero accuracy cost. **That does not survive a larger model** — at 4B it costs
+7.45pp. The 0.6B cell was floor-limited: with a 22.98% baseline the model was
+failing most answerable requests anyway, so a shallower displacement did not
+register.
 
-| depth | arm | gold position | reuse | 0.6B | 4B |
-|---|---|---|---|---|---|
-| k64 | original | 6.1 | 0.91% | 37.09% | **44.37%** |
-| k64 | ContextPilot | 12.5 | 4.78% | 27.15% (−9.94pp) | 42.38% (**−1.99pp**) |
-| k64 | canonical_oracle | 23.9 | 4.28% | — | 41.06% (−3.31pp) |
-| k64 | hybrid_oracle | 24.1 | 4.17% | — | 39.07% (−5.30pp) |
-| k64 | tooltrie_v0 | 31.5 | 1.90% | 25.83% (−11.26pp) | 39.74% (**−4.63pp**) |
-| k128 | original | 11.5 | 0.37% | 22.98% | **44.72%** |
-| k128 | ContextPilot | 27.8 | 1.99% | 22.98% (**0.00pp**) | 37.27% (**−7.45pp**) |
-| k128 | canonical_oracle | 56.5 | 2.87% | 14.29% (−8.69pp) | 34.78% (−9.94pp) |
-| k128 | hybrid_oracle | 57.7 | 3.11% | 13.66% (−9.32pp) | 36.02% (−8.70pp) |
-| k128 | tooltrie_v0 | 62.8 | 1.13% | 16.15% (−6.83pp) | 32.30% (−12.42pp) |
+**ToolTrie-v1 is the one arm that gains reuse without paying for it.** At 4B/k128
+it matches the unordered baseline *exactly* (44.72%) while carrying 6x its reuse
+— the property ContextPilot was credited with before the 4B runs showed that
+credit was an artefact.
 
-The shallow depths, added later so ToolTrie-v1 had a baseline to be read against
-(0.6B only):
-
-| depth | arm | reuse | accuracy |
-|---|---|---|---|
-| k4 | original | 15.87% | 47.57% |
-| k4 | ContextPilot | 18.72% | 47.57% |
-| k4 | tooltrie_v0 | 17.48% | **49.51%** |
-| k4 | tooltrie_v1 | **19.47%** | 47.57% |
-| k16 | original | 6.12% | **42.75%** |
-| k16 | ContextPilot | 9.93% | 41.22% |
-| k16 | tooltrie_v0 | 7.77% | 41.22% |
-| k16 | tooltrie_v1 | **11.31%** | 40.46% |
-
-At k4 every arm lands on 47.57% except v0's 49.51%, and at k16 they span 2.3
-points — with 4 and 16 tools there is barely any depth to displace the gold tool
-into, so the accuracy tension that dominates k64 and k128 has no room to act.
-ToolTrie-v1 leads reuse at both and is last on accuracy at k16 by 0.76pp, which
-is 0.2 SE.
+At k4 and k16 every arm lands within 2.3 points of every other: with 4 and 16
+tools there is barely any depth to displace the correct tool into, so the tension
+that dominates k64 and k128 has no room to act.
 
 **Scale halves the depth penalty, and the 0.6B k128 column understates it.**
 Fitting accuracy against gold-tool position across all arms in each cell:
@@ -921,14 +920,19 @@ places whatever prefix it matched; everything else stays put. At k128 that means
 placing **2.55 tools of 128** and leaving **120 of 200 requests byte-identical**
 to their input — 1.1 positions of movement against v0's 41.9.
 
-**Reuse, against every arm at every depth:**
+**Reuse, and the ratio v1 achieves over each arm** (reuse figures for the other
+arms are §4.1's):
 
-| depth | original | tooltrie_v0 | ContextPilot | **tooltrie_v1** |
-|---|---|---|---|---|
-| k4 | 15.87% | 17.48% | 18.72% | **19.47%** |
-| k16 | 6.12% | 7.77% | 9.93% | **11.31%** |
-| k64 | 0.91% | 1.90% | 4.78% | **4.96%** |
-| k128 | 0.37% | 1.13% | 1.99% | **2.21%** |
+| depth | original | alphabetical | frequency | tooltrie_v0 | ContextPilot | **tooltrie_v1** |
+|---|---|---|---|---|---|---|
+| k4 | 15.87% | 15.28% | 14.62% | 17.48% | 18.72% | **19.47%** |
+| | 1.23x | 1.27x | 1.33x | 1.11x | **1.04x** | |
+| k16 | 6.12% | 6.27% | 5.59% | 7.77% | 9.93% | **11.31%** |
+| | 1.85x | 1.80x | 2.02x | 1.46x | **1.14x** | |
+| k64 | 0.91% | 1.22% | 0.94% | 1.90% | 4.78% | **4.96%** |
+| | **5.45x** | 4.07x | 5.28x | **2.61x** | **1.04x** | |
+| k128 | 0.37% | 0.58% | 0.54% | 1.13% | 1.99% | **2.21%** |
+| | **5.97x** | 3.81x | 4.09x | 1.96x | **1.11x** | |
 
 It beats ContextPilot at **4 of 4 retrieved depths**, and at **5 of 5 arrival
 permutations** at k64 — mean 3.51% against 2.81%, sign test p = 0.031. Seed 0,
@@ -936,17 +940,7 @@ used everywhere else in this report, is ContextPilot's best draw and v1's
 narrowest margin; on the other four the margin is 3–7x larger.
 
 **But the size of the win depends entirely on who it is measured against, and
-the ContextPilot margin is the small one:**
-
-| v1 versus | k4 | k16 | k64 | k128 |
-|---|---|---|---|---|
-| original | 1.23x | 1.85x | **5.45x** | **5.97x** |
-| alphabetical | 1.27x | 1.80x | 4.07x | 3.81x |
-| frequency | 1.33x | 2.02x | 5.28x | 4.09x |
-| tooltrie_v0 | 1.11x | 1.46x | **2.61x** | 1.96x |
-| **ContextPilot** | **1.04x** | **1.14x** | **1.04x** | **1.11x** |
-
-Against ContextPilot it is 4–14%, which at k64 is **+0.18pp of reuse on a
+the ContextPilot margin is the small one.** Against ContextPilot it is 4–14%, which at k64 is **+0.18pp of reuse on a
 workload where 95% of prefill is uncacheable whichever arm is chosen**. Latency
 moves more than that implies — p50 7739.7 against 8565.4 ms at k64, 9.6% faster,
 with 1.9% higher sustained throughput — but nobody should expect swapping
@@ -1427,19 +1421,19 @@ ContextPilot scheduling, so nothing here measures the full system.
 | ContextPilot at alpha=0.001 | `alpha001-comparison-20260829-224719/` | 17 |
 | Canonical and hybrid ordering | `canonical-order-20260830-003615/` | 8 |
 | Accuracy | `accuracy-gate-20260830-011416/` | 10 |
+| ContextPilot + baselines on padded | `cp-online-padded-20260830-115456/` | 15 |
 | Adaptor on ToolTrie under a forced queue | `tooltrie-adaptor-20260830-121234/` | 4 |
 | Adaptor on frequency and ContextPilot | `adaptor-table-20260830-141733/` | 4 |
-| ContextPilot + baselines on padded | `cp-online-padded-20260830-115456/` | 15 |
 | Fairness audit: planner budget, arrival seeds | `tooltrie-uncapped-20260830-212728/` | 9 |
 | Steady state (600 req) and more arrival seeds | `steady-and-seeds-20260830-221902/` | 14 |
 | Steady state: the two reference arms | `steady-arms-20260830-234910/` | 4 |
 | Steady-state capacity, converged workload, replicates | `steady-capacity-20260831-004322/` | 16 |
-| ToolTrie-v1 at 600 requests (padded) | `q1-single-table-20260902-172342/` | 2 |
-| Four questions across all six arms | `four-questions-arms-20260902-002142/` | 17 |
-| ToolTrie-v1 (reuse, accuracy, 5 seeds, 4B) | `tooltrie-keeporder-20260901-001832/` | 15 |
-| Middle-overlap sweep (25/50/75%) | `overlap-sweep-20260831-232237/` | 15 |
-| ToolTrie frequency fallback | `tooltrie-v1-fallback-20260901-233750/` | 4 |
 | Accuracy at Qwen3-4B (k128, k64) | `accuracy-4b-20260831-204740/` | 10 |
+| Middle-overlap sweep (25/50/75%) | `overlap-sweep-20260831-232237/` | 15 |
+| ToolTrie-v1 (reuse, accuracy, 5 seeds, 4B) | `tooltrie-keeporder-20260901-001832/` | 15 |
+| ToolTrie frequency fallback | `tooltrie-v1-fallback-20260901-233750/` | 4 |
+| Four questions across all six arms | `four-questions-arms-20260902-002142/` | 17 |
+| ToolTrie-v1 at 600 requests (padded) | `q1-single-table-20260902-172342/` | 2 |
 
 **270 runs.** All under the git-ignored `cluster/results/`.
 
@@ -1519,27 +1513,19 @@ recent and long:
 other result here uses one arrival permutation. Re-running k64 under five and
 k128 under three permutations of the same 200 records:
 
-| k64 | ToolTrie | ContextPilot | ratio |
-|---|---|---|---|
-| seed 0 (used throughout this report) | 1.86% | **4.78%** | **2.57x** |
-| seed 1 | 1.80% | 2.51% | 1.39x |
-| seed 2 | 1.98% | 2.15% | 1.09x |
-| seed 3 | 1.77% | 2.44% | 1.38x |
-| seed 4 | 1.68% | 2.17% | 1.29x |
-| mean | 1.82% | 2.81% | 1.54x |
-| spread | 0.30pp | **2.63pp** | |
+| arrival permutation | k64 ToolTrie | k64 ContextPilot | k128 ToolTrie | k128 ContextPilot |
+|---|---|---|---|---|
+| seed 0 (used throughout this report) | 1.86% | **4.78%** | 1.16% | 1.99% |
+| seed 1 | 1.80% | 2.51% | 1.10% | 1.81% |
+| seed 2 | 1.98% | 2.15% | 0.82% | 1.76% |
+| seed 3 | 1.77% | 2.44% | — | — |
+| seed 4 | 1.68% | 2.17% | — | — |
+| **mean** | 1.82% | 2.81% | 1.03% | 1.85% |
+| spread | 0.30pp | **2.63pp** | 0.34pp | 0.23pp |
+| mean of per-seed ratios | **1.54x** | | **1.84x** | |
 
-| k128 | ToolTrie | ContextPilot | ratio |
-|---|---|---|---|
-| seed 0 (used throughout this report) | 1.16% | 1.99% | 1.72x |
-| seed 1 | 1.10% | 1.81% | 1.65x |
-| seed 2 | 0.82% | 1.76% | 2.15x |
-| mean | 1.03% | 1.85% | 1.84x |
-| spread | 0.34pp | 0.23pp | |
-
-The `mean` ratios are the mean of the per-seed ratios. Taking the ratio of the
-column means instead gives 1.55x at k64 (identical) and 1.80x at k128, which is
-the figure §4.1 quotes beside those means.
+Taking the ratio of the column means instead of the mean of the ratios gives
+1.55x at k64 (identical) and 1.80x at k128, which is the figure §4.1 quotes.
 
 The ToolTrie column uses the budget-lifted planner, legitimate because capped and
 uncapped are a measured null above; seed 0 against the capped arm is the 2.52x

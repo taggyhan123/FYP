@@ -300,27 +300,6 @@ per position at 4B, at both depths, against 0.359 at 0.6B/k64. And **ContextPilo
 matches the unordered baseline exactly while carrying 6x its reuse.
 ([§1.4](findings.md#14-what-the-reordering-costs))
 
----
-
-## Four caveats on the ContextPilot comparison
-
-1. **It is measured far outside its own evaluation regime.** Its paper uses a
-   dense retriever on 3 of 4 datasets at k=3–20 (primarily 15), over multi-turn
-   workloads with **~40% overlap** between a turn and earlier ones. Here it sees
-   BM25 only, k=4–128, independent requests, **1.6–7.7% adjacent overlap**. v1's
-   wins are where ContextPilot is furthest off-design; its losses are on the §4.3
-   menus, closest to ContextPilot's own regime.
-2. **It runs ordering-only** — no annotations, de-duplication or scheduling,
-   which its paper credits for roughly half its cache gain. This beats its
-   *ordering component*, not the system.
-3. **v1 was designed while looking at k64 and k128**, with no held-out set. k4,
-   k16, four of five arrival seeds and both 4B accuracy cells came after the rule
-   was fixed and it leads on all of them — but it was not preregistered.
-4. **The case for discounting padded menus was assembled after v1 failed on
-   them.** The brief does sanction padded as a *control* (§4.2 designates BFCL
-   for "constructing controlled tool-menu workloads"), so this is v1 measured
-   outside its regime, not an unfair test.
-   ([A.6](findings.md#a6-is-the-tooltrie-vs-contextpilot-comparison-fair))
 
 ---
 

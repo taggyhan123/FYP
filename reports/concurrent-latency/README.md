@@ -341,18 +341,3 @@ matches the unordered baseline exactly while carrying 6x its reuse.
 
 
 ---
-
-## Two things that changed how the numbers read
-
-**ContextPilot's padded lead is warm-up.** Over 600 requests the 8.97pp reuse gap
-becomes 0.04pp and the 22 ms median penalty falls to 0.5 ms. Both converge to
-placing the odd tool last, so the tie is forced. ContextPilot's real advantage
-there is **cold-start speed** — optimal from request 2 against request 222.
-
-**Arrival order matters more than policy choice.** The benchmark's natural order
-is blocked by source (101 `apibank` then 99 `apigen`), so adjacent requests
-overlap 3.40 tools against 1.43 when shuffled. That locality alone moved
-ContextPilot from 2.15% to 4.78% at k64 — larger than the gap between any two
-policies.
-
----

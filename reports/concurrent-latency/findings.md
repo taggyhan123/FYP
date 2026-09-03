@@ -46,8 +46,11 @@ compete for the front of the prompt.
 **ToolTrie-v1 is the one arm that beats ContextPilot.** Changing a single
 component of v0 — unmatched tools keep the order they arrived in rather than
 being sorted alphabetically — wins reuse at all four retrieved depths and all
-five arrival permutations, at equal or better accuracy in every cell (§5). It
-loses only on `padded-64`, whose input ordering is adversarial by construction.
+five arrival permutations (§5). On BM25 menus its accuracy against ContextPilot
+is a wash — 2 wins, 2 losses, 2 ties over six cells, every margin under 1.6 SE;
+on dense menus it wins all four cells and matches the unordered baseline (§4.4).
+It loses only on `padded-64`, whose input ordering is adversarial by
+construction.
 
 **ToolTrie-v0 places second on retrieved menus and ties on padded ones.** It beats
 every simple heuristic — unordered, alphabetical, frequency — everywhere.
@@ -1193,12 +1196,14 @@ evaluates on QASPER, MultihopRAG and NarrativeQA with a dense retriever
 (gte-Qwen2-7B + FAISS) plus MT-RAG with BM25, at top-k 3–20 and primarily k=15,
 over multi-session and multi-turn workloads where **~40% of retrieved documents
 in a turn overlap earlier ones** and 49–79% of questions draw from the top 20% of
-documents. This project uses BM25 only, at k = 4/16/64/128, with independent
-requests and no sessions:
+documents. This project uses k = 4/16/64/128 with independent requests and no
+sessions. The retriever axis has since been closed — §4.4 repeats the whole
+comparison on dense retrieval, where ContextPilot sees its own retriever type
+and loses by *more* — so the row below records where the BM25 comparison stood:
 
 | | ContextPilot's paper | here |
 |---|---|---|
-| retriever | dense for 3 of 4 datasets | BM25 only |
+| retriever | dense for 3 of 4 datasets | BM25, and dense in §4.4 |
 | k | 3–20, primarily 15 | 4, 16, **64, 128** |
 | adjacent-request overlap | **~40%** | **1.6 / 3.6 / 5.3 / 7.7%** |
 | structure | multi-session, multi-turn | independent requests |

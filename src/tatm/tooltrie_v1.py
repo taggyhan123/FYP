@@ -21,10 +21,12 @@ Measured against ToolTrie-v0 and ContextPilot (Qwen3-0.6B unless noted):
     ContextPilot 18.72%   9.93%   4.78%   1.99%
     v1        19.47%  11.31%   4.96%   2.21%
 
-v1 also wins 5 of 5 arrival permutations at k64, and its accuracy is equal or
-better than ContextPilot's in all four model x depth cells measured — at 4B/k128
-it matches the unordered baseline exactly (44.72%) while ContextPilot loses
-7.45 points.
+v1 also wins 5 of 5 arrival permutations at k64. On BM25 menus its accuracy
+against ContextPilot is a wash -- 2 wins, 2 losses, 2 ties over six model x depth
+cells, every margin under 1.6 SE -- so the claim there is more reuse at no
+measurable accuracy cost. On dense-retrieved menus it is stronger: v1 wins all
+four cells (+1.84 to +10.52 points) and stays within noise of not reordering at
+all, so its 2.09x reuse at k64 and 3.09x at k128 over ContextPilot are free.
 
 **Boundary condition.** v1 never overrides its input, so an adversarial input
 ordering defeats it. On the project's synthetic `padded-64` workload, whose

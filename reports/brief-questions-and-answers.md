@@ -140,7 +140,8 @@ eviction fired 506–1,494 times per regime, the first time that path has run.
 **Source:** `reports/tooltrie-pressure/20260811-001032/`.
 
 **The "weighted" half was answered on 2026-08-11, and the answer is that it
-makes no difference.** `WeightedToolTrie` (`src/tatm/tooltrie_v1.py`) reads the
+makes no difference.** `WeightedToolTrie` (`src/tatm/tooltrie_weighted.py`, named `tooltrie_v1` at the
+time; that name was later reused for an unrelated variant) reads the
 `visit_count` v0 never consults — in the selection tie-break, and in eviction,
 where it drops the least-visited leaf instead of the least recent. Run into the
 same 480-block harness. The predeclaration named the empirical regime only, so

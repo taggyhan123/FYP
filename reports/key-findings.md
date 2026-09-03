@@ -352,7 +352,9 @@ That near-miss is worth recording on its own: peak occupancy *falls* as a policy
 concentrates reuse better, because fewer distinct blocks stay resident. **A gate
 certifying cache pressure penalises the policies it exists to reward.**
 
-**Weighting the trie changes nothing.** `tooltrie_v1` reads the `visit_count`
+**Weighting the trie changes nothing.** `WeightedToolTrie` (then named
+`tooltrie_v1`, now `src/tatm/tooltrie_weighted.py`; the name `tooltrie_v1` was
+later reused for an unrelated variant) reads the `visit_count`
 that v0 never consults, in selection and in eviction. It matches v0 to five
 decimal places in all four regimes, and re-deriving both planners offline on
 identical menus shows **0 of 200 records differ**. The weighting does act — v1

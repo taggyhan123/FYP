@@ -3,6 +3,13 @@
 **Written before any policy was implemented, any workload built, or any replay
 executed.**
 
+> **Naming note added 2026-09-03; the text below is unmodified.** `tooltrie_v1`
+> here means the **weighted** trie, now `src/tatm/tooltrie_weighted.py`. That
+> module name was later reused for an unrelated variant (keep unmatched tools in
+> arrival order, `src/tatm/tooltrie_v1.py`, `reports/concurrent-latency/` §5).
+> **Nothing in this document predeclares that later variant**, which was designed
+> while looking at k64 and k128 and was not preregistered.
+
 Closes the two clauses of the initial brief that remain genuinely unanswered:
 
 - **§2 Q3** — *"a **weighted** trie or prefix memory under a limited cache

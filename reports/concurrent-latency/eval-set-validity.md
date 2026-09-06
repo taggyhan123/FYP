@@ -214,6 +214,57 @@ completion rate is lower than `gold_hit_ceil` implies — but no comparison in
 variants as standard columns, not as a one-off audit. It costs nothing further
 to compute — all three are derivable from replay JSONs already on disk.
 
+### 4.1 What does the field actually use for this task shape?
+
+Checked 2026-09-06. The field splits cleanly on whether a task is single- or
+multi-tool:
+
+- **Exact Match / Accuracy** — the call must match gold exactly, all-or-nothing.
+  Standard for single-tool tasks (BFCL uses this).
+- **Precision / Recall / F1** — standard specifically for **multi-select**
+  tasks, because exact match is "overly strict: selecting most correct
+  options but missing one valid answer is counted the same as a completely
+  incorrect prediction" ([UniToolCall](https://arxiv.org/pdf/2604.11557),
+  [When2Call](https://arxiv.org/pdf/2504.18851)). Several benchmarks
+  (AppSelectBench, DICE-Bench) report precision/recall/F1 by default for
+  exactly this reason.
+
+This project's task shape is the multi-select case (44% of tasks need 2+
+tools, §4), so **F1 is the field's standard choice here**, not a stricter or
+looser homebrew variant of it. Precision (of the tools actually called, how
+many are gold) had never been reported at all before this check — every
+existing metric in this project is recall-flavored.
+
+**Computed F1 (harmonic mean of per-task precision and recall, ceiling-
+restricted to match `gold_hit_ceil`'s denominator) across every cell now
+available:**
+
+| cell | v1 | CP | v0 | `original` | v1-CP |
+|---|---|---|---|---|---|
+| k4 @ 0.6B | 39.05 | 38.41 | 40.63 | 39.68 | +0.63 |
+| k16 @ 0.6B | 33.21 | 29.88 | 26.10 | 32.72 | +3.33 |
+| k64 @ 0.6B | 26.99 | 21.47 | 16.36 | 25.66 | +5.52 |
+| k128 @ 0.6B | 25.38 | 16.18 | 12.18 | 26.02 | +9.20 |
+| k4 @ 4B | 49.84 | 49.21 | 46.51 | 50.22 | +0.63 |
+| k16 @ 4B | 40.25 | 36.42 | 36.54 | 40.05 | +3.83 |
+| k64 @ 4B | 34.29 | 32.35 | 28.81 | 34.29 | +1.94 |
+| k128 @ 4B | 34.87 | 31.09 | 27.88 | 34.58 | +3.78 |
+| k64 @ 8B | 35.32 | 35.77 | 33.03 | 35.56 | -0.45 |
+| k128 @ 8B | 35.13 | 35.28 | 33.37 | 34.64 | -0.16 |
+
+**F1 changes nothing already found — it confirms both headline results under
+the field's actual standard metric rather than a homemade one.** Same ranking
+throughout at 0.6B/4B (`tooltrie_v1` >= `original` > ContextPilot >
+`tooltrie_v0`), and the same collapse to a tie at 8B found in §2 — if
+anything slightly tighter under F1 (-0.45/-0.16 against `gold_hit_ceil`'s
+-0.62/-1.17).
+
+**Recommendation**: make F1 the primary reported metric going forward.
+`gold_hit_ceil` answers a different, still-useful question (did retrieval and
+ordering put the tool within reach at all) and can stay as a secondary column,
+but F1 is what the field would call "accuracy" for a task shape like this
+one, and it costs nothing to add retroactively.
+
 ---
 
 ## 5. What a valid eval set for this problem would add
@@ -246,8 +297,8 @@ A.6-A.7. Ordered by expected impact, not by effort.
    hub-tool effect (§4.4: top tool in 66/200 menus vs dense's 21/200,
    partly manufacturing "reuse" via retrieval error) was only caught because
    a second retriever existed for comparison.
-5. **The strict/fractional accuracy columns from §4**, as standard reporting,
-   not an audit.
+5. **F1 as the primary accuracy metric (§4.1)**, with `gold_hit_ceil` kept as
+   a secondary column, not the reverse as currently reported.
 6. **A genuine production trace remains open and likely unclosable here** —
    the brief's own §4.5 says no listed dataset provides one, and this
    project's own finding that arrival order moved reuse more than any policy

@@ -1192,8 +1192,10 @@ information asymmetry; it is the same signal ContextPilot uses, used more.
 **Three things the mechanical checks above do not cover, and they matter more.**
 
 *ContextPilot is being tested far outside its own evaluation regime.* Its paper
-evaluates on QASPER, MultihopRAG and NarrativeQA with a dense retriever
-(gte-Qwen2-7B + FAISS) plus MT-RAG with BM25, at top-k 3–20 and primarily k=15,
+evaluates on four datasets with a 50/50 retriever split -- dense
+(gte-Qwen2-7B + FAISS) on MultihopRAG and NarrativeQA, BM25 on QASPER and
+MT-RAG -- at top-k 3-20 and primarily k=15 [source verified against the paper,
+arXiv:2511.03475, 2026-09-06; corrects an earlier "dense on 3 of 4" misreading],
 over multi-session and multi-turn workloads where **~40% of retrieved documents
 in a turn overlap earlier ones** and 49–79% of questions draw from the top 20% of
 documents. This project uses k = 4/16/64/128 with independent requests and no
@@ -1203,7 +1205,7 @@ and loses by *more* — so the row below records where the BM25 comparison stood
 
 | | ContextPilot's paper | here |
 |---|---|---|
-| retriever | dense for 3 of 4 datasets | BM25, and dense in §4.4 |
+| retriever | dense on 2 of 4 datasets, BM25 on the other 2 | BM25, and dense in §4.4 |
 | k | 3–20, primarily 15 | 4, 16, **64, 128** |
 | adjacent-request overlap | **~40%** | **1.6 / 3.6 / 5.3 / 7.7%** |
 | structure | multi-session, multi-turn | independent requests |

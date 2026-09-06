@@ -1,12 +1,21 @@
 # Is the eval set valid? Depth, retriever, and metric choices checked
 
 `findings.md` and `README.md` report ToolTrie-v1's advantage at k = 4/16/64/128,
-against ContextPilot, on BM25 and dense retrieval. This document checks whether
-that evaluation design itself is defensible: is the depth range realistic, does
-the advantage survive inside ContextPilot's own native range, what do real tool
-catalogs actually look like, and is the accuracy metric fair to multi-tool
-tasks. Every claim below is either a literature citation (dated, sourced) or a
-run under `cluster/results/`.
+against ContextPilot, on BM25 and dense retrieval, at model sizes 0.6B and 4B.
+This document checks whether that evaluation design itself is defensible: is
+the depth range realistic, does the advantage survive inside ContextPilot's
+own native range, what do real tool catalogs actually look like, is the
+accuracy metric fair to multi-tool tasks, and does the accuracy result hold at
+a third, larger model size. Every claim below is either a literature citation
+(dated, sourced) or a run under `cluster/results/`.
+
+**Headline finding**: the depth-range mismatch with ContextPilot's own paper
+turns out to matter less than expected (§2) — the accuracy advantage holds,
+even strengthens, inside ContextPilot's native k=3-20 range. What matters more
+is a dimension the parent report never varied: **model size.** Adding a third
+point (Qwen3-8B) to the existing 0.6B/4B accuracy comparison shows the
+advantage shrinking monotonically and crossing into a statistical tie by 8B
+(§2). This is the most consequential result in this document.
 
 ---
 
@@ -78,9 +87,73 @@ both start at k64. Run here: same driver, settings and metric as those two
 (`--max-tokens 128 --tool-choice auto --disable-thinking --reset-before`),
 dense retrieval, four arms, both models, k4 and k16.
 
-<!-- ACCURACY_TABLE -->
+| cell | v1 | ContextPilot | v0 | `original` | ceiling |
+|---|---|---|---|---|---|
+| k4 @ 0.6B | 42.86 | 41.90 | 42.86 | **43.81** | 0.525 |
+| k4 @ 4B | 55.24 | 54.29 | 54.29 | **56.19** | 0.525 |
+| k16 @ 0.6B | **38.52** | 34.81 | 28.15 | 37.78 | 0.675 |
+| k16 @ 4B | **44.44** | 40.00 | 40.00 | **44.44** | 0.675 |
 
-<!-- ACCURACY_DISCUSSION -->
+**v1 beats ContextPilot in all four cells** — +0.96, +0.95, +3.71, +4.44 pp — so
+inside ContextPilot's own native depth range, the accuracy advantage does hold,
+strengthening with depth even across this narrow band. But the k4 margins are
+noise (0.14 sigma, see the combined table below); only k16 carries real weight
+(0.63-0.74 sigma), and even that is under 1 SE alone.
+
+**And `original` (no reordering at all) wins outright at k4, in both models** —
+43.81 vs v1's 42.86 at 0.6B, 56.19 vs 55.24 at 4B. At this depth the retriever's
+own ranking is already close to optimal, and *any* reordering — even v1's
+conservative one — can only cost a little by disturbing it. This mirrors the
+reuse finding above: k4 is the one depth where not reordering is the right
+call, on both the cache axis and the accuracy axis.
+
+**The full picture, all three model sizes now available at k64/k128, reveals a
+second and more consequential trend**: v1's accuracy margin over ContextPilot
+does not hold steady or keep growing with model size — it shrinks toward zero
+and crosses over.
+
+| cell | v1 | CP | delta | SE | sigma |
+|---|---|---|---|---|---|
+| k4 @ 0.6B | 42.86 | 41.90 | +0.96 | 6.82 | 0.14 |
+| k16 @ 0.6B | 38.52 | 34.81 | +3.71 | 5.86 | 0.63 |
+| k64 @ 0.6B | 31.29 | 24.54 | +6.75 | 4.95 | 1.36 |
+| k128 @ 0.6B | 28.65 | 18.13 | **+10.52** | 4.54 | **2.32** |
+| k4 @ 4B | 55.24 | 54.29 | +0.95 | 6.87 | 0.14 |
+| k16 @ 4B | 44.44 | 40.00 | +4.44 | 6.01 | 0.74 |
+| k64 @ 4B | 39.88 | 38.04 | +1.84 | 5.40 | 0.34 |
+| k128 @ 4B | 40.35 | 36.26 | +4.09 | 5.25 | 0.78 |
+| k64 @ 8B | 41.10 | 41.72 | -0.62 | 5.46 | -0.11 |
+| k128 @ 8B | 40.94 | 42.11 | -1.17 | 5.33 | -0.22 |
+
+At k128 specifically, the margin runs +10.52 (0.6B) -> +4.09 (4B) -> -1.17
+(8B): three model sizes, monotonically shrinking, crossing zero. At k64 the
+same shape: +6.75 -> +1.84 -> -0.62. **Neither 8B cell is a confirmed
+ContextPilot win** — both deltas are under 0.25 sigma, indistinguishable from
+a tie — but the direction is consistent across both depths and the trend that
+produced it (from a clear v1 lead at 0.6B to a coin flip at 8B) is real,
+not noise. **The "reuse is free" claim in `findings.md` §4.4 was established
+at 0.6B and 4B only, and does not extend to 8B**: at production-representative
+model size, v1's extra reuse over ContextPilot buys accuracy parity, not an
+accuracy edge.
+
+**The cache mechanism itself is unaffected by model size** — checked directly
+on the same 8B runs (`aggregate_metric_delta.vllm:prompt_tokens_cached /
+vllm:prefix_cache_queries`, since the serial accuracy driver does not emit the
+`reuse` block the concurrent driver does):
+
+| arm | k64 reuse | k128 reuse |
+|---|---|---|
+| `original` | 0.64% | 0.31% |
+| `tooltrie_v0` | 1.43% | 0.52% |
+| ContextPilot | 1.42% | 0.65% |
+| **`tooltrie_v1`** | **2.41%** | **1.09%** |
+
+v1 still caches ~1.7x ContextPilot's tokens at 8B, same ranking as at 0.6B/4B.
+**So the split is precise: the systems result (v1 caches more) is robust across
+all three model sizes; the accuracy result (v1 costs nothing for that extra
+reuse) is not — it holds at 0.6B/4B and disappears at 8B.** This is the
+single most important qualification this document adds to the parent report's
+headline.
 
 ---
 
@@ -148,6 +221,16 @@ to compute — all three are derivable from replay JSONs already on disk.
 Synthesized from §§1-4 plus the standing limitations already in `findings.md`
 A.6-A.7. Ordered by expected impact, not by effort.
 
+0. **The parent report's "reuse is free" claim needs a model-size caveat.**
+   §2 found this directly: the accuracy margin over ContextPilot that held at
+   0.6B (+6.75 to +10.52pp) and weakened at 4B (+1.84 to +4.09pp) disappears at
+   8B (-0.62 to -1.17pp, both within noise). This is not a new eval-set
+   requirement so much as a correction owed to `findings.md` §4.4 and the
+   README headline, which currently state the free-reuse result without a
+   model-size qualifier. Recommend re-running the two clear-effect 0.6B/4B
+   cells at n=600 to see whether the 8B tie survives more data, and stating
+   explicitly that the claim is demonstrated at 0.6B/4B and untested above
+   that until it is.
 1. **A session-correlated workload.** Every workload here treats requests as
    independent. ContextPilot is designed for ~40% turn-to-turn overlap; nothing
    in this eval set produces that regime, which is why A.6 already names it the
@@ -180,8 +263,11 @@ Item 1 needs real construction. Item 6 is out of reach regardless of budget.
 | stage | directory | runs |
 |---|---|---|
 | k4/k16 dense accuracy, two models | `eval-validity-20260906-165826/` | 16 |
+| k64/k128 dense accuracy, third size point (8B) | `eval-validity-20260906-165826/` | 8 |
 
-Server: Qwen3-0.6B on GPU2:8300, Qwen3-4B on GPU3:8301, both native capacity,
-run concurrently (separate flock targets, 2 GPUs). Driver:
-`scripts/replay_vllm_workload.py`; scoring: `scripts/score_tool_selection.py`
+Servers: Qwen3-0.6B on GPU2:8300, Qwen3-4B on GPU3:8301, Qwen3-8B on GPU0:8302
+(`--max-model-len 32768`, required to fit KV cache alongside the larger
+weights at default `gpu_memory_utilization`), all three run concurrently
+(separate flock targets, 3 GPUs). Driver: `scripts/replay_vllm_workload.py`;
+scoring: `scripts/score_tool_selection.py`
 plus an ad-hoc strict/fractional re-scorer (§4), not yet promoted to a script.

@@ -148,6 +148,22 @@ ToolTrie-v0 and alphabetical are the cautionary tale: they achieve good cache
 reuse by sorting tools into an order that has nothing to do with relevance.
 **92% of requests lose the right tool.** Cache maximised, system broken.
 
+### We checked this on a second search engine, and it got worse for ContextPilot
+
+The result above used one way of searching the catalog. Repeating the whole
+thing with a completely different search method:
+
+| policy | survives (engine A) | survives (engine B) |
+|---|---|---|
+| no reordering | 62% | 59% |
+| **ToolTrie-v1** | 62% | **60%** — slightly *better* than not reordering |
+| ContextPilot | 47% | **40%** |
+| ToolTrie-v0 / alphabetical | 8% | 12% |
+
+**So it isn't a quirk of one setup.** On the second engine ContextPilot throws
+away **one request in five** rather than one in seven, and ToolTrie-v1 comes
+out marginally *ahead* of doing nothing at all.
+
 ---
 
 ## What this changes
@@ -176,9 +192,9 @@ ContextPilot does not.
 
 ## Honest limitations
 
-- Tested on **one retriever** for the main result, **200 tasks**, and
-  **single-turn** requests only. Real agents are multi-turn, where errors
-  compound.
+- Tested on **200 tasks** and **single-turn** requests only. Real agents are
+  multi-turn, where errors compound. (The main result *was* checked on a
+  second search engine and held up — see above.)
 - The 200-task sample we used is **easier than average** — it happened to
   contain more single-tool tasks than a random draw would. Comparisons between
   policies are unaffected (all of them ran the identical tasks), but the

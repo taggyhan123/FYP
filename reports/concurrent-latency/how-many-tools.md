@@ -258,6 +258,55 @@ each policy does to the retriever's ranking:
   truncation are the common, easy ones — yet its ceiling is 0.385, so its
   end-to-end is no better than `original`'s.
 
+### 5.3 The same design on BM25 — the result replicates and strengthens
+
+§5.2 is dense-retrieval only, so the field-comparability claim rested on one
+retriever. Repeated on BM25 at the identical design (retrieve 64, present 10;
+six arms; 12 accuracy runs, 0 failures).
+Runs: `cluster/results/eval-bm25trunc-20260908-000327/`.
+
+**The ceiling needs no model to compute** — it is a property of which tools
+survive truncation — so this half was answerable directly:
+
+| arm | BM25 ceiling | dense ceiling (§5.2) |
+|---|---|---|
+| `original` | 0.590 | 0.620 |
+| **`tooltrie_v1`** | **0.595 (+0.5pp)** | 0.615 (-0.5pp) |
+| `frequency` | 0.415 | 0.385 |
+| ContextPilot | **0.395 (-19.5pp)** | 0.470 (-15.0pp) |
+| `tooltrie_v0` | 0.115 | 0.080 |
+| `alphabetical` | 0.115 | 0.075 |
+
+**ContextPilot's ceiling damage is larger on BM25, not smaller** — -19.5pp
+against -15.0pp — and `tooltrie_v1` moves from -0.5pp to **+0.5pp**, marginally
+*above* the unreordered baseline. The plausible mechanism is BM25's heavier hub
+structure (its most-retrieved tool appears in 66 of 200 menus against dense's
+21): ContextPilot's clustering has more cache-friendly hub material to hoist,
+so it displaces more relevant tools when the list is cut.
+
+**End-to-end (ceiling x F1), scored with `scripts/score_end_to_end.py`:**
+
+| arm | ceiling | 0.6B F1 | **0.6B end-to-end** | 4B F1 | **4B end-to-end** |
+|---|---|---|---|---|---|
+| `original` | 0.590 | 38.98 | **23.00** | 49.01 | **28.92** |
+| **`tooltrie_v1`** | **0.595** | 36.97 | **22.00** | 47.20 | **28.08** |
+| `frequency` | 0.415 | 54.62 | 22.67 | 67.27 | 27.92 |
+| ContextPilot | 0.395 | 41.98 | **16.58** | 56.54 | **22.33** |
+| `tooltrie_v0` | 0.115 | 30.00 | 3.45 | 49.28 | 5.67 |
+| `alphabetical` | 0.115 | 21.30 | 2.45 | 49.28 | 5.67 |
+
+**Same conclusion, larger margins.** ContextPilot loses **6.4pp end-to-end at
+0.6B and 6.6pp at 4B** against `original` (dense: 3.6 and 5.3). `tooltrie_v1`
+tracks `original` within 1.0pp on both models while holding the ceiling.
+
+**And BM25 sharpens the metric point.** `frequency` posts the highest
+conditional F1 of any arm on either retriever (54.62 / 67.27) — it *looks* like
+the best policy in the table — and its end-to-end is merely ordinary, because
+its ceiling is 0.415. ContextPilot shows the same pattern more mildly: second-
+highest conditional F1 at 4B (56.54), worst end-to-end of the four viable arms.
+**Ranking these arms by conditional F1 would recommend the two policies that
+throw away the most user requests.**
+
 ---
 
 ## 6. What k should the evaluation use?
@@ -281,8 +330,11 @@ sees."**
 
 **Concrete gaps this leaves:**
 
-1. **No k=10 on BM25** — §5 is dense only, so the field-comparability claim
-   rests on one retriever.
+1. ~~No k=10 on BM25~~ — **closed by §5.3.** The truncation design was
+   repeated on BM25: the result replicates with *larger* margins
+   (ContextPilot -19.5pp ceiling against dense's -15.0pp). The plain k=10
+   control (§5.1) was not repeated, since its null is driven by prompt length
+   rather than retriever and would replicate trivially.
 2. **No k≈150 point**, the single most commonly cited real composite.
 3. **The 200-task slice is an unrepresentative draw, and by more than
    "slightly".** Taking `offset 0, limit 200` yields a mean of **1.54 gold
@@ -308,12 +360,13 @@ sees."**
 | stage | directory | runs |
 |---|---|---|
 | k4/k16 dense accuracy, two models | `eval-validity-20260906-165826/` | 16 |
-| k=10 and retrieve-64/present-10: reuse/latency (0.6B) + accuracy (0.6B, 4B) | `eval-gaps-20260907-224433/` | 36 |
+| k=10 and retrieve-64/present-10, dense: reuse/latency (0.6B) + accuracy (0.6B, 4B) | `eval-gaps-20260907-224433/` | 36 |
+| retrieve-64/present-10 on BM25: accuracy (0.6B, 4B), six arms | `eval-bm25trunc-20260908-000327/` | 12 |
 
 Drivers: `scripts/replay_vllm_concurrent.py` (rate-controlled) and
 `scripts/replay_vllm_workload.py` (serial, accuracy). Scoring:
-`scripts/score_tool_selection.py` plus an F1/end-to-end re-scorer not yet
-promoted to a script. Companion document:
+`scripts/score_tool_selection.py` and `scripts/score_end_to_end.py` (the
+latter emits ceiling, precision, recall, F1 and end-to-end together). Companion document:
 [`metrics-and-latency-tradeoffs.md`](metrics-and-latency-tradeoffs.md).
 
 Sources: [LiveMCPBench](https://arxiv.org/abs/2508.01780) ·

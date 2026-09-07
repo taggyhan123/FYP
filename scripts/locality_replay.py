@@ -45,7 +45,7 @@ from tatm.measurement import (
 from tatm.prompting import build_menu, order_tool_ids, workload_record
 from tatm.baselines import OnlineFrequencyPlanner, OnlinePairTriplePlanner
 from tatm.tooltrie import ToolTrie
-from tatm.tooltrie_v1 import WeightedToolTrie
+from tatm.tooltrie_weighted import WeightedToolTrie
 from tatm.vllm_client import (
     KvUsageSampler,
     fetch_text,
@@ -85,14 +85,14 @@ def main() -> None:
             "schema_cost_weighted",
             "fp_tree_global",
             "tooltrie",
-            "tooltrie_v1",
+            "tooltrie_weighted",
             "frequency_online",
             "pair_triple_online",
         ),
         default="alphabetical",
         help=(
             "Intra-menu tool order. The first six are fixed permutations held "
-            "constant across replay conditions. 'tooltrie', 'tooltrie_v1', "
+            "constant across replay conditions. 'tooltrie', 'tooltrie_weighted', "
             "'frequency_online' and 'pair_triple_online' plan causally from "
             "earlier requests and so differ per condition."
         ),
@@ -211,7 +211,7 @@ def main() -> None:
                 recency_window=128,
                 capacity_tokens=capacity_tokens,
             )
-        elif args.ordering == "tooltrie_v1":
+        elif args.ordering == "tooltrie_weighted":
             planner = WeightedToolTrie(
                 tools,
                 fallback="alphabetical",

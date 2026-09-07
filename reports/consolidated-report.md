@@ -805,7 +805,9 @@ that certifies pressure penalises the policies it exists to reward. At this
 capacity two regimes clear the gate and two miss it narrowly, while the counter
 reaches 96% reuse in all four.
 
-`tooltrie_v1`, which reads the `visit_count` v0 never consults in both selection
+`WeightedToolTrie` (then named `tooltrie_v1`, now
+`src/tatm/tooltrie_weighted.py`; the name `tooltrie_v1` was later reused for an
+unrelated variant), which reads the `visit_count` v0 never consults in both selection
 and eviction, matches v0 **to five decimal places in all four regimes**, with 0
 of 200 emitted orderings differing. The weighting acts — v1 evicts 1,497 nodes
 against v0's 1,494 on empirical — but `_reachable_cached_cost` decides almost

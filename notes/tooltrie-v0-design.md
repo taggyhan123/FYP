@@ -1,5 +1,8 @@
 # How ToolTrie-v0 works
 
+> **ToolTrie-v1** changes exactly one thing in what follows — the *fallback*
+> ordering in `plan()`. See [`tooltrie-v1-design.md`](tooltrie-v1-design.md).
+
 The Task E deliverable: `src/tatm/tooltrie.py`, 283 lines, no dependencies
 beyond the standard library and `CanonicalTool`. This document explains the
 mechanism and quotes the code that implements it. Results are in
@@ -113,10 +116,10 @@ def _selection_key(self, node, remaining) -> tuple[int, int, str]:
     )
 ```
 
-**This is the design decision that matters most, and it is why v1 changed
-nothing.** The first term dominates: it almost always separates the candidates
-on its own, so the second term — training support in v0, `visit_count` in v1 —
-is rarely consulted.
+**This is the design decision that matters most, and it is why the weighted
+variant changed nothing.** The first term dominates: it almost always separates
+the candidates on its own, so the second term — training support here,
+`visit_count` in `tooltrie_weighted.py` — is rarely consulted.
 
 Tools with no resident path fall through to `_fallback_order`, which is plain
 alphabetical by function name (or frozen frequency, if a separate training
@@ -146,8 +149,8 @@ def observe(self, ordered_ids):
 `observe()` is called only after the request has been served. A planner that
 sees the batch it is ordering can trivially win, and it would be measuring
 nothing. The split is enforced in tests
-(`test_online_frequency_plan_cannot_see_the_current_request` and the v1
-equivalent), and the workload builders call `plan()` before `observe()` per
+(`test_online_frequency_plan_cannot_see_the_current_request` and the equivalent
+for the weighted variant), and the workload builders call `plan()` before `observe()` per
 record.
 
 The project measured what happens when causality is dropped: granting ToolTrie
@@ -196,17 +199,18 @@ analysis — it is suggested next step 4 in the key findings.
 - **No retention of inactive tools.** Brief §9.1, unbuilt.
 - **No use of `visit_count`.** The field is incremented on every observation and
   read nowhere. That is what makes v0 an *unweighted* trie, and
-  `src/tatm/tooltrie_v1.py` is the variant that reads it — which changes 0 of
-  200 emitted orderings, for the reason given above.
+  `src/tatm/tooltrie_weighted.py` is the variant that reads it — which changes 0
+  of 200 emitted orderings, for the reason given above.
 
 ## Where to look next
 
 | | |
 | --- | --- |
 | Implementation | `src/tatm/tooltrie.py` |
-| Weighted variant | `src/tatm/tooltrie_v1.py` |
+| ToolTrie-v1 | `src/tatm/tooltrie_v1.py`, [design note](tooltrie-v1-design.md) |
+| Weighted variant | `src/tatm/tooltrie_weighted.py` |
 | Workload builder | `scripts/build_tooltrie_workload.py` |
-| Tests | `tests/test_tooltrie.py`, `tests/test_tooltrie_v1.py` |
+| Tests | `tests/test_tooltrie.py`, `tests/test_tooltrie_v1.py`, `tests/test_tooltrie_weighted.py` |
 | First GPU measurement | `reports/tooltrie-v0/` |
 | Under a limited cache budget | `reports/tooltrie-pressure/20260811-001032/` |
 | Weighted variant measured | `reports/tooltrie-weighted/20260811-144741/` |

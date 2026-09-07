@@ -1,0 +1,188 @@
+# How many tools should we show the model? — short version
+
+A plain-language summary of [`how-many-tools.md`](how-many-tools.md). Same
+findings, none of the statistics. Read that one for the evidence.
+
+---
+
+## The question
+
+Our experiments show the model a menu of **4, 16, 64, or 128 tools** and ask it
+to pick the right one. Two people looked at that and objected:
+
+> *"A task only needs one or two tools. Why are you showing it 128?"*
+
+> *"No real benchmark shows a menu that big. They show about 5 to 10."*
+
+Both objections are correct on the facts. This document is what happened when
+we checked whether they were correct on the conclusion.
+
+---
+
+## Three numbers that are easy to confuse
+
+Everything here gets clearer once these are kept apart:
+
+| | what it means | typical value |
+|---|---|---|
+| **catalog** | every tool that exists and could be searched | 44,453 |
+| **menu (k)** | the tools we actually put in the prompt | 4 / 16 / 64 / 128 |
+| **used** | the tools the task actually needs | ~1.8 |
+
+The objection is really "menu is much bigger than used." True. But the menu
+isn't supposed to match what's *used* — the system doesn't know which two tools
+a query needs. **That's the entire job retrieval is doing, and it does it
+imperfectly.** The menu is a bet on where the right tool probably is.
+
+---
+
+## Why a small menu is not automatically better
+
+If you shrink the menu, you get a cleaner prompt — but you also start missing
+the right tool completely.
+
+| menu size | how often the right tool is even in the menu |
+|---|---|
+| 4 tools | **53%** |
+| 16 tools | 68% |
+| 64 tools | 82% |
+| 128 tools | **86%** |
+
+**At a 4-tool menu, nearly half of all requests are already lost before the
+model reads anything.** The correct tool simply isn't there. No model and no
+clever ordering can fix that.
+
+So there are two different failure modes, and they are not equally bad:
+
+- **Big menu** — the right tool is there but buried among distractors.
+  *Recoverable*: a better model or better ordering can find it.
+- **Small menu** — the right tool was never shown.
+  *Not recoverable*: nothing downstream can help.
+
+---
+
+## The surprise: menu size barely changes the final answer
+
+We measured what actually reaches the user — how often the whole pipeline
+(retrieval + model) gets the task right:
+
+| menu size | end-to-end accuracy |
+|---|---|
+| 4 tools | 20.5 |
+| 16 tools | 22.4 |
+| 64 tools | 22.0 |
+| 128 tools | 21.7 |
+
+**Essentially flat, across a 32× range of menu size.** The two effects cancel:
+a small menu picks cleanly but misses often; a big menu almost always has the
+tool but the model gets distracted.
+
+**This means menu size can't be argued on accuracy at all.** It has to be
+chosen for other reasons — speed and cost (favour small), or matching what real
+deployments actually do (favour large).
+
+---
+
+## What real systems actually do
+
+Two different worlds, and they disagree:
+
+**Benchmarks show 5–10 tools.** But they get there using a *router* — a
+component that re-searches the catalog on every single query and hands over
+only the best few. One benchmark had to build a purpose-made router to manage
+its 527 tools.
+
+**Real MCP deployments mostly have no router.** They just inject everything.
+One well-scoped server is 20–30 tools — fine. But connect four or five ordinary
+integrations (GitHub, Slack, a database, a calendar) and you're at **~150
+tools**. Cloudflare disclosed a case with over a million tokens of tool
+definitions. Cursor had to impose a hard 40-tool cap because overload became a
+real operational problem.
+
+**So both regimes are real.** Benchmarks measure the routed world. Our k=64/128
+measures the un-routed one — which is where most MCP users actually live. The
+mistake would be pretending they're the same problem.
+
+---
+
+## The uncomfortable finding
+
+At the benchmark's menu size, **our headline effect disappears.**
+
+At 10 tools, every ordering policy we test finishes in the same time —
+66 to 68 milliseconds, all six of them. The cache benefit that ordering
+provides is real, and at that menu size it is worth nothing, because the prompt
+is too short for it to matter.
+
+**Had we used the standard menu size from the start, we would have measured
+nothing at all.** That's worth saying plainly.
+
+---
+
+## The finding that rescues it
+
+Then we tried the design that matches how routed systems actually work:
+
+> **Search 64 tools. Reorder them. Show only the top 10.**
+
+This is the realistic setup — a router picking a shortlist from a bigger pool.
+And here the policies separate sharply, on something we hadn't been measuring:
+
+| policy | how often the right tool survives into the shown 10 |
+|---|---|
+| no reordering | 62% |
+| **ToolTrie-v1** | **62%** — unchanged |
+| ContextPilot | **47%** |
+| ToolTrie-v0 / alphabetical | **8%** |
+
+**ContextPilot pushes the correct tool out of the visible window in one request
+in seven.** It reorders to win cache reuse, and when only the top 10 survive,
+some of what it promoted displaces what the user actually needed.
+
+**ToolTrie-v1 doesn't.** It only moves tools it has direct evidence about and
+leaves everything else in the retriever's order — so when the list gets cut,
+the important things are still near the top. It gets **4.3× the cache reuse and
+13% faster responses, and loses nothing.**
+
+ToolTrie-v0 and alphabetical are the cautionary tale: they achieve good cache
+reuse by sorting tools into an order that has nothing to do with relevance.
+**92% of requests lose the right tool.** Cache maximised, system broken.
+
+---
+
+## What this changes
+
+We had been describing ToolTrie-v1 as *"the policy that gets the most cache
+reuse."* That framing turns out to be almost beside the point:
+
+- At realistic menu sizes, **cache reuse buys nothing measurable**.
+- What actually separates the policies is whether reordering for the cache
+  **damages the results the user sees**.
+- **ToolTrie-v1's real property is that it is safe** — it takes the cache
+  benefit without disturbing what retrieval worked out.
+
+That is a different, and more useful, claim than the one we started with.
+
+---
+
+## The one-sentence version
+
+Menu size doesn't decide accuracy, ordering doesn't decide speed at realistic
+menu sizes, and the thing that actually matters is whether reordering for the
+cache survives having the list cut short — which ToolTrie-v1 does and
+ContextPilot does not.
+
+---
+
+## Honest limitations
+
+- Tested on **one retriever** for the main result, **200 tasks**, and
+  **single-turn** requests only. Real agents are multi-turn, where errors
+  compound.
+- The 200-task sample we used is **easier than average** — it happened to
+  contain more single-tool tasks than a random draw would. Comparisons between
+  policies are unaffected (all of them ran the identical tasks), but the
+  absolute scores are flattering.
+- One policy, `frequency`, looked far better than it was until we measured
+  end-to-end. **Which metric you pick can reverse the answer**, which is why
+  the full document is careful about it.

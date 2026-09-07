@@ -14,7 +14,9 @@ choice, and both are fair on their face:
 
 This document works out whether the large-k choice is defensible anyway, and
 what k a valid evaluation should use. Every claim is a dated literature
-citation or a run under `cluster/results/`.
+citation or a run under `cluster/results/`. A plain-language version without
+the statistics is in
+[`how-many-tools-summary.md`](how-many-tools-summary.md).
 
 **Answer in one paragraph.** The premise is right — tasks use very few tools —
 but it argues for *better retrieval*, not a *smaller menu*, because the two

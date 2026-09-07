@@ -15,7 +15,13 @@ even strengthens, inside ContextPilot's native k=3-20 range. What matters more
 is a dimension the parent report never varied: **model size.** Adding a third
 point (Qwen3-8B) to the existing 0.6B/4B accuracy comparison shows the
 advantage shrinking monotonically and crossing into a statistical tie by 8B
-(§2). This is the most consequential result in this document.
+(§2). Then §6 tests the field's own menu size (k~10) and finds the reverse of
+the 8B tie: under a retrieve-64/present-10 design, ContextPilot's reordering
+pushes the gold tool out of the shown window in one request in seven (ceiling
+0.620 -> 0.470, 3 sigma) while v1's does not (0.615), so v1 keeps
+`original`'s end-to-end accuracy with 4.3x its reuse. Together: the 8B tie is
+a whole-menu result; at the menu size every benchmark actually uses, v1's
+advantage is large and it is a ceiling advantage.
 
 ---
 
@@ -367,7 +373,98 @@ framing is adopted as a standard reporting format.
 
 ---
 
-## 6. What a valid eval set for this problem would add
+## 6. Do the findings hold at the field's menu size? (k=10, and retrieve-64/present-10)
+
+§1 established that every tool-use benchmark separates two numbers this
+project collapses into one `k`: the **catalog** the retriever searches (large:
+250-527 tools in the MCP benchmarks, 43k in ToolRet) and the **menu** the model
+actually sees (small: BFCL 2-5, τ²-bench ~11, ToolBench/ToolRet top-5 to 10,
+LiveMCPBench k=5 with an ablation showing k=1 -> 64.2%, k=5 -> 79.0%, k=10 ->
+no further gain). Our k=64/128 hands the model a menu 6-25x larger than any of
+them. Two designs test whether the k64/k128 results survive at the field's
+size. Dense retrieval, six arms, 0.6B for reuse/latency (rate 10, uncapped),
+0.6B and 4B for accuracy. 36 runs, 0 failures.
+
+### 6.1 k=10, control intact: retrieve top-10, reorder those 10, present all 10
+
+Same ten tools in every arm (ceiling 0.620 everywhere), only the order differs.
+
+| arm | reuse | p50 ms | p95 ms | 0.6B F1 | 0.6B end-to-end | 4B F1 | 4B end-to-end |
+|---|---|---|---|---|---|---|---|
+| `original` | 6.38% | 66.2 | 121.8 | 31.99 | 19.83 | 43.12 | 26.73 |
+| `alphabetical` | 7.97% | 66.5 | 124.9 | 31.85 | 19.75 | 37.50 | 23.25 |
+| `frequency` | 8.68% | 66.8 | 127.5 | 30.91 | 19.17 | **44.81** | **27.78** |
+| `tooltrie_v0` | 9.94% | 68.1 | 127.9 | 31.85 | 19.75 | 37.50 | 23.25 |
+| ContextPilot | 12.46% | 67.1 | 130.6 | **32.39** | **20.08** | 42.80 | 26.53 |
+| **`tooltrie_v1`** | **13.71%** | 67.1 | **117.3** | 31.59 | 19.58 | 43.66 | 27.07 |
+
+**The reuse ranking holds — v1 first, 2.15x `original`, 1.10x ContextPilot —
+but it is worth nothing here.** p50 is flat across all six arms (66-68 ms):
+a ten-tool prompt is too short for prefix reuse to move latency, and at this
+rate no queue forms. Accuracy is a wash on both models (every gap under 1 SE;
+`frequency` edges 4B, ContextPilot edges 0.6B). So at the field's menu size the
+*mechanism* survives and the *effect* does not — exactly the k4/k16 pattern,
+and consistent with the parent report's own claim that ordering is a large-menu
+phenomenon. (End-to-end = ceiling x F1.)
+
+### 6.2 Retrieve 64, present 10: does cache-oriented reordering push relevant tools out of the window?
+
+Each arm reorders the same 64 retrieved tools, then only the first 10 are
+shown. The tools shown now differ by arm, so the **ceiling** — whether the gold
+tool is among the ten shown at all — is the primary result, and end-to-end
+(ceiling x F1) is the honest accuracy number. Conditional F1 on a tiny surviving
+subset is not meaningful and is shown only to make that point.
+
+| arm | ceiling | reuse | p50 ms | 0.6B F1 | **0.6B end-to-end** | 4B F1 | **4B end-to-end** |
+|---|---|---|---|---|---|---|---|
+| `original` | 0.620 | 6.38% | 69.0 | 31.99 | 19.83 | 43.12 | 26.73 |
+| **`tooltrie_v1`** | **0.615** | **27.64%** | **60.1** | 32.38 | **19.92** | 42.33 | 26.03 |
+| ContextPilot | 0.470 | 20.16% | 64.1 | 34.57 | 16.25 | 45.64 | 21.45 |
+| `frequency` | 0.385 | 9.39% | 72.8 | 52.16 | 20.08 | 63.29 | 24.37 |
+| `tooltrie_v0` | 0.080 | 16.12% | 67.1 | 9.38 | 0.75 | 44.79 | 3.58 |
+| `alphabetical` | 0.075 | 11.67% | 68.5 | 10.00 | 0.75 | 47.78 | 3.58 |
+
+**This is the sharpest v1-vs-ContextPilot separation in the project, and it is
+on the field's menu size.** Truncation exposes what each policy does to the
+retriever's ranking:
+
+- **`tooltrie_v1` keeps the ceiling intact** — 0.615 vs `original`'s 0.620, a
+  0.5pp loss (0.1 sigma). It hoists only the tools its trie has evidence for
+  and leaves the rest in retriever order, so the gold tool almost never falls
+  out of the top ten. It gains **4.3x `original`'s reuse and 13% lower p50** for
+  that, with end-to-end accuracy unchanged on both models.
+- **ContextPilot drops the ceiling by 15pp** (0.620 -> 0.470, **3.0 sigma**).
+  Its cluster hoist pulls cache-friendly tools into the window and pushes the
+  gold tool out of it in one request in seven. End-to-end falls 3.6pp at 0.6B
+  and **5.3pp at 4B** — the accuracy cost of its reuse that §2 found invisible
+  at k64/128 is fully visible once the menu is truncated.
+- **`tooltrie_v0` and `alphabetical` are catastrophic** (ceiling 0.08): the
+  alphabetical fallback puts arbitrary tools first, so the shown ten are almost
+  never the relevant ones. v0's 16% reuse is bought at a 92% miss rate.
+- **`frequency` shows why ceiling-conditioned F1 misleads**: its conditional F1
+  is the highest in the table (52/63) because the gold tools that survive its
+  truncation are the common, easy ones — but its ceiling is 0.385, so its
+  end-to-end is no better than `original`.
+
+**What holds and what does not, at field-standard menu size.** The reuse
+ranking (v1 > ContextPilot > v0 > original) holds in both designs. The
+*magnitude* of the latency gain at k64/128 does not transfer to k=10 — the
+prompt is too short. What transfers, and sharpens, is the accuracy story: v1's
+"preserve the retriever's order except where the trie has evidence" rule is
+what keeps it safe under truncation, and ContextPilot's override is what makes
+it unsafe. The 8B tie at k64/128 (§2) therefore describes the regime where the
+whole menu is shown; where only a window is shown — which is how every field
+benchmark presents tools — v1's advantage is a ceiling advantage, and it is
+large.
+
+**Scope.** One retriever (dense), 0.6B for latency, 0.6B/4B for accuracy,
+n=200. The k64p10 design changes which tools are shown per arm, which is its
+purpose, so within-arm comparisons to §4 (same tools) are not like-for-like.
+Runs: `cluster/results/eval-gaps-20260907-224433/`.
+
+---
+
+## 7. What a valid eval set for this problem would add
 
 Synthesized from §§1-4 plus the standing limitations already in `findings.md`
 A.6-A.7. Ordered by expected impact, not by effort.
@@ -404,7 +501,14 @@ A.6-A.7. Ordered by expected impact, not by effort.
    project's own finding that arrival order moved reuse more than any policy
    did is exactly the kind of effect only a real trace would calibrate.
 7. **The SLA-constrained throughput framing (§5) should be swept, not left as
-   a single measurement.** It is the most direct answer to "does ordering
+   a single measurement.**
+8. **Report end-to-end accuracy (ceiling x F1) as the primary accuracy column,
+   with the decoupled retrieve-N/present-k design as a standard condition.**
+   §6.2 shows a policy can have the best conditional F1 in the table and the
+   worst end-to-end, and that the field's own menu size (k~10) is where
+   ContextPilot's accuracy cost becomes measurable and v1's does not. That
+   condition should sit beside the whole-menu k64/k128 results in the parent
+   report, not after them. It is the most direct answer to "does ordering
    let you serve more traffic at the same accuracy and the same latency
    budget", and one depth/model/SLA value is a proof of concept, not a curve.
 
@@ -423,6 +527,7 @@ budget.
 | k16 dense accuracy, 8B follow-up | `eval-validity-20260906-165826/` | 4 |
 | alphabetical/frequency dense accuracy, all four depths, two models | `eval-validity-20260906-165826/` | 16 |
 | SLA-constrained throughput sweep, k64/0.6B, six arms x six rates | `eval-validity-20260906-165826/` | 36 |
+| k=10 and retrieve-64/present-10: reuse/latency (0.6B) + accuracy (0.6B, 4B), six arms | `eval-gaps-20260907-224433/` | 36 |
 
 Servers: Qwen3-0.6B on GPU2:8300, Qwen3-4B on GPU3:8301, Qwen3-8B on GPU0:8302
 (`--max-model-len 32768`, required to fit KV cache alongside the larger

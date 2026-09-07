@@ -106,9 +106,52 @@ every depth on both models, and at k64/4B edges past even v1 and `original`
 on reuse grounds and so never entered the accuracy comparison. On accuracy
 alone, global frequency sorting is a stronger baseline than previously known.
 
-**Recommendation**: report **F1 as primary** with `gold_hit_ceil` secondary —
-the latter answers a different, still-useful question (did retrieval and
-ordering put the tool within reach). Costs nothing to add retroactively.
+### 1.3 The primary metric should be end-to-end F1, not conditional F1
+
+Both metrics discussed so far are **ceiling-conditioned** — computed only over
+requests whose menu contained a gold tool. That is the right control when
+every arm sees identical menus, but it silently excuses a policy that pushes
+gold tools out of the menu altogether, and that failure is real and measured.
+
+**The demonstration, from the retrieve-64/present-10 design** (`how-many-tools.md`
+§5.2), scored with `scripts/score_end_to_end.py`:
+
+| arm | ceiling | `gold_hit_ceil` | conditional F1 | **end-to-end F1** |
+|---|---|---|---|---|
+| `tooltrie_v1` | 0.615 | 35.77 | 32.38 | **19.92** |
+| `frequency` | 0.385 | **55.84** | **52.16** | **20.08** |
+
+On the legacy metric `frequency` looks far better than v1 — 55.84 against
+35.77, a 20-point gap. **They are in fact identical** (20.08 vs 19.92). The
+gap is entirely an artefact of conditioning: `frequency` truncates away the
+hard cases, so the requests it is scored on are the easy ones. Ranking by
+`gold_hit_ceil` or by conditional F1 would invert this comparison.
+
+**So the reporting order should be:**
+
+1. **`end_to_end_f1` = ceiling x F1** — primary, always comparable.
+2. **`ceiling`** — reported beside it, because it is the whole difference above.
+3. **conditional `f1`, `precision`, `recall`** — valid only when ceilings match
+   across arms, and the text must say so.
+4. **`gold_hit_ceil`** — legacy, kept for continuity with earlier tables.
+
+`scripts/score_end_to_end.py` emits all six. Every cell in this report is
+recomputable from replay JSONs already on disk; no reruns are needed to adopt
+this.
+
+**Where the existing tables stand under it.** The whole-menu comparisons
+(§1.1, §1.2, and everything in `findings.md`) hold their rankings unchanged,
+because those designs give every arm the same menu and therefore the same
+ceiling — conditional F1 and end-to-end F1 differ there only by a constant
+factor. **Only the truncation design is affected**, and there it changes the
+answer. That is why it matters that the truncation design is the one closest
+to how the field actually presents tools.
+
+---
+
+**Recommendation**: report **end-to-end F1 as primary**, `ceiling` beside it,
+conditional F1 only where ceilings match, `gold_hit_ceil` for continuity.
+Costs nothing to add retroactively.
 
 ---
 
@@ -283,8 +326,10 @@ things would likely move it:
    model-size qualifier** (§3.2). Recommend re-running the clear 0.6B/4B cells
    at n=600 to see whether the 8B tie survives more data, and stating
    explicitly that the claim is demonstrated at 0.6B/4B only.
-4. **F1 is not yet the reported primary metric** anywhere in the parent report
-   (§1.1).
+4. **End-to-end F1 is not yet the reported primary metric** anywhere in the
+   parent report (§1.3). `scripts/score_end_to_end.py` now emits it; adopting
+   it needs no reruns, only re-scoring and edits. Rankings change only for the
+   truncation design, but there they change the answer.
 5. **n=200 per cell** gives ~5pp SE on deltas of similar size; 7,961
    gold-labelled tasks exist. n=600 would roughly halve it.
 

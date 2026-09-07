@@ -7,7 +7,8 @@ choice, and both are fair on their face:
 1. A task typically needs **1.77 tools** (mean over 7,961 gold-labelled
    ToolRet tasks; 55% need exactly one). The model actually *calls* ~0.9-1.0
    tools per request. So at k128, roughly 126 of the 128 tools shown are
-   irrelevant to that request.
+   irrelevant to that request. (The 200-task slice these experiments run on
+   averages **1.54** — see §6, gap 3: it is an unrepresentative draw.)
 2. **No published tool-use benchmark presents a menu that large.** They cap at
    2-11 tools, or retrieve top-5 to top-10 from a large catalog.
 
@@ -281,8 +282,17 @@ sees."**
 1. **No k=10 on BM25** — §5 is dense only, so the field-comparability claim
    rests on one retriever.
 2. **No k≈150 point**, the single most commonly cited real composite.
-3. **The 200-task slice averages 1.77 gold tools against ToolRet's stated
-   2.17**, biasing slightly toward the easy single-tool case.
+3. **The 200-task slice is an unrepresentative draw, and by more than
+   "slightly".** Taking `offset 0, limit 200` yields a mean of **1.54 gold
+   tools per task**, against **1.77** corpus-wide over all 7,961 gold-labelled
+   tasks. Random 200-task slices fall in **1.64-1.91** (5th-95th percentile,
+   200 resamples), so 1.54 sits **below the 5th percentile** — the evaluated
+   slice is materially easier than a representative sample, not marginally so.
+   ToolRet's own paper states 2.17, further still. This does **not** bias any
+   arm-vs-arm comparison, since every arm replays the identical slice, but it
+   does mean the absolute accuracy numbers are optimistic and not directly
+   comparable to ToolRet's published figures. Re-running the k64 cells on a
+   random slice would settle the size of the inflation.
 4. **Ceiling-conditioned accuracy is still the default** everywhere else in
    the report. §3 and §5.2 both show it can invert a conclusion; end-to-end
    (ceiling x F1) should be primary.

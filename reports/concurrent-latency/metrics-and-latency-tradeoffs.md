@@ -34,10 +34,14 @@ replays under three definitions:
 | k64 4B: v1 / CP / v0 / orig | 39.88 / 38.04 / 34.97 / 39.26 | 27.61 / 25.77 / 20.86 / 28.22 | 33.23 / 31.39 / 27.51 / 33.33 |
 | k128 4B: v1 / CP / v0 / orig | 40.35 / 36.26 / 33.92 / 39.18 | 28.65 / 25.15 / 19.88 / 29.24 | 33.92 / 30.31 / 26.51 / 33.82 |
 
-**Ranking is identical under all three in every cell** (`tooltrie_v1` ≥
-`original` > ContextPilot > `tooltrie_v0`). Absolute numbers drop by roughly a
-third under the strict definition — real task-completion rate is lower than
-`gold_hit_ceil` implies — but no published comparison reverses.
+**`tooltrie_v1` and `original` > ContextPilot > `tooltrie_v0` in every cell,
+under all three definitions.** The one pair the definition can reorder is
+`tooltrie_v1` against `original`, which are never more than three requests
+apart: v1 leads under all three at k64/0.6B, trails by one request under all
+three at k128/0.6B, and in both 4B cells leads on any-hit but trails by one
+request on all-hit. Absolute numbers drop by roughly a third under the strict
+definition — real task-completion rate is lower than `gold_hit_ceil` implies —
+but no comparison between policies more than a few requests apart reverses.
 
 ### 1.1 What the field uses, and why it is F1 here
 

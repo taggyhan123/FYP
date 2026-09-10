@@ -406,22 +406,27 @@ sees."**
    control (§5.1) was not repeated, since its null is driven by prompt length
    rather than retriever and would replicate trivially.
 2. **No k≈150 point**, the single most commonly cited real composite.
-3. **The 200-task slice is an unrepresentative draw — now re-run, and the
-   ranking survives it.** Taking `offset 0, limit 200` yields a mean of **1.54
-   gold tools per task**, against **1.77** corpus-wide over all 7,961
-   gold-labelled tasks; random 200-task slices fall in **1.64-1.91** (5th-95th
-   percentile, 200 resamples), so 1.54 sits **below the 5th percentile**.
-   ToolRet's own paper states 2.17, further still. The k64 cells were re-run on
-   a random slice (`--sample-seed 2026`; `findings.md` §4.5). That draw is
-   harder on both counts — 1.94 gold tools per task, retrieval hit@64 70.5%
-   against 81.5% — and on it **end-to-end accuracy falls by roughly a third**
-   (`tooltrie_v1` 22.0 → 14.3). **The ranking does not change**: `original`
-   14.38, `tooltrie_v1` 14.29, `frequency` 13.93, ContextPilot 12.20,
-   `tooltrie_v0` and `alphabetical` 11.35. What changes is the margins: v1's
-   small lead over `original` becomes a tie, and its lead over ContextPilot
-   roughly halves. The random draw sits just above the 95th percentile of
-   difficulty, so the true inflation against a typical slice is smaller than a
-   third — but every absolute figure in this document is optimistic.
+3. **The 200-task slice is an unrepresentative draw — now re-run; the
+   headline comparison survives it, the full ranking does not.** Taking
+   `offset 0, limit 200` yields a mean of **1.54 gold tools per task**, against
+   **1.77** corpus-wide over all 7,961 gold-labelled tasks; random 200-task
+   slices fall in **1.64-1.91** (5th-95th percentile, 200 resamples), so 1.54
+   sits **below the 5th percentile**. ToolRet's own paper states 2.17, further
+   still. The k64 cells were re-run on a random slice (`--sample-seed 2026`;
+   `findings.md` §4.5). That draw is harder on both counts — 1.94 gold tools per
+   task, retrieval hit@64 70.5% against 81.5% — and on it **end-to-end accuracy
+   falls 30-35% for `original`, v1 and ContextPilot** (`tooltrie_v1` 22.0 →
+   14.3), but only ~15% for `frequency` and v0/alphabetical, whose F1 barely
+   moves. Random-slice end-to-end: `original` 14.38, `tooltrie_v1` 14.29,
+   `frequency` 13.93, ContextPilot 12.20, `tooltrie_v0` and `alphabetical`
+   11.35. **v1 still beats ContextPilot**, by about half its original margin,
+   and v0/alphabetical stay last. But v1's small lead over `original` becomes a
+   tie, its lead over `frequency` nearly vanishes, and **ContextPilot falls
+   from ahead of `frequency` to behind it** — so accuracy comparisons among the
+   middle arms are slice-dependent. The random draw sits just above the 95th
+   percentile of difficulty, so the true inflation against a typical slice is
+   smaller than a third — but every absolute figure in this document is
+   optimistic, and so are the margins between the leading arms.
 4. **Ceiling-conditioned accuracy is still the default in the older tables —
    partly addressed.** §3 and §5.2 both show it can invert a conclusion.
    `scripts/score_end_to_end.py` now emits end-to-end F1 (ceiling x F1), the

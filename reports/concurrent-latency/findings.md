@@ -1177,25 +1177,41 @@ At 2.75 req/s v1 answers in 821 ms and meets the budget; ContextPilot takes
   window, so no result moves — but workload rebuilds should use the device the
   original was built on.
 
-**A representative task sample changes the absolute numbers, not the ranking.**
-The evaluated 200-task slice is an easy draw (`how-many-tools.md` §6, gap 3).
-Re-run on a random 200-task slice (`--sample-seed 2026`, 1.94 gold tools per task
-against the slice's 1.54 and the corpus's 1.77; retrieval hit@64 70.5% against
-81.5%):
+**A representative task sample lowers the absolute numbers, compresses the
+spread, and reorders the middle of the ranking.** The evaluated 200-task slice
+is an easy draw (`how-many-tools.md` §6, gap 3). Re-run on a random 200-task
+slice (`--sample-seed 2026`, 1.94 gold tools per task against the slice's 1.54
+and the corpus's 1.77; retrieval hit@64 70.5% against 81.5%):
 
-| arm | first-200 slice, F1 | random slice, F1 | random slice, end-to-end |
-|---|---|---|---|
-| `original` | 25.66 | 20.39 | 14.38 |
-| **`tooltrie_v1`** | 26.99 | 20.27 | 14.29 |
-| `frequency` | 19.84 | 19.76 | 13.93 |
-| ContextPilot | 21.47 | 17.31 | 12.20 |
-| `tooltrie_v0` / `alphabetical` | 16.36 | 16.10 | 11.35 |
+| arm | first-200, F1 | random, F1 | first-200, end-to-end | random, end-to-end | end-to-end drop |
+|---|---|---|---|---|---|
+| `original` | 25.66 | 20.39 | 20.92 | 14.38 | -31% |
+| **`tooltrie_v1`** | 26.99 | 20.27 | 22.00 | 14.29 | -35% |
+| `frequency` | 19.84 | 19.76 | 16.17 | 13.93 | -14% |
+| ContextPilot | 21.47 | 17.31 | 17.50 | 12.20 | -30% |
+| `tooltrie_v0` / `alphabetical` | 16.36 | 16.10 | 13.33 | 11.35 | -15% |
 
-Absolute accuracy falls by roughly a third end-to-end, so every absolute figure
-elsewhere in this report is flattered by the slice. **The ranking is unchanged**
-(v1 ≈ `original` > `frequency` > ContextPilot > v0 = alphabetical), but v1's small
-lead over `original` becomes a tie (-0.12, inside the noise floor) and its margin
-over ContextPilot roughly halves (F1 +5.52 → +2.96). This random draw sits just
+The drop is not uniform. `original`, v1 and ContextPilot lose 30-35%
+end-to-end; `frequency` and v0/alphabetical lose ~15%, because their F1 barely
+moves (19.84 → 19.76; 16.36 → 16.10) and only the lower ceiling costs them. The
+best-to-worst F1 spread therefore more than halves (10.6pp → 4.3pp): on a
+harder draw, ordering matters less for accuracy.
+
+**What holds:** the ends of the ranking — v1 and `original` on top, v0 =
+alphabetical last — and the headline comparison, v1 over ContextPilot, which
+keeps its sign but roughly halves (F1 +5.52 → +2.96; end-to-end +4.50 → +2.09).
+**What does not:** v1's lead over `original` becomes a tie (+1.33 → -0.12,
+inside the noise floor); its lead over `frequency` nearly vanishes (+7.15 →
++0.51), leaving `original`, v1 and `frequency` within about one request of each
+other; and **ContextPilot drops below `frequency`** (+1.63 → -2.45, both outside
+the noise floor). That last swap is consistent with the six-arm study
+(`metrics-and-latency-tradeoffs.md` §1.2), where `frequency` already beats
+ContextPilot in six of eight depth/model cells: ContextPilot leads only at k16
+and k64 on 0.6B, and k64/0.6B is the cell re-run here. As a full-menu accuracy
+baseline, `frequency` is at least ContextPilot's equal.
+
+So every absolute figure elsewhere in this report is flattered by the slice,
+and so are the margins among the leading arms. This random draw sits just
 above the 95th percentile of slice difficulty, so the two slices bracket the
 corpus rather than this one representing it.
 

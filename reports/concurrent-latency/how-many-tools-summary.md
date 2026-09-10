@@ -19,7 +19,7 @@ we checked whether they were correct on the conclusion.
 
 ---
 
-## Three numbers that are easy to confuse
+## Four numbers that are easy to confuse
 
 Everything here gets clearer once these are kept apart:
 
@@ -27,12 +27,18 @@ Everything here gets clearer once these are kept apart:
 |---|---|---|
 | **catalog** | every tool that exists and could be searched | 44,453 |
 | **menu (k)** | the tools we actually put in the prompt | 4 / 16 / 64 / 128 |
-| **used** | the tools the task actually needs | ~1.8 |
+| **needed** | the tools the task actually requires | ~1.8 (~1.5 in our test tasks) |
+| **called** | the tools the model actually calls | ~1 |
 
-The objection is really "menu is much bigger than used." True. But the menu
-isn't supposed to match what's *used* — the system doesn't know which two tools
-a query needs. **That's the entire job retrieval is doing, and it does it
+The objection is really "menu is much bigger than needed." True. But the menu
+isn't supposed to match what's *needed* — the system doesn't know which two
+tools a query needs. **That's the entire job retrieval is doing, and it does it
 imperfectly.** The menu is a bet on where the right tool probably is.
+
+And a bigger menu doesn't make the model call more tools. It calls about one
+per request whatever the menu size — a 32× bigger menu barely moves it. The
+task decides how many tools get called, not the menu. (If anything the model
+calls too *few*: it needs about 1.5 and calls about 1.)
 
 ---
 
@@ -58,6 +64,13 @@ So there are two different failure modes, and they are not equally bad:
   *Recoverable*: a better model or better ordering can find it.
 - **Small menu** — the right tool was never shown.
   *Not recoverable*: nothing downstream can help.
+
+You can see the switch directly in the requests where the model called
+nothing at all. With a 4-tool menu, about **6 in 10** of those had no correct
+tool to call — declining was the right move, and the search was to blame. With
+a 64- or 128-tool menu, **9 in 10** had the right tool sitting in the menu,
+unused. **The failure doesn't go away as the menu grows — it moves**, from
+"the search didn't find it" to "the model didn't notice it."
 
 ---
 
@@ -218,9 +231,14 @@ ContextPilot does not.
   multi-turn, where errors compound. (The main result *was* checked on a
   second search engine and held up — see above.)
 - The 200-task sample we used is **easier than average** — it happened to
-  contain more single-tool tasks than a random draw would. Comparisons between
-  policies are unaffected (all of them ran the identical tasks), but the
-  absolute scores are flattering.
+  contain more single-tool tasks than a random draw would. We re-ran the main
+  64-tool comparison on a random sample, which turned out *harder* than
+  average. Scores dropped — by about a third for the best policies — and the
+  gaps between policies narrowed. **ToolTrie-v1 still beat ContextPilot**, by
+  about half as much. But ToolTrie-v1's small lead over no reordering became a
+  tie, and ContextPilot slipped behind the simple `frequency` policy. So the
+  main comparison holds; the absolute scores, and the finer orderings between
+  similar policies, should not be trusted.
 - One policy, `frequency`, looked far better than it was until we measured
   end-to-end. **Which metric you pick can reverse the answer**, which is why
   the full document is careful about it.

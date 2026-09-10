@@ -307,6 +307,28 @@ highest conditional F1 at 4B (56.54), worst end-to-end of the four viable arms.
 **Ranking these arms by conditional F1 would recommend the two policies that
 throw away the most user requests.**
 
+### 5.4 Under bursty arrival: the gap widens
+
+§5.2-5.3 used the natural arrival order. Repeated under the upper-bound locality
+ordering from `findings.md` §4.5 (adjacent requests share 17.5 of 64 tools
+rather than 1.8), end-to-end F1:
+
+| retriever / arrival | `original` | **`tooltrie_v1`** | ContextPilot | v1 - CP |
+|---|---|---|---|---|
+| dense, natural | 19.83 | 19.92 | 16.25 | +3.67 |
+| dense, **locality_max** | 19.83 | 19.08 | **12.42** | **+6.66** |
+| BM25, natural | 23.00 | 22.00 | 16.58 | +5.42 |
+| BM25, **locality_max** | 23.00 | 20.92 | **15.08** | **+5.84** |
+
+**ContextPilot's damage roughly doubles on dense** (-3.6 → -7.4pp against
+`original`): with more shared material to cluster, it hoists more and pushes the
+right tool out of the window more often. **v1 is no longer free** at the upper
+bound — -0.75pp dense, -2.08pp BM25 — because high locality gives the trie more
+matches to hoist, and some displace a relevant tool. "Nothing lost" becomes "a
+little lost, far less than ContextPilot." The model-free ceiling puts v1 ahead
+of ContextPilot by **+8.5 to +22.0pp** in all six arrival regimes, both
+retrievers.
+
 ---
 
 ## 6. What k should the evaluation use?

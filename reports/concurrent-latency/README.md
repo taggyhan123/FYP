@@ -1,7 +1,7 @@
 # Tool ordering under concurrent load — key findings
 
 Qwen3-0.6B on one RTX 3090 (plus a Qwen3-4B check), vLLM 0.26.0, prefix caching
-unmodified. 310 GPU runs.
+unmodified. 534 GPU runs.
 
 The short version. Every number links to the section of
 [`findings.md`](findings.md) that derives it, with its runs and controls.
@@ -13,11 +13,21 @@ The short version. Every number links to the section of
 | tools shared between two requests | **63 of 64** | 0.03 (k4) to 4.95 (k128) |
 | what it is for | the **instrument** — a 36–68x p50 spread makes the mechanism visible | the **deployment case** the brief describes |
 | input ordering | adversarial by construction: the one differing tool is first in every request | a relevance ranking worth preserving |
+| tools present in **every** request | **63** — a global core | **0** — even at maximum arrival locality |
 | best arm | ContextPilot / `tooltrie_v0` | **`tooltrie_v1`** |
 
 Arms swap places between them, and that is the point rather than a
 contradiction: padded menus isolate how ordering becomes reuse becomes capacity,
-and retrieved menus say how much of that survives real retrieval. Questions 1–4
+and retrieved menus say how much of that survives real retrieval.
+
+**Why they swap, in one rule.** ContextPilot wins where requests share a
+**global core** — tools present in every request — because its set intersection
+*is* that core. A trie wins where overlap is only **local** — each request
+resembling its neighbours, with nothing common to all — because it matches the
+previous request's prefix. Padded menus are all core; retrieved menus have none,
+even when arrivals are made as bursty as the data allows, which is why v1's lead
+over ContextPilot *grows* with arrival locality (BM25: 1.04x → 1.35x;
+[§4.5](findings.md#45-arrival-locality-the-stress-test-the-headline-had-not-faced)). Questions 1–4
 below are answered on whichever workload can answer them; where only padded can,
 it says so.
 
@@ -50,8 +60,10 @@ displacement per point of reuse, against ContextPilot's 8.**
 | ContextPilot | 18.72% | 9.93% | 4.78% | 1.99% |
 | **`tooltrie_v1`** | **19.47%** | **11.31%** | **4.96%** | **2.21%** |
 
-Wins **4 of 4 retrieved depths** and **5 of 5 arrival permutations** at k64
-(p = 0.031; reuse is deterministic, so each paired comparison is exact), and 21
+Wins **4 of 4 retrieved depths** and **5 of 6 arrival permutations** at k64
+(sign test p = 0.109 — suggestive, not significant; the original five were a
+clean sweep at p = 0.031, and a sixth surfaced by the locality stress test went
+to ContextPilot; reuse is deterministic, so each paired comparison is exact), and 21
 of 24 latency cells.
 
 **And it holds on the retriever most deployments actually use.** Every result

@@ -16,7 +16,61 @@ Each states which question it answers. Differences are in percentage points.
 How the project's own planner works, with the code, is in
 [`notes/tooltrie-v0-design.md`](../notes/tooltrie-v0-design.md).
 
-## Headline
+## Current state — read this first (updated 2026-09-11)
+
+The findings below record the **August phase**: ToolTrie-v0, measured one
+request at a time. They are accurate for what was measured then. A later phase
+changed three of its conclusions, and the documents that carry the full
+evidence are listed at the end of this section.
+
+**1. The headline's first half still holds: on realistic retrieved menus,
+ordering buys little reuse.** Measured under concurrent load, ordering is worth
+68x at p50 on padded menus and only 1.26x on retrieved ones — and at the menu
+size published benchmarks actually use (~10 tools), no ordering policy moves
+latency at all.
+
+**2. Its second half does not: a fixed ToolTrie beats ContextPilot.**
+ToolTrie-v0 lost (findings 7-8) because it sorted every tool its trie could not
+match *alphabetically* — reordering ~93% of each menu on no information.
+ToolTrie-v1 is a one-line change: unmatched tools keep the order retrieval
+returned them in. On retrieved menus v1 beats ContextPilot at 4 of 4 depths on
+both a BM25 and a dense retriever, and at 5 of 6 arrival permutations (sign test
+p = 0.109 — suggestive, not significant).
+
+**3. What separates the policies is not speed but safety.** When a system
+retrieves a wide pool and shows the model only the top 10 — how published
+benchmarks present tools — reordering for the cache can push the right tool out
+of view. ContextPilot does so in **one request in five to seven**; v1 does not.
+Measured on two retrievers and under every arrival pattern tested.
+
+**The rule that ties every result together.** ContextPilot wins where requests
+share a **global core** — tools present in every request — because its set
+intersection *is* that core (padded menus: 63 of 64 tools in every request). A
+trie wins where overlap is only **local** — each request resembling its
+neighbours without any tool common to all — because it matches the previous
+request's prefix directly. **Real retrieved traffic has no global core**, even
+when arrivals are as bursty as the data allows, which is why v1's lead over
+ContextPilot *grows* with arrival locality rather than shrinking. This also
+revises finding 8: v0's trie was not doing no work, it was being undone by its
+fallback.
+
+**Where it stops holding.** v1's accuracy advantage over ContextPilot shrinks
+with model size and becomes a **tie at 8B**. Every result here is single-turn;
+multi-turn traffic is ContextPilot's actual design regime and is untested. The
+evaluated task slice is easier than average, so absolute accuracy figures are
+flattered by roughly a third (rankings are unaffected).
+
+Evidence: [`concurrent-latency/README.md`](concurrent-latency/README.md) (key
+results) · [`concurrent-latency/findings.md`](concurrent-latency/findings.md)
+(full record; §4.5 for arrival locality) ·
+[`concurrent-latency/how-many-tools.md`](concurrent-latency/how-many-tools.md)
+(menu size, truncation) ·
+[`concurrent-latency/metrics-and-latency-tradeoffs.md`](concurrent-latency/metrics-and-latency-tradeoffs.md)
+(metrics, model size, throughput under a latency limit).
+
+---
+
+## Headline (August phase, ToolTrie-v0)
 
 **Reordering tool schemas produces large prefix-cache reuse only when the tool
 menu barely changes between requests. Under realistic retrieval it produces
@@ -43,8 +97,9 @@ convention used in every policy-comparison table below.
 > at request 2. Extended to 600 requests, the padded gap closes: 97.05% against
 > 97.09%, and every timing metric ties within noise. **ContextPilot's advantage on
 > padded menus is cold-start speed, not ordering quality.** The retrieved column
-> is unaffected — there is no common core to converge to, and ContextPilot leads
-> at every depth. The "zero spread across trials" above measures determinism
+> is unaffected for ToolTrie-v0 — there is no common core to converge to, and
+> ContextPilot leads it at every depth. ToolTrie-v1, which keeps unmatched tools
+> in retrieval order, reverses that (see the current-state section above). The "zero spread across trials" above measures determinism
 > (the orderings are frozen files), not robustness; arrival order is the axis that
 > actually moves these numbers. See
 > [`concurrent-latency/findings.md`](concurrent-latency/findings.md) §1.5 and A.6–A.7.
@@ -280,6 +335,10 @@ method — which is why the primary result uses 4B.
 ## 7. Where trie-aware ordering provides little or no benefit
 > **Brief §7 Q8** — *Under which workloads does trie-aware ordering provide little or no benefit?*
 
+> **Superseded in part (2026-09-11).** This finding is about ToolTrie-v0. The
+> "stronger comparators" bullet does not hold for ToolTrie-v1, which beats
+> ContextPilot on retrieved menus. See the current-state section at the top.
+
 Three regimes, in increasing order of how badly it does:
 
 - **Retrieved menus.** On Qwen3-4B, ToolTrie-v0 reaches 0.89% at k=128 against a
@@ -309,6 +368,15 @@ Three regimes, in increasing order of how badly it does:
 ## 8. The trie does not do the work — adaptivity does
 > **Brief §2 Q3** — *Can frequently occurring tool sequences be represented as a
 > weighted trie or prefix memory under a limited cache budget?*
+
+> **Revised (2026-09-11).** Measured for ToolTrie-v0, and true for it. But v0's
+> trie was being undone by its alphabetical fallback rather than doing no work:
+> with the fallback fixed (ToolTrie-v1), the trie beats ContextPilot on
+> retrieved menus, and its lead grows with arrival locality — because a trie
+> matches the *previous* request's prefix, which is exactly what local overlap
+> rewards and what a set intersection cannot use. The claim that adaptivity
+> alone wins holds where requests share a global core (padded menus), not on
+> retrieved traffic. See the current-state section at the top.
 
 Three tries were measured. None beats a method without one, and adding weights
 to ours changed nothing. 

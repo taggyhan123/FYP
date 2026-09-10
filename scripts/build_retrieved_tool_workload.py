@@ -11,6 +11,7 @@ retrieval error separate from cache/ordering behavior as required by the brief.
 from __future__ import annotations
 
 import argparse
+import random
 import sys
 from collections import Counter
 from pathlib import Path
@@ -56,6 +57,17 @@ def main() -> None:
     )
     parser.add_argument("--offset", type=int, default=0)
     parser.add_argument("--limit", type=int, default=200)
+    parser.add_argument(
+        "--sample-seed",
+        type=int,
+        default=None,
+        help=(
+            "Draw --limit tasks uniformly at random (seeded) instead of the "
+            "contiguous --offset slice. The contiguous slice is not a random "
+            "draw: offset 0 averages 1.54 gold tools per task against 1.77 "
+            "corpus-wide, below the 5th percentile of random 200-task slices."
+        ),
+    )
     parser.add_argument(
         "--ordering",
         choices=(
@@ -117,7 +129,12 @@ def main() -> None:
     benchmark_tasks = [
         task for task in tasks if task.evidence_type == "gold_relevance"
     ]
-    evaluation_tasks = benchmark_tasks[args.offset : args.offset + args.limit]
+    if args.sample_seed is not None:
+        evaluation_tasks = random.Random(args.sample_seed).sample(
+            benchmark_tasks, min(args.limit, len(benchmark_tasks))
+        )
+    else:
+        evaluation_tasks = benchmark_tasks[args.offset : args.offset + args.limit]
     if not corpus:
         raise SystemExit("No ToolRet tools found in the processed corpus.")
     if not evaluation_tasks:

@@ -298,7 +298,33 @@ both clear of ContextPilot's 21.47). Every other arm trades one for the other:
 ContextPilot is middling on both; `original` matches v1's accuracy but sustains
 meaningfully less throughput.
 
-### 4.3 The caveat that changes the conclusion
+### 4.3 Under bursty arrival the margin grows, not shrinks
+
+§4.2 was measured on the natural file order, where v1's margin over
+ContextPilot was only 1.2% — the result most likely, it seemed, to flip if
+arrivals became more local, since ContextPilot is designed for multi-turn
+traffic with ~40% overlap between turns. Repeated under the upper-bound
+locality ordering (`findings.md` §4.5; adjacent requests share 17.5 of 64
+tools rather than 1.8):
+
+| arm | empirical order | **locality_max** |
+|---|---|---|
+| `original` | 2.623 req/s | 2.608 |
+| ContextPilot | 2.638 | 2.662 |
+| **`tooltrie_v1`** | 2.671 | **2.817** |
+| v1 over ContextPilot | +1.2% | **+5.8%** |
+
+**The fragile margin strengthened, to +5.8%.** At 2.75 req/s v1 answers in
+821 ms and meets the 1-second budget; ContextPilot takes 1184 ms and misses it.
+
+The reason is general, and `findings.md` §4.5 establishes it: ContextPilot wins
+where menus share a **global core** (tools present in every request), because
+its set intersection *is* that core. Bursty arrival raises *adjacent* overlap
+without creating any global core — even the upper-bound ordering has zero tools
+in every menu — and adjacent overlap is exactly what a trie over served
+sequences matches. So locality helps v1 more than it helps ContextPilot.
+
+### 4.4 The caveat that changes the conclusion
 
 **This is p50 at one depth, one model, one SLA value, one retriever.** Two
 things would likely move it:
@@ -320,8 +346,9 @@ things would likely move it:
 
 1. **Quantization untested** (§3.1) — the most obvious latency-vs-accuracy
    knob in serving, never touched.
-2. **The SLA sweep is one point** (§4.2) — needs p95, other depths, other
-   model sizes to become a curve.
+2. **The SLA sweep is two points** (§4.2, §4.3: natural order and upper-bound
+   locality) — still needs p95, other depths and other model sizes to become a
+   curve.
 3. **`findings.md` §4.4 and the README state "reuse is free" without a
    model-size qualifier** (§3.2). Recommend re-running the clear 0.6B/4B cells
    at n=600 to see whether the 8B tie survives more data, and stating

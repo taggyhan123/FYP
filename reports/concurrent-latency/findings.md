@@ -1,7 +1,7 @@
 # Tool ordering under concurrent load
 
 Qwen3-0.6B on one RTX 3090 (plus a Qwen3-4B check), vLLM 0.26.0, prefix caching
-unmodified. 310 GPU runs. Raw outputs are in the git-ignored `cluster/results/`
+unmodified. 534 GPU runs. Raw outputs are in the git-ignored `cluster/results/`
 directories listed in the Appendix.
 
 This is the full record, with every control and validity check.
@@ -1056,6 +1056,149 @@ caveats (ordering-only, no held-out set, padded menus), and it is one embedding
 model on one corpus with 200 tasks per cell. Runs:
 `cluster/results/dense-retrieval-20260902-234630/`.
 
+### 4.5 Arrival locality: the stress test the headline had not faced
+
+Every result in this report was measured on the natural file order plus random
+permutations of it. The research brief (§4.5) requires four replay regimes —
+empirical, uniform, skewed and **session-bursty** — and the v1-vs-ContextPilot
+comparison had run two. This section runs all four, plus two more, on both
+retrievers, because session-bursty is the regime closest to the multi-turn
+traffic ContextPilot was designed for, and so the one most likely to reverse the
+headline. Six arrival orderings x six arms x two retrievers, k64, rate 4,
+Qwen3-0.6B; 72 reuse/latency runs and 24 follow-up runs, 0 failures. Runs:
+`cluster/results/eval-locality-20260910-231437/`.
+
+**The brief's session-bursty regime is degenerate on this data.** It groups
+tasks by domain (`tatm.analysis.replay_workloads`), and every one of the 200
+evaluated tasks is domain `web` — so it forms one group and reduces to a random
+shuffle, *less* local than the natural order. This is also why earlier work found
+the natural order "beat" a session-bursty replay: the bursty construction had
+nothing to group. Two tool-overlap orderings were therefore added: a greedy chain
+on menu overlap (`locality_max`, an **upper bound** on locality that uses
+knowledge of every future request, not a realistic arrival pattern) and the same
+chain with a 50% random jump (`locality_mid`).
+
+| regime | adjacent requests share (dense / BM25, of 64) | what it is |
+|---|---|---|
+| uniform | 0.64 / 1.12 | brief; sampled with replacement, 129 distinct tasks |
+| session_bursty | 0.56 / 1.59 | brief; **degenerate** — one domain, so a shuffle |
+| empirical | 1.78 / 3.40 | brief; the natural order every earlier result used |
+| skewed | 3.47 / 6.61 | brief; popularity-weighted with replacement, 83 distinct |
+| locality_mid | 9.61 / 10.06 | tool-overlap chain, 50% random jumps |
+| locality_max | 17.46 / 17.16 | tool-overlap chain — upper bound |
+
+**Reuse, and v1's lead over ContextPilot:**
+
+| regime | dense: CP | dense: **v1** | dense v1/CP | BM25: CP | BM25: **v1** | BM25 v1/CP |
+|---|---|---|---|---|---|---|
+| uniform | 8.53% | 9.09% | 1.07x | 8.29% | 8.89% | 1.07x |
+| session_bursty | 1.88% | 3.97% | 2.12x | **3.08%** | 2.41% | **0.78x** |
+| empirical | 2.98% | 6.22% | 2.09x | 4.78% | 4.96% | 1.04x |
+| skewed | 28.16% | 38.65% | 1.37x | 27.14% | 35.22% | 1.30x |
+| locality_mid | 3.47% | 5.75% | 1.66x | 4.21% | 5.24% | 1.24x |
+| **locality_max** | 3.96% | **8.39%** | **2.12x** | 5.14% | **6.91%** | **1.35x** |
+
+**The prediction that ContextPilot would catch up as locality rose was wrong.**
+v1 leads in 11 of 12 cells and still leads at the upper bound on both retrievers.
+On BM25 — where the headline was always narrowest — its lead *grows* with
+locality: 1.04x (empirical) → 1.24x → 1.35x. p50 latency follows: v1 is faster
+than ContextPilot in 11 of 12 cells, by up to **43%** under the skewed regime,
+where repeated requests make reuse large enough to relieve queueing.
+
+**The one exception weakens an earlier claim.** On BM25, the degenerate
+session_bursty shuffle goes to ContextPilot (3.08% vs 2.41%). Since that ordering
+is just a sixth random permutation, the arrival-permutation record at BM25 k64 is
+**5 of 6, not 5 of 5** — the p=0.031 figure in §5 no longer holds as stated.
+
+**Why the prediction failed — the unifying rule.** §4.3 showed ContextPilot
+winning at 25-75% overlap, and the prediction extrapolated from it. But §4.3's
+menus have a **global core** — tools present in *every* request — while
+`locality_max` raises *adjacent* overlap and leaves the global core at zero:
+
+| workload | tools in every menu | adjacent overlap | winner |
+|---|---|---|---|
+| padded-64 | **63 of 64** | 63.0 | ContextPilot / v0 |
+| §4.3 constructed, 50% | **32 of 64** | 32.0 | ContextPilot |
+| retrieved, empirical | **0** | 1.8 | v1 |
+| retrieved, locality_max | **0** | 17.5 | v1 |
+
+**ContextPilot wins where there is a global core**, because it computes a set
+intersection, and the intersection *is* the core. **v1 wins where overlap is
+local** — consecutive requests share tools, but nothing is shared by all —
+because a trie over served sequences matches the previous request's prefix
+directly. That rule accounts for every ToolTrie-vs-ContextPilot result in this
+report, and real retrieved traffic has no global core even at its most bursty.
+
+**Safety under truncation holds, and ContextPilot's damage grows.** Retrieve 64,
+present 10, end-to-end F1 (ceiling x F1):
+
+| retriever / regime | `original` | **`tooltrie_v1`** | ContextPilot | v1 - CP |
+|---|---|---|---|---|
+| dense, empirical | 19.83 | 19.92 | 16.25 | +3.67 |
+| dense, **locality_max** | 19.83 | 19.08 | **12.42** | **+6.66** |
+| BM25, empirical | 23.00 | 22.00 | 16.58 | +5.42 |
+| BM25, **locality_max** | 23.00 | 20.92 | **15.08** | **+5.84** |
+
+At the upper bound ContextPilot's loss against `original` roughly doubles on
+dense (-3.6 → -7.4pp). v1's is no longer zero — **-0.75pp dense, -2.08pp BM25** —
+because high locality gives the trie more matches to hoist, and some displace a
+relevant tool. "Nothing lost" becomes "a little lost, far less than
+ContextPilot." The ceiling alone (model-free, computed for all six regimes)
+shows v1 ahead of ContextPilot by **+8.5 to +22.0pp** in every regime on both
+retrievers.
+
+**Whole-menu accuracy is unchanged** at the upper bound (dense k64):
+`original` and v1 both 21.42 end-to-end, ContextPilot 17.92.
+
+**The throughput result flagged as most fragile strengthened instead.** Highest
+rate keeping p50 TTFT under 1000 ms, dense k64:
+
+| arm | empirical order | **locality_max** |
+|---|---|---|
+| `original` | 2.623 req/s | 2.608 |
+| ContextPilot | 2.638 | 2.662 |
+| **`tooltrie_v1`** | 2.671 | **2.817** |
+| v1 over ContextPilot | +1.2% | **+5.8%** |
+
+At 2.75 req/s v1 answers in 821 ms and meets the budget; ContextPilot takes
+1184 ms and misses it.
+
+**Two measurement caveats this section surfaced.**
+
+- **Decoding is 199/200 reproducible, not perfectly.** `original` is a static
+  policy, so its prompts are byte-identical in every regime, yet one request out
+  of 200 produced a different tool call between runs. That moves F1 by 0.62pp
+  (one request of ~163 scored) and sets the run-to-run noise floor: accuracy gaps
+  under ~0.6pp are not distinguishable from it. The v1-vs-ContextPilot gaps here
+  are 3.5-6.7pp.
+- **Dense retrieval is not bit-reproducible across CPU and GPU.** Rebuilding the
+  dense k64 workload on CPU swapped two exactly-tied tools (score 0.591000) at
+  positions 57-58 of 64 in one record. Same tool set, far outside any truncation
+  window, so no result moves — but workload rebuilds should use the device the
+  original was built on.
+
+**A representative task sample changes the absolute numbers, not the ranking.**
+The evaluated 200-task slice is an easy draw (§A.6, and `how-many-tools.md` gap 3).
+Re-run on a random 200-task slice (`--sample-seed 2026`, 1.94 gold tools per task
+against the slice's 1.54 and the corpus's 1.77; retrieval hit@64 70.5% against
+81.5%):
+
+| arm | first-200 slice, F1 | random slice, F1 | random slice, end-to-end |
+|---|---|---|---|
+| `original` | 25.66 | 20.39 | 14.38 |
+| **`tooltrie_v1`** | 26.99 | 20.27 | 14.29 |
+| `frequency` | 19.84 | 19.76 | 13.93 |
+| ContextPilot | 21.47 | 17.31 | 12.20 |
+| `tooltrie_v0` / `alphabetical` | 16.36 | 16.10 | 11.35 |
+
+Absolute accuracy falls by roughly a third end-to-end, so every absolute figure
+elsewhere in this report is flattered by the slice. **The ranking is unchanged**
+(v1 ≈ `original` > `frequency` > ContextPilot > v0 = alphabetical), but v1's small
+lead over `original` becomes a tie (-0.12, inside the noise floor) and its margin
+over ContextPilot roughly halves (F1 +5.52 → +2.96). This random draw sits just
+above the 95th percentile of slice difficulty, so the two slices bracket the
+corpus rather than this one representing it.
+
 ## 5. ToolTrie-v1: reorder only what the trie matched
 
 The accuracy gate above rejects three orderings, and §4.3 shows ToolTrie-v0
@@ -1094,10 +1237,14 @@ arms are §4.1's):
 | k128 | 0.37% | 0.58% | 0.54% | 1.13% | 1.99% | **2.21%** |
 | | **5.97x** | 3.81x | 4.09x | 1.96x | **1.11x** | |
 
-It beats ContextPilot at **4 of 4 retrieved depths**, and at **5 of 5 arrival
-permutations** at k64 — mean 3.51% against 2.81%, sign test p = 0.031. Seed 0,
-used everywhere else in this report, is ContextPilot's best draw and v1's
-narrowest margin; on the other four the margin is 3–7x larger.
+It beats ContextPilot at **4 of 4 retrieved depths**, and at **5 of 6 arrival
+permutations** at k64. The original five (mean 3.51% against 2.81%) were a clean
+sweep, sign test p = 0.031; a sixth random permutation, surfaced by the locality
+stress test (§4.5), goes to ContextPilot, 3.08% against 2.41%. Over all six the
+mean is 3.33% against 2.86% and the sign test is **p = 0.109 — suggestive, not
+significant**. Seed 0, used everywhere else in this report, is ContextPilot's
+best draw among the original five and v1's narrowest margin; on the other four
+the margin is 3–7x larger.
 
 **But the size of the win depends entirely on who it is measured against, and
 the ContextPilot margin is the small one.** Against ContextPilot it is 4–14%, which at k64 is **+0.18pp of reuse on a
@@ -1139,8 +1286,8 @@ So the defensible claim is **more reuse at no measurable accuracy cost**, not
 better accuracy. At 4B/k128 v1 matches the unordered baseline exactly while
 carrying 6x its reuse — the property ContextPilot was credited with before §1.4
 showed that credit was a floor effect. What carries the result is reuse, which is
-exact and wins 4/4 depths and 5/5 arrival seeds; accuracy establishes only that
-the reuse is not bought with it.
+exact and wins 4/4 depths and 5 of 6 arrival permutations (p = 0.109, §4.5);
+accuracy establishes only that the reuse is not bought with it.
 
 **Latency follows reuse, at the deeper menus.** Against ContextPilot across
 reuse, p50, p95, p99, max and achieved rate at four depths, v1 wins **21 of 24**
@@ -1601,8 +1748,12 @@ ContextPilot scheduling, so nothing here measures the full system.
 | ToolTrie-v1 at 600 requests (padded) | `q1-single-table-20260902-172342/` | 2 |
 | Dense retrieval, six arms x four depths | `dense-retrieval-20260902-234630/` | 24 |
 | Dense accuracy, two models x two depths | `dense-accuracy-20260903-002742/` | 16 |
+| Eval-design audit: k4/k16 accuracy, 8B size point, alphabetical/frequency accuracy, SLA sweep | `eval-validity-20260906-165826/` | 80 |
+| Field menu size: k=10 and retrieve-64/present-10, dense | `eval-gaps-20260907-224433/` | 36 |
+| Retrieve-64/present-10 on BM25 | `eval-bm25trunc-20260908-000327/` | 12 |
+| Arrival locality: six regimes x six arms x two retrievers, plus follow-ups and random slice (§4.5) | `eval-locality-20260910-231437/` | 96 |
 
-**310 runs.** All under the git-ignored `cluster/results/`.
+**534 runs.** All under the git-ignored `cluster/results/`.
 
 Driver `scripts/replay_vllm_concurrent.py`; also added
 `summarize_queuing_runs.py`, `build_canonical_ordering.py`,

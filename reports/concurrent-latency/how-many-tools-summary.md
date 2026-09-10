@@ -164,6 +164,28 @@ thing with a completely different search method:
 away **one request in five** rather than one in seven, and ToolTrie-v1 comes
 out marginally *ahead* of doing nothing at all.
 
+### And it gets worse for ContextPilot when requests arrive in bursts
+
+Real traffic comes in clusters — related requests close together. We tested the
+most clustered arrival order our tasks allow, which is exactly the kind of
+traffic ContextPilot was designed for. It made ContextPilot's problem **worse**:
+it now throws away the right tool about **twice as often** as before, while
+ToolTrie-v1 loses only a little.
+
+The reason turns out to be simple, and it explains every result in the
+project:
+
+- **ContextPilot looks for tools that *every* request shares**, and moves those
+  to the front. That works brilliantly when such tools exist — like the padded
+  menus, where 63 of 64 tools are in every request.
+- **ToolTrie-v1 looks at what the *previous* request used**, and reuses that
+  order. That works when requests resemble their neighbours, even if nothing is
+  shared by everyone.
+
+**Real retrieved requests never share a common core** — even at their most
+clustered, no tool appears in every request. They only resemble their
+neighbours. That is ToolTrie-v1's situation, not ContextPilot's.
+
 ---
 
 ## What this changes

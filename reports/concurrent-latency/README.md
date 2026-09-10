@@ -73,7 +73,7 @@ substantially from hub tools — its top tool lands in 66 of 200 menus against
 dense's 21. **Some of the reuse measured on BM25 menus is retrieval error that
 happens to be cache-friendly.**
 
-**On dense the accuracy stops being a wash and the reuse becomes free.**
+**On dense, at 0.6B and 4B, the accuracy stops being a wash and the reuse becomes free — but not at 8B.**
 `gold_hit_ceil`, ceiling identical across arms within each depth:
 
 | cell | `original` | ContextPilot | **`tooltrie_v1`** | v1 − CP |
@@ -84,10 +84,21 @@ happens to be cache-friendly.**
 | k128 @ 4B | 39.18 | 36.26 | **40.35** | +4.09 |
 
 v1 beats ContextPilot in **all four cells** (BM25 was 2 wins, 2 losses, 2 ties)
-and is within noise of *not reordering at all* in every cell — so it buys 2.09x
-ContextPilot's reuse at k64 and 3.09x at k128 at no accuracy cost. Only one cell
-clears 2 SE alone; the result rests on four-of-four consistency plus the gold
-position that predicted it (7.3 against ContextPilot's 13.7 at k64).
+and is within noise of *not reordering at all* in every cell — so at these two
+model sizes it buys 2.09x ContextPilot's reuse at k64 and 3.09x at k128 at no
+accuracy cost. Only one cell clears 2 SE alone; the result rests on
+four-of-four consistency plus the gold position that predicted it (7.3 against
+ContextPilot's 13.7 at k64).
+
+**This does not extend to 8B.** Adding Qwen3-8B as a third size point, the
+margin shrinks monotonically and crosses into a tie at both depths — k64:
++6.75 (0.6B) → +1.84 (4B) → **−0.62** (8B); k128: +10.52 → +4.09 → **−1.17**.
+Both 8B deltas are under 0.25 SE, so they are ties, not ContextPilot wins. The
+cache mechanism is untouched — v1 still caches ~1.7x ContextPilot's tokens at
+8B — so it is only the "free" half of the claim that is model-size-bounded. The
+erosion is also depth-specific: at k16 the margin halves (+4.44 → +2.22) but
+stays positive. See
+[`metrics-and-latency-tradeoffs.md`](metrics-and-latency-tradeoffs.md) §3.2.
 
 Accuracy against ContextPilot is a **wash** — the six cells measured are four
 depths at 0.6B plus k64 and k128 repeated at 4B:

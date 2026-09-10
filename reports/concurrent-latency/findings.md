@@ -1178,7 +1178,7 @@ At 2.75 req/s v1 answers in 821 ms and meets the budget; ContextPilot takes
   original was built on.
 
 **A representative task sample changes the absolute numbers, not the ranking.**
-The evaluated 200-task slice is an easy draw (§A.6, and `how-many-tools.md` gap 3).
+The evaluated 200-task slice is an easy draw (`how-many-tools.md` §6, gap 3).
 Re-run on a random 200-task slice (`--sample-seed 2026`, 1.94 gold tools per task
 against the slice's 1.54 and the corpus's 1.77; retrieval hit@64 70.5% against
 81.5%):

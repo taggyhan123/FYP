@@ -5,10 +5,11 @@ tool definitions placed in the model's prompt**. Two objections apply to that
 choice, and both are fair on their face:
 
 1. A task typically needs **1.77 tools** (mean over 7,961 gold-labelled
-   ToolRet tasks; 55% need exactly one). The model actually *calls* ~0.9-1.0
-   tools per request. So at k128, roughly 126 of the 128 tools shown are
-   irrelevant to that request. (The 200-task slice these experiments run on
-   averages **1.54** — see §6, gap 3: it is an unrepresentative draw.)
+   ToolRet tasks; 55% need exactly one). The model actually *calls* 0.7-1.1
+   tools per request — about one, at every menu size and model tested (§3).
+   So at k128, roughly 126 of the 128 tools shown are irrelevant to that
+   request. (The 200-task slice these experiments run on averages **1.54** —
+   see §6, gap 3: it is an unrepresentative draw.)
 2. **No published tool-use benchmark presents a menu that large.** They cap at
    2-11 tools, or retrieve top-5 to top-10 from a large catalog.
 
@@ -145,6 +146,52 @@ neither. If a model correctly calls 2 tools out of a 3-tool menu and out of a
 the model gets distracted, calls the wrong tool, or calls nothing — not an
 arithmetic artefact of a bigger denominator. A "correct ÷ menu size" reading
 would predict a ~20x collapse; the measured decline is nothing like that.
+
+### How many tools the model actually calls
+
+The objection's premise, measured directly — not what tasks *need* (1.54 on
+this slice) but what the model *does*. Tool calls per request, `tooltrie_v1`,
+dense retrieval:
+
+| menu | model | 0 calls | 1 call | 2 calls | 3+ | mean |
+|---|---|---|---|---|---|---|
+| 4 | 0.6B | 48% | 34% | 16% | 2% | 0.70 |
+| 10 | 0.6B | 42% | 38% | 18% | 2% | 0.79 |
+| 16 | 0.6B | 40% | 40% | 18% | 1% | 0.80 |
+| 64 | 0.6B | 34% | 46% | 16% | 2% | 0.88 |
+| 128 | 0.6B | 34% | 48% | 15% | 3% | 0.90 |
+| 128 | 4B | 25% | 50% | 20% | 4% | 1.06 |
+| 128 | 8B | 18% | 58% | 22% | 2% | 1.10 |
+
+- **Menu size barely changes how many tools get called.** A 32x larger menu
+  moves the mean from 0.70 to 0.90. Showing more tools does not make the model
+  call more; the task decides that, not the menu.
+- **Neither does the ordering policy.** At k64/0.6B the mean is 0.85-0.89
+  across `original`, `tooltrie_v0`, ContextPilot and `tooltrie_v1`.
+- **The model under-calls.** Tasks need 1.54 tools on average and even the
+  best case (8B, 128 tools) calls 1.10. The largest single failure is calling
+  nothing at all: 18-48% of requests.
+
+**"Called nothing" changes meaning with menu size** — the most direct evidence
+for the two failure modes above. Zero-call requests, split by whether the right
+tool was in the menu at all:
+
+| menu | model | zero-call requests | right tool **absent** | right tool **present** |
+|---|---|---|---|---|
+| 4 | 0.6B | 97 | **62%** | 38% |
+| 16 | 0.6B | 81 | 44% | 56% |
+| 64 | 0.6B | 69 | 10% | **90%** |
+| 128 | 0.6B | 67 | 10% | **90%** |
+| 4 | 4B | 79 | **56%** | 44% |
+| 128 | 4B | 50 | 10% | **90%** |
+
+At a small menu most "called nothing" requests had no correct tool to call:
+declining was the sensible move, and the failure is retrieval's. At a large
+menu, 90% had the right tool in front of the model and it went unused: the
+failure is the model's, among the distractors. **The failure does not disappear
+as the menu grows — it moves**, from "retrieval didn't find it" to "the model
+didn't notice it." That is the mechanism behind the flat end-to-end accuracy
+above: each end of the menu-size range fails, for a different reason.
 
 ---
 
@@ -339,13 +386,14 @@ retrievers.
 |---|---|---|
 | Comparability with the field | **k=10** | BFCL, ToolBench, ToolRet, LiveMCPBench all sit at 5-11. ToolRet's own downstream number (39.2%) is at k=10. |
 | Deployment realism (no router) | **k≈150** | The commonly cited MCP composite; sits between the k64 and k128 already run. |
-| Studying **ordering** at all | **large, or truncated** | §4.1 is a null at k=10. The effect requires either a long prompt (k64/128) or a truncation boundary (§4.2). |
+| Studying **ordering** at all | **large, or truncated** | §5.1 is a null at k=10. The effect requires either a long prompt (k64/128) or a truncation boundary (§5.2). |
 
 **Recommended design, and it is the one this document validates: retrieve
 large, present small.** §5.2 is the only condition that is simultaneously
 comparable to the field (10 tools shown), realistic (64-tool candidate pool
-behind it), and *discriminating* (a 15pp, 3-sigma ceiling gap between
-policies). It also measures the thing that actually matters in a routed
+behind it), and *discriminating* (a 15-20pp ceiling gap between policies —
+3.0 sigma on dense, 4.0 on BM25 — which holds on both retrievers and widens
+under bursty arrival, §5.3-5.4). It also measures the thing that actually matters in a routed
 deployment — not "does reordering slow the prompt down" but **"does
 cache-oriented reordering push relevant tools out of the window the model
 sees."**
@@ -358,20 +406,31 @@ sees."**
    control (§5.1) was not repeated, since its null is driven by prompt length
    rather than retriever and would replicate trivially.
 2. **No k≈150 point**, the single most commonly cited real composite.
-3. **The 200-task slice is an unrepresentative draw, and by more than
-   "slightly".** Taking `offset 0, limit 200` yields a mean of **1.54 gold
-   tools per task**, against **1.77** corpus-wide over all 7,961 gold-labelled
-   tasks. Random 200-task slices fall in **1.64-1.91** (5th-95th percentile,
-   200 resamples), so 1.54 sits **below the 5th percentile** — the evaluated
-   slice is materially easier than a representative sample, not marginally so.
-   ToolRet's own paper states 2.17, further still. This does **not** bias any
-   arm-vs-arm comparison, since every arm replays the identical slice, but it
-   does mean the absolute accuracy numbers are optimistic and not directly
-   comparable to ToolRet's published figures. Re-running the k64 cells on a
-   random slice would settle the size of the inflation.
-4. **Ceiling-conditioned accuracy is still the default** everywhere else in
-   the report. §3 and §5.2 both show it can invert a conclusion; end-to-end
-   (ceiling x F1) should be primary.
+3. **The 200-task slice is an unrepresentative draw — now re-run, and the
+   ranking survives it.** Taking `offset 0, limit 200` yields a mean of **1.54
+   gold tools per task**, against **1.77** corpus-wide over all 7,961
+   gold-labelled tasks; random 200-task slices fall in **1.64-1.91** (5th-95th
+   percentile, 200 resamples), so 1.54 sits **below the 5th percentile**.
+   ToolRet's own paper states 2.17, further still. The k64 cells were re-run on
+   a random slice (`--sample-seed 2026`; `findings.md` §4.5). That draw is
+   harder on both counts — 1.94 gold tools per task, retrieval hit@64 70.5%
+   against 81.5% — and on it **end-to-end accuracy falls by roughly a third**
+   (`tooltrie_v1` 22.0 → 14.3). **The ranking does not change**: `original`
+   14.38, `tooltrie_v1` 14.29, `frequency` 13.93, ContextPilot 12.20,
+   `tooltrie_v0` and `alphabetical` 11.35. What changes is the margins: v1's
+   small lead over `original` becomes a tie, and its lead over ContextPilot
+   roughly halves. The random draw sits just above the 95th percentile of
+   difficulty, so the true inflation against a typical slice is smaller than a
+   third — but every absolute figure in this document is optimistic.
+4. **Ceiling-conditioned accuracy is still the default in the older tables —
+   partly addressed.** §3 and §5.2 both show it can invert a conclusion.
+   `scripts/score_end_to_end.py` now emits end-to-end F1 (ceiling x F1), the
+   reporting order is set in `metrics-and-latency-tradeoffs.md` §1.3, and every
+   truncation result here (§5.2-5.4) uses it. **Still open:** the accuracy
+   columns in `findings.md` §1.4 and the README are `gold_hit_ceil` under the
+   plain label "accuracy". Those tables compare policies on identical menus,
+   so the ceilings match and the *ranking* is unaffected — but the absolute
+   numbers are ceiling-conditioned and the label does not say so.
 5. **Single-turn only.** BFCL v4, τ²-bench, LiveMCPBench and MCP-Bench are all
    multi-turn now; retrieval-error compounding across turns is untested here.
 
@@ -379,11 +438,13 @@ sees."**
 
 ## Runs
 
-| stage | directory | runs |
+| stage | directory | runs drawn on |
 |---|---|---|
-| k4/k16 dense accuracy, two models | `eval-validity-20260906-165826/` | 16 |
-| k=10 and retrieve-64/present-10, dense: reuse/latency (0.6B) + accuracy (0.6B, 4B) | `eval-gaps-20260907-224433/` | 36 |
-| retrieve-64/present-10 on BM25: accuracy (0.6B, 4B), six arms | `eval-bm25trunc-20260908-000327/` | 12 |
+| k64/k128 dense accuracy: all four arms at k64/0.6B, `tooltrie_v1` at k128 (§3) | `dense-accuracy-20260903-002742/` | 6 |
+| k4/k16 dense accuracy, 0.6B and 4B (§3-4); `tooltrie_v1` at 8B/k128 (§3) | `eval-validity-20260906-165826/` | 17 |
+| k=10 and retrieve-64/present-10, dense: reuse/latency (0.6B) + accuracy (0.6B, 4B) (§3, §5.1-5.2) | `eval-gaps-20260907-224433/` | 36 |
+| retrieve-64/present-10 on BM25: accuracy (0.6B, 4B), six arms (§5.3) | `eval-bm25trunc-20260908-000327/` | 12 |
+| retrieve-64/present-10 under bursty arrival (§5.4); random-slice re-run (§6, gap 3) | `eval-locality-20260910-231437/` | 12 |
 
 Drivers: `scripts/replay_vllm_concurrent.py` (rate-controlled) and
 `scripts/replay_vllm_workload.py` (serial, accuracy). Scoring:

@@ -5,6 +5,8 @@ unmodified. 534 GPU runs.
 
 The short version. Every number links to the section of
 [`findings.md`](findings.md) that derives it, with its runs and controls.
+Direct answers to "is ToolTrie-v1 better than ContextPilot", its F1 results, and
+the latency/throughput questions are collected in [`answers.md`](answers.md).
 
 **Two workloads, and which one a number comes from decides what it means.**
 

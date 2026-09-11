@@ -270,6 +270,6 @@ model, two arrival patterns — a first measurement of this framing, not a curve
 |---|---|
 | single-turn only | multi-turn is ContextPilot's design regime; could reverse the headline |
 | ContextPilot run as ordering only | its full system is untested |
-| 200-task sample is easier than average | absolute accuracy flattered by ~⅓; rankings unaffected |
+| 200-task sample is easier than average | absolute accuracy flattered by up to ~⅓; v1 still beats ContextPilot on a random sample but by half as much, and the middle of the ranking reorders (ContextPilot falls behind frequency sort) |
 | decoding 199/200 reproducible | gaps under ~0.6 F1 are noise |
 | 200 tasks per cell | ~5 points standard error; most single cells not significant alone |

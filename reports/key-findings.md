@@ -58,7 +58,9 @@ fallback.
 with model size and becomes a **tie at 8B**. Every result here is single-turn;
 multi-turn traffic is ContextPilot's actual design regime and is untested. The
 evaluated task slice is easier than average, so absolute accuracy figures are
-flattered by roughly a third (rankings are unaffected).
+flattered by up to a third. On a random slice v1 still beats ContextPilot, by
+about half the margin, but the middle of the ranking reorders — ContextPilot
+falls behind frequency sort (`concurrent-latency/findings.md` §4.5).
 
 Evidence: [`concurrent-latency/README.md`](concurrent-latency/README.md) (key
 results) · [`concurrent-latency/findings.md`](concurrent-latency/findings.md)

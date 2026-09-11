@@ -23,7 +23,7 @@ computed for this document from the per-request timings in those same runs.
 |---|---|---|
 | 1 | Does F1 → better accuracy → less KV-cache recompute? | **No.** F1 only measures accuracy, and accuracy does not change cache reuse. What cuts recompute is the ordering: ToolTrie-v1 recomputes the least, and F1 shows that costs no accuracy. |
 | 2 | Is there a latency–precision tradeoff through configuration? | **Yes.** Model size and menu size trade latency for accuracy. Ordering is the one setting that improves latency without costing accuracy, and ToolTrie-v1 is the best choice of ordering. |
-| 3 | If every request must respond within 1 s, what accuracy? | **It depends on what "respond" means.** Whole reply, every request: only 0.6B fits, best end-to-end F1 22.4 (16 tools, ToolTrie-v1 top). On average: 4B, 27.2. First token only: 8B, 29.6. |
+| 3 | If every request must respond within 1 s, what accuracy? | **It depends on what "respond" means.** With no limit the best end-to-end F1 is 30.0 (8B, 128 tools). Whole reply, every request: only 0.6B fits, 22.4 (16 tools, ToolTrie-v1 top). On average: 4B, 27.2. First token only: 8B, 29.6. |
 | 4 | Optimise for higher throughput under a latency limit, scored on precision/F1? | **ToolTrie-v1** sustains the most traffic within the limit and has the highest precision and F1 there. It is the only policy best on both. |
 | 5 | How many tools do we use? | Menus of 4, 16, 64 and 128 tools, plus 10 and "retrieve 64, show 10". Tasks need about 1.5 tools, and the model calls about 1 whatever the menu size. **Recommended evaluation: retrieve 64, show 10.** |
 
@@ -161,12 +161,30 @@ bf16. It is the most obvious untested knob. It would be the natural way to get
 answer.** All measured one request at a time, with no queue. Under load, see
 §4.
 
-| the 1-second limit applies to | settings that fit | best accuracy that fits |
-|---|---|---|
-| **the whole reply, for every request** | only 0.6B, at 4, 10 or 16 tools, or 64 → 10 (64 tools misses by one request: 1,028 ms) | **22.42** end-to-end F1 (0.6B, 16 tools) |
-| the whole reply, for 95% of requests | 0.6B up to 64 tools; no 4B setting | 22.42 (0.6B, 16 tools) |
-| the whole reply, **on average** | 0.6B up to 64 tools; 4B up to 16 tools | **27.17** (4B, 16 tools) |
-| **the first token, for every request** | 0.6B up to 64 tools; 4B up to 16 tools; 8B at 16 tools | **29.62** (8B, 16 tools) |
+From no limit to the strictest limit, ToolTrie-v1:
+
+| the 1-second limit applies to | settings that fit | best setting | median whole reply | plain F1 | **end-to-end F1** | accuracy lost to the limit |
+|---|---|---|---|---|---|---|
+| **no limit** | every setting | 8B, 128 tools | 5,571 ms | 35.13 | **30.03** | — |
+| the first token, for every request | 0.6B up to 64 tools; 4B up to 16; 8B at 16 | 8B, 16 tools | 1,386 ms | 43.88 | **29.62** | −0.41 |
+| the whole reply, **on average** | 0.6B up to 64 tools; 4B up to 16 | 4B, 16 tools | 817 ms | 40.25 | **27.17** | −2.86 |
+| the whole reply, for 95% of requests | 0.6B up to 64 tools; no 4B setting | 0.6B, 16 tools | 178 ms | 33.21 | **22.42** | −7.61 |
+| **the whole reply, for every request** | only 0.6B, at 4, 10 or 16 tools, or 64 → 10 (64 tools misses by one request: 1,028 ms) | 0.6B, 16 tools | 178 ms | 33.21 | **22.42** | −7.61 |
+
+**Compare rows on end-to-end F1, not plain F1.**
+- End-to-end F1 scores every request, counting zero when the right tool was not
+  in the menu.
+- Plain F1 scores only the requests where the right tool *was* in the menu, so
+  it rises as the menu shrinks. That is why 8B reads 43.88 at 16 tools against
+  35.13 at 128, even though 128 tools is more accurate overall.
+- Plain F1 is the number earlier documents quoted: `answers.md`'s "4B fits 16
+  tools (F1 40)" is 40.25 plain, which is 27.17 end-to-end.
+
+**What the limit costs:**
+- Limiting only the first token is almost free (−0.4).
+- Limiting the average reply costs about 3 points.
+- The strict limit costs a quarter of the achievable accuracy (7.6 of 30.0),
+  because only the smallest model fits.
 
 - **4B cannot keep every reply under 1 s at any menu size tested.** At 16
   tools, 54 of 200 replies take longer (the slowest 2.0 s). Even at 4 tools,
@@ -178,24 +196,31 @@ answer.** All measured one request at a time, with no queue. Under load, see
 
 **Which ordering gives the best accuracy inside the limit.** Ordering does not
 change time here, so each policy fits the same settings, and the difference is
-accuracy. End-to-end F1 at each reading's best setting:
+accuracy. End-to-end F1 at each reading's best setting, with plain F1 in
+brackets:
 
-| policy | whole reply, every request (0.6B, 16 tools) | whole reply, average (4B, 16 tools) | first token, every request (8B, 16 tools) |
-|---|---|---|---|
-| **ToolTrie-v1** | **22.42** | 27.17 | 29.62 |
-| no reordering | 22.08 | 27.03 | **31.12** |
-| frequency | 19.25 | **27.20** | not run |
-| ContextPilot | 20.17 | 24.58 | 28.12 |
-| ToolTrie-v0 | 17.62 | 24.67 | 28.48 |
-| alphabetical | 17.62 | 25.00 | not run |
+| policy | no limit (8B, 128 tools) | first token, every request (8B, 16 tools) | whole reply, average (4B, 16 tools) | whole reply, every request (0.6B, 16 tools) |
+|---|---|---|---|---|
+| **ToolTrie-v1** | 30.03 (35.13) | 29.62 (43.88) | 27.17 (40.25) | **22.42** (33.21) |
+| no reordering | 29.62 (34.64) | **31.12** (46.10) | 27.03 (40.05) | 22.08 (32.72) |
+| frequency | not run | not run | **27.20** (40.30) | 19.25 (28.52) |
+| ContextPilot | **30.17** (35.28) | 28.12 (41.65) | 24.58 (36.42) | 20.17 (29.88) |
+| ToolTrie-v0 | 28.53 (33.37) | 28.48 (42.20) | 24.67 (36.54) | 17.62 (26.10) |
+| alphabetical | not run | not run | 25.00 (37.04) | 17.62 (26.10) |
 
 - **Under the strict limit, ToolTrie-v1 gives the highest accuracy of any
   policy**: +2.25 over ContextPilot, +0.34 over no reordering.
 - On the average reading it ties the top (27.17 against frequency's 27.20),
   +2.59 over ContextPilot.
-- At 8B the policies converge. No reordering leads v1 by 1.5 (inside noise at
-  200 tasks), and v1 is still ahead of ContextPilot.
-- **v1 beats ContextPilot under every reading.**
+- At 8B the policies converge.
+  - With the first-token limit, no reordering leads v1 by 1.5 (inside noise at
+    200 tasks), and v1 is ahead of ContextPilot.
+  - With no limit, ContextPilot, v1 and no reordering are within 0.6 of each
+    other.
+- At 4B with 128 tools, all six policies were run, and the accuracy is nearly
+  the same as the no-limit best (29.82). **v1 is the best policy there:** no
+  reordering 29.57, frequency 29.17, ContextPilot 26.58.
+- **v1 beats ContextPilot under every 1-second reading.**
 
 **Retrieve 64, show 10** fits the strictest reading too: every 0.6B reply is
 under 445 ms. v1 keeps the right tool in view in 61.5% of requests there,

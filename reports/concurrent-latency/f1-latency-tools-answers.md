@@ -312,16 +312,18 @@ The menu is a bet that the right tool is in it. ToolTrie-v1, 0.6B, dense:
   of the model (90% at 64 and 128 tools). **The failure moves from retrieval
   to the model as the menu grows.**
 
-**What we decided.** Three questions, three answers:
+**What we decided.** Menu size answers three different questions, so there
+are three answers, each tested:
 
-| purpose | menu size | why |
-|---|---|---|
-| comparable to published benchmarks | 10 | BFCL, ToolBench, ToolRet and LiveMCPBench all show 5-11 |
-| realistic for deployments with no router | ~150 | several ordinary MCP integrations together; sits between our 64 and 128 |
-| able to see ordering effects at all | large, or cut | at 10 tools with nothing cut, every policy is identical (66-68 ms) |
+| question | menu size | why this size | what we found |
+|---|---|---|---|
+| Can our results be compared with published benchmarks? | **10** | BFCL, ToolBench, ToolRet and LiveMCPBench all show 5-11 tools | **Yes, but ordering makes no difference there.** Every policy answers in 66-68 ms and accuracy is within noise. v1 still caches the most (13.71%, against ContextPilot's 12.46%), but a 10-tool prompt is too short for that to matter. |
+| Does it hold for real deployments with no router? | **~150** | several ordinary MCP integrations together | **Not run at 150; 64 and 128 bracket it, and v1 wins both.** It caches 2.1x (64) and 3.1x (128) what ContextPilot does and is faster under load. It leads on F1 by 5.5 and 9.2 at 0.6B; at 8B they tie. |
+| Can we see ordering effects at all? | **large, or cut** | at 10 tools with nothing cut, every policy is identical | **Yes. Retrieve 64 and show 10 separates the policies most sharply.** v1 keeps the right tool among the 10 as often as not reordering (61.5%). ContextPilot keeps it in only 47.0% (39.5% on BM25). |
 
-**Recommended evaluation: retrieve 64, show 10.** It is the only design that
-satisfies all three purposes at once:
+**Our answer: use all three, each for its own question. The headline
+evaluation is retrieve 64, show 10.** It is the only design that satisfies all
+three purposes at once:
 
 - **comparable** to the field: 10 tools shown;
 - **realistic**: a router picking a shortlist from a larger pool;

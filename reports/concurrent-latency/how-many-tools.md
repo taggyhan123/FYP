@@ -382,11 +382,11 @@ retrievers.
 
 **Three answers, because there are three different questions.**
 
-| question | right k | why |
-|---|---|---|
-| Comparability with the field | **k=10** | BFCL, ToolBench, ToolRet, LiveMCPBench all sit at 5-11. ToolRet's own downstream number (39.2%) is at k=10. |
-| Deployment realism (no router) | **k≈150** | The commonly cited MCP composite; sits between the k64 and k128 already run. |
-| Studying **ordering** at all | **large, or truncated** | §5.1 is a null at k=10. The effect requires either a long prompt (k64/128) or a truncation boundary (§5.2). |
+| question | right k | why | what we found |
+|---|---|---|---|
+| Comparability with the field | **k=10** | BFCL, ToolBench, ToolRet, LiveMCPBench all sit at 5-11. ToolRet's own downstream number (39.2%) is at k=10. | Comparable, but ordering is a null there: p50 66-68 ms for all six arms, accuracy within 1 SE, while v1 still has the most reuse (13.71% vs ContextPilot 12.46%) (§5.1). |
+| Deployment realism (no router) | **k≈150** | The commonly cited MCP composite; sits between the k64 and k128 already run. | Not run at 150 (gap 2). The bracketing k64/k128 both go to v1: 2.09x/3.09x ContextPilot's reuse on dense, F1 +5.52/+9.20 at 0.6B, tied at 8B (§3, `findings.md` §4.4). |
+| Studying **ordering** at all | **large, or truncated** | §5.1 is a null at k=10. The effect requires either a long prompt (k64/128) or a truncation boundary (§5.2). | Retrieve-64/present-10 gives the sharpest separation: ceiling v1 0.615 vs ContextPilot 0.470 dense, 0.595 vs 0.395 BM25 (§5.2-5.4). |
 
 **Recommended design, and it is the one this document validates: retrieve
 large, present small.** §5.2 is the only condition that is simultaneously

@@ -31,7 +31,7 @@ than "better":**
 
 | measure | result |
 |---|---|
-| cache reuse | wins at 4 of 4 menu sizes, on both retrievers; 11 of 12 arrival patterns |
+| cache reuse | wins 4 of 4 menu sizes on BM25 and 3 of 4 on dense (loses 4 tools by 0.19 points); 11 of 12 arrival patterns |
 | latency | faster in 11 of 12 cells, by up to 43% |
 | keeping the right tool in the shown 10 | **v1 loses almost nothing; ContextPilot drops it in 1 request in 5–7** |
 | throughput under a 1-second limit | +1.2% on natural arrival order, **+5.8%** on bursty arrival |

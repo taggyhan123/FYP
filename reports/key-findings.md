@@ -33,9 +33,10 @@ latency at all.
 ToolTrie-v0 lost (findings 7-8) because it sorted every tool its trie could not
 match *alphabetically* — reordering ~93% of each menu on no information.
 ToolTrie-v1 is a one-line change: unmatched tools keep the order retrieval
-returned them in. On retrieved menus v1 beats ContextPilot at 4 of 4 depths on
-both a BM25 and a dense retriever, and at 5 of 6 arrival permutations (sign test
-p = 0.109 — suggestive, not significant).
+returned them in. On retrieved menus v1 caches more than ContextPilot at 4 of 4
+depths on a BM25 retriever and 3 of 4 on a dense one (it loses k4 by 0.19pp),
+and at 5 of 6 arrival permutations (sign test p = 0.109 — suggestive, not
+significant).
 
 **3. What separates the policies is not speed but safety.** When a system
 retrieves a wide pool and shows the model only the top 10 — how published

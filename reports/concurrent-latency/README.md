@@ -14,7 +14,8 @@ the latency–precision tradeoff, the 1-second limit, throughput under a latency
 limit, and how many tools, answered together:
 [`f1-latency-tools-answers.md`](f1-latency-tools-answers.md). Absolute cache
 hit and miss rates, why the misses happen, and the most any ordering could
-reach: [`cache-hit-miss.md`](cache-hit-miss.md).
+reach: [`cache-hit-miss.md`](cache-hit-miss.md). Multi-turn coding-agent sessions
+(ordering vs placement vs cache size): [`multi-turn-sessions.md`](multi-turn-sessions.md).
 
 **Two workloads, and which one a number comes from decides what it means.**
 

@@ -364,9 +364,13 @@ agreement; ContextPilot overrides it.
    annotations, de-duplication and scheduling were not run, and its paper
    credits them with about half its cache gain. The full system might close
    some or all of the gap. **This is the most important limit.**
-2. **Single-turn only.** Multi-turn traffic keeps the conversation in the
-   prompt, so requests do share a core. That is ContextPilot's design regime
-   and the one condition that could reverse the result.
+2. **Multi-turn was tested afterwards, in simulation: no reversal.** On 300
+   real coding-agent sessions, v1 is never worse than ContextPilot, but by at
+   most 0.08 points of hit rate, because the conversation history dominates.
+   The one exception is re-retrieving tools every turn at the front of the
+   prompt: there v1 leads 20.3% to 16.2%, and appending new tools gives 93%
+   instead ([`multi-turn-sessions.md`](multi-turn-sessions.md)). The tool
+   layer is synthetic, and there is no GPU measurement yet.
 3. **The cache margins are small in absolute terms.** At 64 tools, 94-99% of
    each prompt is recomputed whatever the policy. Over six random arrival
    orders (64 tools, BM25), v1 caches more than ContextPilot in 5 (sign test

@@ -35,3 +35,47 @@ def test_finite_cache_evicts_a_request_tail_first() -> None:
     # tail block A1, so A0 survives and the repeat still hits 16 tokens.
     assert simulate_prefix_cache(prompts, completions, capacity_blocks=4) == [0, 0, 16]
     assert simulate_prefix_cache(prompts, completions, capacity_blocks=None) == [0, 0, 32]
+
+
+def test_block_cache_without_owners_matches_the_prompt_api() -> None:
+    from tatm.prefix_cache_sim import simulate_block_cache
+
+    prompts = [list(range(40)), list(range(40)) + [9] * 30, list(range(100, 150))]
+    completions = [3, 3, 3]
+    for capacity in (None, 5):
+        cached, foreign = simulate_block_cache(
+            [block_hashes(p) for p in prompts], [len(p) for p in prompts],
+            completions, capacity)
+        assert cached == simulate_prefix_cache(prompts, completions, capacity)
+        assert foreign == [0, 0, 0]
+
+
+def test_owners_split_hits_into_own_and_foreign_blocks() -> None:
+    from tatm.prefix_cache_sim import simulate_block_cache
+
+    shared = list(range(48))
+    prompts = [shared + [1] * 5, shared + [2] * 20, shared + [2] * 20 + [3] * 20]
+    owners = ["s1", "s2", "s2"]
+    cached, foreign = simulate_block_cache(
+        [block_hashes(p) for p in prompts], [len(p) for p in prompts],
+        [0, 0, 0], None, owners=owners)
+    # s2's first round reuses s1's three blocks; its second round reuses those
+    # three again (still s1's) plus one block of its own.
+    assert cached == [0, 48, 64]
+    assert foreign == [0, 48, 48]
+
+
+def test_eviction_resets_block_provenance() -> None:
+    from tatm.prefix_cache_sim import simulate_block_cache
+
+    a = list(range(32))
+    b = list(range(100, 164))  # four blocks: evicts both of A's blocks
+    prompts = [a + [0], b + [0], a + [0], a + [0]]
+    owners = ["s1", "s2", "s2", "s1"]
+    cached, foreign = simulate_block_cache(
+        [block_hashes(p) for p in prompts], [len(p) for p in prompts],
+        [0, 0, 0, 0], capacity_blocks=5, owners=owners)
+    # A was evicted, so s2 recomputes it and becomes its writer; s1's later
+    # hit on A is then foreign.
+    assert cached == [0, 0, 0, 32]
+    assert foreign == [0, 0, 0, 32]

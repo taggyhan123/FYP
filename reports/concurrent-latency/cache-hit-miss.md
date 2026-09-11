@@ -234,7 +234,8 @@ At 128 tools the pattern repeats:
   recent requests that fit in its capacity. vLLM actually keeps the beginnings
   of older prompts a little longer than their ends.
 - Single-turn only. In multi-turn traffic the conversation history is a large
-  shared prefix, so hit rates would be far higher.
+  shared prefix, and hit rates are far higher: 93% on real coding-agent
+  sessions ([`multi-turn-sessions.md`](multi-turn-sessions.md)).
 
 ## Reproduce
 

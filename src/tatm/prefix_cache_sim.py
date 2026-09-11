@@ -47,29 +47,72 @@ def simulate_prefix_cache(
     """
     if len(prompts) != len(completion_tokens):
         raise ValueError("prompts and completion_tokens differ in length")
+    cached, _ = simulate_block_cache(
+        [block_hashes(ids, block_size) for ids in prompts],
+        [len(ids) for ids in prompts],
+        completion_tokens,
+        capacity_blocks,
+        block_size,
+    )
+    return cached
+
+
+def simulate_block_cache(
+    prompt_block_hashes: Sequence[Sequence[int]],
+    prompt_lengths: Sequence[int],
+    completion_tokens: Sequence[int],
+    capacity_blocks: int | None = None,
+    block_size: int = 16,
+    owners: Sequence[object] | None = None,
+) -> tuple[list[int], list[int]]:
+    """`simulate_prefix_cache` on precomputed block hashes, with provenance.
+
+    Hashing a prompt once and replaying it under many cache sizes or request
+    orders is much cheaper than re-hashing every time. With ``owners`` (one
+    label per request, e.g. a session id), the second list reports how many of
+    each request's cached tokens came from blocks first written by a request
+    with a different owner; without it, that list is all zeros.
+    """
+    count = len(prompt_block_hashes)
+    if len(prompt_lengths) != count or len(completion_tokens) != count:
+        raise ValueError("inputs differ in length")
+    if owners is not None and len(owners) != count:
+        raise ValueError("owners differ in length")
     cache: OrderedDict[object, None] = OrderedDict()  # front = evicted first
+    writer: dict[object, object] = {}
     cached: list[int] = []
-    for request_index, (ids, completion) in enumerate(zip(prompts, completion_tokens)):
-        hashes = block_hashes(ids, block_size)
-        limit = min(len(hashes), max(len(ids) - 1, 0) // block_size)
+    foreign: list[int] = []
+    for index in range(count):
+        hashes = prompt_block_hashes[index]
+        length = prompt_lengths[index]
+        owner = owners[index] if owners is not None else None
+        limit = min(len(hashes), max(length - 1, 0) // block_size)
         hit = 0
         while hit < limit and hashes[hit] in cache:
             hit += 1
         cached.append(hit * block_size)
+        foreign.append(
+            sum(block_size for value in hashes[:hit] if writer.get(value) != owner)
+            if owners is not None else 0
+        )
         if capacity_blocks is None:
             for value in hashes:
-                cache[value] = None
+                if value not in cache:
+                    cache[value] = None
+                    writer[value] = owner
             continue
         for value in hashes[:hit]:
             cache.pop(value, None)  # in use: not evictable while running
-        total_blocks = -(-(len(ids) + completion) // block_size)
+        total_blocks = -(-(length + completion_tokens[index]) // block_size)
         while cache and len(cache) + total_blocks > capacity_blocks:
-            cache.popitem(last=False)
+            writer.pop(cache.popitem(last=False)[0], None)
         for extra in range(total_blocks - len(hashes)):
-            cache[("output", request_index, extra)] = None
-        for value in reversed(hashes):
+            cache[("output", index, extra)] = None
+        for position, value in enumerate(reversed(hashes)):
+            if position < len(hashes) - hit:
+                writer[value] = owner  # newly computed by this request
             cache.pop(value, None)
             cache[value] = None
         while len(cache) > capacity_blocks:
-            cache.popitem(last=False)
-    return cached
+            writer.pop(cache.popitem(last=False)[0], None)
+    return cached, foreign

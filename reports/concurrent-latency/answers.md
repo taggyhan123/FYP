@@ -68,9 +68,11 @@ than "better":**
    is 1–8% in absolute terms. Across arrival orders v1 wins 5 of 6, sign test
    **p = 0.109** — suggestive, not significant. At 8B the accuracy advantage
    becomes a tie.
-4. **Multi-turn is untested.** When conversation history stays in the prompt,
-   requests do share a core — ContextPilot's actual design regime, and the one
-   condition that could reverse this.
+4. **Multi-turn: simulated since, with no reversal.** On 300 real
+   coding-agent sessions, v1 is never worse than ContextPilot, but the lead is
+   at most 0.08 points, because the conversation history dominates the cache
+   ([`multi-turn-sessions.md`](multi-turn-sessions.md)). There is no GPU
+   measurement yet, and the tool layer is synthetic.
 
 ---
 
@@ -274,7 +276,7 @@ model, two arrival patterns — a first measurement of this framing, not a curve
 
 | limit | effect |
 |---|---|
-| single-turn only | multi-turn is ContextPilot's design regime; could reverse the headline |
+| multi-turn only simulated | no reversal in simulation; ordering barely matters there (placement and cache size do); not yet measured on GPU |
 | ContextPilot run as ordering only | its full system is untested |
 | 200-task sample is easier than average | absolute accuracy flattered by up to ~⅓; v1 still beats ContextPilot on a random sample but by half as much, and the middle of the ranking reorders (ContextPilot falls behind frequency sort) |
 | decoding 199/200 reproducible | gaps under ~0.6 F1 are noise |

@@ -244,9 +244,14 @@ to gain 1.13% reuse.
   credits its annotations, de-duplication and scheduling with about half its
   cache gain; they might close some or all of the gap. This is the most
   important limit.
-- **Single-turn only.** Multi-turn traffic keeps the conversation in the
-  prompt, so requests share a core. That is ContextPilot's design regime and
-  could reverse the result.
+- **Multi-turn: no reversal, but no meaningful win either.** Simulated on
+  300 real coding-agent sessions, v1 is never worse than ContextPilot. But the
+  lead is at most 0.08 points of hit rate, because the conversation history
+  dominates the cache. What matters there is where new tools are placed and
+  how big the cache is
+  ([`concurrent-latency/multi-turn-sessions.md`](concurrent-latency/multi-turn-sessions.md)).
+  This is a simulation of cache hits with a synthetic tool layer; it has not
+  been measured on the GPU.
 - **The ordering effect is small in absolute terms on retrieved menus:**
   - between the best and worst policy it is 1.26x at p50, against 68x on
     padded menus;
@@ -271,6 +276,7 @@ to gain 1.13% reuse.
 | [`concurrent-latency/answers.md`](concurrent-latency/answers.md) | direct answers to the research questions |
 | [`concurrent-latency/f1-latency-tools-answers.md`](concurrent-latency/f1-latency-tools-answers.md) | F1 and recompute, latency–precision tradeoff, the 1-second limit, throughput under a limit, how many tools |
 | [`concurrent-latency/cache-hit-miss.md`](concurrent-latency/cache-hit-miss.md) | absolute cache hit and miss rates, why misses happen, the ceiling for any ordering, cache size |
+| [`concurrent-latency/multi-turn-sessions.md`](concurrent-latency/multi-turn-sessions.md) | multi-turn coding-agent sessions: ordering vs placement vs cache size |
 | [`concurrent-latency/README.md`](concurrent-latency/README.md) | key results under load |
 | [`concurrent-latency/findings.md`](concurrent-latency/findings.md) | full record; §4.4 dense retrieval, §4.5 arrival patterns, §5 ToolTrie-v1 |
 | [`concurrent-latency/how-many-tools.md`](concurrent-latency/how-many-tools.md) | menu size, cut to 10 |

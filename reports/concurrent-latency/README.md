@@ -7,6 +7,9 @@ The short version. Every number links to the section of
 [`findings.md`](findings.md) that derives it, with its runs and controls.
 Direct answers to "is ToolTrie-v1 better than ContextPilot", its F1 results, and
 the latency/throughput questions are collected in [`answers.md`](answers.md).
+The strongest results in one place — ToolTrie-v1 against ContextPilot and the
+traditional orderings, whether the right tool stays among the k shown, and
+accuracy/F1 — are in [`top-findings.md`](top-findings.md).
 
 **Two workloads, and which one a number comes from decides what it means.**
 

@@ -69,7 +69,9 @@ results) · [`concurrent-latency/findings.md`](concurrent-latency/findings.md)
 [`concurrent-latency/how-many-tools.md`](concurrent-latency/how-many-tools.md)
 (menu size, truncation) ·
 [`concurrent-latency/metrics-and-latency-tradeoffs.md`](concurrent-latency/metrics-and-latency-tradeoffs.md)
-(metrics, model size, throughput under a latency limit).
+(metrics, model size, throughput under a latency limit) ·
+[`concurrent-latency/top-findings.md`](concurrent-latency/top-findings.md)
+(the strongest results in one place).
 
 ---
 

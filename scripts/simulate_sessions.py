@@ -72,11 +72,20 @@ def encode(text: str) -> list[int]:
 
 def build_prompts(timeline: dict, ordering: str, plan: dict | None) -> tuple[list, list, list]:
     """Per (session index, round): block hashes, prompt length; plus a check count."""
-    from analyze_prefix_cache import vllm_tool
     from tatm.prefix_cache_sim import block_hashes
+    hashes, lengths, checked = {}, {}, 0
+    for index, r, ids, was_checked in iter_prompt_ids(timeline, ordering, plan):
+        hashes[(index, r)] = block_hashes(ids, BLOCK)
+        lengths[(index, r)] = len(ids)
+        checked += was_checked
+    return hashes, lengths, checked
+
+
+def iter_prompt_ids(timeline: dict, ordering: str, plan: dict | None):
+    """Yield (session index, round, prompt token ids, spot-checked?) for every round."""
+    from analyze_prefix_cache import vllm_tool
     from tatm.prompting import openai_tool, order_tool_ids
     tok, tools, support = _STATE["tok"], _STATE["tools"], _STATE["support"]
-    hashes, lengths, checked = {}, {}, 0
     for index, (session, meta) in enumerate(zip(_STATE["sessions"], _STATE["meta"])):
         sid, starts = session["session_id"], meta["round_starts"]
         messages = session["messages"]
@@ -99,14 +108,10 @@ def build_prompts(timeline: dict, ordering: str, plan: dict | None) -> tuple[lis
                 tools=[vllm_tool(openai_tool(tools[t])) for t in ordered],
                 add_generation_prompt=True, tokenize=False, enable_thinking=False)
             ids = encode(text)
-            if (index * 7 + r) % 97 == 0:  # spot-check the piecewise tokenizer
-                full = tok(text, add_special_tokens=False)["input_ids"]
-                if full != ids:
-                    raise SystemExit(f"piecewise tokenisation differs for {sid} round {r}")
-                checked += 1
-            hashes[(index, r)] = block_hashes(ids, BLOCK)
-            lengths[(index, r)] = len(ids)
-    return hashes, lengths, checked
+            spot = (index * 7 + r) % 97 == 0  # spot-check the piecewise tokenizer
+            if spot and tok(text, add_special_tokens=False)["input_ids"] != ids:
+                raise SystemExit(f"piecewise tokenisation differs for {sid} round {r}")
+            yield index, r, ids, int(spot)
 
 
 def run_job(job: dict) -> list[dict]:

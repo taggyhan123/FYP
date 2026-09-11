@@ -19,6 +19,15 @@ history does not depend on tool order.
 In multi-turn sessions, *where* tools go and how much cache there is matter
 far more than tool order.
 
+**Confirmed on the GPU** (13 runs on two RTX 3090s, section 5):
+- The simulator matches vLLM within 0.11 points in every run, and exactly on
+  every request whenever the cache isn't under pressure.
+- With static tools, every policy has the same latency.
+- Where v1 caches more (tools changing every turn), latency doesn't improve.
+- A new effect: **with more than about 12 sessions sending at once, the cache
+  thrashes.** Hits fall from 93% to 13%, and median latency rises from 0.5 s
+  to 12–24 s.
+
 ---
 
 ## Setup: what is real and what is synthetic
@@ -178,6 +187,96 @@ changed:
 
 ---
 
+## 5. On the GPU: measured, not simulated
+
+**Setup:**
+- Two RTX 3090s, each running its own vLLM 0.26.0 server with Qwen3-0.6B. The
+  flags are the same as every earlier run, plus per-request reporting of
+  cached tokens.
+- Every turn's exact token sequence was sent with `max_tokens=1`, so each
+  request measures time to first token.
+- N sessions ran at once. Each sent its next turn as soon as the previous one
+  returned, with **no pause between turns**. That's harsher than real use,
+  where tools run and people read.
+- 13 runs and 56,010 requests; one request failed with a dropped connection.
+
+**The simulator is exact on real vLLM.** Hit rates, measured vs simulated for
+the same dispatch order:
+
+| run | measured hit | simulated hit | requests matching exactly |
+|---|---|---|---|
+| static tools, 8 sessions (no reordering / ContextPilot / v1) | 92.95 / 92.96 / 92.97% | identical | 5,058 of 5,058 each |
+| realistic changes, front / append, 8 sessions | 92.60 / 92.96% | identical | 5,058 of 5,058 each |
+| every-turn changes at the front, 8 sessions (three policies) | 7.86 / 9.04 / 10.97% | within 0.01 | 1,809–1,810 of 1,810 |
+| 16, 24, 32 sessions | 13.06 / 12.27 / 11.23% | within 0.01 | 99–100% |
+| under memory pressure (12 sessions; every-turn append) | 83.64 / 84.30% | 83.53 / 84.23% | 86% / 77% |
+
+- **Totals agree within 0.11 points in every run.**
+- **Every request matches exactly** whenever the cache isn't under pressure.
+- **Under pressure the per-request match loosens** to 77–86%, because requests
+  running at the same time hold blocks the simulator treats as free, but the
+  totals still agree.
+- **So the simulated results in sections 1–4 are measurements in all but
+  name.**
+
+**Static tools, 8 sessions: the policies perform the same on the GPU too.**
+
+| policy | hit rate | time to first token, p50 | p95 | p99 | requests/s |
+|---|---|---|---|---|---|
+| no reordering | 92.95% | 561 ms | 1,330 ms | 1,793 ms | 12.39 |
+| ContextPilot | 92.96% | 559 ms | 1,294 ms | 1,822 ms | 12.36 |
+| ToolTrie-v1 | 92.97% | 544 ms | 1,286 ms | 1,846 ms | 12.50 |
+
+The differences are within run-to-run noise. Realistic tool changes are just as
+cheap on the GPU: at the front, 92.60% hits and a 564 ms median; appended,
+92.96% and 561 ms.
+
+**New: a cliff when too many sessions are active at once.** Static tools,
+ToolTrie-v1 (the 32-session run used no reordering, which is identical here):
+
+| sessions sending at once | hit rate | time to first token, p50 | p95 | requests/s |
+|---|---|---|---|---|
+| 8 | 92.97% | 0.54 s | 1.3 s | 12.50 |
+| 12 | 83.64% | 0.96 s | 9.1 s | 5.78 |
+| 16 | **13.06%** | **12.2 s** | 14.8 s | 1.36 |
+| 24 | 12.27% | 19.0 s | 22.1 s | 1.30 |
+| 32 | 11.23% | 24.4 s | 27.4 s | 1.34 |
+
+- **Why the cliff:** a session's prompt averages about 16,000 tokens, and the
+  cache holds 190,000, which is about 12 sessions' histories. With more
+  sessions than that sending back to back, each session's history is evicted
+  before its next turn arrives. The cache thrashes: hits collapse between 12
+  and 16 sessions, throughput falls about 9x, and median latency rises 22x at
+  16 sessions and 45x at 32.
+- **Why the simulation at 32 sessions gave 84% instead:** it used TraceLab's
+  real pauses between turns (tool runs, user thinking), which keep most
+  sessions idle at any moment.
+- **Lesson for deployment:** real idle time is what keeps multi-turn caching
+  working. When more sessions are active than the cache can hold, it
+  collapses. Limiting active sessions to what fits in the cache matters far
+  more than any ordering policy.
+
+**Every-turn tool changes: v1 caches more, but it doesn't show in latency.**
+The same 100 sessions, 8 at once:
+
+| setup | hit rate | time to first token, p50 | p95 |
+|---|---|---|---|
+| front, no reordering | 7.86% | 6.30 s | 8.17 s |
+| front, ContextPilot | 9.04% | 6.30 s | 8.20 s |
+| front, ToolTrie-v1 | **10.97%** | 6.39 s | 8.29 s |
+| appended, ToolTrie-v1 | **85.04%** | **1.50 s** | 8.78 s |
+
+- **v1 still caches the most**, as the simulation predicted. But with about 90%
+  of each prompt recomputed, the GPU is saturated, and 2–3 points less
+  recomputation is invisible in latency.
+- **Appending gives 85% hits and a 4x lower median.** Its p95 stays high,
+  though: appended tools make prompts grow (about 24,000 tokens on average,
+  against 16,000), so 8 sessions no longer fit in the cache and it partly
+  thrashes. Appending is the right placement, but tools changing every turn
+  is expensive either way.
+
+---
+
 ## Pre-declared hypotheses: how they fared
 
 | hypothesis | result |
@@ -195,10 +294,15 @@ changed:
 - **ToolTrie's value lies where the prompt changes per request:** single-turn
   retrieved menus, and cutting a large pool to a shortlist
   ([`top-findings.md`](top-findings.md)). It is not in long conversations.
+- **On the GPU, v1's multi-turn edge doesn't reach latency.** With static
+  tools every policy has the same latency. With tools changing every turn, v1
+  caches the most but the GPU is saturated either way.
 - **For multi-turn agents, the design advice is:**
   - append new tools after the history rather than rebuilding the tool block;
   - keep already-loaded tools;
-  - give the cache enough memory for the sessions that are between turns.
+  - keep the number of sessions actively sending within what the cache can
+    hold. On one RTX 3090 with a 0.6B model that's about 12; beyond it, hits
+    collapse from 93% to 13% and latency rises 20x or more.
 
   This matches how Claude Code's tool search is designed, and is consistent
   with TraceLab's findings.
@@ -215,10 +319,16 @@ changed:
 - **Sessions are cut to the 32k context window.** 5,058 of 8,798 model calls
   are kept, and later turns of long sessions are dropped (median 14 calls per
   session). Later turns reuse more, so this lowers hit rates slightly.
-- **This is a simulation of hits, not a latency measurement.** A GPU replay is
-  planned but has not been run.
-- **Model calls are replayed one at a time**, in the order a concurrent system
-  would serve them. Batching effects are not modelled.
+- **Sections 1–4 are simulated; section 5 measures a subset on the GPU.** The
+  simulator matched vLLM within 0.11 points in all 13 GPU runs.
+- **The GPU runs have their own limits:**
+  - they measure time to first token only (`max_tokens=1`, no decoding);
+  - sessions send turns back to back, with no pauses;
+  - the every-turn front runs use the first 100 sessions;
+  - Qwen3-0.6B only.
+- **The simulation serves model calls one at a time**, in the order a
+  concurrent system would serve them. The GPU runs show this loosens
+  per-request agreement only under memory pressure.
 - **ContextPilot's ordering only**, as in all our comparisons. Its
   conversation-level de-duplication and scheduling are not tested.
 - **ContextPilot needed a workaround at this scale.** At the pinned commit it
@@ -242,9 +352,19 @@ bash $OUT/build_plans.sh $OUT        # existing ToolTrie / ContextPilot builders
 CUDA_VISIBLE_DEVICES="" <tatm env>/python scripts/simulate_sessions.py --out-dir $OUT --workers 32
 ```
 
-All of it is CPU only. The results in this document are in
-`cluster/results/multiturn-sessions-20260911-234046/`, together with the
-pre-declaration, plans and logs.
+All of that is CPU only. The GPU replay (section 5) starts one vLLM server per
+GPU and runs one driver per server:
+
+```
+bash $RUN/server_gpu1.sh &        # Qwen3-0.6B, same flags as before + --enable-prompt-tokens-details
+<tatm venv>/python scripts/replay_sessions_vllm.py --out-dir $OUT --timeline D1-k64 \
+    --ordering tooltrie_v1 --concurrency 8 --base-url http://127.0.0.1:8311 --output $RUN/replays/...
+```
+
+The simulation results are in
+`cluster/results/multiturn-sessions-20260911-234046/` (with the
+pre-declaration, plans and logs). The GPU results, server scripts and logs are
+in `cluster/results/multiturn-gpu-20260912-001802/`.
 
 **Data credits:**
 - nebius/SWE-agent-trajectories (CC BY 4.0).

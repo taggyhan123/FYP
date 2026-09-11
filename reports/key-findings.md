@@ -250,8 +250,10 @@ to gain 1.13% reuse.
   dominates the cache. What matters there is where new tools are placed and
   how big the cache is
   ([`concurrent-latency/multi-turn-sessions.md`](concurrent-latency/multi-turn-sessions.md)).
-  This is a simulation of cache hits with a synthetic tool layer; it has not
-  been measured on the GPU.
+  Confirmed on the GPU (13 runs): the simulator matches vLLM within 0.11
+  points, and policies' latencies are equal. A new effect also showed up:
+  more than about 12 sessions sending at once make the cache thrash (hits
+  93% → 13%, median latency 0.5 s → 12–24 s). The tool layer is synthetic.
 - **The ordering effect is small in absolute terms on retrieved menus:**
   - between the best and worst policy it is 1.26x at p50, against 68x on
     padded menus;

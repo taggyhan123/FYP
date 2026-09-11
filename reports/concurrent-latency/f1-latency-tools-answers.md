@@ -321,6 +321,86 @@ are three answers, each tested:
 | Does it hold for real deployments with no router? | **~150** | several ordinary MCP integrations together | **Not run at 150; 64 and 128 bracket it, and v1 wins both.** It caches 2.1x (64) and 3.1x (128) what ContextPilot does and is faster under load. It leads on F1 by 5.5 and 9.2 at 0.6B; at 8B they tie. |
 | Can we see ordering effects at all? | **large, or cut** | at 10 tools with nothing cut, every policy is identical | **Yes. Retrieve 64 and show 10 separates the policies most sharply.** v1 keeps the right tool among the 10 as often as not reordering (61.5%). ContextPilot keeps it in only 47.0% (39.5% on BM25). |
 
+The results behind each answer follow, all on the dense retriever unless
+stated. **Bold** marks the best value in each column.
+
+**Result 1: 10 tools, nothing cut (comparable to benchmarks).** Retrieve the
+top 10, reorder them, show all 10. Every policy shows the same 10 tools, so
+the right tool is in view in 62.0% of requests for all of them.
+
+| policy | reuse | p50 ms | p95 ms | F1, 0.6B | end-to-end F1, 0.6B | F1, 4B | end-to-end F1, 4B |
+|---|---|---|---|---|---|---|---|
+| no reordering | 6.38% | **66.2** | 121.8 | 31.99 | 19.83 | 43.12 | 26.73 |
+| alphabetical | 7.97% | 66.5 | 124.9 | 31.85 | 19.75 | 37.50 | 23.25 |
+| frequency | 8.68% | 66.8 | 127.5 | 30.91 | 19.17 | **44.81** | **27.78** |
+| ToolTrie-v0 | 9.94% | 68.1 | 127.9 | 31.85 | 19.75 | 37.50 | 23.25 |
+| ContextPilot | 12.46% | 67.1 | 130.6 | **32.39** | **20.08** | 42.80 | 26.53 |
+| **ToolTrie-v1** | **13.71%** | 67.1 | **117.3** | 31.59 | 19.58 | 43.66 | 27.07 |
+
+v1 caches the most (2.1x no reordering, 1.1x ContextPilot) and has the lowest
+p95. But the median is flat at 66-68 ms for everyone, and every accuracy gap is
+under one standard error. **A 10-tool prompt is too short for reuse to matter,
+so at 10 tools alone the ordering effect cannot be seen.**
+
+**Result 2: 64 and 128 tools (bracketing the ~150-tool deployments with no
+router).** Every policy shows the same tools, only in a different order.
+Latency is median time to first token under load: 4 requests/s at 64 tools and
+2 at 128, both above what any policy can serve, so requests queue.
+
+| policy | reuse, 64 | reuse, 128 | p50 under load, 64 | p50 under load, 128 | F1 (0.6B), 64 | F1 (0.6B), 128 |
+|---|---|---|---|---|---|---|
+| no reordering | 0.82% | 0.36% | 10,774 ms | 41,679 ms | 25.66 | **26.02** |
+| alphabetical | 1.52% | 0.43% | 10,785 ms | 41,669 ms | 16.36 | 12.18 |
+| frequency | 1.39% | 0.47% | 10,875 ms | 41,651 ms | 19.84 | 17.06 |
+| ToolTrie-v0 | 2.40% | 0.91% | 10,525 ms | 41,632 ms | 16.36 | 12.18 |
+| ContextPilot | 2.98% | 1.21% | 10,308 ms | 41,231 ms | 21.47 | 16.18 |
+| **ToolTrie-v1** | **6.22%** | **3.74%** | **9,163 ms** | **38,815 ms** | **26.99** | 25.38 |
+
+- **v1 wins both sizes on the cache and on speed.** It caches 2.1x and 3.1x
+  what ContextPilot does, and its median under load is 11% and 6% below
+  ContextPilot's.
+- **On accuracy it leads ContextPilot by 5.5 and 9.2 F1 points.** It is 1.3
+  ahead of no reordering at 64 tools and 0.6 behind at 128.
+- The lead over ContextPilot shrinks with model size: +1.9 and +3.8 at 4B,
+  a tie at 8B (−0.45 and −0.16).
+- 150 tools was not run; these two sizes bracket it.
+
+**Result 3: retrieve 64, show 10 (seeing ordering effects at all).** Every
+policy reorders the same 64 tools and only the first 10 are shown, so the
+policy decides whether the right tool survives the cut:
+
+| policy | right tool among the 10 | same, BM25 | reuse | p50 ms |
+|---|---|---|---|---|
+| no reordering | **62.0%** | 59.0% | 6.38% | 69.0 |
+| alphabetical | 7.5% | 11.5% | 11.67% | 68.5 |
+| frequency | 38.5% | 41.5% | 9.39% | 72.8 |
+| ToolTrie-v0 | 8.0% | 11.5% | 16.12% | 67.1 |
+| ContextPilot | 47.0% | 39.5% | 20.16% | 64.1 |
+| **ToolTrie-v1** | 61.5% | **59.5%** | **27.64%** | **60.1** |
+
+End-to-end F1, which scores a request as zero when its right tool was cut:
+
+| policy | dense, 0.6B | dense, 4B | BM25, 0.6B | BM25, 4B |
+|---|---|---|---|---|
+| no reordering | 19.83 | **26.73** | **23.00** | **28.92** |
+| alphabetical | 0.75 | 3.58 | 2.45 | 5.67 |
+| frequency | **20.08** | 24.37 | 22.67 | 27.92 |
+| ToolTrie-v0 | 0.75 | 3.58 | 3.45 | 5.67 |
+| ContextPilot | 16.25 | 21.45 | 16.58 | 22.33 |
+| **ToolTrie-v1** | 19.92 | 26.03 | 22.00 | 28.08 |
+
+- **v1 keeps the right tool in view as often as no reordering** (61.5% vs
+  62.0% dense, 59.5% vs 59.0% BM25), with 4.3x the reuse and 13% lower
+  latency. Its end-to-end F1 stays within 1 point of no reordering.
+- **ContextPilot pushes the right tool out in one request in seven on dense
+  and one in five on BM25.** v1 beats it on end-to-end F1 in every cell, by
+  3.7 to 5.8 points.
+- **Alphabetical and v0 show the right tool in only 7.5-11.5% of requests.**
+  **Frequency** keeps it in about 40%.
+- **The policies separate far more sharply here than anywhere else**: a 15-20
+  point gap in whether the right tool survives, against nothing at 10 tools
+  uncut.
+
 **Our answer: use all three, each for its own question. The headline
 evaluation is retrieve 64, show 10.** It is the only design that satisfies all
 three purposes at once:
@@ -335,4 +415,8 @@ three purposes at once:
   view as often as no reordering, with 4.3x the reuse and 13% lower latency,
   while ContextPilot loses the right tool in one request in five to seven.
 
-*Derived in:* `how-many-tools.md` §1-§6.
+*Derived in:* `how-many-tools.md` §1-§6 · `findings.md` §4.4 ·
+`metrics-and-latency-tradeoffs.md` §1.2, §3.2. The alphabetical and frequency
+latencies in Result 2 were computed for this document from the same runs
+(`dense-retrieval-20260902-234630/`). The same method reproduces the published
+figures for the other four policies exactly.

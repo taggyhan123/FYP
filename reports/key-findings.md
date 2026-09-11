@@ -95,6 +95,17 @@ trails ContextPilot by 0.19 points. Its lead over ContextPilot on dense grows
 with menu size (0.99x → 1.14x → 2.09x → 3.09x). It also holds across arrival
 patterns: v1 caches more in 11 of 12 arrival-pattern × retriever cells.
 
+**In absolute terms these hit rates are small, and part of v1's lead is cache
+locality.**
+- Even v1 recomputes 93.8% of every 64-tool prompt.
+- 48 tokens of each hit are fixed template text that every policy gets.
+- For every request, v1 already reuses the most the cache allows.
+- v1 reuses recent requests, which a finite cache still holds. ContextPilot's
+  reuse often comes from older requests that have already been evicted. With
+  an unlimited cache, v1's lead at 64 tools would be 1.4x rather than 2.1x.
+
+See [`concurrent-latency/cache-hit-miss.md`](concurrent-latency/cache-hit-miss.md).
+
 ### It is the fastest under load
 
 Time to first token, 64 tools, BM25, 4 requests/s offered (above every
@@ -259,6 +270,7 @@ to gain 1.13% reuse.
 | [`concurrent-latency/top-findings.md`](concurrent-latency/top-findings.md) | full scoreboard |
 | [`concurrent-latency/answers.md`](concurrent-latency/answers.md) | direct answers to the research questions |
 | [`concurrent-latency/f1-latency-tools-answers.md`](concurrent-latency/f1-latency-tools-answers.md) | F1 and recompute, latency–precision tradeoff, the 1-second limit, throughput under a limit, how many tools |
+| [`concurrent-latency/cache-hit-miss.md`](concurrent-latency/cache-hit-miss.md) | absolute cache hit and miss rates, why misses happen, the ceiling for any ordering, cache size |
 | [`concurrent-latency/README.md`](concurrent-latency/README.md) | key results under load |
 | [`concurrent-latency/findings.md`](concurrent-latency/findings.md) | full record; §4.4 dense retrieval, §4.5 arrival patterns, §5 ToolTrie-v1 |
 | [`concurrent-latency/how-many-tools.md`](concurrent-latency/how-many-tools.md) | menu size, cut to 10 |

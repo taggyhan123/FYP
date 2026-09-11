@@ -267,6 +267,12 @@ Serial, one request at a time: the lower bound no amount of tuning beats.
 | 4B | **k16** (~897-914 ms) | **40.25** | 36.42 | 36.54 | 40.05 |
 | 8B | below k16 | — | — | — | — |
 
+"Under 1s" here is the **mean** per-request time (total run time ÷ 200). Read as
+*every* request finishing its reply within 1 s, only 0.6B qualifies, at up to
+k16; k64 misses by one request (1,028 ms), and at 4B/k16 54 of 200 replies
+exceed 1 s. Read as every request's *first token* within 1 s, 8B fits at k16.
+See [`f1-latency-tools-answers.md`](f1-latency-tools-answers.md) §3.
+
 Note that **ordering barely affects latency here** (all arms within 1-2% at
 fixed depth): with nothing queued, latency is almost pure prefill cost, which
 depends on token count, not policy. Ordering's latency benefit is a

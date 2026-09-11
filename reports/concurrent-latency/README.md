@@ -9,7 +9,10 @@ Direct answers to "is ToolTrie-v1 better than ContextPilot", its F1 results, and
 the latency/throughput questions are collected in [`answers.md`](answers.md).
 The strongest results in one place — ToolTrie-v1 against ContextPilot and the
 traditional orderings, whether the right tool stays among the k shown, and
-accuracy/F1 — are in [`top-findings.md`](top-findings.md).
+accuracy/F1 — are in [`top-findings.md`](top-findings.md). F1 and recompute,
+the latency–precision tradeoff, the 1-second limit, throughput under a latency
+limit, and how many tools, answered together:
+[`f1-latency-tools-answers.md`](f1-latency-tools-answers.md).
 
 **Two workloads, and which one a number comes from decides what it means.**
 

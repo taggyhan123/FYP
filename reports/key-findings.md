@@ -35,8 +35,8 @@ ordering policies tested:
   to the 10 the model sees. v1 keeps the right tool among them as often as
   not reordering does. ContextPilot pushes it out in one request in five to
   seven.
-- **It costs no accuracy.** Its F1 matches the unreordered list, and it beats
-  ContextPilot in all 8 cells at 0.6B and 4B.
+- **It costs no accuracy.** At 0.6B and 4B its F1 matches the unreordered
+  list and beats ContextPilot in all 8 cells.
 
 **What made the difference was one line.** ToolTrie-v0 sorted every tool its
 trie could not match alphabetically, which left ~93% of each menu to an order
@@ -226,7 +226,9 @@ to gain 1.13% reuse.
 - **Menus where every request shares most of its tools** (padded menus, 63 of
   64). ContextPilot and ToolTrie-v0 are 48x faster than v1 there.
 - **Larger models.** v1's accuracy lead over ContextPilot becomes a tie at 8B
-  for 64 and 128 tools. Its cache lead does not shrink (still about 1.7x).
+  for 64 and 128 tools. At 8B all orderings converge on accuracy; the
+  unreordered list edges v1 by 2.2 F1 at 16 tools, inside noise. v1's cache
+  lead does not shrink (still about 1.7x).
 - **ContextPilot's full system was not run**, only its ordering. The paper
   credits its annotations, de-duplication and scheduling with about half its
   cache gain; they might close some or all of the gap. This is the most
@@ -256,6 +258,7 @@ to gain 1.13% reuse.
 |---|---|
 | [`concurrent-latency/top-findings.md`](concurrent-latency/top-findings.md) | full scoreboard |
 | [`concurrent-latency/answers.md`](concurrent-latency/answers.md) | direct answers to the research questions |
+| [`concurrent-latency/f1-latency-tools-answers.md`](concurrent-latency/f1-latency-tools-answers.md) | F1 and recompute, latency–precision tradeoff, the 1-second limit, throughput under a limit, how many tools |
 | [`concurrent-latency/README.md`](concurrent-latency/README.md) | key results under load |
 | [`concurrent-latency/findings.md`](concurrent-latency/findings.md) | full record; §4.4 dense retrieval, §4.5 arrival patterns, §5 ToolTrie-v1 |
 | [`concurrent-latency/how-many-tools.md`](concurrent-latency/how-many-tools.md) | menu size, cut to 10 |

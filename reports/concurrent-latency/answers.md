@@ -10,7 +10,7 @@ in [`findings.md`](findings.md), [`how-many-tools.md`](how-many-tools.md) and
 | 0 | Is ToolTrie-v1 better than ContextPilot? | **Yes, on single-turn retrieved menus — and it is the safer of the two** |
 | 1 | Does using F1 → better accuracy → less KV-cache recompute? | **No.** Accuracy and reuse are independent |
 | 2 | Is there a latency–precision tradeoff through configuration? | **Yes, through model size**, with sharply diminishing returns. Quantization untested |
-| 3 | If every request must answer within 1 s, what accuracy? | **0.6B fits 64 tools (F1 27); 4B fits 16 (F1 40); 8B fits neither** |
+| 3 | If every request must answer within 1 s, what accuracy? | **On average: 0.6B fits 64 tools (F1 27), 4B fits 16 (F1 40), 8B neither. For *every* request, only 0.6B fits (≤16 tools)** |
 | 4 | Optimise throughput under a latency limit, scored on F1? | **ToolTrie-v1 is the only policy best on both axes at once** |
 
 All results are Qwen3 on one RTX 3090, vLLM with prefix caching unmodified,
@@ -204,16 +204,22 @@ accuracy cost, and it remains the most obvious untested configuration.
 **It depends on the model — and on whether requests queue.**
 
 **With no queue** (one request at a time — the hard floor), the largest menu
-each model can serve in under 1 second:
+each model can serve in under 1 second **on average**:
 
-| model | largest menu under 1 s | ToolTrie-v1 F1 | ContextPilot F1 | no reordering F1 |
+| model | largest menu under 1 s, average | ToolTrie-v1 F1 | ContextPilot F1 | no reordering F1 |
 |---|---|---|---|---|
 | **0.6B** | **64 tools** (~510 ms) | **26.99** | 21.47 | 25.66 |
 | **4B** | **16 tools** (~900 ms) | **40.25** | 36.42 | 40.05 |
 | 8B | **none** — 16 tools already takes ~1,470 ms | — | — | — |
 
-- **4B gives the highest accuracy that fits the budget** (F1 40), on a 16-tool menu.
-- **8B cannot meet 1 second** at any menu size tested.
+- **4B gives the highest accuracy that fits on average** (F1 40), on a 16-tool
+  menu.
+- **If *every* request must finish its reply within 1 s, only 0.6B qualifies,
+  at up to 16 tools.** At 4B/16 tools, 54 of 200 replies take longer. If the
+  limit is on the *first token* instead, 8B fits at 16 tools. All three
+  readings, with end-to-end F1 per policy, are in
+  [`f1-latency-tools-answers.md`](f1-latency-tools-answers.md) §3.
+- **8B cannot finish replies within 1 second** at any menu size tested.
 - **With no queue, ordering barely changes latency** — every policy lands within
   1–2% at a fixed menu size, because the time is almost all spent reading the
   prompt, which depends on its length, not its order. Ordering changes the

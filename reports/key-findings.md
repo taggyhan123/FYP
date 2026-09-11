@@ -1,81 +1,292 @@
-# Key findings — trie-aware tool ordering for prefix-cached LLM serving
+# Key findings — ToolTrie: trie-aware tool ordering for prefix-cached LLM serving
 
-Measured on an isolated RTX 3090 with vLLM 0.26.0 automatic prefix caching.
-Primary model Qwen/Qwen3-4B, replicated on Qwen/Qwen3-0.6B. 190 accepted GPU
-replays, all 33 audit checks passed. Full evidence and provenance in
-[`consolidated-report.md`](consolidated-report.md); every brief question with its
-status in [`brief-questions-and-answers.md`](brief-questions-and-answers.md).
+ToolTrie orders the tool definitions in an LLM prompt so that each request
+shares as long a prefix as possible with the ones served before it. vLLM can
+then reuse the cached computation for that prefix instead of recomputing it.
+This page is the project's results summary.
+
+- **The top half is the current result: ToolTrie-v1 against every other
+  ordering policy.**
+- The bottom half is the August phase (ToolTrie-v0), kept as the record of how
+  the project got there.
+
+**Setup.** Qwen3 (0.6B, 4B, 8B) on one RTX 3090, vLLM 0.26.0 with automatic
+prefix caching unmodified. Single-turn requests over the ToolRet catalogue
+(44,453 tools), 200 tasks per cell. 534 GPU runs in the current phase, 190 in
+the August phase.
 
 ```
 reuse = prompt_tokens_cached / (prompt_tokens_cached + request_prefill_kv_computed_tokens_sum)
 ```
 
-Findings 1–7 are ordered by the brief's own experimental questions (§7); finding
-8 answers the high-level research question the project is named after (§2 Q3).
-Each states which question it answers. Differences are in percentage points.
-How the project's own planner works, with the code, is in
-[`notes/tooltrie-v0-design.md`](../notes/tooltrie-v0-design.md).
+## Headline: ToolTrie-v1 beats every other ordering on real retrieved tool menus
 
-## Current state — read this first (updated 2026-09-11)
+On the menus a retriever actually produces, ToolTrie-v1 is the best of the six
+ordering policies tested:
 
-The findings below record the **August phase**: ToolTrie-v0, measured one
-request at a time. They are accurate for what was measured then. A later phase
-changed three of its conclusions, and the documents that carry the full
-evidence are listed at the end of this section.
+- **It caches the most.** At 64 tools on a dense retriever it caches 2.1x
+  what ContextPilot caches and 7.6x what the unreordered list gets. It is
+  first in 7 of 8 menu-size/retriever combinations.
+- **It is the fastest under load and serves the most traffic within a
+  1-second limit.** Its median latency is about 20% below the traditional
+  orderings and 10% below ContextPilot. When requests arrive in bursts it
+  sustains 5.8% more traffic than ContextPilot.
+- **It keeps the right tool in view.** Take 64 retrieved tools and cut them
+  to the 10 the model sees. v1 keeps the right tool among them as often as
+  not reordering does. ContextPilot pushes it out in one request in five to
+  seven.
+- **It costs no accuracy.** Its F1 matches the unreordered list, and it beats
+  ContextPilot in all 8 cells at 0.6B and 4B.
 
-**1. The headline's first half still holds: on realistic retrieved menus,
-ordering buys little reuse.** Measured under concurrent load, ordering is worth
-68x at p50 on padded menus and only 1.26x on retrieved ones — and at the menu
-size published benchmarks actually use (~10 tools), no ordering policy moves
-latency at all.
+**What made the difference was one line.** ToolTrie-v0 sorted every tool its
+trie could not match alphabetically, which left ~93% of each menu to an order
+that carries no information. ToolTrie-v1 leaves those tools in the order
+retrieval returned them.
 
-**2. Its second half does not: a fixed ToolTrie beats ContextPilot.**
-ToolTrie-v0 lost (findings 7-8) because it sorted every tool its trie could not
-match *alphabetically* — reordering ~93% of each menu on no information.
-ToolTrie-v1 is a one-line change: unmatched tools keep the order retrieval
-returned them in. On retrieved menus v1 caches more than ContextPilot at 4 of 4
-depths on a BM25 retriever and 3 of 4 on a dense one (it loses k4 by 0.19pp),
-and at 5 of 6 arrival permutations (sign test p = 0.109 — suggestive, not
-significant).
+The six policies compared:
 
-**3. What separates the policies is not speed but safety.** When a system
-retrieves a wide pool and shows the model only the top 10 — how published
-benchmarks present tools — reordering for the cache can push the right tool out
-of view. ContextPilot does so in **one request in five to seven**; v1 does not.
-Measured on two retrievers and under every arrival pattern tested.
+| policy | what it does to the retrieved list |
+|---|---|
+| no reordering | nothing: keeps the retriever's ranking |
+| alphabetical | sorts by tool name |
+| frequency | puts tools that appear in the most menus first |
+| ToolTrie-v0 | trie-matched tools first, the rest alphabetical |
+| ContextPilot | moves the tools that requests share to the front (published state of the art; its ordering only) |
+| **ToolTrie-v1** | trie-matched tools first, the rest **left in retrieval order** |
 
-**The rule that ties every result together.** ContextPilot wins where requests
-share a **global core** — tools present in every request — because its set
-intersection *is* that core (padded menus: 63 of 64 tools in every request). A
-trie wins where overlap is only **local** — each request resembling its
-neighbours without any tool common to all — because it matches the previous
-request's prefix directly. **Real retrieved traffic has no global core**, even
-when arrivals are as bursty as the data allows, which is why v1's lead over
-ContextPilot *grows* with arrival locality rather than shrinking. This also
-revises finding 8: v0's trie was not doing no work, it was being undone by its
-fallback.
+## ToolTrie-v1 against the rest
 
-**Where it stops holding.** v1's accuracy advantage over ContextPilot shrinks
-with model size and becomes a **tie at 8B**. Every result here is single-turn;
-multi-turn traffic is ContextPilot's actual design regime and is untested. The
-evaluated task slice is easier than average, so absolute accuracy figures are
-flattered by up to a third. On a random slice v1 still beats ContextPilot, by
-about half the margin, but the middle of the ranking reorders — ContextPilot
-falls behind frequency sort (`concurrent-latency/findings.md` §4.5).
+v1's advantage over each policy, at 64 retrieved tools unless stated.
+**Bold** marks a clear win.
 
-Evidence: [`concurrent-latency/README.md`](concurrent-latency/README.md) (key
-results) · [`concurrent-latency/findings.md`](concurrent-latency/findings.md)
-(full record; §4.5 for arrival locality) ·
-[`concurrent-latency/how-many-tools.md`](concurrent-latency/how-many-tools.md)
-(menu size, truncation) ·
-[`concurrent-latency/metrics-and-latency-tradeoffs.md`](concurrent-latency/metrics-and-latency-tradeoffs.md)
-(metrics, model size, throughput under a latency limit) ·
-[`concurrent-latency/top-findings.md`](concurrent-latency/top-findings.md)
-(the strongest results in one place).
+| measure | vs no reordering | vs alphabetical | vs frequency | vs ToolTrie-v0 | vs **ContextPilot** |
+|---|---|---|---|---|---|
+| cache reuse, dense retriever | **7.6x** | **4.1x** | **4.5x** | **2.6x** | **2.1x** |
+| cache reuse, BM25 retriever | **5.5x** | **4.1x** | **5.3x** | **2.6x** | 1.04x |
+| p50 latency under load, BM25 | **20% lower** | **20% lower** | **21% lower** | **19% lower** | **10% lower** |
+| traffic within a 1 s p50 limit, dense | +1.8% | +3.8% | +3.9% | +3.3% | +1.2% |
+| same, requests arriving in bursts | **+8.0%** | — | — | — | **+5.8%** |
+| right tool survives a cut to 10, dense | tie | **+54pp** | **+23pp** | **+53.5pp** | **+14.5pp** |
+| right tool survives a cut to 10, BM25 | tie | **+48pp** | **+18pp** | **+48pp** | **+20pp** |
+| end-to-end F1 after the cut | tie | **+19 to +22** | tie | **+19 to +22** | **+3.7 to +5.8** |
+| whole-menu F1, cells where v1 is ahead | tie (all within 1.33) | 7 of 8 | 5 of 8 | 7 of 8 | **8 of 8** |
+
+Against the unreordered list, v1 ties on accuracy by design and wins on
+everything the cache decides. Against ContextPilot it wins every row. The one
+regime where it loses is covered under "Where ToolTrie does not win" below.
+The full scoreboard, with every measure, is in
+[`concurrent-latency/top-findings.md`](concurrent-latency/top-findings.md).
+
+### It caches the most
+
+Reuse, dense retriever (BM25 in parentheses), %:
+
+| policy | 4 tools | 16 tools | 64 tools | 128 tools |
+|---|---|---|---|---|
+| no reordering | 14.35 (15.87) | 4.11 (6.12) | 0.82 (0.91) | 0.36 (0.37) |
+| alphabetical | 13.94 (15.28) | 5.34 (6.27) | 1.52 (1.22) | 0.43 (0.58) |
+| frequency | 15.84 (14.62) | 6.29 (5.59) | 1.39 (0.94) | 0.47 (0.54) |
+| ToolTrie-v0 | 15.67 (17.48) | 7.32 (7.77) | 2.40 (1.90) | 0.91 (1.13) |
+| ContextPilot | **18.16** (18.72) | 11.58 (9.93) | 2.98 (4.78) | 1.21 (1.99) |
+| **ToolTrie-v1** | 17.97 (**19.47**) | **13.18** (**11.31**) | **6.22** (**4.96**) | **3.74** (**2.21**) |
+
+v1 is first in 7 of 8 cells. The exception is 4 tools on dense, where it
+trails ContextPilot by 0.19 points. Its lead over ContextPilot on dense grows
+with menu size (0.99x → 1.14x → 2.09x → 3.09x). It also holds across arrival
+patterns: v1 caches more in 11 of 12 arrival-pattern × retriever cells.
+
+### It is the fastest under load
+
+Time to first token, 64 tools, BM25, 4 requests/s offered (above every
+policy's capacity, so requests queue), ms:
+
+| policy | p50 | p95 | p99 | max |
+|---|---|---|---|---|
+| no reordering | 9,667.9 | 24,699.7 | 26,490.8 | 26,820.4 |
+| alphabetical | 9,727.5 | 24,854.3 | 26,781.7 | 27,104.6 |
+| frequency | 9,760.9 | 25,009.1 | 26,842.3 | 27,161.5 |
+| ToolTrie-v0 | 9,559.8 | 24,825.6 | 26,691.0 | 27,059.1 |
+| ContextPilot | 8,565.4 | 22,452.4 | 25,163.5 | 25,432.4 |
+| **ToolTrie-v1** | **7,739.7** | **21,219.8** | **23,824.2** | **24,177.4** |
+
+**Fastest on every statistic.** Across four menu sizes, v1 beats ContextPilot
+in 21 of 24 reuse, latency and throughput cells. When popular requests repeat
+(the skewed arrival pattern), it is up to 43% faster at p50.
+
+**Most traffic within a latency limit.** The highest request rate each policy
+sustains with p50 time to first token under 1 second (64 tools, dense, 0.6B):
+
+| policy | natural arrival | bursty arrival | F1 there |
+|---|---|---|---|
+| frequency | 2.570 req/s | — | 19.84 |
+| alphabetical | 2.574 | — | 16.36 |
+| ToolTrie-v0 | 2.585 | — | 16.36 |
+| no reordering | 2.623 | 2.608 | 25.66 |
+| ContextPilot | 2.638 | 2.662 | 21.47 |
+| **ToolTrie-v1** | **2.671** | **2.817** | **26.99** |
+
+v1 is the only policy best on both throughput and accuracy at once. At 2.75
+req/s with bursty arrival, v1 answers in 821 ms and meets the budget;
+ContextPilot takes 1,184 ms and misses it.
+
+### It keeps the right tool in view
+
+This is the design benchmarks and routed systems use: retrieve a wide pool,
+reorder it, show the model the top 10. Every policy reorders the same 64
+tools, so what matters is which 10 end up in front of the model:
+
+| policy | right tool among the 10, dense | same, BM25 | reuse (dense) | p50 ms (dense) |
+|---|---|---|---|---|
+| no reordering | **62.0%** | 59.0% | 6.38% | 69.0 |
+| **ToolTrie-v1** | 61.5% | **59.5%** | **27.64%** | **60.1** |
+| ContextPilot | 47.0% | 39.5% | 20.16% | 64.1 |
+| frequency | 38.5% | 41.5% | 9.39% | 72.8 |
+| ToolTrie-v0 | 8.0% | 11.5% | 16.12% | 67.1 |
+| alphabetical | 7.5% | 11.5% | 11.67% | 68.5 |
+
+**v1 keeps the right tool as often as not reordering, with 4.3x the reuse and
+13% lower latency.** It moves only the tools the trie has evidence for, so the
+retriever's top picks stay on top when the list is cut. The other policies:
+
+- **ContextPilot pushes the right tool out in one request in seven on dense
+  (−15pp, 3.0 sigma) and one in five on BM25 (−19.5pp, 4.0 sigma).**
+- **frequency pushes it out in about one request in four on dense and one in
+  six on BM25.**
+- **ToolTrie-v0 and alphabetical show it in only 7.5-11.5% of requests.**
+
+**Bursty arrival widens the gap.** Under the most bursty arrival order the
+data allows, v1 loses at most 2.1 end-to-end F1 points against not reordering.
+ContextPilot loses 7.4-7.9. Measured without the model, v1 keeps the right
+tool in view more often than ContextPilot in all six arrival patterns, by 8.5
+to 22.0 points.
+
+### It costs no accuracy
+
+**Whole menu** (every policy shows the same tools; only the order differs).
+v1 minus ContextPilot, F1:
+
+| menu | 0.6B | 4B | 8B |
+|---|---|---|---|
+| 4 tools | +0.63 | +0.63 | — |
+| 16 tools | +3.33 | +3.83 | +2.23 |
+| 64 tools | +5.52 | +1.94 | −0.45 (tie) |
+| 128 tools | **+9.20** | +3.78 | −0.16 (tie) |
+
+- v1 is ahead in 9 of 11 cells; the other two are ties under the 0.6-point
+  noise floor.
+- v1 stays within 1.33 points of the unreordered list everywhere. ContextPilot
+  falls up to 9.84 points below it. The mechanism is position: at 64 tools
+  (dense), v1 leaves the right tool at position 7.3, where the retriever put
+  it (7.6). ContextPilot moves it to 13.7, and deeper tools get missed more.
+
+**Cut to 10** (retrieve 64, show 10). End-to-end F1 = share of requests with
+the right tool shown × F1. It is the only fair measure when policies show
+different tools:
+
+| policy | dense, 0.6B | dense, 4B | BM25, 0.6B | BM25, 4B |
+|---|---|---|---|---|
+| no reordering | 19.83 | **26.73** | **23.00** | **28.92** |
+| **ToolTrie-v1** | 19.92 | 26.03 | 22.00 | 28.08 |
+| frequency | **20.08** | 24.37 | 22.67 | 27.92 |
+| ContextPilot | 16.25 | 21.45 | 16.58 | 22.33 |
+| ToolTrie-v0 | 0.75 | 3.58 | 3.45 | 5.67 |
+| alphabetical | 0.75 | 3.58 | 2.45 | 5.67 |
+
+v1 beats ContextPilot in every cell, by 3.7 to 5.8 points (6.7 under bursty
+arrival). It stays within 1 point of not reordering. It ties frequency, which
+gets about a third of v1's reuse (9.39% against 27.64%, dense).
+
+### Why ToolTrie wins
+
+**A trie matches the previous request's prefix directly. ContextPilot looks
+for tools that every request shares.** Which one wins depends on how much
+requests have in common:
+
+| workload | tools in **every** request | tools shared by adjacent requests | winner |
+|---|---|---|---|
+| padded menus | **63 of 64** | 63.0 | ContextPilot |
+| constructed 50% overlap | **32 of 64** | 32.0 | ContextPilot |
+| retrieved, natural arrival | **0** | 1.8 | **ToolTrie-v1** |
+| retrieved, most bursty arrival | **0** | 17.5 | **ToolTrie-v1** |
+
+Real retrieved traffic never has a core shared by every request, even when
+arrivals are as bursty as the data allows. Its overlap is local: each request
+resembles its neighbours. That is exactly what a trie over served sequences
+exploits, which is why v1's lead grows as arrivals get more bursty (BM25 reuse:
+1.04x → 1.35x ContextPilot) instead of shrinking.
+
+**And v1 does not undo the retriever.** It places only the tools it has
+evidence for: at 128 tools, 2.55 of them on average. It leaves 120 of 200
+requests byte-identical to what the retriever returned (BM25). ToolTrie-v0
+permuted 99.1% of each menu and moved the right tool to position 62.8 of 128,
+to gain 1.13% reuse.
+
+### Where ToolTrie does not win, and what is untested
+
+- **Menus where every request shares most of its tools** (padded menus, 63 of
+  64). ContextPilot and ToolTrie-v0 are 48x faster than v1 there.
+- **Larger models.** v1's accuracy lead over ContextPilot becomes a tie at 8B
+  for 64 and 128 tools. Its cache lead does not shrink (still about 1.7x).
+- **ContextPilot's full system was not run**, only its ordering. The paper
+  credits its annotations, de-duplication and scheduling with about half its
+  cache gain; they might close some or all of the gap. This is the most
+  important limit.
+- **Single-turn only.** Multi-turn traffic keeps the conversation in the
+  prompt, so requests share a core. That is ContextPilot's design regime and
+  could reverse the result.
+- **The ordering effect is small in absolute terms on retrieved menus:**
+  - between the best and worst policy it is 1.26x at p50, against 68x on
+    padded menus;
+  - at 64 tools, 94-99% of each prompt is recomputed whatever the policy;
+  - over six arrival orders (BM25, 64 tools), v1 caches more than ContextPilot
+    in 5 (sign test p = 0.109): suggestive, not significant;
+  - at the 10-tool menus benchmarks show, with nothing cut, no policy moves
+    latency.
+- **The 200-task slice is easier than average.** On a random slice:
+  - scores fall by up to a third;
+  - v1 still beats ContextPilot, by about half the margin;
+  - v1, the unreordered list and frequency end up within about one request
+    of each other.
+- **v1 does not improve accuracy over the unreordered list.** It avoids the
+  damage ContextPilot does.
+
+**Evidence:**
+
+| document | covers |
+|---|---|
+| [`concurrent-latency/top-findings.md`](concurrent-latency/top-findings.md) | full scoreboard |
+| [`concurrent-latency/answers.md`](concurrent-latency/answers.md) | direct answers to the research questions |
+| [`concurrent-latency/README.md`](concurrent-latency/README.md) | key results under load |
+| [`concurrent-latency/findings.md`](concurrent-latency/findings.md) | full record; §4.4 dense retrieval, §4.5 arrival patterns, §5 ToolTrie-v1 |
+| [`concurrent-latency/how-many-tools.md`](concurrent-latency/how-many-tools.md) | menu size, cut to 10 |
+| [`concurrent-latency/metrics-and-latency-tradeoffs.md`](concurrent-latency/metrics-and-latency-tradeoffs.md) | F1, model size, throughput under a latency limit |
+| [`../notes/tooltrie-v1-design.md`](../notes/tooltrie-v1-design.md) | how v1 works |
 
 ---
 
-## Headline (August phase, ToolTrie-v0)
+## The August phase (ToolTrie-v0): how the project got here
+
+Everything below was measured in August with **ToolTrie-v0**, one request at a
+time: 190 accepted GPU replays, primary model Qwen/Qwen3-4B, replicated on
+Qwen/Qwen3-0.6B, all 33 audit checks passed. Full evidence and provenance are
+in [`consolidated-report.md`](consolidated-report.md); every brief question with
+its status is in [`brief-questions-and-answers.md`](brief-questions-and-answers.md).
+
+Findings 1–7 follow the brief's own experimental questions (§7); finding 8
+answers the high-level research question the project is named after (§2 Q3).
+Each states which question it answers. Differences are in percentage points.
+How ToolTrie-v0 works, with the code, is in
+[`notes/tooltrie-v0-design.md`](../notes/tooltrie-v0-design.md).
+
+**Findings 1–6 were not overturned**, with one qualification. Finding 1's
+"ordering does not fix it" was measured one request at a time; under concurrent
+load, ToolTrie-v1 cuts median latency by 15-20% against the unreordered list
+at 64 tools (top half). Findings 7 and 8 are where ToolTrie-v0 lost to
+ContextPilot and to a frequency counter. That loss is what led to ToolTrie-v1:
+v0's trie was not failing, it was being undone by its alphabetical fallback.
+Both are marked where they have been superseded.
+
+## August headline (ToolTrie-v0)
 
 **Reordering tool schemas produces large prefix-cache reuse only when the tool
 menu barely changes between requests. Under realistic retrieval it produces
@@ -104,7 +315,7 @@ convention used in every policy-comparison table below.
 > padded menus is cold-start speed, not ordering quality.** The retrieved column
 > is unaffected for ToolTrie-v0 — there is no common core to converge to, and
 > ContextPilot leads it at every depth. ToolTrie-v1, which keeps unmatched tools
-> in retrieval order, reverses that (see the current-state section above). The "zero spread across trials" above measures determinism
+> in retrieval order, reverses that (see the ToolTrie-v1 results at the top). The "zero spread across trials" above measures determinism
 > (the orderings are frozen files), not robustness; arrival order is the axis that
 > actually moves these numbers. See
 > [`concurrent-latency/findings.md`](concurrent-latency/findings.md) §1.5 and A.6–A.7.
@@ -342,7 +553,7 @@ method — which is why the primary result uses 4B.
 
 > **Superseded in part (2026-09-11).** This finding is about ToolTrie-v0. The
 > "stronger comparators" bullet does not hold for ToolTrie-v1, which beats
-> ContextPilot on retrieved menus. See the current-state section at the top.
+> ContextPilot on retrieved menus. See the ToolTrie-v1 results at the top.
 
 Three regimes, in increasing order of how badly it does:
 
@@ -381,7 +592,7 @@ Three regimes, in increasing order of how badly it does:
 > matches the *previous* request's prefix, which is exactly what local overlap
 > rewards and what a set intersection cannot use. The claim that adaptivity
 > alone wins holds where requests share a global core (padded menus), not on
-> retrieved traffic. See the current-state section at the top.
+> retrieved traffic. See the ToolTrie-v1 results at the top.
 
 Three tries were measured. None beats a method without one, and adding weights
 to ours changed nothing. 

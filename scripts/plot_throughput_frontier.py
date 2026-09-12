@@ -67,6 +67,8 @@ CONFIGS = {
         rates_text="0.25, 0.4, 0.5, 0.6, 0.7, 0.8",
         source="cluster/results/sla-4b-single-20260912-175313",
         xaxis_note=" - log scale",
+        inset=dict(x0=0.058, x1=0.30, y0=0.245, y1=0.41,
+                   title="p50 TTFT speedup vs no reordering"),
         footnote_extra=" No arm reaches a 1 s p50 at 4B, so the 2 s budget is post-hoc.",
     ),
 }
@@ -191,6 +193,28 @@ def main() -> None:
         s.append(f'<line x1="{xv:.1f}" y1="{sy(sla["tooltrie_v1"]):.1f}" x2="{xv + (-26 if right else 26):.1f}" y2="{ay-14:.1f}" stroke="{INK3}" stroke-width="1"/>')
         s.append(f'<text x="{tx:.1f}" y="{ay-10:.1f}" font-size="12.5" font-weight="600" fill="{INK}" text-anchor="{anchor}">{sgain:+.1f}% throughput within the budget</text>')
         s.append(f'<text x="{tx:.1f}" y="{ay+8:.1f}" font-size="11.5" fill="{INK2}" text-anchor="{anchor}">{sla["tooltrie_v1"]:.2f} vs {sla["original"]:.2f} req/s sustained</text>')
+
+    # inset: the gap itself, which the frontier can only show as horizontal distance
+    ins = cfg.get("inset")
+    if ins and cfg.get("focus"):
+        ix0, ix1 = sx(ins["x0"]), sx(ins["x1"])
+        iy0, iy1 = sy(ins["y0"]), sy(ins["y1"])          # iy0 is the baseline (lower on screen)
+        base = {r: 1 / x for r, x, _ in data["original"]}
+        ratios = [(r, base[r] * x) for r, x, _ in data[cfg["focus"]]]   # p50_none / p50_v1
+        peak = max(v for _, v in ratios)
+        s.append(f'<text x="{ix0:.1f}" y="{iy1-10:.1f}" font-size="11.5" font-weight="600" fill="{INK2}">{ins["title"]}</text>')
+        s.append(f'<line x1="{ix0:.1f}" y1="{iy0:.1f}" x2="{ix1:.1f}" y2="{iy0:.1f}" stroke="{INK3}" stroke-width="1"/>')
+        n = len(ratios); slot = (ix1 - ix0) / n; bw = slot * 0.56
+        for i, (rate, ratio) in enumerate(ratios):
+            h = (iy0 - iy1 + 12) * (ratio - 1) / (peak - 1) if peak > 1 else 0
+            bx = ix0 + i * slot + (slot - bw) / 2
+            s.append(f'<rect x="{bx:.1f}" y="{iy0-h:.1f}" width="{bw:.1f}" height="{max(h,0.5):.1f}" '
+                     f'fill="#2a78d6" rx="2"/>')
+            s.append(f'<text x="{bx+bw/2:.1f}" y="{iy0-h-5:.1f}" font-size="10" font-weight="600" '
+                     f'fill="{INK}" text-anchor="middle">{ratio:.2f}x</text>')
+            s.append(f'<text x="{bx+bw/2:.1f}" y="{iy0+13:.1f}" font-size="9.5" fill="{INK3}" '
+                     f'text-anchor="middle">{rate:g}</text>')
+        s.append(f'<text x="{ix0:.1f}" y="{iy0+28:.1f}" font-size="9.5" fill="{INK3}">offered req/s</text>')
 
     # legend
     lx0, ly0 = W - R + 24, T + 8

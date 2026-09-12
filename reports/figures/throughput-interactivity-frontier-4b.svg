@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="940" height="632" viewBox="0 0 940 632" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif">
+<rect width="940" height="632" fill="#fcfcfb"/>
+<text x="92" y="38" font-size="19" font-weight="600" fill="#0b0b0b">ToolTrie-v1 serves the same load 1.5x faster at Qwen3-4B</text>
+<text x="92" y="62" font-size="13.5" fill="#52514e">Shaded band: the interactivity ToolTrie-v1 gains over the best rival at each offered rate. Fastest at all six rates; log x-axis.</text>
+<line x1="92" y1="478.2" x2="690" y2="478.2" stroke="#e3e2de" stroke-width="1"/>
+<text x="80" y="482.2" font-size="12" fill="#7a7973" text-anchor="end">0.25</text>
+<line x1="92" y1="370.9" x2="690" y2="370.9" stroke="#e3e2de" stroke-width="1"/>
+<text x="80" y="374.9" font-size="12" fill="#7a7973" text-anchor="end">0.40</text>
+<line x1="92" y1="299.4" x2="690" y2="299.4" stroke="#e3e2de" stroke-width="1"/>
+<text x="80" y="303.4" font-size="12" fill="#7a7973" text-anchor="end">0.50</text>
+<line x1="92" y1="227.9" x2="690" y2="227.9" stroke="#e3e2de" stroke-width="1"/>
+<text x="80" y="231.9" font-size="12" fill="#7a7973" text-anchor="end">0.60</text>
+<line x1="92" y1="156.4" x2="690" y2="156.4" stroke="#e3e2de" stroke-width="1"/>
+<text x="80" y="160.4" font-size="12" fill="#7a7973" text-anchor="end">0.70</text>
+<line x1="122.8" y1="92" x2="122.8" y2="514" stroke="#e3e2de" stroke-width="1"/>
+<text x="122.8" y="536" font-size="12" fill="#7a7973" text-anchor="middle">0.06</text>
+<line x1="232.6" y1="92" x2="232.6" y2="514" stroke="#e3e2de" stroke-width="1"/>
+<text x="232.6" y="536" font-size="12" fill="#7a7973" text-anchor="middle">0.1</text>
+<line x1="319.7" y1="92" x2="319.7" y2="514" stroke="#e3e2de" stroke-width="1"/>
+<text x="319.7" y="536" font-size="12" fill="#7a7973" text-anchor="middle">0.15</text>
+<line x1="381.5" y1="92" x2="381.5" y2="514" stroke="#e3e2de" stroke-width="1"/>
+<text x="381.5" y="536" font-size="12" fill="#7a7973" text-anchor="middle">0.2</text>
+<line x1="468.7" y1="92" x2="468.7" y2="514" stroke="#e3e2de" stroke-width="1"/>
+<text x="468.7" y="536" font-size="12" fill="#7a7973" text-anchor="middle">0.3</text>
+<line x1="578.5" y1="92" x2="578.5" y2="514" stroke="#e3e2de" stroke-width="1"/>
+<text x="578.5" y="536" font-size="12" fill="#7a7973" text-anchor="middle">0.5</text>
+<line x1="665.6" y1="92" x2="665.6" y2="514" stroke="#e3e2de" stroke-width="1"/>
+<text x="665.6" y="536" font-size="12" fill="#7a7973" text-anchor="middle">0.75</text>
+<line x1="92" y1="514" x2="690" y2="514" stroke="#7a7973" stroke-width="1"/>
+<line x1="92" y1="92" x2="92" y2="514" stroke="#7a7973" stroke-width="1"/>
+<text x="391" y="564" font-size="13" fill="#52514e" text-anchor="middle">interactivity: responses per second per user (1 / p50 time to first token) - log scale</text>
+<text transform="translate(26,303) rotate(-90)" font-size="13" fill="#52514e" text-anchor="middle">aggregate throughput (requests per second)</text>
+<path d="M650.7,477.2 L609.8,369.7 L558.9,298.3 L471.0,227.0 L351.2,156.0 L153.7,125.1" fill="none" stroke="#eb6834" stroke-width="1.8" stroke-linejoin="round" opacity="0.62"/>
+<circle cx="650.7" cy="477.2" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2" opacity="0.62"/>
+<circle cx="609.8" cy="369.7" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2" opacity="0.62"/>
+<circle cx="558.9" cy="298.3" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2" opacity="0.62"/>
+<circle cx="471.0" cy="227.0" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2" opacity="0.62"/>
+<circle cx="351.2" cy="156.0" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2" opacity="0.62"/>
+<circle cx="153.7" cy="125.1" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2" opacity="0.62"/>
+<path d="M649.5,477.2 L608.5,369.7 L557.3,298.3 L449.5,227.0 L333.8,156.0 L120.0,130.3" fill="none" stroke="#1baf7a" stroke-width="1.8" stroke-linejoin="round" opacity="0.62"/>
+<circle cx="649.5" cy="477.2" r="4" fill="#1baf7a" stroke="#fcfcfb" stroke-width="2" opacity="0.62"/>
+<circle cx="608.5" cy="369.7" r="4" fill="#1baf7a" stroke="#fcfcfb" stroke-width="2" opacity="0.62"/>
+<circle cx="557.3" cy="298.3" r="4" fill="#1baf7a" stroke="#fcfcfb" stroke-width="2" opacity="0.62"/>
+<circle cx="449.5" cy="227.0" r="4" fill="#1baf7a" stroke="#fcfcfb" stroke-width="2" opacity="0.62"/>
+<circle cx="333.8" cy="156.0" r="4" fill="#1baf7a" stroke="#fcfcfb" stroke-width="2" opacity="0.62"/>
+<circle cx="120.0" cy="130.3" r="4" fill="#1baf7a" stroke="#fcfcfb" stroke-width="2" opacity="0.62"/>
+<path d="M648.8,477.2 L607.2,369.7 L557.4,298.3 L447.1,227.0 L322.7,156.0 L113.9,131.8" fill="none" stroke="#8a8983" stroke-width="1.8" stroke-linejoin="round" opacity="0.62"/>
+<circle cx="648.8" cy="477.2" r="4" fill="#8a8983" stroke="#fcfcfb" stroke-width="2" opacity="0.62"/>
+<circle cx="607.2" cy="369.7" r="4" fill="#8a8983" stroke="#fcfcfb" stroke-width="2" opacity="0.62"/>
+<circle cx="557.4" cy="298.3" r="4" fill="#8a8983" stroke="#fcfcfb" stroke-width="2" opacity="0.62"/>
+<circle cx="447.1" cy="227.0" r="4" fill="#8a8983" stroke="#fcfcfb" stroke-width="2" opacity="0.62"/>
+<circle cx="322.7" cy="156.0" r="4" fill="#8a8983" stroke="#fcfcfb" stroke-width="2" opacity="0.62"/>
+<circle cx="113.9" cy="131.8" r="4" fill="#8a8983" stroke="#fcfcfb" stroke-width="2" opacity="0.62"/>
+<line x1="113.9" y1="137.8" x2="113.9" y2="152.8" stroke="#8a8983" stroke-width="1"/>
+<text x="105.9" y="161.8" font-size="12.5" font-weight="600" fill="#0b0b0b" text-anchor="start">no reordering</text>
+<path d="M661.7,477.2 L620.2,371.2 L570.8,300.1 L474.2,227.0 L382.3,156.0 L201.5,115.2" fill="none" stroke="#2a78d6" stroke-width="3.2" stroke-linejoin="round" opacity="1"/>
+<circle cx="661.7" cy="477.2" r="5.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2" opacity="1"/>
+<circle cx="620.2" cy="371.2" r="5.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2" opacity="1"/>
+<circle cx="570.8" cy="300.1" r="5.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2" opacity="1"/>
+<circle cx="474.2" cy="227.0" r="5.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2" opacity="1"/>
+<circle cx="382.3" cy="156.0" r="5.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2" opacity="1"/>
+<circle cx="201.5" cy="115.2" r="5.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2" opacity="1"/>
+<line x1="201.5" y1="109.2" x2="201.5" y2="97.0" stroke="#2a78d6" stroke-width="1"/>
+<text x="201.5" y="89.2" font-size="12.5" font-weight="600" fill="#0b0b0b" text-anchor="middle">ToolTrie-v1</text>
+<path d="M661.7,477.2 L620.2,371.2 L570.8,300.1 L474.2,227.0 L382.3,156.0 L201.5,115.2 L113.9,115.2 L322.7,156.0 L447.1,227.0 L557.3,300.1 L607.2,371.2 L648.8,477.2 Z" fill="#2a78d6" opacity="0.10"/>
+<line x1="113.9" y1="123.5" x2="201.5" y2="123.5" stroke="#52514e" stroke-width="1.5" stroke-dasharray="5 4"/>
+<line x1="113.9" y1="117.5" x2="113.9" y2="129.5" stroke="#52514e" stroke-width="1.5"/>
+<line x1="201.5" y1="117.5" x2="201.5" y2="129.5" stroke="#52514e" stroke-width="1.5"/>
+<text x="188.0" y="107.5" font-size="13" font-weight="600" fill="#0b0b0b" text-anchor="middle">+50% interactivity at 0.8 req/s</text>
+<line x1="578.5" y1="92" x2="578.5" y2="514" stroke="#7a7973" stroke-width="1.5" stroke-dasharray="3 4"/>
+<text x="586.5" y="108" font-size="11.5" fill="#52514e">2 s time to first token</text>
+<circle cx="578.5" cy="311.7" r="3" fill="#2a78d6"/>
+<circle cx="578.5" cy="329.0" r="3" fill="#eb6834"/>
+<circle cx="578.5" cy="331.1" r="3" fill="#1baf7a"/>
+<circle cx="578.5" cy="331.7" r="3" fill="#8a8983"/>
+<line x1="578.5" y1="311.7" x2="552.5" y2="171.0" stroke="#7a7973" stroke-width="1"/>
+<text x="548.5" y="175.0" font-size="12.5" font-weight="600" fill="#0b0b0b" text-anchor="end">+6.2% throughput within the budget</text>
+<text x="548.5" y="193.0" font-size="11.5" fill="#52514e" text-anchor="end">0.48 vs 0.45 req/s sustained</text>
+<text x="714" y="100" font-size="12" font-weight="600" fill="#52514e">ordering policy</text>
+<line x1="714" y1="120" x2="736" y2="120" stroke="#2a78d6" stroke-width="2"/>
+<circle cx="725" cy="120" r="4.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<text x="744" y="124" font-size="12.5" fill="#0b0b0b">ToolTrie-v1</text>
+<line x1="714" y1="142" x2="736" y2="142" stroke="#eb6834" stroke-width="2"/>
+<circle cx="725" cy="142" r="4.5" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
+<text x="744" y="146" font-size="12.5" fill="#0b0b0b">ContextPilot</text>
+<line x1="714" y1="164" x2="736" y2="164" stroke="#1baf7a" stroke-width="2"/>
+<circle cx="725" cy="164" r="4.5" fill="#1baf7a" stroke="#fcfcfb" stroke-width="2"/>
+<text x="744" y="168" font-size="12.5" fill="#0b0b0b">frequency</text>
+<line x1="714" y1="186" x2="736" y2="186" stroke="#8a8983" stroke-width="2"/>
+<circle cx="725" cy="186" r="4.5" fill="#8a8983" stroke="#fcfcfb" stroke-width="2"/>
+<text x="744" y="190" font-size="12.5" fill="#0b0b0b">no reordering</text>
+<text x="714" y="240" font-size="11.5" fill="#52514e">Qwen3-4B, one RTX 3090 (GPU 2),</text>
+<text x="714" y="257" font-size="11.5" fill="#52514e">64 retrieved tools per request,</text>
+<text x="714" y="274" font-size="11.5" fill="#52514e">dense retrieval, vLLM 0.26.0.</text>
+<text x="92" y="602" font-size="11.5" fill="#7a7973">Offered rates 0.25, 0.4, 0.5, 0.6, 0.7, 0.8 req/s, 200 requests each. At 0.8 req/s the median first token arrives after 11.55 s with ToolTrie-v1</text>
+<text x="92" y="620" font-size="11.5" fill="#7a7973">and 17.37 s with no reordering. Source: cluster/results/sla-4b-single-20260912-175313. No arm reaches a 1 s p50 at 4B, so the 2 s budget is post-hoc.</text>
+</svg>

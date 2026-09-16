@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="860" height="520" viewBox="0 0 860 520" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif">
+<rect width="860" height="520" fill="#fcfcfb"/>
+<text x="84" y="38" font-size="19" font-weight="600" fill="#0b0b0b">ToolTrie-v1 is up to 1.5x faster, and the lead grows with load</text>
+<text x="84" y="62" font-size="13.5" fill="#52514e">p50 time-to-first-token speedup of ToolTrie-v1 over each rival, Qwen3-4B. 1.0x means no difference.</text>
+<line x1="84" y1="428.0" x2="820" y2="428.0" stroke="#7a7973" stroke-width="1"/>
+<text x="72" y="432.0" font-size="12" fill="#7a7973" text-anchor="end">1.0x</text>
+<line x1="84" y1="374.0" x2="820" y2="374.0" stroke="#e3e2de" stroke-width="1"/>
+<text x="72" y="378.0" font-size="12" fill="#7a7973" text-anchor="end">1.1x</text>
+<line x1="84" y1="320.0" x2="820" y2="320.0" stroke="#e3e2de" stroke-width="1"/>
+<text x="72" y="324.0" font-size="12" fill="#7a7973" text-anchor="end">1.2x</text>
+<line x1="84" y1="266.0" x2="820" y2="266.0" stroke="#e3e2de" stroke-width="1"/>
+<text x="72" y="270.0" font-size="12" fill="#7a7973" text-anchor="end">1.3x</text>
+<line x1="84" y1="212.0" x2="820" y2="212.0" stroke="#e3e2de" stroke-width="1"/>
+<text x="72" y="216.0" font-size="12" fill="#7a7973" text-anchor="end">1.4x</text>
+<line x1="84" y1="158.0" x2="820" y2="158.0" stroke="#e3e2de" stroke-width="1"/>
+<text x="72" y="162.0" font-size="12" fill="#7a7973" text-anchor="end">1.5x</text>
+<line x1="84" y1="104.0" x2="820" y2="104.0" stroke="#e3e2de" stroke-width="1"/>
+<text x="72" y="108.0" font-size="12" fill="#7a7973" text-anchor="end">1.6x</text>
+<text transform="translate(28,266) rotate(-90)" font-size="13" fill="#52514e" text-anchor="middle">p50 TTFT speedup (rival / ToolTrie-v1)</text>
+<rect x="106.5" y="394.6" width="36.8" height="33.4" fill="#8a8983" rx="3"/>
+<text x="124.9" y="388.6" font-size="11" font-weight="600" fill="#0b0b0b" text-anchor="middle">1.06x</text>
+<rect x="147.3" y="399.6" width="36.8" height="28.4" fill="#eb6834" rx="3"/>
+<text x="165.7" y="393.6" font-size="11" font-weight="600" fill="#0b0b0b" text-anchor="middle">1.05x</text>
+<text x="145.3" y="450" font-size="12" fill="#7a7973" text-anchor="middle">0.25</text>
+<rect x="229.2" y="394.4" width="36.8" height="33.6" fill="#8a8983" rx="3"/>
+<text x="247.6" y="388.4" font-size="11" font-weight="600" fill="#0b0b0b" text-anchor="middle">1.06x</text>
+<rect x="270.0" y="401.2" width="36.8" height="26.8" fill="#eb6834" rx="3"/>
+<text x="288.4" y="395.2" font-size="11" font-weight="600" fill="#0b0b0b" text-anchor="middle">1.05x</text>
+<text x="268.0" y="450" font-size="12" fill="#7a7973" text-anchor="middle">0.4</text>
+<rect x="351.9" y="393.2" width="36.8" height="34.8" fill="#8a8983" rx="3"/>
+<text x="370.3" y="387.2" font-size="11" font-weight="600" fill="#0b0b0b" text-anchor="middle">1.06x</text>
+<rect x="392.7" y="397.3" width="36.8" height="30.7" fill="#eb6834" rx="3"/>
+<text x="411.1" y="391.3" font-size="11" font-weight="600" fill="#0b0b0b" text-anchor="middle">1.06x</text>
+<text x="390.7" y="450" font-size="12" fill="#7a7973" text-anchor="middle">0.5</text>
+<rect x="474.5" y="355.2" width="36.8" height="72.8" fill="#8a8983" rx="3"/>
+<text x="492.9" y="349.2" font-size="11" font-weight="600" fill="#0b0b0b" text-anchor="middle">1.13x</text>
+<rect x="515.3" y="419.8" width="36.8" height="8.2" fill="#eb6834" rx="3"/>
+<text x="533.7" y="413.8" font-size="11" font-weight="600" fill="#0b0b0b" text-anchor="middle">1.02x</text>
+<text x="513.3" y="450" font-size="12" fill="#7a7973" text-anchor="middle">0.6</text>
+<rect x="597.2" y="255.3" width="36.8" height="172.7" fill="#8a8983" rx="3"/>
+<text x="615.6" y="249.3" font-size="11" font-weight="600" fill="#0b0b0b" text-anchor="middle">1.32x</text>
+<rect x="638.0" y="343.8" width="36.8" height="84.2" fill="#eb6834" rx="3"/>
+<text x="656.4" y="337.8" font-size="11" font-weight="600" fill="#0b0b0b" text-anchor="middle">1.16x</text>
+<text x="636.0" y="450" font-size="12" fill="#7a7973" text-anchor="middle">0.7</text>
+<rect x="719.9" y="156.2" width="36.8" height="271.8" fill="#8a8983" rx="3"/>
+<text x="738.3" y="150.2" font-size="11" font-weight="600" fill="#0b0b0b" text-anchor="middle">1.50x</text>
+<rect x="760.7" y="293.5" width="36.8" height="134.5" fill="#eb6834" rx="3"/>
+<text x="779.1" y="287.5" font-size="11" font-weight="600" fill="#0b0b0b" text-anchor="middle">1.25x</text>
+<text x="758.7" y="450" font-size="12" fill="#7a7973" text-anchor="middle">0.8</text>
+<text x="452" y="476" font-size="13" fill="#52514e" text-anchor="middle">offered load (requests per second)</text>
+<rect x="84" y="74" width="12" height="12" fill="#8a8983" rx="2"/>
+<text x="102" y="84" font-size="12.5" fill="#0b0b0b">ToolTrie-v1 vs no reordering</text>
+<rect x="314" y="74" width="12" height="12" fill="#eb6834" rx="2"/>
+<text x="332" y="84" font-size="12.5" fill="#0b0b0b">ToolTrie-v1 vs ContextPilot</text>
+<text x="84" y="508" font-size="11.5" fill="#7a7973">200 requests per bar, one run per point, all arms on one GPU. Source: cluster/results/sla-4b-single-20260912-175313.</text>
+</svg>

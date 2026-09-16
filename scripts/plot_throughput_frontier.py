@@ -54,7 +54,7 @@ CONFIGS = {
         pattern="sla4b1-k64-{arm}-rate*.json",
         out="reports/figures/throughput-interactivity-frontier-4b.svg",
         focus="tooltrie_v1",
-        title="ToolTrie-v1 serves the same load 1.5x faster at Qwen3-4B",
+        title="ToolTrie-v1 holds the outer frontier at Qwen3-4B",
         subtitle="Shaded band: the interactivity ToolTrie-v1 gains over the best rival at each offered rate. "
                  "Fastest at all six rates; log x-axis.",
         xscale="log",
@@ -67,8 +67,7 @@ CONFIGS = {
         rates_text="0.25, 0.4, 0.5, 0.6, 0.7, 0.8",
         source="cluster/results/sla-4b-single-20260912-175313",
         xaxis_note=" - log scale",
-        inset=dict(x0=0.058, x1=0.30, y0=0.245, y1=0.41,
-                   title="p50 TTFT speedup vs no reordering"),
+        speedup_out="reports/figures/ttft-speedup-4b.svg",
         footnote_extra=" No arm reaches a 1 s p50 at 4B, so the 2 s budget is post-hoc.",
     ),
 }
@@ -194,28 +193,6 @@ def main() -> None:
         s.append(f'<text x="{tx:.1f}" y="{ay-10:.1f}" font-size="12.5" font-weight="600" fill="{INK}" text-anchor="{anchor}">{sgain:+.1f}% throughput within the budget</text>')
         s.append(f'<text x="{tx:.1f}" y="{ay+8:.1f}" font-size="11.5" fill="{INK2}" text-anchor="{anchor}">{sla["tooltrie_v1"]:.2f} vs {sla["original"]:.2f} req/s sustained</text>')
 
-    # inset: the gap itself, which the frontier can only show as horizontal distance
-    ins = cfg.get("inset")
-    if ins and cfg.get("focus"):
-        ix0, ix1 = sx(ins["x0"]), sx(ins["x1"])
-        iy0, iy1 = sy(ins["y0"]), sy(ins["y1"])          # iy0 is the baseline (lower on screen)
-        base = {r: 1 / x for r, x, _ in data["original"]}
-        ratios = [(r, base[r] * x) for r, x, _ in data[cfg["focus"]]]   # p50_none / p50_v1
-        peak = max(v for _, v in ratios)
-        s.append(f'<text x="{ix0:.1f}" y="{iy1-10:.1f}" font-size="11.5" font-weight="600" fill="{INK2}">{ins["title"]}</text>')
-        s.append(f'<line x1="{ix0:.1f}" y1="{iy0:.1f}" x2="{ix1:.1f}" y2="{iy0:.1f}" stroke="{INK3}" stroke-width="1"/>')
-        n = len(ratios); slot = (ix1 - ix0) / n; bw = slot * 0.56
-        for i, (rate, ratio) in enumerate(ratios):
-            h = (iy0 - iy1 + 12) * (ratio - 1) / (peak - 1) if peak > 1 else 0
-            bx = ix0 + i * slot + (slot - bw) / 2
-            s.append(f'<rect x="{bx:.1f}" y="{iy0-h:.1f}" width="{bw:.1f}" height="{max(h,0.5):.1f}" '
-                     f'fill="#2a78d6" rx="2"/>')
-            s.append(f'<text x="{bx+bw/2:.1f}" y="{iy0-h-5:.1f}" font-size="10" font-weight="600" '
-                     f'fill="{INK}" text-anchor="middle">{ratio:.2f}x</text>')
-            s.append(f'<text x="{bx+bw/2:.1f}" y="{iy0+13:.1f}" font-size="9.5" fill="{INK3}" '
-                     f'text-anchor="middle">{rate:g}</text>')
-        s.append(f'<text x="{ix0:.1f}" y="{iy0+28:.1f}" font-size="9.5" fill="{INK3}">offered req/s</text>')
-
     # legend
     lx0, ly0 = W - R + 24, T + 8
     s.append(f'<text x="{lx0}" y="{ly0}" font-size="12" font-weight="600" fill="{INK2}">ordering policy</text>')
@@ -234,6 +211,60 @@ def main() -> None:
           + f"\n  v1 interactivity vs no reordering: {gain:+.1f}%"
           + f"\n  max throughput within p50 < {1/cfg['budget']:g} s: "
           + ", ".join(f"{a} {sla[a]:.3f}" if sla[a] else f"{a} n/a" for a, _, _ in SERIES))
+    if cfg.get("speedup_out"):
+        speedup_chart(cfg, data)
+
+
+def speedup_chart(cfg, data) -> None:
+    """p50 TTFT speedup of the focal policy over each rival, per offered rate.
+
+    Ratio = rival p50 / focal p50, so 1.0x is parity. Bars are coloured by the
+    rival they are measured against, matching the frontier legend.
+    """
+    focus = cfg["focus"]
+    rivals = [("original", "vs no reordering", "#8a8983"), ("cp_online", "vs ContextPilot", "#eb6834")]
+    rates = [r for r, _, _ in data[focus]]
+    p50 = {a: {r: 1 / x for r, x, _ in data[a]} for a, _, _ in SERIES}
+    ratio = {a: [p50[a][r] / p50[focus][r] for r in rates] for a, _, _ in rivals}
+
+    w, h = 860, 520
+    l, r_, t_, b = 84, 40, 104, 92
+    ymin, ymax = 1.0, 1.6
+    sy = lambda v: h - b - (v - ymin) / (ymax - ymin) * (h - t_ - b)
+    slot = (w - l - r_) / len(rates)
+    bw = slot * 0.30
+
+    s = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" viewBox="0 0 {w} {h}" '
+         f'font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif">',
+         f'<rect width="{w}" height="{h}" fill="{SURFACE}"/>',
+         f'<text x="{l}" y="38" font-size="19" font-weight="600" fill="{INK}">ToolTrie-v1 is up to 1.5x faster, and the lead grows with load</text>',
+         f'<text x="{l}" y="62" font-size="13.5" fill="{INK2}">p50 time-to-first-token speedup of ToolTrie-v1 over each rival, Qwen3-4B. 1.0x means no difference.</text>']
+    for v in [1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6]:
+        s.append(f'<line x1="{l}" y1="{sy(v):.1f}" x2="{w-r_}" y2="{sy(v):.1f}" stroke="{INK3 if v == 1.0 else GRID}" stroke-width="1"/>')
+        s.append(f'<text x="{l-12}" y="{sy(v)+4:.1f}" font-size="12" fill="{INK3}" text-anchor="end">{v:.1f}x</text>')
+    s.append(f'<text transform="translate(28,{(t_+h-b)/2:.0f}) rotate(-90)" font-size="13" fill="{INK2}" text-anchor="middle">p50 TTFT speedup (rival / ToolTrie-v1)</text>')
+
+    for i, rate in enumerate(rates):
+        cx = l + i * slot + slot / 2
+        for j, (arm, _, colour) in enumerate(rivals):
+            v = ratio[arm][i]
+            bx = cx - bw - 2 + j * (bw + 4)
+            top_y = sy(v)
+            s.append(f'<rect x="{bx:.1f}" y="{top_y:.1f}" width="{bw:.1f}" height="{max(sy(1.0)-top_y, 0.8):.1f}" fill="{colour}" rx="3"/>')
+            s.append(f'<text x="{bx+bw/2:.1f}" y="{top_y-6:.1f}" font-size="11" font-weight="600" fill="{INK}" text-anchor="middle">{v:.2f}x</text>')
+        s.append(f'<text x="{cx:.1f}" y="{h-b+22:.0f}" font-size="12" fill="{INK3}" text-anchor="middle">{rate:g}</text>')
+    s.append(f'<text x="{(l+w-r_)/2:.0f}" y="{h-b+48:.0f}" font-size="13" fill="{INK2}" text-anchor="middle">offered load (requests per second)</text>')
+
+    lx, ly = l, 84
+    for j, (_, label, colour) in enumerate(rivals):
+        x = lx + j * 230
+        s.append(f'<rect x="{x}" y="{ly-10}" width="12" height="12" fill="{colour}" rx="2"/>')
+        s.append(f'<text x="{x+18}" y="{ly}" font-size="12.5" fill="{INK}">ToolTrie-v1 {label}</text>')
+    s.append(f'<text x="{l}" y="{h-12}" font-size="11.5" fill="{INK3}">200 requests per bar, one run per point, all arms on one GPU. Source: {cfg["source"]}.</text>')
+    s.append("</svg>")
+    Path(cfg["speedup_out"]).write_text("\n".join(s))
+    print(f"{cfg['speedup_out']}\n" + "\n".join(
+        f"  {label}: " + ", ".join(f"{rt:g} {v:.2f}x" for rt, v in zip(rates, ratio[arm])) for arm, label, _ in rivals))
 
 
 if __name__ == "__main__":

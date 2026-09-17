@@ -72,6 +72,10 @@ CONFIGS = {
         xlim=(0.05, 1.0), ylim=(0.22, 0.82),
         xticks=[0.05, 0.1, 0.2, 0.5, 1.0], yticks=[0.3, 0.4, 0.5, 0.6, 0.7, 0.8], yfmt=".1f",
         brackets=[0.7, 0.5],
+        callout=dict(at=0.8, tx=0.072, ty=0.60,
+                     text=["1.50x faster at 0.8 req/s",
+                           "median first token 11.55 s vs 17.37 s",
+                           "(measured at the same offered load)"]),
         caption=["Qwen3-4B, one RTX 3090", "(all arms on the same GPU),",
                  "64 retrieved tools per request,", "dense retrieval, vLLM 0.26.0."],
         rates_text="0.25, 0.4, 0.5, 0.6, 0.7, 0.8",
@@ -216,22 +220,35 @@ def main() -> None:
     for rate in cfg["brackets"]:
         _, ax, ay = next(v for v in trend[BASELINE] if abs(v[0] - rate) < 1e-9)
         by, cx = interp(y_at_x, ax), interp(x_at_y, ay)
-        dash = f'stroke="{INK}" stroke-width="1.4" stroke-dasharray="5 3" fill="none"'
+        dash = f'stroke="{INK}" stroke-width="2" stroke-dasharray="6 3" fill="none"'
         if by is not None:   # vertical leg: throughput at the same interactivity
             s.append(f'<line x1="{sx(ax):.1f}" y1="{sy(ay):.1f}" x2="{sx(ax):.1f}" y2="{sy(by):.1f}" {dash}/>')
-            s.append(f'<line x1="{sx(ax)-5:.1f}" y1="{sy(by):.1f}" x2="{sx(ax)+5:.1f}" y2="{sy(by):.1f}" stroke="{INK}" stroke-width="1.4"/>')
+            s.append(f'<line x1="{sx(ax)-6:.1f}" y1="{sy(by):.1f}" x2="{sx(ax)+6:.1f}" y2="{sy(by):.1f}" stroke="{INK}" stroke-width="2"/>')
+            s.append(f'<line x1="{sx(ax)-6:.1f}" y1="{sy(ay):.1f}" x2="{sx(ax)+6:.1f}" y2="{sy(ay):.1f}" stroke="{INK}" stroke-width="2"/>')
             dy = 100 * (by / ay - 1)
-            s.append(f'<text x="{sx(ax)-8:.1f}" y="{(sy(ay)+sy(by))/2+4:.1f}" font-size="12.5" font-weight="600" fill="{INK}" '
-                     f'text-anchor="end" paint-order="stroke" stroke="{SURFACE}" stroke-width="6">{dy:+.0f}% throughput</text>')
+            s.append(f'<text x="{sx(ax)-8:.1f}" y="{(sy(ay)+sy(by))/2+4:.1f}" font-size="13.5" font-weight="700" fill="{INK}" '
+                     f'text-anchor="end" paint-order="stroke" stroke="{SURFACE}" stroke-width="7">{dy:+.0f}% throughput</text>')
             report.append(f"at {rate:g} no-reordering vertex: throughput {dy:+.1f}%")
         if cx is not None:   # horizontal leg: interactivity at the same throughput
             s.append(f'<line x1="{sx(ax):.1f}" y1="{sy(ay):.1f}" x2="{sx(cx):.1f}" y2="{sy(ay):.1f}" {dash}/>')
-            s.append(f'<line x1="{sx(cx):.1f}" y1="{sy(ay)-5:.1f}" x2="{sx(cx):.1f}" y2="{sy(ay)+5:.1f}" stroke="{INK}" stroke-width="1.4"/>')
+            s.append(f'<line x1="{sx(cx):.1f}" y1="{sy(ay)-6:.1f}" x2="{sx(cx):.1f}" y2="{sy(ay)+6:.1f}" stroke="{INK}" stroke-width="2"/>')
             dx = 100 * (cx / ax - 1)
-            s.append(f'<text x="{(sx(ax)+sx(cx))/2:.1f}" y="{sy(ay)+19:.1f}" font-size="12.5" font-weight="600" fill="{INK}" '
-                     f'text-anchor="middle" paint-order="stroke" stroke="{SURFACE}" stroke-width="6">{dx:+.0f}% interactivity</text>')
+            s.append(f'<text x="{(sx(ax)+sx(cx))/2:.1f}" y="{sy(ay)+19:.1f}" font-size="13.5" font-weight="700" fill="{INK}" '
+                     f'text-anchor="middle" paint-order="stroke" stroke="{SURFACE}" stroke-width="7">{dx:+.0f}% interactivity</text>')
             report.append(f"at {rate:g} no-reordering vertex: interactivity {dx:+.1f}%")
         s.append(f'<circle cx="{sx(ax):.1f}" cy="{sy(ay):.1f}" r="3" fill="{INK}"/>')
+
+    call = cfg.get("callout")
+    if call:  # measured, not interpolated: both arms at the same offered load
+        _, vx, vy = next(v for v in trend[FOCUS] if abs(v[0] - call["at"]) < 1e-9)
+        _, bx2, by2 = next(v for v in trend[BASELINE] if abs(v[0] - call["at"]) < 1e-9)
+        tx0, ty0 = sx(call["tx"]), sy(call["ty"])
+        for px, py in ((vx, vy), (bx2, by2)):
+            s.append(f'<line x1="{tx0:.1f}" y1="{ty0:.1f}" x2="{sx(px):.1f}" y2="{sy(py):.1f}" stroke="{INK3}" stroke-width="1"/>')
+        for i, line in enumerate(call["text"]):
+            s.append(f'<text x="{tx0:.1f}" y="{ty0 + 16 * i:.1f}" font-size="{13.5 if i == 0 else 12}" '
+                     f'font-weight="{700 if i == 0 else 400}" fill="{INK if i == 0 else INK2}" text-anchor="middle" '
+                     f'paint-order="stroke" stroke="{SURFACE}" stroke-width="7">{line}</text>')
 
     # legend
     lx0, ly0 = W - R + 22, T + 8

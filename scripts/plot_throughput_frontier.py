@@ -68,8 +68,9 @@ CONFIGS = {
         pattern="sla4b1-k64-{arm}-rate*.json",
         out="reports/figures/throughput-interactivity-frontier-4b.svg",
         title="ToolTrie-v1 holds the outer throughput–interactivity frontier at Qwen3-4B",
-        xlim=(0.0, 0.95), ylim=(0.15, 1.02),
-        xticks=[0, 0.2, 0.4, 0.6, 0.8], yticks=[0.2, 0.4, 0.6, 0.8, 1.0], yfmt=".1f",
+        xscale="log", axis_x_note=" (log scale)",
+        xlim=(0.05, 1.0), ylim=(0.22, 0.82),
+        xticks=[0.05, 0.1, 0.2, 0.5, 1.0], yticks=[0.3, 0.4, 0.5, 0.6, 0.7, 0.8], yfmt=".1f",
         brackets=[0.7, 0.5],
         caption=["Qwen3-4B, one RTX 3090", "(all arms on the same GPU),",
                  "64 retrieved tools per request,", "dense retrieval, vLLM 0.26.0."],
@@ -180,7 +181,7 @@ def main() -> None:
         s.append(f'<text x="{sx(v):.1f}" y="{H-B+22:.0f}" font-size="12" fill="{INK3}" text-anchor="middle">{v:g}</text>')
     s.append(f'<line x1="{L}" y1="{H-B}" x2="{W-R}" y2="{H-B}" stroke="{INK3}" stroke-width="1"/>')
     s.append(f'<line x1="{L}" y1="{T}" x2="{L}" y2="{H-B}" stroke="{INK3}" stroke-width="1"/>')
-    s.append(f'<text x="{(L+W-R)/2:.0f}" y="{H-B+50:.0f}" font-size="13" fill="{INK2}" text-anchor="middle">interactivity: responses per second per user (1 / time to first token){cfg.get("axis_note", "")}</text>')
+    s.append(f'<text x="{(L+W-R)/2:.0f}" y="{H-B+50:.0f}" font-size="13" fill="{INK2}" text-anchor="middle">interactivity: responses per second per user (1 / time to first token){cfg.get("axis_note", cfg.get("axis_x_note", ""))}</text>')
     s.append(f'<text transform="translate(24,{(T+H-B)/2:.0f}) rotate(-90)" font-size="13" fill="{INK2}" text-anchor="middle">throughput (requests per second){cfg.get("axis_note", "")}</text>')
 
     # clouds: rivals first, the focal policy last so its swath sits on top

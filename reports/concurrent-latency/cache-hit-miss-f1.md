@@ -24,6 +24,24 @@ table (96 replays, every menu size and model) is
 - **So v1 raises the hit rate without costing F1.** ContextPilot and frequency
   raise it too, but in some settings pay for it in F1.
 
+## Where ToolTrie-v1 wins
+
+| where | what v1 wins | by how much |
+|---|---|---|
+| **Retrieve 64, show 10, dense** (realistic setting, 4B) | highest hit rate | **27.6%** vs ContextPilot 20.0%, frequency 9.0%, no reordering 6.2% (1.4x / 3.1x / 4.4x) |
+| | keeps the right tool in the 10 shown | **61.5%** vs ContextPilot 47.0%, frequency 38.5% (ties no reordering, 62.0%) |
+| | end-to-end F1 | **+4.6 points over ContextPilot** (significant) |
+| **Retrieve 64, show 10, BM25** (4B and 0.6B) | end-to-end F1 | **+5.8 and +5.4 points over ContextPilot** (both significant), because v1 keeps the right tool in view for 59.5% of requests vs 39.5% |
+| **64 and 128 tools shown** (4B) | highest hit rate | **2.1x ContextPilot** (4.35% vs 2.10%; 2.19% vs 1.02%), **4-6x frequency and no reordering** |
+| **64 and 128 tools shown** (0.6B) | end-to-end F1 | **+4.5 and +7.9 points over ContextPilot, +5.8 and +7.1 over frequency** (all significant) |
+| **16 tools shown** (4B and 0.6B) | end-to-end F1 | **+2.6 and +2.2 points over ContextPilot** (both significant) |
+| **Qwen3-8B, 16 / 64 / 128 tools** | highest hit rate | 8.15 / 2.41 / 1.09% vs ContextPilot 7.53 / 1.42 / 0.65% |
+| **Serving under load** (4B, from the frontier sweeps) | latency and throughput | fastest policy at all six offered rates on 64-tool menus (1.5x faster than no reordering at 0.8 req/s); on retrieve 64 / show 10 with 32 requests in flight, **+8% throughput over ContextPilot and +23% over no reordering** |
+
+**Where v1 does not win:** ContextPilot caches slightly more on 4-tool menus
+(by 0.2 points) and on BM25 retrieve-64 / show-10 (22.8% vs 21.8%, while losing
+F1), and v1 ties no reordering on F1 everywhere.
+
 ## Retrieval: dense vs sparse, and why dense is the headline
 
 Each request starts with a retrieval step that picks 64 candidate tools out of

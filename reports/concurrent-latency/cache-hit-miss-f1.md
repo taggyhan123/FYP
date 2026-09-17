@@ -24,6 +24,38 @@ table (96 replays, every menu size and model) is
 - **So v1 raises the hit rate without costing F1.** ContextPilot and frequency
   raise it too, but in some settings pay for it in F1.
 
+## Retrieval: dense vs sparse, and why dense is the headline
+
+Each request starts with a retrieval step that picks 64 candidate tools out of
+the 44,453 in ToolRet. **The retriever is not part of ToolTrie or ContextPilot**:
+it runs first and gives every policy the same 64 tools. The policies only
+reorder them, and in the show-10 design the first 10 after reordering are what
+the model sees.
+
+Two retrievers are used. Both read the same parts of each tool (name,
+description, parameter names and values); they differ only in how they match.
+
+| | **dense** (`BAAI/bge-small-en-v1.5`) | **sparse** (BM25) |
+|---|---|---|
+| how it matches | turns the query and each tool into 384-number embeddings and ranks tools by cosine similarity: **similar meaning** matches, even with different words | scores tools by **shared words**, weighting rare words more and repeated words less (k1 = 1.5, b = 0.75); no shared word, no match |
+| right tool among the 64 retrieved | **81.5%** | 75.5% |
+| right tool in the retriever's top 10 | **62.0%** | 59.0% |
+| code | `src/tatm/dense_retrieval.py` | `src/tatm/retrieval.py` |
+
+- **Dense is the realistic setting.** Tool routers mostly match by embedding
+  similarity, because users describe what they want in their own words rather
+  than in the tool's vocabulary. It also finds the right tool more often here,
+  and it is the retriever type ContextPilot's own paper evaluates with.
+- **BM25 is kept as a robustness check, and it matters.** The two retrievers
+  share only 17 of their 64 tools per request on average (range 1-47), so the
+  policies reorder very different candidate lists. That is why the cache winner
+  flips under BM25 (§2) while v1's accuracy advantage over ContextPilot holds
+  under both.
+- **Not tested:** hybrid retrieval (keyword and embedding scores combined, common
+  in production) and larger embedding models (bge-small is small; ContextPilot's
+  paper used a 7B embedding model). Either would change which 64 tools come
+  back.
+
 ## 1. Retrieve 64, show 10 (dense): the realistic setting
 
 Every policy reorders the same 64 retrieved tools and the model sees the first

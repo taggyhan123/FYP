@@ -1,0 +1,322 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="1220" viewBox="0 0 1180 1220" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif">
+<rect width="1180" height="1220" fill="#fcfcfb"/>
+<text x="40.0" y="40.0" font-size="20" font-weight="700" fill="#0b0b0b" text-anchor="start">ToolTrie-v1 vs frequency: up to 1.5x faster, up to +32% throughput, 2-8x the cache reuse, never lower F1</text>
+<text x="40.0" y="64.0" font-size="13" font-weight="400" fill="#52514e" text-anchor="start">Each panel compares only these two policies. Shading: blue where ToolTrie-v1 is better, green where frequency is better.</text>
+<line x1="40" y1="86" x2="62" y2="86" stroke="#2a78d6" stroke-width="2.6"/>
+<circle cx="51" cy="86" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="1.5"/>
+<text x="70.0" y="90.0" font-size="12.5" font-weight="400" fill="#0b0b0b" text-anchor="start">ToolTrie-v1</text>
+<line x1="163.2" y1="86" x2="185.2" y2="86" stroke="#1baf7a" stroke-width="2.6"/>
+<circle cx="174.2" cy="86" r="4" fill="#1baf7a" stroke="#fcfcfb" stroke-width="1.5"/>
+<text x="193.2" y="90.0" font-size="12.5" font-weight="400" fill="#0b0b0b" text-anchor="start">frequency</text>
+<rect x="272.0" y="80" width="22" height="12" fill="#2a78d6" fill-opacity="0.22" rx="2"/>
+<text x="302.0" y="90.0" font-size="12.5" font-weight="400" fill="#0b0b0b" text-anchor="start">ToolTrie-v1 better</text>
+<rect x="445.6" y="80" width="22" height="12" fill="#1baf7a" fill-opacity="0.22" rx="2"/>
+<text x="475.6" y="90.0" font-size="12.5" font-weight="400" fill="#0b0b0b" text-anchor="start">frequency better</text>
+<text x="40.0" y="130.0" font-size="14" font-weight="700" fill="#0b0b0b" text-anchor="start">Speed under load, 64 tools, Qwen3-0.6B</text>
+<text x="40.0" y="148.0" font-size="12" font-weight="400" fill="#52514e" text-anchor="start">v1 faster at 6 of 6 rates; up to 1.41x at 3 req/s</text>
+<line x1="92" y1="376.0" x2="552" y2="376.0" stroke="#e3e2de"/>
+<text x="84.0" y="380.0" font-size="11" font-weight="400" fill="#7a7973" text-anchor="end">0.3</text>
+<line x1="92" y1="335.0" x2="552" y2="335.0" stroke="#e3e2de"/>
+<text x="84.0" y="339.0" font-size="11" font-weight="400" fill="#7a7973" text-anchor="end">0.5</text>
+<line x1="92" y1="279.3" x2="552" y2="279.3" stroke="#e3e2de"/>
+<text x="84.0" y="283.3" font-size="11" font-weight="400" fill="#7a7973" text-anchor="end">1</text>
+<line x1="92" y1="223.7" x2="552" y2="223.7" stroke="#e3e2de"/>
+<text x="84.0" y="227.7" font-size="11" font-weight="400" fill="#7a7973" text-anchor="end">2</text>
+<line x1="92" y1="191.1" x2="552" y2="191.1" stroke="#e3e2de"/>
+<text x="84.0" y="195.1" font-size="11" font-weight="400" fill="#7a7973" text-anchor="end">3</text>
+<text x="112.9" y="392.0" font-size="11" font-weight="400" fill="#7a7973" text-anchor="middle">1</text>
+<text x="217.5" y="392.0" font-size="11" font-weight="400" fill="#7a7973" text-anchor="middle">1.5</text>
+<text x="322.0" y="392.0" font-size="11" font-weight="400" fill="#7a7973" text-anchor="middle">2</text>
+<text x="426.5" y="392.0" font-size="11" font-weight="400" fill="#7a7973" text-anchor="middle">2.5</text>
+<text x="478.8" y="392.0" font-size="11" font-weight="400" fill="#7a7973" text-anchor="middle">2.75</text>
+<text x="531.1" y="392.0" font-size="11" font-weight="400" fill="#7a7973" text-anchor="middle">3</text>
+<line x1="92" y1="376" x2="552" y2="376" stroke="#7a7973"/>
+<line x1="92" y1="168" x2="92" y2="376" stroke="#7a7973"/>
+<text x="322.0" y="410.0" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="middle">offered load (requests per second)</text>
+<text transform="translate(52,272) rotate(-90)" font-size="11.5" fill="#52514e" text-anchor="middle">median time to first token, s (log)</text>
+<polygon points="112.9,359.4 217.5,351.7 217.5,347.6 112.9,356.3" fill="#2a78d6" fill-opacity="0.22"/>
+<polygon points="217.5,351.7 322.0,339.5 322.0,332.1 217.5,347.6" fill="#2a78d6" fill-opacity="0.22"/>
+<polygon points="322.0,339.5 426.5,299.7 426.5,288.7 322.0,332.1" fill="#2a78d6" fill-opacity="0.22"/>
+<polygon points="426.5,299.7 478.8,271.5 478.8,259.7 426.5,288.7" fill="#2a78d6" fill-opacity="0.22"/>
+<polygon points="478.8,271.5 531.1,214.0 531.1,186.5 478.8,259.7" fill="#2a78d6" fill-opacity="0.22"/>
+<path d="M112.9,356.3 L217.5,347.6 L322.0,332.1 L426.5,288.7 L478.8,259.7 L531.1,186.5" fill="none" stroke="#1baf7a" stroke-width="2" stroke-linejoin="round"/>
+<circle cx="112.9" cy="356.3" r="3.4" fill="#1baf7a" stroke="#fcfcfb" stroke-width="1.5"/>
+<circle cx="217.5" cy="347.6" r="3.4" fill="#1baf7a" stroke="#fcfcfb" stroke-width="1.5"/>
+<circle cx="322.0" cy="332.1" r="3.4" fill="#1baf7a" stroke="#fcfcfb" stroke-width="1.5"/>
+<circle cx="426.5" cy="288.7" r="3.4" fill="#1baf7a" stroke="#fcfcfb" stroke-width="1.5"/>
+<circle cx="478.8" cy="259.7" r="3.4" fill="#1baf7a" stroke="#fcfcfb" stroke-width="1.5"/>
+<circle cx="531.1" cy="186.5" r="3.4" fill="#1baf7a" stroke="#fcfcfb" stroke-width="1.5"/>
+<path d="M112.9,359.4 L217.5,351.7 L322.0,339.5 L426.5,299.7 L478.8,271.5 L531.1,214.0" fill="none" stroke="#2a78d6" stroke-width="2.8" stroke-linejoin="round"/>
+<circle cx="112.9" cy="359.4" r="4.2" fill="#2a78d6" stroke="#fcfcfb" stroke-width="1.5"/>
+<circle cx="217.5" cy="351.7" r="4.2" fill="#2a78d6" stroke="#fcfcfb" stroke-width="1.5"/>
+<circle cx="322.0" cy="339.5" r="4.2" fill="#2a78d6" stroke="#fcfcfb" stroke-width="1.5"/>
+<circle cx="426.5" cy="299.7" r="4.2" fill="#2a78d6" stroke="#fcfcfb" stroke-width="1.5"/>
+<circle cx="478.8" cy="271.5" r="4.2" fill="#2a78d6" stroke="#fcfcfb" stroke-width="1.5"/>
+<circle cx="531.1" cy="214.0" r="4.2" fill="#2a78d6" stroke="#fcfcfb" stroke-width="1.5"/>
+<text x="531.1" y="174.5" font-size="13" font-weight="700" fill="#0b0b0b" text-anchor="end" paint-order="stroke" stroke="#fcfcfb" stroke-width="5">1.41x faster</text>
+<text x="620.0" y="130.0" font-size="14" font-weight="700" fill="#0b0b0b" text-anchor="start">Speed under load, 64 tools, Qwen3-4B</text>
+<text x="620.0" y="148.0" font-size="12" font-weight="400" fill="#52514e" text-anchor="start">v1 faster at 6 of 6 rates; up to 1.46x at 0.8 req/s</text>
+<line x1="672" y1="376.0" x2="1132" y2="376.0" stroke="#e3e2de"/>
+<text x="664.0" y="380.0" font-size="11" font-weight="400" fill="#7a7973" text-anchor="end">1</text>
+<line x1="672" y1="327.9" x2="1132" y2="327.9" stroke="#e3e2de"/>
+<text x="664.0" y="331.9" font-size="11" font-weight="400" fill="#7a7973" text-anchor="end">2</text>
+<line x1="672" y1="264.3" x2="1132" y2="264.3" stroke="#e3e2de"/>
+<text x="664.0" y="268.3" font-size="11" font-weight="400" fill="#7a7973" text-anchor="end">5</text>
+<line x1="672" y1="216.1" x2="1132" y2="216.1" stroke="#e3e2de"/>
+<text x="664.0" y="220.1" font-size="11" font-weight="400" fill="#7a7973" text-anchor="end">10</text>
+<line x1="672" y1="168.0" x2="1132" y2="168.0" stroke="#e3e2de"/>
+<text x="664.0" y="172.0" font-size="11" font-weight="400" fill="#7a7973" text-anchor="end">20</text>
+<text x="692.9" y="392.0" font-size="11" font-weight="400" fill="#7a7973" text-anchor="middle">0.25</text>
+<text x="807.0" y="392.0" font-size="11" font-weight="400" fill="#7a7973" text-anchor="middle">0.4</text>
+<text x="883.0" y="392.0" font-size="11" font-weight="400" fill="#7a7973" text-anchor="middle">0.5</text>
+<text x="959.0" y="392.0" font-size="11" font-weight="400" fill="#7a7973" text-anchor="middle">0.6</text>
+<text x="1035.1" y="392.0" font-size="11" font-weight="400" fill="#7a7973" text-anchor="middle">0.7</text>
+<text x="1111.1" y="392.0" font-size="11" font-weight="400" fill="#7a7973" text-anchor="middle">0.8</text>
+<line x1="672" y1="376" x2="1132" y2="376" stroke="#7a7973"/>
+<line x1="672" y1="168" x2="672" y2="376" stroke="#7a7973"/>
+<text x="902.0" y="410.0" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="middle">offered load (requests per second)</text>
+<text transform="translate(632,272) rotate(-90)" font-size="11.5" fill="#52514e" text-anchor="middle">median time to first token, s (log)</text>
+<polygon points="692.9,354.7 807.0,341.3 807.0,337.6 692.9,350.8" fill="#2a78d6" fill-opacity="0.22"/>
+<polygon points="807.0,341.3 883.0,325.4 883.0,321.0 807.0,337.6" fill="#2a78d6" fill-opacity="0.22"/>
+<polygon points="883.0,325.4 959.0,294.2 959.0,286.2 883.0,321.0" fill="#2a78d6" fill-opacity="0.22"/>
+<polygon points="959.0,294.2 1035.1,264.5 1035.1,248.8 959.0,286.2" fill="#2a78d6" fill-opacity="0.22"/>
+<polygon points="1035.1,264.5 1111.1,206.1 1111.1,179.8 1035.1,248.8" fill="#2a78d6" fill-opacity="0.22"/>
+<path d="M692.9,350.8 L807.0,337.6 L883.0,321.0 L959.0,286.2 L1035.1,248.8 L1111.1,179.8" fill="none" stroke="#1baf7a" stroke-width="2" stroke-linejoin="round"/>
+<circle cx="692.9" cy="350.8" r="3.4" fill="#1baf7a" stroke="#fcfcfb" stroke-width="1.5"/>
+<circle cx="807.0" cy="337.6" r="3.4" fill="#1baf7a" stroke="#fcfcfb" stroke-width="1.5"/>
+<circle cx="883.0" cy="321.0" r="3.4" fill="#1baf7a" stroke="#fcfcfb" stroke-width="1.5"/>
+<circle cx="959.0" cy="286.2" r="3.4" fill="#1baf7a" stroke="#fcfcfb" stroke-width="1.5"/>
+<circle cx="1035.1" cy="248.8" r="3.4" fill="#1baf7a" stroke="#fcfcfb" stroke-width="1.5"/>
+<circle cx="1111.1" cy="179.8" r="3.4" fill="#1baf7a" stroke="#fcfcfb" stroke-width="1.5"/>
+<path d="M692.9,354.7 L807.0,341.3 L883.0,325.4 L959.0,294.2 L1035.1,264.5 L1111.1,206.1" fill="none" stroke="#2a78d6" stroke-width="2.8" stroke-linejoin="round"/>
+<circle cx="692.9" cy="354.7" r="4.2" fill="#2a78d6" stroke="#fcfcfb" stroke-width="1.5"/>
+<circle cx="807.0" cy="341.3" r="4.2" fill="#2a78d6" stroke="#fcfcfb" stroke-width="1.5"/>
+<circle cx="883.0" cy="325.4" r="4.2" fill="#2a78d6" stroke="#fcfcfb" stroke-width="1.5"/>
+<circle cx="959.0" cy="294.2" r="4.2" fill="#2a78d6" stroke="#fcfcfb" stroke-width="1.5"/>
+<circle cx="1035.1" cy="264.5" r="4.2" fill="#2a78d6" stroke="#fcfcfb" stroke-width="1.5"/>
+<circle cx="1111.1" cy="206.1" r="4.2" fill="#2a78d6" stroke="#fcfcfb" stroke-width="1.5"/>
+<text x="1111.1" y="167.8" font-size="13" font-weight="700" fill="#0b0b0b" text-anchor="end" paint-order="stroke" stroke="#fcfcfb" stroke-width="5">1.46x faster</text>
+<text x="40.0" y="450.0" font-size="14" font-weight="700" fill="#0b0b0b" text-anchor="start">Throughput, show 10 of 64, Qwen3-4B</text>
+<text x="40.0" y="468.0" font-size="12" font-weight="400" fill="#52514e" text-anchor="start">v1 higher at 6 of 6 concurrency levels; up to +32% at N = 32</text>
+<line x1="92" y1="696.0" x2="552" y2="696.0" stroke="#e3e2de"/>
+<text x="84.0" y="700.0" font-size="11" font-weight="400" fill="#7a7973" text-anchor="end">0</text>
+<line x1="92" y1="640.5" x2="552" y2="640.5" stroke="#e3e2de"/>
+<text x="84.0" y="644.5" font-size="11" font-weight="400" fill="#7a7973" text-anchor="end">2</text>
+<line x1="92" y1="585.1" x2="552" y2="585.1" stroke="#e3e2de"/>
+<text x="84.0" y="589.1" font-size="11" font-weight="400" fill="#7a7973" text-anchor="end">4</text>
+<line x1="92" y1="529.6" x2="552" y2="529.6" stroke="#e3e2de"/>
+<text x="84.0" y="533.6" font-size="11" font-weight="400" fill="#7a7973" text-anchor="end">6</text>
+<text x="118.2" y="712.0" font-size="11" font-weight="400" fill="#7a7973" text-anchor="middle">1</text>
+<text x="199.7" y="712.0" font-size="11" font-weight="400" fill="#7a7973" text-anchor="middle">2</text>
+<text x="281.2" y="712.0" font-size="11" font-weight="400" fill="#7a7973" text-anchor="middle">4</text>
+<text x="362.8" y="712.0" font-size="11" font-weight="400" fill="#7a7973" text-anchor="middle">8</text>
+<text x="444.3" y="712.0" font-size="11" font-weight="400" fill="#7a7973" text-anchor="middle">16</text>
+<text x="525.8" y="712.0" font-size="11" font-weight="400" fill="#7a7973" text-anchor="middle">32</text>
+<line x1="92" y1="696" x2="552" y2="696" stroke="#7a7973"/>
+<line x1="92" y1="488" x2="92" y2="696" stroke="#7a7973"/>
+<text x="322.0" y="730.0" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="middle">requests in flight, N (log)</text>
+<text transform="translate(52,592) rotate(-90)" font-size="11.5" fill="#52514e" text-anchor="middle">throughput, requests per second</text>
+<polygon points="118.2,657.3 199.7,632.0 199.7,638.6 118.2,659.9" fill="#2a78d6" fill-opacity="0.22"/>
+<polygon points="199.7,632.0 281.2,597.9 281.2,611.8 199.7,638.6" fill="#2a78d6" fill-opacity="0.22"/>
+<polygon points="281.2,597.9 362.8,561.1 362.8,586.2 281.2,611.8" fill="#2a78d6" fill-opacity="0.22"/>
+<polygon points="362.8,561.1 444.3,533.7 444.3,568.3 362.8,586.2" fill="#2a78d6" fill-opacity="0.22"/>
+<polygon points="444.3,533.7 525.8,513.5 525.8,558.2 444.3,568.3" fill="#2a78d6" fill-opacity="0.22"/>
+<path d="M118.2,659.9 L199.7,638.6 L281.2,611.8 L362.8,586.2 L444.3,568.3 L525.8,558.2" fill="none" stroke="#1baf7a" stroke-width="2" stroke-linejoin="round"/>
+<circle cx="118.2" cy="659.9" r="3.4" fill="#1baf7a" stroke="#fcfcfb" stroke-width="1.5"/>
+<circle cx="199.7" cy="638.6" r="3.4" fill="#1baf7a" stroke="#fcfcfb" stroke-width="1.5"/>
+<circle cx="281.2" cy="611.8" r="3.4" fill="#1baf7a" stroke="#fcfcfb" stroke-width="1.5"/>
+<circle cx="362.8" cy="586.2" r="3.4" fill="#1baf7a" stroke="#fcfcfb" stroke-width="1.5"/>
+<circle cx="444.3" cy="568.3" r="3.4" fill="#1baf7a" stroke="#fcfcfb" stroke-width="1.5"/>
+<circle cx="525.8" cy="558.2" r="3.4" fill="#1baf7a" stroke="#fcfcfb" stroke-width="1.5"/>
+<path d="M118.2,657.3 L199.7,632.0 L281.2,597.9 L362.8,561.1 L444.3,533.7 L525.8,513.5" fill="none" stroke="#2a78d6" stroke-width="2.8" stroke-linejoin="round"/>
+<circle cx="118.2" cy="657.3" r="4.2" fill="#2a78d6" stroke="#fcfcfb" stroke-width="1.5"/>
+<circle cx="199.7" cy="632.0" r="4.2" fill="#2a78d6" stroke="#fcfcfb" stroke-width="1.5"/>
+<circle cx="281.2" cy="597.9" r="4.2" fill="#2a78d6" stroke="#fcfcfb" stroke-width="1.5"/>
+<circle cx="362.8" cy="561.1" r="4.2" fill="#2a78d6" stroke="#fcfcfb" stroke-width="1.5"/>
+<circle cx="444.3" cy="533.7" r="4.2" fill="#2a78d6" stroke="#fcfcfb" stroke-width="1.5"/>
+<circle cx="525.8" cy="513.5" r="4.2" fill="#2a78d6" stroke="#fcfcfb" stroke-width="1.5"/>
+<text x="525.8" y="499.5" font-size="13" font-weight="700" fill="#0b0b0b" text-anchor="end" paint-order="stroke" stroke="#fcfcfb" stroke-width="5">+32%</text>
+<text x="620.0" y="450.0" font-size="14" font-weight="700" fill="#0b0b0b" text-anchor="start">Speed, show 10 of 64, Qwen3-4B</text>
+<text x="620.0" y="468.0" font-size="12" font-weight="400" fill="#52514e" text-anchor="start">v1 faster at 6 of 6 concurrency levels; up to 1.51x at N = 16</text>
+<line x1="672" y1="696.0" x2="1132" y2="696.0" stroke="#e3e2de"/>
+<text x="664.0" y="700.0" font-size="11" font-weight="400" fill="#7a7973" text-anchor="end">0.1</text>
+<line x1="672" y1="655.4" x2="1132" y2="655.4" stroke="#e3e2de"/>
+<text x="664.0" y="659.4" font-size="11" font-weight="400" fill="#7a7973" text-anchor="end">0.2</text>
+<line x1="672" y1="601.8" x2="1132" y2="601.8" stroke="#e3e2de"/>
+<text x="664.0" y="605.8" font-size="11" font-weight="400" fill="#7a7973" text-anchor="end">0.5</text>
+<line x1="672" y1="561.3" x2="1132" y2="561.3" stroke="#e3e2de"/>
+<text x="664.0" y="565.3" font-size="11" font-weight="400" fill="#7a7973" text-anchor="end">1</text>
+<line x1="672" y1="520.7" x2="1132" y2="520.7" stroke="#e3e2de"/>
+<text x="664.0" y="524.7" font-size="11" font-weight="400" fill="#7a7973" text-anchor="end">2</text>
+<text x="698.2" y="712.0" font-size="11" font-weight="400" fill="#7a7973" text-anchor="middle">1</text>
+<text x="779.7" y="712.0" font-size="11" font-weight="400" fill="#7a7973" text-anchor="middle">2</text>
+<text x="861.2" y="712.0" font-size="11" font-weight="400" fill="#7a7973" text-anchor="middle">4</text>
+<text x="942.8" y="712.0" font-size="11" font-weight="400" fill="#7a7973" text-anchor="middle">8</text>
+<text x="1024.3" y="712.0" font-size="11" font-weight="400" fill="#7a7973" text-anchor="middle">16</text>
+<text x="1105.8" y="712.0" font-size="11" font-weight="400" fill="#7a7973" text-anchor="middle">32</text>
+<line x1="672" y1="696" x2="1132" y2="696" stroke="#7a7973"/>
+<line x1="672" y1="488" x2="672" y2="696" stroke="#7a7973"/>
+<text x="902.0" y="730.0" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="middle">requests in flight, N (log)</text>
+<text transform="translate(632,592) rotate(-90)" font-size="11.5" fill="#52514e" text-anchor="middle">median time to first token, s (log)</text>
+<polygon points="698.2,671.5 779.7,653.5 779.7,634.9 698.2,654.5" fill="#2a78d6" fill-opacity="0.22"/>
+<polygon points="779.7,653.5 861.2,609.6 861.2,586.1 779.7,634.9" fill="#2a78d6" fill-opacity="0.22"/>
+<polygon points="861.2,609.6 942.8,568.9 942.8,552.8 861.2,586.1" fill="#2a78d6" fill-opacity="0.22"/>
+<polygon points="942.8,568.9 1024.3,548.6 1024.3,524.4 942.8,552.8" fill="#2a78d6" fill-opacity="0.22"/>
+<polygon points="1024.3,548.6 1105.8,513.8 1105.8,504.0 1024.3,524.4" fill="#2a78d6" fill-opacity="0.22"/>
+<path d="M698.2,654.5 L779.7,634.9 L861.2,586.1 L942.8,552.8 L1024.3,524.4 L1105.8,504.0" fill="none" stroke="#1baf7a" stroke-width="2" stroke-linejoin="round"/>
+<circle cx="698.2" cy="654.5" r="3.4" fill="#1baf7a" stroke="#fcfcfb" stroke-width="1.5"/>
+<circle cx="779.7" cy="634.9" r="3.4" fill="#1baf7a" stroke="#fcfcfb" stroke-width="1.5"/>
+<circle cx="861.2" cy="586.1" r="3.4" fill="#1baf7a" stroke="#fcfcfb" stroke-width="1.5"/>
+<circle cx="942.8" cy="552.8" r="3.4" fill="#1baf7a" stroke="#fcfcfb" stroke-width="1.5"/>
+<circle cx="1024.3" cy="524.4" r="3.4" fill="#1baf7a" stroke="#fcfcfb" stroke-width="1.5"/>
+<circle cx="1105.8" cy="504.0" r="3.4" fill="#1baf7a" stroke="#fcfcfb" stroke-width="1.5"/>
+<path d="M698.2,671.5 L779.7,653.5 L861.2,609.6 L942.8,568.9 L1024.3,548.6 L1105.8,513.8" fill="none" stroke="#2a78d6" stroke-width="2.8" stroke-linejoin="round"/>
+<circle cx="698.2" cy="671.5" r="4.2" fill="#2a78d6" stroke="#fcfcfb" stroke-width="1.5"/>
+<circle cx="779.7" cy="653.5" r="4.2" fill="#2a78d6" stroke="#fcfcfb" stroke-width="1.5"/>
+<circle cx="861.2" cy="609.6" r="4.2" fill="#2a78d6" stroke="#fcfcfb" stroke-width="1.5"/>
+<circle cx="942.8" cy="568.9" r="4.2" fill="#2a78d6" stroke="#fcfcfb" stroke-width="1.5"/>
+<circle cx="1024.3" cy="548.6" r="4.2" fill="#2a78d6" stroke="#fcfcfb" stroke-width="1.5"/>
+<circle cx="1105.8" cy="513.8" r="4.2" fill="#2a78d6" stroke="#fcfcfb" stroke-width="1.5"/>
+<text x="1024.3" y="512.4" font-size="13" font-weight="700" fill="#0b0b0b" text-anchor="middle" paint-order="stroke" stroke="#fcfcfb" stroke-width="5">1.51x faster</text>
+<text x="40.0" y="772.0" font-size="14" font-weight="700" fill="#0b0b0b" text-anchor="start">Cache hit rate</text>
+<text x="40.0" y="790.0" font-size="12" font-weight="400" fill="#52514e" text-anchor="start">share of prompt tokens served from cache; v1 higher in 10 of 10</text>
+<rect x="40" y="807.0" width="520" height="23" fill="#2a78d6" fill-opacity="0.1" rx="3"/>
+<rect x="40" y="832.0" width="520" height="23" fill="#2a78d6" fill-opacity="0.1" rx="3"/>
+<rect x="40" y="857.0" width="520" height="23" fill="#2a78d6" fill-opacity="0.1" rx="3"/>
+<rect x="40" y="882.0" width="520" height="23" fill="#2a78d6" fill-opacity="0.1" rx="3"/>
+<rect x="40" y="907.0" width="520" height="23" fill="#2a78d6" fill-opacity="0.1" rx="3"/>
+<rect x="40" y="932.0" width="520" height="23" fill="#2a78d6" fill-opacity="0.1" rx="3"/>
+<rect x="40" y="957.0" width="520" height="23" fill="#2a78d6" fill-opacity="0.1" rx="3"/>
+<rect x="40" y="982.0" width="520" height="23" fill="#2a78d6" fill-opacity="0.1" rx="3"/>
+<rect x="40" y="1007.0" width="520" height="23" fill="#2a78d6" fill-opacity="0.1" rx="3"/>
+<rect x="40" y="1032.0" width="520" height="23" fill="#2a78d6" fill-opacity="0.1" rx="3"/>
+<line x1="242.1" y1="806" x2="242.1" y2="1056" stroke="#e3e2de"/>
+<text x="242.1" y="1070.0" font-size="11" font-weight="400" fill="#7a7973" text-anchor="middle">0.3</text>
+<line x1="301.6" y1="806" x2="301.6" y2="1056" stroke="#e3e2de"/>
+<text x="301.6" y="1070.0" font-size="11" font-weight="400" fill="#7a7973" text-anchor="middle">1</text>
+<line x1="355.9" y1="806" x2="355.9" y2="1056" stroke="#e3e2de"/>
+<text x="355.9" y="1070.0" font-size="11" font-weight="400" fill="#7a7973" text-anchor="middle">3</text>
+<line x1="415.4" y1="806" x2="415.4" y2="1056" stroke="#e3e2de"/>
+<text x="415.4" y="1070.0" font-size="11" font-weight="400" fill="#7a7973" text-anchor="middle">10</text>
+<line x1="469.8" y1="806" x2="469.8" y2="1056" stroke="#e3e2de"/>
+<text x="469.8" y="1070.0" font-size="11" font-weight="400" fill="#7a7973" text-anchor="middle">30</text>
+<text x="46.0" y="822.5" font-size="11.5" font-weight="400" fill="#0b0b0b" text-anchor="start">show 10 of 64, dense · 4B</text>
+<line x1="465.7" y1="818.5" x2="410.2" y2="818.5" stroke="#7a7973" stroke-width="1.5"/>
+<circle cx="410.2" cy="818.5" r="4.2" fill="#1baf7a" stroke="#fcfcfb" stroke-width="1.5"/>
+<circle cx="465.7" cy="818.5" r="5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="1.5"/>
+<text x="556.0" y="822.5" font-size="11.5" font-weight="700" fill="#0b0b0b" text-anchor="end">3.1x</text>
+<text x="46.0" y="847.5" font-size="11.5" font-weight="400" fill="#0b0b0b" text-anchor="start">show 10 of 64, dense · 0.6B</text>
+<line x1="465.7" y1="843.5" x2="412.4" y2="843.5" stroke="#7a7973" stroke-width="1.5"/>
+<circle cx="412.4" cy="843.5" r="4.2" fill="#1baf7a" stroke="#fcfcfb" stroke-width="1.5"/>
+<circle cx="465.7" cy="843.5" r="5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="1.5"/>
+<text x="556.0" y="847.5" font-size="11.5" font-weight="700" fill="#0b0b0b" text-anchor="end">2.9x</text>
+<text x="46.0" y="872.5" font-size="11.5" font-weight="400" fill="#0b0b0b" text-anchor="start">show 10 of 64, BM25 · 4B</text>
+<line x1="453.9" y1="868.5" x2="399.9" y2="868.5" stroke="#7a7973" stroke-width="1.5"/>
+<circle cx="399.9" cy="868.5" r="4.2" fill="#1baf7a" stroke="#fcfcfb" stroke-width="1.5"/>
+<circle cx="453.9" cy="868.5" r="5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="1.5"/>
+<text x="556.0" y="872.5" font-size="11.5" font-weight="700" fill="#0b0b0b" text-anchor="end">3.0x</text>
+<text x="46.0" y="897.5" font-size="11.5" font-weight="400" fill="#0b0b0b" text-anchor="start">show 10 of 64, BM25 · 0.6B</text>
+<line x1="453.9" y1="893.5" x2="403.6" y2="893.5" stroke="#7a7973" stroke-width="1.5"/>
+<circle cx="403.6" cy="893.5" r="4.2" fill="#1baf7a" stroke="#fcfcfb" stroke-width="1.5"/>
+<circle cx="453.9" cy="893.5" r="5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="1.5"/>
+<text x="556.0" y="897.5" font-size="11.5" font-weight="700" fill="#0b0b0b" text-anchor="end">2.8x</text>
+<text x="46.0" y="922.5" font-size="11.5" font-weight="400" fill="#0b0b0b" text-anchor="start">128 tools · 4B</text>
+<line x1="340.2" y1="918.5" x2="255.8" y2="918.5" stroke="#7a7973" stroke-width="1.5"/>
+<circle cx="255.8" cy="918.5" r="4.2" fill="#1baf7a" stroke="#fcfcfb" stroke-width="1.5"/>
+<circle cx="340.2" cy="918.5" r="5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="1.5"/>
+<text x="556.0" y="922.5" font-size="11.5" font-weight="700" fill="#0b0b0b" text-anchor="end">5.5x</text>
+<text x="46.0" y="947.5" font-size="11.5" font-weight="400" fill="#0b0b0b" text-anchor="start">128 tools · 0.6B</text>
+<line x1="366.7" y1="943.5" x2="264.5" y2="943.5" stroke="#7a7973" stroke-width="1.5"/>
+<circle cx="264.5" cy="943.5" r="4.2" fill="#1baf7a" stroke="#fcfcfb" stroke-width="1.5"/>
+<circle cx="366.7" cy="943.5" r="5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="1.5"/>
+<text x="556.0" y="947.5" font-size="11.5" font-weight="700" fill="#0b0b0b" text-anchor="end">7.9x</text>
+<text x="46.0" y="972.5" font-size="11.5" font-weight="400" fill="#0b0b0b" text-anchor="start">64 tools · 4B</text>
+<line x1="374.3" y1="968.5" x2="304.2" y2="968.5" stroke="#7a7973" stroke-width="1.5"/>
+<circle cx="304.2" cy="968.5" r="4.2" fill="#1baf7a" stroke="#fcfcfb" stroke-width="1.5"/>
+<circle cx="374.3" cy="968.5" r="5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="1.5"/>
+<text x="556.0" y="972.5" font-size="11.5" font-weight="700" fill="#0b0b0b" text-anchor="end">4.1x</text>
+<text x="46.0" y="997.5" font-size="11.5" font-weight="400" fill="#0b0b0b" text-anchor="start">64 tools · 0.6B</text>
+<line x1="392.0" y1="993.5" x2="317.8" y2="993.5" stroke="#7a7973" stroke-width="1.5"/>
+<circle cx="317.8" cy="993.5" r="4.2" fill="#1baf7a" stroke="#fcfcfb" stroke-width="1.5"/>
+<circle cx="392.0" cy="993.5" r="5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="1.5"/>
+<text x="556.0" y="997.5" font-size="11.5" font-weight="700" fill="#0b0b0b" text-anchor="end">4.5x</text>
+<text x="46.0" y="1022.5" font-size="11.5" font-weight="400" fill="#0b0b0b" text-anchor="start">16 tools · 4B</text>
+<line x1="426.6" y1="1018.5" x2="389.1" y2="1018.5" stroke="#7a7973" stroke-width="1.5"/>
+<circle cx="389.1" cy="1018.5" r="4.2" fill="#1baf7a" stroke="#fcfcfb" stroke-width="1.5"/>
+<circle cx="426.6" cy="1018.5" r="5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="1.5"/>
+<text x="556.0" y="1022.5" font-size="11.5" font-weight="700" fill="#0b0b0b" text-anchor="end">2.1x</text>
+<text x="46.0" y="1047.5" font-size="11.5" font-weight="400" fill="#0b0b0b" text-anchor="start">16 tools · 0.6B</text>
+<line x1="429.1" y1="1043.5" x2="392.5" y2="1043.5" stroke="#7a7973" stroke-width="1.5"/>
+<circle cx="392.5" cy="1043.5" r="4.2" fill="#1baf7a" stroke="#fcfcfb" stroke-width="1.5"/>
+<circle cx="429.1" cy="1043.5" r="5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="1.5"/>
+<text x="556.0" y="1047.5" font-size="11.5" font-weight="700" fill="#0b0b0b" text-anchor="end">2.1x</text>
+<text x="353.0" y="1087.0" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="middle">prompt tokens served from cache, % (log)</text>
+<text x="620.0" y="772.0" font-size="14" font-weight="700" fill="#0b0b0b" text-anchor="start">End-to-end F1</text>
+<text x="620.0" y="790.0" font-size="12" font-weight="400" fill="#52514e" text-anchor="start">v1 significantly higher in 2 of 10, lower in 0</text>
+<rect x="620" y="932.0" width="520" height="23" fill="#2a78d6" fill-opacity="0.1" rx="3"/>
+<rect x="620" y="982.0" width="520" height="23" fill="#2a78d6" fill-opacity="0.1" rx="3"/>
+<line x1="802.0" y1="806" x2="802.0" y2="1056" stroke="#e3e2de"/>
+<text x="802.0" y="1070.0" font-size="11" font-weight="400" fill="#7a7973" text-anchor="middle">10</text>
+<line x1="861.5" y1="806" x2="861.5" y2="1056" stroke="#e3e2de"/>
+<text x="861.5" y="1070.0" font-size="11" font-weight="400" fill="#7a7973" text-anchor="middle">15</text>
+<line x1="921.1" y1="806" x2="921.1" y2="1056" stroke="#e3e2de"/>
+<text x="921.1" y="1070.0" font-size="11" font-weight="400" fill="#7a7973" text-anchor="middle">20</text>
+<line x1="980.6" y1="806" x2="980.6" y2="1056" stroke="#e3e2de"/>
+<text x="980.6" y="1070.0" font-size="11" font-weight="400" fill="#7a7973" text-anchor="middle">25</text>
+<line x1="1040.2" y1="806" x2="1040.2" y2="1056" stroke="#e3e2de"/>
+<text x="1040.2" y="1070.0" font-size="11" font-weight="400" fill="#7a7973" text-anchor="middle">30</text>
+<text x="626.0" y="822.5" font-size="11.5" font-weight="400" fill="#0b0b0b" text-anchor="start">show 10 of 64, dense · 4B</text>
+<line x1="992.9" y1="818.5" x2="973.1" y2="818.5" stroke="#7a7973" stroke-width="1.5"/>
+<circle cx="973.1" cy="818.5" r="4.2" fill="#1baf7a" stroke="#fcfcfb" stroke-width="1.5"/>
+<circle cx="992.9" cy="818.5" r="5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="1.5"/>
+<text x="1136.0" y="822.5" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="end">+1.7</text>
+<text x="626.0" y="847.5" font-size="11.5" font-weight="400" fill="#0b0b0b" text-anchor="start">show 10 of 64, dense · 0.6B</text>
+<line x1="920.1" y1="843.5" x2="922.0" y2="843.5" stroke="#7a7973" stroke-width="1.5"/>
+<circle cx="922.0" cy="843.5" r="4.2" fill="#1baf7a" stroke="#fcfcfb" stroke-width="1.5"/>
+<circle cx="920.1" cy="843.5" r="5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="1.5"/>
+<text x="1136.0" y="847.5" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="end">-0.2</text>
+<text x="626.0" y="872.5" font-size="11.5" font-weight="400" fill="#0b0b0b" text-anchor="start">show 10 of 64, BM25 · 4B</text>
+<line x1="1017.3" y1="868.5" x2="1015.4" y2="868.5" stroke="#7a7973" stroke-width="1.5"/>
+<circle cx="1015.4" cy="868.5" r="4.2" fill="#1baf7a" stroke="#fcfcfb" stroke-width="1.5"/>
+<circle cx="1017.3" cy="868.5" r="5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="1.5"/>
+<text x="1136.0" y="872.5" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="end">+0.2</text>
+<text x="626.0" y="897.5" font-size="11.5" font-weight="400" fill="#0b0b0b" text-anchor="start">show 10 of 64, BM25 · 0.6B</text>
+<line x1="944.9" y1="893.5" x2="952.9" y2="893.5" stroke="#7a7973" stroke-width="1.5"/>
+<circle cx="952.9" cy="893.5" r="4.2" fill="#1baf7a" stroke="#fcfcfb" stroke-width="1.5"/>
+<circle cx="944.9" cy="893.5" r="5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="1.5"/>
+<text x="1136.0" y="897.5" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="end">-0.7</text>
+<text x="626.0" y="922.5" font-size="11.5" font-weight="400" fill="#0b0b0b" text-anchor="start">128 tools · 4B</text>
+<line x1="1038.0" y1="918.5" x2="1030.3" y2="918.5" stroke="#7a7973" stroke-width="1.5"/>
+<circle cx="1030.3" cy="918.5" r="4.2" fill="#1baf7a" stroke="#fcfcfb" stroke-width="1.5"/>
+<circle cx="1038.0" cy="918.5" r="5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="1.5"/>
+<text x="1136.0" y="922.5" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="end">+0.6</text>
+<text x="626.0" y="947.5" font-size="11.5" font-weight="400" fill="#0b0b0b" text-anchor="start">128 tools · 0.6B</text>
+<line x1="941.3" y1="943.5" x2="856.5" y2="943.5" stroke="#7a7973" stroke-width="1.5"/>
+<circle cx="856.5" cy="943.5" r="4.2" fill="#1baf7a" stroke="#fcfcfb" stroke-width="1.5"/>
+<circle cx="941.3" cy="943.5" r="5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="1.5"/>
+<text x="1136.0" y="947.5" font-size="11.5" font-weight="700" fill="#0b0b0b" text-anchor="end">+7.1 ▲</text>
+<text x="626.0" y="972.5" font-size="11.5" font-weight="400" fill="#0b0b0b" text-anchor="start">64 tools · 4B</text>
+<line x1="1015.8" y1="968.5" x2="1038.0" y2="968.5" stroke="#7a7973" stroke-width="1.5"/>
+<circle cx="1038.0" cy="968.5" r="4.2" fill="#1baf7a" stroke="#fcfcfb" stroke-width="1.5"/>
+<circle cx="1015.8" cy="968.5" r="5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="1.5"/>
+<text x="1136.0" y="972.5" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="end">-1.9</text>
+<text x="626.0" y="997.5" font-size="11.5" font-weight="400" fill="#0b0b0b" text-anchor="start">64 tools · 0.6B</text>
+<line x1="944.9" y1="993.5" x2="875.5" y2="993.5" stroke="#7a7973" stroke-width="1.5"/>
+<circle cx="875.5" cy="993.5" r="4.2" fill="#1baf7a" stroke="#fcfcfb" stroke-width="1.5"/>
+<circle cx="944.9" cy="993.5" r="5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="1.5"/>
+<text x="1136.0" y="997.5" font-size="11.5" font-weight="700" fill="#0b0b0b" text-anchor="end">+5.8 ▲</text>
+<text x="626.0" y="1022.5" font-size="11.5" font-weight="400" fill="#0b0b0b" text-anchor="start">16 tools · 4B</text>
+<line x1="1006.5" y1="1018.5" x2="1006.8" y2="1018.5" stroke="#7a7973" stroke-width="1.5"/>
+<circle cx="1006.8" cy="1018.5" r="4.2" fill="#1baf7a" stroke="#fcfcfb" stroke-width="1.5"/>
+<circle cx="1006.5" cy="1018.5" r="5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="1.5"/>
+<text x="1136.0" y="1022.5" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="end">-0.0</text>
+<text x="626.0" y="1047.5" font-size="11.5" font-weight="400" fill="#0b0b0b" text-anchor="start">16 tools · 0.6B</text>
+<line x1="949.9" y1="1043.5" x2="912.2" y2="1043.5" stroke="#7a7973" stroke-width="1.5"/>
+<circle cx="912.2" cy="1043.5" r="4.2" fill="#1baf7a" stroke="#fcfcfb" stroke-width="1.5"/>
+<circle cx="949.9" cy="1043.5" r="5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="1.5"/>
+<text x="1136.0" y="1047.5" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="end">+3.2</text>
+<text x="933.0" y="1087.0" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="middle">end-to-end F1 (×100); ▲ = v1 higher by at least 2 standard errors</text>
+<text x="40.0" y="1162.0" font-size="11.5" font-weight="400" fill="#7a7973" text-anchor="start">Panels 1-4: one run of 200 requests per point, every arm on one GPU. Panels 5-6: 200 ToolRet tasks per setting, one request at a time; F1 differences are paired over the same tasks. 4-tool menus</text>
+<text x="40.0" y="1180.0" font-size="11.5" font-weight="400" fill="#7a7973" text-anchor="start">are omitted: the right tool is missing from 47.5% of them and nearly half their cache hit is the shared template header (full table in cache-hit-miss-f1.md).</text>
+<text x="40.0" y="1198.0" font-size="11.5" font-weight="400" fill="#7a7973" text-anchor="start">Sources: eval-validity-20260906-165826, sla-4b-single-20260912-175313, conc-4b-p10-single-20260916-214417, hit-miss-f1 summary (scripts/summarize_hit_miss_f1.py).</text>
+</svg>

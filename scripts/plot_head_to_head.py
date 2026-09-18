@@ -3,6 +3,7 @@
 
   --rival cp_online   reports/figures/head-to-head-contextpilot.svg
   --rival original    reports/figures/head-to-head-no-reordering.svg
+  --rival frequency   reports/figures/head-to-head-frequency.svg
 
 Six panels, each comparing exactly two policies:
 
@@ -32,7 +33,8 @@ from pathlib import Path
 SURFACE, INK, INK2, INK3, GRID = "#fcfcfb", "#0b0b0b", "#52514e", "#7a7973", "#e3e2de"
 V1 = ("tooltrie_v1", "ToolTrie-v1", "#2a78d6")
 RIVALS = {"cp_online": ("ContextPilot", "#eb6834", "contextpilot"),
-          "original": ("no reordering", "#8a8983", "no-reordering")}
+          "original": ("no reordering", "#8a8983", "no-reordering"),
+          "frequency": ("frequency", "#1baf7a", "frequency")}
 W, H = 1180, 1220
 FONT = "Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif"
 
@@ -162,10 +164,11 @@ def main() -> None:
     s = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}" font-family="{FONT}">',
          f'<rect width="{W}" height="{H}" fill="{SURFACE}"/>']
     headline = {"cp_online": "ToolTrie-v1 vs ContextPilot: faster under load, more cache reuse, higher F1",
-                "original": "ToolTrie-v1 vs no reordering: up to 1.5x faster and up to 10x the cache reuse, at equal accuracy"}
+                "original": "ToolTrie-v1 vs no reordering: up to 1.5x faster and up to 10x the cache reuse, at equal accuracy",
+                "frequency": "ToolTrie-v1 vs frequency: up to 1.5x faster, up to +32% throughput, 2-8x the cache reuse, never lower F1"}
     s.append(text(40, 40, headline[args.rival], 20, 700))
     s.append(text(40, 64, f"Each panel compares only these two policies. Shading: blue where ToolTrie-v1 is better, "
-                          f"{'orange' if args.rival == 'cp_online' else 'grey'} where {rname} is better.", 13, 400, INK2))
+                          f"{ {'cp_online': 'orange', 'original': 'grey', 'frequency': 'green'}[args.rival]} where {rname} is better.", 13, 400, INK2))
     lx = 40
     for label, colour, kind in ((V1[1], V1[2], "line"), (rname, rcolour, "line"),
                                 ("ToolTrie-v1 better", V1[2], "fill"), (f"{rname} better", rcolour, "fill")):

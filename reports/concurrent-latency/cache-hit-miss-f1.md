@@ -67,7 +67,7 @@ description, parameter names and values); they differ only in how they match.
 - **BM25 is kept as a robustness check, and it matters.** The two retrievers
   share only 17 of their 64 tools per request on average (range 1-47), so the
   policies reorder very different candidate lists. That is why the cache winner
-  flips under BM25 (§2) while v1's accuracy advantage over ContextPilot holds
+  flips under BM25 while v1's accuracy advantage over ContextPilot holds
   under both.
 - **Not tested:** hybrid retrieval (keyword and embedding scores combined, common
   in production) and larger embedding models (bge-small is small; ContextPilot's
@@ -94,24 +94,7 @@ survives the cut. This is how routed tool-selection systems work. Qwen3-4B:
 - **End-to-end F1: v1 ties no reordering and frequency, and beats ContextPilot
   by 4.6 points.**
 
-## 2. Retrieve 64, show 10 (BM25): where ContextPilot out-caches v1
-
-The same design with a keyword retriever. Qwen3-4B:
-
-| policy | hit | miss | right tool in the 10 shown | end-to-end F1 | vs v1 |
-|---|---|---|---|---|---|
-| **ToolTrie-v1** | 21.8% | 78.2% | 59.5% | 28.1 | |
-| ContextPilot | **22.8%** | **77.2%** | 39.5% | 22.3 | **−5.8 ▼** |
-| frequency | 7.3% | 92.7% | 41.5% | 27.9 | −0.2 |
-| no reordering | 8.4% | 91.6% | 59.0% | 28.9 | +0.8 |
-
-- **ContextPilot's extra hit rate costs accuracy.** It fills the 10 slots with
-  widely shared tools, which pushes the right tool out: it is shown for 39.5%
-  of requests against v1's 59.5%, and end-to-end F1 falls 5.8 points
-  (5.4 at 0.6B). A higher hit rate is not a win if the model sees the wrong
-  tools.
-
-## 3. Every retrieved tool shown: hit rate across menu sizes
+## 2. Every retrieved tool shown: hit rate across menu sizes
 
 With the whole menu shown, the right tool is present equally often under every
 policy, so ordering can only change where it sits. Qwen3-4B:

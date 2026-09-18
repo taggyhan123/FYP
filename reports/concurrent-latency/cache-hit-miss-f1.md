@@ -31,6 +31,7 @@ table (96 replays, every menu size and model) is
 | **Retrieve 64, show 10, dense** (realistic setting, 4B) | highest hit rate | **27.6%** vs ContextPilot 20.0%, frequency 9.0%, no reordering 6.2% (1.4x / 3.1x / 4.4x) |
 | | keeps the right tool in the 10 shown | **61.5%** vs ContextPilot 47.0%, frequency 38.5% (ties no reordering, 62.0%) |
 | | end-to-end F1 | **+4.6 points over ContextPilot** (significant) |
+| **Retrieve 10, show all 10, dense** (the prior-work setup, 4B) | highest hit rate | **13.7%** vs ContextPilot 12.4%, frequency 8.6%, no reordering 6.2% (1.1x / 1.6x / 2.2x), at unchanged F1 |
 | **Retrieve 64, show 10, BM25** (4B and 0.6B) | end-to-end F1 | **+5.8 and +5.4 points over ContextPilot** (both significant), because v1 keeps the right tool in view for 59.5% of requests vs 39.5% |
 | **64 and 128 tools shown** (4B) | highest hit rate | **2.1x ContextPilot** (4.35% vs 2.10%; 2.19% vs 1.02%), **4-6x frequency and no reordering** |
 | **64 and 128 tools shown** (0.6B) | end-to-end F1 | **+4.5 and +7.9 points over ContextPilot, +5.8 and +7.1 over frequency** (all significant) |
@@ -94,7 +95,31 @@ survives the cut. This is how routed tool-selection systems work. Qwen3-4B:
 - **End-to-end F1: v1 ties no reordering and frequency, and beats ContextPilot
   by 4.6 points.**
 
-## 2. Every retrieved tool shown: hit rate across menu sizes
+## 2. Retrieve 10, show all 10 (dense): the setup prior papers use
+
+The retriever returns only its top 10 and all 10 are shown, so every policy
+gives the model the same tools and ordering can only change their order. This
+matches how prompt-reordering papers such as ContextPilot evaluate (retrieve k,
+show all k). Qwen3-4B:
+
+| policy | hit | miss | requests hitting the tool list | right tool in the 10 shown | end-to-end F1 | vs v1 |
+|---|---|---|---|---|---|---|
+| **ToolTrie-v1** | **13.7%** | **86.3%** | **63 / 200** | 62.0% | 27.1 | |
+| ContextPilot | 12.4% | 87.6% | 58 / 200 | 62.0% | 26.5 | −0.5 |
+| frequency | 8.6% | 91.4% | 40 / 200 | 62.0% | 27.8 | +0.7 |
+| no reordering | 6.2% | 93.8% | 33 / 200 | 62.0% | 26.7 | −0.3 |
+
+- **v1 has the highest hit rate**: 2.2x no reordering, 1.6x frequency and
+  1.1x ContextPilot, with more requests reusing part of the tool list (63 vs
+  58, 40 and 33).
+- **F1 is unchanged by ordering**: every policy shows the same 10 tools, and no
+  difference is significant.
+- **The margin over ContextPilot is small here.** With only 10 tools both find
+  most of the same shared prefix; v1's lead grows when the pool is larger
+  (§1: 1.4x) or the whole menu is long (§3: 2.1x). At light load (0.6B,
+  10 req/s) the policies' time to first token is the same.
+
+## 3. Every retrieved tool shown: hit rate across menu sizes
 
 With the whole menu shown, the right tool is present equally often under every
 policy, so ordering can only change where it sits. Qwen3-4B:

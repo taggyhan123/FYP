@@ -33,7 +33,7 @@ SURFACE, INK, INK2, INK3, GRID = "#fcfcfb", "#0b0b0b", "#52514e", "#7a7973", "#e
 V1 = ("tooltrie_v1", "ToolTrie-v1", "#2a78d6")
 RIVALS = {"cp_online": ("ContextPilot", "#eb6834", "contextpilot"),
           "original": ("no reordering", "#8a8983", "no-reordering")}
-W, H = 1180, 1250
+W, H = 1180, 1220
 FONT = "Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif"
 
 SLA = {"0.6B": ("cluster/results/eval-validity-20260906-165826/replays/sla-k64-{arm}-rate{r}.json",
@@ -48,8 +48,8 @@ SETTINGS = [  # (label, setting, k) - rows of panels 5-6, each at 4B then 0.6B
     ("128 tools", "whole menu, dense", "k128"),
     ("64 tools", "whole menu, dense", "k64"),
     ("16 tools", "whole menu, dense", "k16"),
-    ("4 tools", "whole menu, dense", "k4"),
-]
+]  # 4-tool menus are left out: the right tool is missing from 47.5% of them, and
+   # nearly half of their cache hit is the 48-token template header, shared under any order
 
 
 def text(x, y, s, size=12, weight=400, fill=INK, anchor="start", halo=False):
@@ -249,8 +249,10 @@ def main() -> None:
                    subtitle=f1_sub, rows=rows, rcolour=rcolour, xlim=(10, 32), xticks=[10, 15, 20, 25, 30],
                    xlog=False, xlabel="end-to-end F1 (×100); ▲ = v1 higher by at least 2 standard errors")
 
-    s.append(text(40, H - 40, "Panels 1-4: one run of 200 requests per point, every arm on one GPU. Panels 5-6: 200 ToolRet tasks per "
-                              "setting, one request at a time; F1 differences are paired over the same tasks.", 11.5, 400, INK3))
+    s.append(text(40, H - 58, "Panels 1-4: one run of 200 requests per point, every arm on one GPU. Panels 5-6: 200 ToolRet tasks per "
+                              "setting, one request at a time; F1 differences are paired over the same tasks. 4-tool menus", 11.5, 400, INK3))
+    s.append(text(40, H - 40, "are omitted: the right tool is missing from 47.5% of them and nearly half their cache hit is the shared "
+                              "template header (full table in cache-hit-miss-f1.md).", 11.5, 400, INK3))
     s.append(text(40, H - 22, "Sources: eval-validity-20260906-165826, sla-4b-single-20260912-175313, "
                               "conc-4b-p10-single-20260916-214417, hit-miss-f1 summary (scripts/summarize_hit_miss_f1.py).",
                   11.5, 400, INK3))

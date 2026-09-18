@@ -1,5 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="1250" viewBox="0 0 1180 1250" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif">
-<rect width="1180" height="1250" fill="#fcfcfb"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="1220" viewBox="0 0 1180 1220" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif">
+<rect width="1180" height="1220" fill="#fcfcfb"/>
 <text x="40.0" y="40.0" font-size="20" font-weight="700" fill="#0b0b0b" text-anchor="start">ToolTrie-v1 vs ContextPilot: faster under load, more cache reuse, higher F1</text>
 <text x="40.0" y="64.0" font-size="13" font-weight="400" fill="#52514e" text-anchor="start">Each panel compares only these two policies. Shading: blue where ToolTrie-v1 is better, orange where ContextPilot is better.</text>
 <line x1="40" y1="86" x2="62" y2="86" stroke="#2a78d6" stroke-width="2.6"/>
@@ -183,7 +183,7 @@
 <circle cx="1105.8" cy="513.8" r="4.2" fill="#2a78d6" stroke="#fcfcfb" stroke-width="1.5"/>
 <text x="698.2" y="650.5" font-size="13" font-weight="700" fill="#0b0b0b" text-anchor="middle" paint-order="stroke" stroke="#fcfcfb" stroke-width="5">1.17x faster</text>
 <text x="40.0" y="772.0" font-size="14" font-weight="700" fill="#0b0b0b" text-anchor="start">Cache hit rate</text>
-<text x="40.0" y="790.0" font-size="12" font-weight="400" fill="#52514e" text-anchor="start">share of prompt tokens served from cache; v1 higher in 8 of 12</text>
+<text x="40.0" y="790.0" font-size="12" font-weight="400" fill="#52514e" text-anchor="start">share of prompt tokens served from cache; v1 higher in 8 of 10</text>
 <rect x="40" y="807.0" width="520" height="23" fill="#2a78d6" fill-opacity="0.1" rx="3"/>
 <rect x="40" y="832.0" width="520" height="23" fill="#2a78d6" fill-opacity="0.1" rx="3"/>
 <rect x="40" y="857.0" width="520" height="23" fill="#eb6834" fill-opacity="0.14" rx="3"/>
@@ -194,18 +194,16 @@
 <rect x="40" y="982.0" width="520" height="23" fill="#2a78d6" fill-opacity="0.1" rx="3"/>
 <rect x="40" y="1007.0" width="520" height="23" fill="#2a78d6" fill-opacity="0.1" rx="3"/>
 <rect x="40" y="1032.0" width="520" height="23" fill="#2a78d6" fill-opacity="0.1" rx="3"/>
-<rect x="40" y="1057.0" width="520" height="23" fill="#eb6834" fill-opacity="0.14" rx="3"/>
-<rect x="40" y="1082.0" width="520" height="23" fill="#eb6834" fill-opacity="0.14" rx="3"/>
-<line x1="242.1" y1="806" x2="242.1" y2="1106" stroke="#e3e2de"/>
-<text x="242.1" y="1120.0" font-size="11" font-weight="400" fill="#7a7973" text-anchor="middle">0.3</text>
-<line x1="301.6" y1="806" x2="301.6" y2="1106" stroke="#e3e2de"/>
-<text x="301.6" y="1120.0" font-size="11" font-weight="400" fill="#7a7973" text-anchor="middle">1</text>
-<line x1="355.9" y1="806" x2="355.9" y2="1106" stroke="#e3e2de"/>
-<text x="355.9" y="1120.0" font-size="11" font-weight="400" fill="#7a7973" text-anchor="middle">3</text>
-<line x1="415.4" y1="806" x2="415.4" y2="1106" stroke="#e3e2de"/>
-<text x="415.4" y="1120.0" font-size="11" font-weight="400" fill="#7a7973" text-anchor="middle">10</text>
-<line x1="469.8" y1="806" x2="469.8" y2="1106" stroke="#e3e2de"/>
-<text x="469.8" y="1120.0" font-size="11" font-weight="400" fill="#7a7973" text-anchor="middle">30</text>
+<line x1="242.1" y1="806" x2="242.1" y2="1056" stroke="#e3e2de"/>
+<text x="242.1" y="1070.0" font-size="11" font-weight="400" fill="#7a7973" text-anchor="middle">0.3</text>
+<line x1="301.6" y1="806" x2="301.6" y2="1056" stroke="#e3e2de"/>
+<text x="301.6" y="1070.0" font-size="11" font-weight="400" fill="#7a7973" text-anchor="middle">1</text>
+<line x1="355.9" y1="806" x2="355.9" y2="1056" stroke="#e3e2de"/>
+<text x="355.9" y="1070.0" font-size="11" font-weight="400" fill="#7a7973" text-anchor="middle">3</text>
+<line x1="415.4" y1="806" x2="415.4" y2="1056" stroke="#e3e2de"/>
+<text x="415.4" y="1070.0" font-size="11" font-weight="400" fill="#7a7973" text-anchor="middle">10</text>
+<line x1="469.8" y1="806" x2="469.8" y2="1056" stroke="#e3e2de"/>
+<text x="469.8" y="1070.0" font-size="11" font-weight="400" fill="#7a7973" text-anchor="middle">30</text>
 <text x="46.0" y="822.5" font-size="11.5" font-weight="400" fill="#0b0b0b" text-anchor="start">show 10 of 64, dense · 4B</text>
 <line x1="465.7" y1="818.5" x2="449.6" y2="818.5" stroke="#7a7973" stroke-width="1.5"/>
 <circle cx="449.6" cy="818.5" r="4.2" fill="#eb6834" stroke="#fcfcfb" stroke-width="1.5"/>
@@ -256,19 +254,9 @@
 <circle cx="422.7" cy="1043.5" r="4.2" fill="#eb6834" stroke="#fcfcfb" stroke-width="1.5"/>
 <circle cx="429.1" cy="1043.5" r="5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="1.5"/>
 <text x="556.0" y="1047.5" font-size="11.5" font-weight="700" fill="#0b0b0b" text-anchor="end">1.1x</text>
-<text x="46.0" y="1072.5" font-size="11.5" font-weight="400" fill="#0b0b0b" text-anchor="start">4 tools · 4B</text>
-<line x1="444.4" y1="1068.5" x2="444.9" y2="1068.5" stroke="#7a7973" stroke-width="1.5"/>
-<circle cx="444.9" cy="1068.5" r="4.2" fill="#eb6834" stroke="#fcfcfb" stroke-width="1.5"/>
-<circle cx="444.4" cy="1068.5" r="5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="1.5"/>
-<text x="556.0" y="1072.5" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="end">0.99x</text>
-<text x="46.0" y="1097.5" font-size="11.5" font-weight="400" fill="#0b0b0b" text-anchor="start">4 tools · 0.6B</text>
-<line x1="444.4" y1="1093.5" x2="444.9" y2="1093.5" stroke="#7a7973" stroke-width="1.5"/>
-<circle cx="444.9" cy="1093.5" r="4.2" fill="#eb6834" stroke="#fcfcfb" stroke-width="1.5"/>
-<circle cx="444.4" cy="1093.5" r="5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="1.5"/>
-<text x="556.0" y="1097.5" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="end">0.99x</text>
-<text x="353.0" y="1137.0" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="middle">prompt tokens served from cache, % (log)</text>
+<text x="353.0" y="1087.0" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="middle">prompt tokens served from cache, % (log)</text>
 <text x="620.0" y="772.0" font-size="14" font-weight="700" fill="#0b0b0b" text-anchor="start">End-to-end F1</text>
-<text x="620.0" y="790.0" font-size="12" font-weight="400" fill="#52514e" text-anchor="start">v1 significantly higher in 7 of 12, lower in 0</text>
+<text x="620.0" y="790.0" font-size="12" font-weight="400" fill="#52514e" text-anchor="start">v1 significantly higher in 7 of 10, lower in 0</text>
 <rect x="620" y="807.0" width="520" height="23" fill="#2a78d6" fill-opacity="0.1" rx="3"/>
 <rect x="620" y="857.0" width="520" height="23" fill="#2a78d6" fill-opacity="0.1" rx="3"/>
 <rect x="620" y="882.0" width="520" height="23" fill="#2a78d6" fill-opacity="0.1" rx="3"/>
@@ -276,16 +264,16 @@
 <rect x="620" y="982.0" width="520" height="23" fill="#2a78d6" fill-opacity="0.1" rx="3"/>
 <rect x="620" y="1007.0" width="520" height="23" fill="#2a78d6" fill-opacity="0.1" rx="3"/>
 <rect x="620" y="1032.0" width="520" height="23" fill="#2a78d6" fill-opacity="0.1" rx="3"/>
-<line x1="802.0" y1="806" x2="802.0" y2="1106" stroke="#e3e2de"/>
-<text x="802.0" y="1120.0" font-size="11" font-weight="400" fill="#7a7973" text-anchor="middle">10</text>
-<line x1="861.5" y1="806" x2="861.5" y2="1106" stroke="#e3e2de"/>
-<text x="861.5" y="1120.0" font-size="11" font-weight="400" fill="#7a7973" text-anchor="middle">15</text>
-<line x1="921.1" y1="806" x2="921.1" y2="1106" stroke="#e3e2de"/>
-<text x="921.1" y="1120.0" font-size="11" font-weight="400" fill="#7a7973" text-anchor="middle">20</text>
-<line x1="980.6" y1="806" x2="980.6" y2="1106" stroke="#e3e2de"/>
-<text x="980.6" y="1120.0" font-size="11" font-weight="400" fill="#7a7973" text-anchor="middle">25</text>
-<line x1="1040.2" y1="806" x2="1040.2" y2="1106" stroke="#e3e2de"/>
-<text x="1040.2" y="1120.0" font-size="11" font-weight="400" fill="#7a7973" text-anchor="middle">30</text>
+<line x1="802.0" y1="806" x2="802.0" y2="1056" stroke="#e3e2de"/>
+<text x="802.0" y="1070.0" font-size="11" font-weight="400" fill="#7a7973" text-anchor="middle">10</text>
+<line x1="861.5" y1="806" x2="861.5" y2="1056" stroke="#e3e2de"/>
+<text x="861.5" y="1070.0" font-size="11" font-weight="400" fill="#7a7973" text-anchor="middle">15</text>
+<line x1="921.1" y1="806" x2="921.1" y2="1056" stroke="#e3e2de"/>
+<text x="921.1" y="1070.0" font-size="11" font-weight="400" fill="#7a7973" text-anchor="middle">20</text>
+<line x1="980.6" y1="806" x2="980.6" y2="1056" stroke="#e3e2de"/>
+<text x="980.6" y="1070.0" font-size="11" font-weight="400" fill="#7a7973" text-anchor="middle">25</text>
+<line x1="1040.2" y1="806" x2="1040.2" y2="1056" stroke="#e3e2de"/>
+<text x="1040.2" y="1070.0" font-size="11" font-weight="400" fill="#7a7973" text-anchor="middle">30</text>
 <text x="626.0" y="822.5" font-size="11.5" font-weight="400" fill="#0b0b0b" text-anchor="start">show 10 of 64, dense · 4B</text>
 <line x1="992.9" y1="818.5" x2="938.4" y2="818.5" stroke="#7a7973" stroke-width="1.5"/>
 <circle cx="938.4" cy="818.5" r="4.2" fill="#eb6834" stroke="#fcfcfb" stroke-width="1.5"/>
@@ -336,17 +324,8 @@
 <circle cx="923.1" cy="1043.5" r="4.2" fill="#eb6834" stroke="#fcfcfb" stroke-width="1.5"/>
 <circle cx="949.9" cy="1043.5" r="5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="1.5"/>
 <text x="1136.0" y="1047.5" font-size="11.5" font-weight="700" fill="#0b0b0b" text-anchor="end">+2.2 ▲</text>
-<text x="626.0" y="1072.5" font-size="11.5" font-weight="400" fill="#0b0b0b" text-anchor="start">4 tools · 4B</text>
-<line x1="994.6" y1="1068.5" x2="990.5" y2="1068.5" stroke="#7a7973" stroke-width="1.5"/>
-<circle cx="990.5" cy="1068.5" r="4.2" fill="#eb6834" stroke="#fcfcfb" stroke-width="1.5"/>
-<circle cx="994.6" cy="1068.5" r="5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="1.5"/>
-<text x="1136.0" y="1072.5" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="end">+0.3</text>
-<text x="626.0" y="1097.5" font-size="11.5" font-weight="400" fill="#0b0b0b" text-anchor="start">4 tools · 0.6B</text>
-<line x1="927.0" y1="1093.5" x2="923.1" y2="1093.5" stroke="#7a7973" stroke-width="1.5"/>
-<circle cx="923.1" cy="1093.5" r="4.2" fill="#eb6834" stroke="#fcfcfb" stroke-width="1.5"/>
-<circle cx="927.0" cy="1093.5" r="5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="1.5"/>
-<text x="1136.0" y="1097.5" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="end">+0.3</text>
-<text x="933.0" y="1137.0" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="middle">end-to-end F1 (×100); ▲ = v1 higher by at least 2 standard errors</text>
-<text x="40.0" y="1210.0" font-size="11.5" font-weight="400" fill="#7a7973" text-anchor="start">Panels 1-4: one run of 200 requests per point, every arm on one GPU. Panels 5-6: 200 ToolRet tasks per setting, one request at a time; F1 differences are paired over the same tasks.</text>
-<text x="40.0" y="1228.0" font-size="11.5" font-weight="400" fill="#7a7973" text-anchor="start">Sources: eval-validity-20260906-165826, sla-4b-single-20260912-175313, conc-4b-p10-single-20260916-214417, hit-miss-f1 summary (scripts/summarize_hit_miss_f1.py).</text>
+<text x="933.0" y="1087.0" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="middle">end-to-end F1 (×100); ▲ = v1 higher by at least 2 standard errors</text>
+<text x="40.0" y="1162.0" font-size="11.5" font-weight="400" fill="#7a7973" text-anchor="start">Panels 1-4: one run of 200 requests per point, every arm on one GPU. Panels 5-6: 200 ToolRet tasks per setting, one request at a time; F1 differences are paired over the same tasks. 4-tool menus</text>
+<text x="40.0" y="1180.0" font-size="11.5" font-weight="400" fill="#7a7973" text-anchor="start">are omitted: the right tool is missing from 47.5% of them and nearly half their cache hit is the shared template header (full table in cache-hit-miss-f1.md).</text>
+<text x="40.0" y="1198.0" font-size="11.5" font-weight="400" fill="#7a7973" text-anchor="start">Sources: eval-validity-20260906-165826, sla-4b-single-20260912-175313, conc-4b-p10-single-20260916-214417, hit-miss-f1 summary (scripts/summarize_hit_miss_f1.py).</text>
 </svg>

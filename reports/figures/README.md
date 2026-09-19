@@ -1,6 +1,27 @@
 # ToolTrie figures
 
-## Latest completed study: controlled trie improvements (19 September 2026)
+## Improved trie versus ContextPilot and frequency (512-token quality budget)
+
+Read the [cache hit/miss, F1 and latency report](../concurrent-latency/cache-hit-miss-f1-improved-trie.md)
+for the matched six-policy comparison. The main figure compares the improved
+trie, ContextPilot ordering, fitted frequency, online frequency and no reordering.
+It shows 9,660 overlapping windows from 12,000 measured systems requests, with
+separate GPU/dataset panels. The report also includes previous v1 as a reference.
+
+[PNG](improved-trie-cache-interactivity.png) · [SVG](improved-trie-cache-interactivity.svg)
+
+This is cache hit rate versus reciprocal mean TTFT. Sequential measurements do
+not provide a throughput frontier. Window overlap does not add independent tasks.
+
+```bash
+uv run scripts/report_improved_trie_comparison.py
+```
+
+[Audited summary](../trie-baselines-controlled-summary.json) ·
+[Request metrics](../trie-baselines-plot-data.json) ·
+[Publication hashes](../trie-baselines-publication.json)
+
+## Earlier study: controlled trie improvements (128-token quality budget)
 
 Start with the [generated report](../trie-improvements-figures.md): 96 accepted
 replays across two RTX 3090s, with fixed KV capacity and matched request streams.
@@ -9,15 +30,15 @@ quality preservation is not established by the paired F1 intervals.
 
 | Figure | PNG | SVG |
 |---|---|---|
-| Improved trie: cache versus interactivity, styled like the historical frontier | [PNG](improved-trie-cache-interactivity.png) | [SVG](improved-trie-cache-interactivity.svg) |
+| Improved trie: cache versus interactivity, styled like the historical frontier | [PNG](controlled-trie-cache-interactivity.png) | [SVG](controlled-trie-cache-interactivity.svg) |
 | Cache, computed tokens and TTFT per GPU | [PNG](controlled-trie-systems.png) | [SVG](controlled-trie-systems.svg) |
 | Tool-ID F1 and paired uncertainty | [PNG](controlled-trie-quality.png) | [SVG](controlled-trie-quality.svg) |
 | Trie structure and observation rule | [PNG](controlled-trie-structure.png) | [SVG](controlled-trie-structure.svg) |
 
-The new interactivity plot highlights the **improved trie that observes only
+The earlier interactivity plot highlights the **improved trie that observes only
 the ten shown tools**. It uses cache hit rate versus reciprocal **mean** engine
 TTFT; the historical frontier below uses throughput versus reciprocal median
-TTFT. The completed improvement study has no load sweep, so the new plot shows
+TTFT. The completed improvement study has no load sweep, so this plot shows
 measured trial points and separate devices rather than a throughput frontier.
 
 Regenerate these figures and their report from the committed audited summary:
@@ -27,8 +48,8 @@ uv run scripts/plot_controlled_trie.py
 ```
 
 The [publication manifest](controlled-trie-publication.json) records input and
-output SHA-256 hashes. The new ContextPilot/frequency matrix and fixed-menu
-follow-up are separate experiments and are not included in this publication.
+output SHA-256 hashes. The matched ContextPilot/frequency results above use a
+separate 512-token quality budget. The fixed-menu follow-up is another experiment.
 
 ## Historical ToolTrie-v1 figures
 

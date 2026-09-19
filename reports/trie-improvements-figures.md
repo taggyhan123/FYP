@@ -17,9 +17,9 @@ Observing only the ten shown tools improves cache reuse and engine TTFT over v1 
 
 ### Cache versus interactivity, in the historical frontier's visual style
 
-[PNG](figures/improved-trie-cache-interactivity.png) · [SVG](figures/improved-trie-cache-interactivity.svg)
+[PNG](figures/controlled-trie-cache-interactivity.png) · [SVG](figures/controlled-trie-cache-interactivity.svg)
 
-![Improved trie cache versus interactivity](figures/improved-trie-cache-interactivity.png)
+![Improved trie cache versus interactivity](figures/controlled-trie-cache-interactivity.png)
 
 The blue policy is the improved trie that observes only shown tools. Orange is the original v1 and gray is no reordering. Circles represent First200, diamonds Random2026; filled markers are GPU 2 and open markers GPU 3. Each small mark is one actual trial. Large markers use the reciprocal of mean engine TTFT averaged over the three trials. Horizontal spans show the trial range, not confidence intervals. Brackets show the direct GPU 2 coordinate changes from v1 to the improved policy, without interpolation or pooling devices.
 

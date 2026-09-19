@@ -1,5 +1,10 @@
 # Cache hit and miss rate, with F1
 
+**Historical ToolTrie-v1 results.** For the new trie that observes only the
+ten shown tools, see the [matched cache hit/miss, F1 and latency report](cache-hit-miss-f1-improved-trie.md).
+That report uses fresh measurements, unique function names and a common
+512-token quality budget; its absolute scores are separate from these results.
+
 How much of each prompt vLLM served from its prefix cache (hit) or had to
 compute (miss) under each tool-ordering policy, and the F1 those same requests
 scored. Hit/miss and F1 always come from the same replay.

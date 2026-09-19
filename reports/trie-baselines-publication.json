@@ -1,0 +1,18 @@
+{
+  "accepted_replays": 96,
+  "inputs": {
+    "reports/trie-baselines-controlled-summary.json": "b43f396ebc18b7333c8d9fa3be5ee6c75cb6f8bf7284a867ee66e91361fd3a1f",
+    "reports/trie-baselines-plot-data.json": "f113527969f78e5980b7348b1f5bd0fcb2fc9f17a859db6487b099c468db74c1",
+    "scripts/report_improved_trie_comparison.py": "26624512f5ad04eb41440bb2a950e250fe6abd002e222a32a271b82017778d14"
+  },
+  "matplotlib_version": "3.10.1",
+  "outputs": {
+    "reports/concurrent-latency/cache-hit-miss-f1-improved-trie.md": "d38841e94574c6b3398f53bddcf021851ec87c50288d793298f9677ce4d092e7",
+    "reports/figures/improved-trie-cache-interactivity.png": "008d837a4c1bef3c23839ecc4e381190745443a788c817e13953ef0185787a9b",
+    "reports/figures/improved-trie-cache-interactivity.svg": "45e9f783fa46029927005dd306b75437e1a3cef5d9b8047b8a1c8deafa3328d0"
+  },
+  "plotted_windows": 9660,
+  "protocol": "trie-baselines-20260919-v1",
+  "window_size": 40,
+  "window_stride": 1
+}

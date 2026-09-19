@@ -9,9 +9,16 @@ quality preservation is not established by the paired F1 intervals.
 
 | Figure | PNG | SVG |
 |---|---|---|
+| Improved trie: cache versus interactivity, styled like the historical frontier | [PNG](improved-trie-cache-interactivity.png) | [SVG](improved-trie-cache-interactivity.svg) |
 | Cache, computed tokens and TTFT per GPU | [PNG](controlled-trie-systems.png) | [SVG](controlled-trie-systems.svg) |
 | Tool-ID F1 and paired uncertainty | [PNG](controlled-trie-quality.png) | [SVG](controlled-trie-quality.svg) |
 | Trie structure and observation rule | [PNG](controlled-trie-structure.png) | [SVG](controlled-trie-structure.svg) |
+
+The new interactivity plot highlights the **improved trie that observes only
+the ten shown tools**. It uses cache hit rate versus reciprocal **mean** engine
+TTFT; the historical frontier below uses throughput versus reciprocal median
+TTFT. The completed improvement study has no load sweep, so the new plot shows
+measured trial points and separate devices rather than a throughput frontier.
 
 Regenerate these figures and their report from the committed audited summary:
 

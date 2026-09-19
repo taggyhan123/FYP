@@ -95,16 +95,84 @@ def style(ax, title, xlabel, labels=LABELS):
     ax.tick_params(axis="y", length=0)
 
 
-def save(fig, stem):
+def save(fig, stem, facecolor="white"):
     for ext in ("png", "svg"):
         path = OUT / f"{stem}.{ext}"
         metadata = {"Date": None} if ext == "svg" else {"Software": f"Matplotlib {matplotlib.__version__}"}
-        fig.savefig(path, dpi=180, facecolor="white", metadata=metadata)
+        fig.savefig(path, dpi=180, facecolor=facecolor, metadata=metadata)
         if ext == "svg":
             # Matplotlib leaves trailing spaces inside multiline path data.
             path.write_text("\n".join(line.rstrip() for line in path.read_text().splitlines()) + "\n")
         FILES.append(path)
     plt.close(fig)
+
+
+def cache_interactivity(cells):
+    """Match the historical frontier's visual style using accepted metrics.
+
+    There is no load sweep in this study. Dots are real trial measurements,
+    and brackets are coordinate differences between policies on GPU 2.
+    No throughput values, request clouds or frontier curves are inferred.
+    """
+    surface, ink, secondary, grid = "#fcfcfb", "#0b0b0b", "#52514e", "#e3e2de"
+    series = (
+        ("served_only", "Improved ToolTrie", "#2a78d6"),
+        ("v1", "ToolTrie-v1", "#eb6834"),
+        ("original", "No reordering", "#8a8983"),
+    )
+    fig = plt.figure(figsize=(14, 9.5), facecolor=surface)
+    ax = fig.add_axes((.085, .23, .64, .60), facecolor=surface)
+    sidebar = fig.add_axes((.76, .22, .23, .62), facecolor=surface)
+    sidebar.set(xlim=(0, 1), ylim=(0, 1))
+    sidebar.axis("off")
+    fig.text(.085, .95, "Improved ToolTrie: cache reuse and first-token interactivity", fontsize=19, fontweight="bold", color=ink)
+    fig.text(.085, .91, "Matched requests on Qwen3-4B. Brackets: improved trie versus v1 on GPU 2, within each dataset.", fontsize=11.5, color=secondary)
+    ax.set(xlim=(4.3, 6.65), ylim=(0, 38))
+    ax.set_xlabel("Interactivity: 1 / mean engine time to first token (s⁻¹)", fontsize=12, labelpad=16, color=secondary)
+    ax.set_ylabel("Cache hit rate (% of prompt tokens)", fontsize=12, labelpad=16, color=secondary)
+    ax.grid(color=grid, linewidth=1)
+    ax.set_axisbelow(True)
+    ax.tick_params(colors="#7a7973", labelsize=11, length=0, pad=9)
+    for side in ("top", "right"):
+        ax.spines[side].set_visible(False)
+    for side in ("bottom", "left"):
+        ax.spines[side].set_color("#7a7973")
+    points = {}
+    for arm, _, color in reversed(series):
+        for dataset, marker in (("first200", "o"), ("random2026", "D")):
+            for device in ("gpu3", "gpu2"):
+                cell = cells[device, dataset, arm]
+                hit = cell["hit_pct"][0]
+                trial_x = [1 / value for value in cell["mean_ttft_seconds"]]
+                x = 1 / cell["mean_ttft_across_trials"]
+                points[device, dataset, arm] = (x, hit)
+                ax.scatter(trial_x, [hit] * 3, s=30, marker=marker, color=color, alpha=.25, linewidths=0, zorder=3)
+                ax.plot([min(trial_x), max(trial_x)], [hit, hit], color=color, linewidth=1.3, alpha=.6, zorder=3)
+                ax.scatter([x], [hit], s=85, marker=marker, facecolors=color if device == "gpu2" else surface, edgecolors="white" if device == "gpu2" else color, linewidths=1.6, zorder=5)
+    # Separate, measured differences on the same device; no interpolation.
+    for dataset in DATASETS:
+        x0, y0 = points["gpu2", dataset, "v1"]
+        x1, y1 = points["gpu2", dataset, "served_only"]
+        gain = 100 * (x1 / x0 - 1)
+        ax.plot([x0, x0, x1], [y0, y1, y1], color=ink, linewidth=1.3, linestyle=(0, (3, 3)), zorder=2)
+        ax.text(x0 - .10, (y0 + y1) / 2, f"+{y1-y0:.2f} pp\ncache hit rate", ha="right", va="center", fontsize=10.5, fontweight="bold", color=ink, bbox={"facecolor": surface, "edgecolor": "none", "pad": 2})
+        ax.text((x0+x1)/2, y1+1.25, f"+{gain:.2f}% interactivity", ha="center", va="bottom", fontsize=10.5, fontweight="bold", color=ink, bbox={"facecolor": surface, "edgecolor": "none", "pad": 2})
+    ax.text(.02, .97, "Higher cache reuse ↑     Faster mean first token →", transform=ax.transAxes, color=secondary, fontsize=10, va="top")
+    sidebar.text(0, .98, "Policy", fontsize=12, fontweight="bold", color=secondary)
+    for i, (_, label, color) in enumerate(series):
+        y = .92 - i * .07
+        sidebar.plot([0, .13], [y, y], color=color, linewidth=2)
+        sidebar.scatter([.065], [y], s=65, color=color, edgecolor="white", zorder=4)
+        sidebar.text(.19, y, label, va="center", fontsize=11, color=ink)
+    sidebar.text(.19, .725, "Improved = observe only\nthe ten tools shown", fontsize=10, color=secondary, linespacing=1.5, va="top")
+    sidebar.text(0, .60, "Dataset / device", fontsize=12, fontweight="bold", color=secondary)
+    for marker, name, y in (("o", "First200", .54), ("D", "Random2026", .48)):
+        sidebar.scatter([.065], [y], s=65, marker=marker, color=secondary)
+        sidebar.text(.19, y, name, va="center", fontsize=11, color=ink)
+    sidebar.text(0, .40, "Filled: GPU 2\nOpen: GPU 3 replication\nSmall marks: three trials\nLarge marks: trial summaries", fontsize=10.5, color=secondary, linespacing=1.65, va="top")
+    sidebar.text(0, .16, "200 requests per stream\nRetrieve 64 / show 10\nKV capacity: 97,920 tokens\nvLLM 0.26.0 · RTX 3090", fontsize=10.5, color=secondary, linespacing=1.65, va="top")
+    fig.text(.085, .11, "Sequential traffic, one output token. This is a cache–latency comparison; a throughput frontier requires a load sweep.\nInteractivity = reciprocal of the mean TTFT averaged over three trials (the historical reference used median TTFT).\nF1 changes vs v1: −0.333 pp on First200; −0.200 pp on Random2026. Quality equivalence is not established.\nSource: reports/trie-improvements-controlled-summary.json · 96 accepted replays · GPU timings kept separate.", fontsize=10.5, color="#7a7973", linespacing=1.65, va="top")
+    save(fig, "improved-trie-cache-interactivity", facecolor=surface)
 
 
 def systems(cells):
@@ -209,7 +277,13 @@ def report(data, cells, pairs):
         p = pairs["gpu2", d, "served_only"]
         timing = " / ".join(f"{100*(1-cells[g,d,'served_only']['mean_ttft_across_trials']/cells[g,d,'v1']['mean_ttft_across_trials']):.2f}%" for g in ("gpu2", "gpu3"))
         lines.append(f"| {name} | {v['hit_pct'][0]:.2f} → {s['hit_pct'][0]:.2f} | {100*(1-s['computed_tokens'][0]/v['computed_tokens'][0]):.2f}% | {timing} | {100*p['mean_difference']:+.3f} [{100*p['ci95_low']:+.3f}, {100*p['ci95_high']:+.3f}] |")
-    lines += ["", "## Figures", "", "### Cache, computation and latency", "", "[PNG](figures/controlled-trie-systems.png) · [SVG](figures/controlled-trie-systems.svg)", "", "![Cache, computed tokens and TTFT](figures/controlled-trie-systems.png)", "", "Cache/token totals are identical across all six systems replays for each policy/dataset. TTFT is shown separately for each GPU: error bars are the sample standard deviation of three trial means, not task confidence intervals. The TTFT axis starts at 145 ms; cache and token bars start at zero.", "", "### Quality and uncertainty", "", "[PNG](figures/controlled-trie-quality.png) · [SVG](figures/controlled-trie-quality.svg)", "", "![Tool-ID F1 and paired differences](figures/controlled-trie-quality.png)", "", "GPU quality outputs agree on all 2,400 policy requests. Repeating tasks across GPUs does not increase the number of independent tasks. Bootstrap intervals use 10,000 task resamples, seed 20260918, conditional on each frozen sequence; comparisons are exploratory.", "", "### Structure and observation rule", "", "[PNG](figures/controlled-trie-structure.png) · [SVG](figures/controlled-trie-structure.svg)", "", "![Trie structure and observation rule](figures/controlled-trie-structure.png)", "", "The tree is planner metadata over tool IDs. The shown-ten change uses the existing [v1 planner](../src/tatm/tooltrie_v1.py) and [trie core](../src/tatm/tooltrie.py). Its recorded paths end after the shown menu. This diagram is illustrative, not a dump of an experimental tree.", "", "## All measured policies", "", "| Figure label | Policy | Rule |", "|---|---|---|"]
+    lines += [
+        "", "## Figures", "", "### Cache versus interactivity, in the historical frontier's visual style", "",
+        "[PNG](figures/improved-trie-cache-interactivity.png) · [SVG](figures/improved-trie-cache-interactivity.svg)", "",
+        "![Improved trie cache versus interactivity](figures/improved-trie-cache-interactivity.png)", "",
+        "The blue policy is the improved trie that observes only shown tools. Orange is the original v1 and gray is no reordering. Circles represent First200, diamonds Random2026; filled markers are GPU 2 and open markers GPU 3. Each small mark is one actual trial. Large markers use the reciprocal of mean engine TTFT averaged over the three trials. Horizontal spans show the trial range, not confidence intervals. Brackets show the direct GPU 2 coordinate changes from v1 to the improved policy, without interpolation or pooling devices.", "",
+        "This matches the historical plot's presentation but uses **cache hit rate versus reciprocal mean TTFT**. Its sequential study has no load sweep from which to draw a throughput frontier. The historical reference used reciprocal median TTFT; those two latency summaries are distinct. Percentage gains on the reciprocal axis also differ from percentage reductions in TTFT. No synthetic request cloud or load curve is added. The main plot focuses on three policies; the complete six-policy results follow.", "",
+        "### Cache, computation and latency", "", "[PNG](figures/controlled-trie-systems.png) · [SVG](figures/controlled-trie-systems.svg)", "", "![Cache, computed tokens and TTFT](figures/controlled-trie-systems.png)", "", "Cache/token totals are identical across all six systems replays for each policy/dataset. TTFT is shown separately for each GPU: error bars are the sample standard deviation of three trial means, not task confidence intervals. The TTFT axis starts at 145 ms; cache and token bars start at zero.", "", "### Quality and uncertainty", "", "[PNG](figures/controlled-trie-quality.png) · [SVG](figures/controlled-trie-quality.svg)", "", "![Tool-ID F1 and paired differences](figures/controlled-trie-quality.png)", "", "GPU quality outputs agree on all 2,400 policy requests. Repeating tasks across GPUs does not increase the number of independent tasks. Bootstrap intervals use 10,000 task resamples, seed 20260918, conditional on each frozen sequence; comparisons are exploratory.", "", "### Structure and observation rule", "", "[PNG](figures/controlled-trie-structure.png) · [SVG](figures/controlled-trie-structure.svg)", "", "![Trie structure and observation rule](figures/controlled-trie-structure.png)", "", "The tree is planner metadata over tool IDs. The shown-ten change uses the existing [v1 planner](../src/tatm/tooltrie_v1.py) and [trie core](../src/tatm/tooltrie.py). Its recorded paths end after the shown menu. This diagram is illustrative, not a dump of an experimental tree.", "", "## All measured policies", "", "| Figure label | Policy | Rule |", "|---|---|---|"]
     rules = ("Show the retriever's first ten in retrieval order", "Plan 64; show ten; observe all 64", "Plan 64; show ten; observe only shown ten", "Score rendered compatible prefixes up to ten; observe shown", "Bounded policy with the retriever's first five guaranteed inclusion", "Select the original top ten, then reorder and observe those ten")
     lines.extend(f"| {label} | `{arm}` | {rule} |" for label, arm, rule in zip(LABELS, ARMS, rules))
     lines += ["", "Except for no reordering and select-ten-then-v1, policies can change which ten tools are shown. This is a joint selection/ordering comparison. The fixed-ten arm isolates ordering relative to no reordering.", ""]
@@ -236,7 +310,7 @@ def report(data, cells, pairs):
         "This study contains no fresh ContextPilot or frequency arm, so it cannot establish the improved policy's advantage over those methods. Historical figures remain available in the [figure index](figures/README.md), with their original experimental conditions and quality limitations.", "",
         "## Reproduce and trace", "",
         "From the repository root:", "", "```bash", "uv run scripts/plot_controlled_trie.py", "```", "",
-        "This regenerates three PNG/SVG pairs, this report and a [SHA-256 publication manifest](figures/controlled-trie-publication.json) from the committed compact summary. It requires no GPU or raw data. Matplotlib 3.10.1 is installed by uv into an isolated script environment.", "",
+        "This regenerates four PNG/SVG pairs, this report and a [SHA-256 publication manifest](figures/controlled-trie-publication.json) from the committed compact summary. It requires no GPU or raw data. Matplotlib 3.10.1 is installed by uv into an isolated script environment.", "",
         f"- Experimental manifest SHA-256: `{data['manifest_sha256']}`.",
         f"- Independent analysis script SHA-256: `{data['analysis_script_sha256']}`.",
         f"- Summary SHA-256: `{digest(SUMMARY)}`.",
@@ -253,6 +327,7 @@ def main():
     systems(cells)
     quality(cells, pairs)
     structure()
+    cache_interactivity(cells)
     report(data, cells, pairs)
     manifest = {"study": data["protocol"], "accepted_replays": data["accepted_replays"], "matplotlib_version": matplotlib.__version__, "inputs": {str(p.relative_to(ROOT)): digest(p) for p in (SUMMARY, Path(__file__).resolve(), ROOT / "src/tatm/tooltrie.py", ROOT / "src/tatm/tooltrie_v1.py")}, "outputs": {str(p.relative_to(ROOT)): digest(p) for p in FILES}}
     (OUT / "controlled-trie-publication.json").write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n")

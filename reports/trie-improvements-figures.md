@@ -15,6 +15,16 @@ Observing only the ten shown tools improves cache reuse and engine TTFT over v1 
 
 ## Figures
 
+### Cache versus interactivity, in the historical frontier's visual style
+
+[PNG](figures/improved-trie-cache-interactivity.png) · [SVG](figures/improved-trie-cache-interactivity.svg)
+
+![Improved trie cache versus interactivity](figures/improved-trie-cache-interactivity.png)
+
+The blue policy is the improved trie that observes only shown tools. Orange is the original v1 and gray is no reordering. Circles represent First200, diamonds Random2026; filled markers are GPU 2 and open markers GPU 3. Each small mark is one actual trial. Large markers use the reciprocal of mean engine TTFT averaged over the three trials. Horizontal spans show the trial range, not confidence intervals. Brackets show the direct GPU 2 coordinate changes from v1 to the improved policy, without interpolation or pooling devices.
+
+This matches the historical plot's presentation but uses **cache hit rate versus reciprocal mean TTFT**. Its sequential study has no load sweep from which to draw a throughput frontier. The historical reference used reciprocal median TTFT; those two latency summaries are distinct. Percentage gains on the reciprocal axis also differ from percentage reductions in TTFT. No synthetic request cloud or load curve is added. The main plot focuses on three policies; the complete six-policy results follow.
+
 ### Cache, computation and latency
 
 [PNG](figures/controlled-trie-systems.png) · [SVG](figures/controlled-trie-systems.svg)
@@ -100,7 +110,7 @@ From the repository root:
 uv run scripts/plot_controlled_trie.py
 ```
 
-This regenerates three PNG/SVG pairs, this report and a [SHA-256 publication manifest](figures/controlled-trie-publication.json) from the committed compact summary. It requires no GPU or raw data. Matplotlib 3.10.1 is installed by uv into an isolated script environment.
+This regenerates four PNG/SVG pairs, this report and a [SHA-256 publication manifest](figures/controlled-trie-publication.json) from the committed compact summary. It requires no GPU or raw data. Matplotlib 3.10.1 is installed by uv into an isolated script environment.
 
 - Experimental manifest SHA-256: `31efe62052d9992378cfc42723dbeea11ac0458be5c45e3e2def75c05c9ee6a2`.
 - Independent analysis script SHA-256: `cc259d9757e76ea78b4cf8ca823e337a927af69264817f4dc8b430ce6a5a392c`.

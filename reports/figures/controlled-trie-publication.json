@@ -2,7 +2,7 @@
   "accepted_replays": 96,
   "inputs": {
     "reports/trie-improvements-controlled-summary.json": "3d41a3a099c4fc3ffbb2ca58cdf9cb1302944061a68d2da52c6ca238effdf5de",
-    "scripts/plot_controlled_trie.py": "2d5208e69f267c53781765e05e9723404797387012caab4cdb78e76f1b3c9987",
+    "scripts/plot_controlled_trie.py": "3aa3d1b856b3d1bf0d2ca22ad2abaeab247ff1e7e7fe4ff960224d12e581aa8b",
     "src/tatm/tooltrie.py": "3e5f5ab81c978e106ee0f0f0522672cbaebbc0a0300d323ad6e60ba75ad00f80",
     "src/tatm/tooltrie_v1.py": "2a50883c19ec050034ae84c6ad41ac594df4a55ee1a74a4718a01125e837e356"
   },
@@ -14,7 +14,9 @@
     "reports/figures/controlled-trie-structure.svg": "8d6dbb9a30269475e09d3793492c74692ae77265c19e1591b4ca9253d7bbc2f8",
     "reports/figures/controlled-trie-systems.png": "6bc25d2833540dad79f11f10d61d6c28731061ee8a25fb220cac2abc85074527",
     "reports/figures/controlled-trie-systems.svg": "70e3e78cae22c74d9de6250450225d49326424622a05e120d2e32356f0f9c392",
-    "reports/trie-improvements-figures.md": "72a4e72f3c4790c91f4744b86efb5a21ca7ab7c7ebf269d2da48e28b2690bb74"
+    "reports/figures/improved-trie-cache-interactivity.png": "821a3a966b5a496e138a4b9f6b70bfe8271dbf065a77eb1696154375a405a01f",
+    "reports/figures/improved-trie-cache-interactivity.svg": "b1d58b0b4d5855759b5afc37df47a4eb6ce3feb8ce0caea12ad29bbdeeecb381",
+    "reports/trie-improvements-figures.md": "4f98303828435489db04f7bc2fce95bad113ebc4e21f3076f9dd66ce8ec4ec95"
   },
   "study": "trie-improvements-20260918-v2"
 }
